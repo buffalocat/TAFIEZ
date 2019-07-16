@@ -1,0 +1,376 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="dlls">
+      <UniqueIdentifier>{a3ae1f31-662a-4e3f-bb3b-d02f53bb02d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="External Source Files">
+      <UniqueIdentifier>{cbf101c0-d2e9-4939-a0c0-92624b51e043}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Sokoban.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sokoban.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\common_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common_enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\delta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\door.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\doorselectstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\doortab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\editorbasestate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\editorstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\editortab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fallstepprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameobjectarray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gamestate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gatebody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphicsmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\horizontalstepprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mainmenustate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maplayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\modifiertab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\moveprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectmodifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objecttab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\playingstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pressswitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pushblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\realplayingstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\room.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\roommap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\saveloadtab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\signaler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\snakeblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\snaketab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sokoban.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\string_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\switch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\switchable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\switchtab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\testplayingstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\wall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\autoblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\car.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\color_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\colorcycle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\color_constants.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\colorcycle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\delta.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\door.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\doorselectstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\doortab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editorbasestate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editorstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editortab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\effects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fallstepprocessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameobject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameobjectarray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamestate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gatebody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphicsmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\horizontalstepprocessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainmenustate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maplayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modifiertab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\moveprocessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objectmodifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objecttab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playingstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\point.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pressswitch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pushblock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\realplayingstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\room.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\roommap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\saveloadtab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\signaler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\snakeblock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\snaketab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sokoban.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\switch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\switchable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\switchtab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\testplayingstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\autoblock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\car.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_demo.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_draw.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_glfw.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_opengl3.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_widgets.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glad.c">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

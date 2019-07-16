@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{4338457C-0D64-4D49-A8BA-AC3F875E0B1E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Sokoban</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeaderFile>include\stdafx.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Sokoban.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico" />
+    <Image Include="Sokoban.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h" />
+    <ClInclude Include="include\animation.h" />
+    <ClInclude Include="include\autoblock.h" />
+    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\car.h" />
+    <ClInclude Include="include\colorcycle.h" />
+    <ClInclude Include="include\color_constants.h" />
+    <ClInclude Include="include\common_constants.h" />
+    <ClInclude Include="include\common_enums.h" />
+    <ClInclude Include="include\component.h" />
+    <ClInclude Include="include\delta.h" />
+    <ClInclude Include="include\door.h" />
+    <ClInclude Include="include\doorselectstate.h" />
+    <ClInclude Include="include\doortab.h" />
+    <ClInclude Include="include\editorbasestate.h" />
+    <ClInclude Include="include\editorstate.h" />
+    <ClInclude Include="include\editortab.h" />
+    <ClInclude Include="include\fallstepprocessor.h" />
+    <ClInclude Include="include\gameobject.h" />
+    <ClInclude Include="include\gameobjectarray.h" />
+    <ClInclude Include="include\gamestate.h" />
+    <ClInclude Include="include\gate.h" />
+    <ClInclude Include="include\gatebody.h" />
+    <ClInclude Include="include\graphicsmanager.h" />
+    <ClInclude Include="include\horizontalstepprocessor.h" />
+    <ClInclude Include="include\mainmenustate.h" />
+    <ClInclude Include="include\mapfile.h" />
+    <ClInclude Include="include\maplayer.h" />
+    <ClInclude Include="include\modifiertab.h" />
+    <ClInclude Include="include\moveprocessor.h" />
+    <ClInclude Include="include\objectmodifier.h" />
+    <ClInclude Include="include\objecttab.h" />
+    <ClInclude Include="include\player.h" />
+    <ClInclude Include="include\playingstate.h" />
+    <ClInclude Include="include\point.h" />
+    <ClInclude Include="include\pressswitch.h" />
+    <ClInclude Include="include\pushblock.h" />
+    <ClInclude Include="include\realplayingstate.h" />
+    <ClInclude Include="include\Resource.h" />
+    <ClInclude Include="include\room.h" />
+    <ClInclude Include="include\roommap.h" />
+    <ClInclude Include="include\saveloadtab.h" />
+    <ClInclude Include="include\shader.h" />
+    <ClInclude Include="include\signaler.h" />
+    <ClInclude Include="include\snakeblock.h" />
+    <ClInclude Include="include\snaketab.h" />
+    <ClInclude Include="include\Sokoban.h" />
+    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\string_constants.h" />
+    <ClInclude Include="include\switch.h" />
+    <ClInclude Include="include\switchable.h" />
+    <ClInclude Include="include\switchtab.h" />
+    <ClInclude Include="include\targetver.h" />
+    <ClInclude Include="include\testplayingstate.h" />
+    <ClInclude Include="include\wall.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\include\dear\imgui.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_demo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_glfw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_opengl3.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_widgets.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\animation.cpp" />
+    <ClCompile Include="src\autoblock.cpp" />
+    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\car.cpp" />
+    <ClCompile Include="src\colorcycle.cpp" />
+    <ClCompile Include="src\color_constants.cpp" />
+    <ClCompile Include="src\component.cpp" />
+    <ClCompile Include="src\delta.cpp" />
+    <ClCompile Include="src\door.cpp" />
+    <ClCompile Include="src\doorselectstate.cpp" />
+    <ClCompile Include="src\doortab.cpp" />
+    <ClCompile Include="src\editorbasestate.cpp" />
+    <ClCompile Include="src\editorstate.cpp" />
+    <ClCompile Include="src\editortab.cpp" />
+    <ClCompile Include="src\effects.cpp" />
+    <ClCompile Include="src\fallstepprocessor.cpp" />
+    <ClCompile Include="src\gameobject.cpp" />
+    <ClCompile Include="src\gameobjectarray.cpp" />
+    <ClCompile Include="src\gamestate.cpp" />
+    <ClCompile Include="src\gate.cpp" />
+    <ClCompile Include="src\gatebody.cpp" />
+    <ClCompile Include="src\glad.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\graphicsmanager.cpp" />
+    <ClCompile Include="src\horizontalstepprocessor.cpp" />
+    <ClCompile Include="src\mainmenustate.cpp" />
+    <ClCompile Include="src\mapfile.cpp" />
+    <ClCompile Include="src\maplayer.cpp" />
+    <ClCompile Include="src\modifiertab.cpp" />
+    <ClCompile Include="src\moveprocessor.cpp" />
+    <ClCompile Include="src\objectmodifier.cpp" />
+    <ClCompile Include="src\objecttab.cpp" />
+    <ClCompile Include="src\player.cpp" />
+    <ClCompile Include="src\playingstate.cpp" />
+    <ClCompile Include="src\point.cpp" />
+    <ClCompile Include="src\pressswitch.cpp" />
+    <ClCompile Include="src\pushblock.cpp" />
+    <ClCompile Include="src\realplayingstate.cpp" />
+    <ClCompile Include="src\room.cpp" />
+    <ClCompile Include="src\roommap.cpp" />
+    <ClCompile Include="src\saveloadtab.cpp" />
+    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\signaler.cpp" />
+    <ClCompile Include="src\snakeblock.cpp" />
+    <ClCompile Include="src\snaketab.cpp" />
+    <ClCompile Include="src\Sokoban.cpp" />
+    <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\switch.cpp" />
+    <ClCompile Include="src\switchable.cpp" />
+    <ClCompile Include="src\switchtab.cpp" />
+    <ClCompile Include="src\testplayingstate.cpp" />
+    <ClCompile Include="src\wall.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

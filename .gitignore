@@ -1,0 +1,42 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Fortran module files
+*.mod
+*.smod
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+# Visual Studio Things
+.vs/*
+Debug/*
+
+# Builds
+Win32/*
+x64/*
+Sokoban/x64/*
+Sokoban/Win32/*
+
+# Private Maps
+*_.map
+
+# Temp Maps
+Sokoban/maps/temp/*
+!Sokoban/maps/temp/.keep
+
+# ImGui ini
+*.ini
