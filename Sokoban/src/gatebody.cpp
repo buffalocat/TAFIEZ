@@ -7,6 +7,7 @@
 #include "mapfile.h"
 #include "graphicsmanager.h"
 #include "moveprocessor.h"
+#include "texture_constants.h"
 
 #include "animation.h"
 
@@ -102,15 +103,10 @@ bool GateBody::state_animation() {
     return transition_animation_ != nullptr;
 }
 
-
 void GateBody::draw(GraphicsManager* gfx) {
     FPoint3 p {real_pos()};
     float height = transition_animation_ ? transition_animation_->height() : 1.0f;
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z - (1.0 - height)/2, p.y));
-    model = glm::scale(model, glm::vec3(0.7f, height, 0.7f));
-    gfx->set_tex(Texture::Edges);
-    gfx->set_model(model);
-    gfx->set_color(COLORS[color_]);
-    gfx->draw_cube();
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
+		glm::vec3(0.7f, 0.7f, height), BlockTexture::Edges, color_);
 }
 

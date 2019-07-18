@@ -23,6 +23,7 @@ public:
     void set_cam_pos(Point3);
     bool valid(Point3);
     RoomMap* map();
+	Camera* camera();
 
     void write_to_file(MapFileO& file, Point3 start_pos);
     void load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_pos=nullptr);

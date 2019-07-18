@@ -159,7 +159,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 
     switch (threshold_mode) {
     case Threshold::All:
-        *threshold = switches->size();
+        *threshold = (int)switches->size();
         break;
     case Threshold::Any:
         *threshold = 1;

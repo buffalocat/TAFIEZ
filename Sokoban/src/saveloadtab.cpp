@@ -24,6 +24,7 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
     if (ImGui::Button("Load Map##SAVELOAD")) {
         if (editor_->load_room(map_name_input, true)) {
             editor_->set_active_room(map_name_input);
+			return;
         } else {
             std::cout << "Failed to load room." << std::endl;
         }

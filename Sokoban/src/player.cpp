@@ -6,6 +6,8 @@
 #include "delta.h"
 #include "roommap.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
+
 #include "mapfile.h"
 #include "car.h"
 
@@ -52,22 +54,20 @@ Car* Player::get_car(RoomMap* room_map, bool strict) {
 
 void Player::draw(GraphicsManager* gfx) {
     FPoint3 p = real_pos();
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z - 0.7f * (state_ == RidingState::Riding), p.y));
-    model = glm::scale(model, glm::vec3(0.7f, 0.7f, 0.7f));
-    gfx->set_model(model);
-    gfx->set_tex(Texture::Blank);
-    switch (state_) {
-    case RidingState::Free:
-        gfx->set_color(COLORS[BLUE]);
-        break;
-    case RidingState::Bound:
-        gfx->set_color(COLORS[PINK]);
-        break;
-    case RidingState::Riding:
-        gfx->set_color(COLORS[RED]);
-        break;
-    }
-    gfx->draw_cube();
+	int color;
+	switch (state_) {
+	case RidingState::Free:
+		color = BLUE;
+		break;
+	case RidingState::Bound:
+		color = PINK;
+		break;
+	case RidingState::Riding:
+		color = RED;
+		break;
+	}
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.7f * (state_ == RidingState::Riding)),
+		glm::vec3(0.7f, 0.7f, 0.7f), BlockTexture::Blank, color);
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

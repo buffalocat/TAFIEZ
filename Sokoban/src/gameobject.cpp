@@ -5,6 +5,7 @@
 
 #include "roommap.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
 #include "delta.h"
 #include "mapfile.h"
 #include "objectmodifier.h"
@@ -181,18 +182,11 @@ FPoint3 GameObject::real_pos() {
     }
 }
 
-void GameObject::draw_force_indicators(GraphicsManager* gfx, glm::mat4& model) {
-    gfx->set_tex(Texture::Blank);
+void GameObject::draw_force_indicators(GraphicsManager* gfx, FPoint3 p) {
     if (!pushable_) {
-        gfx->set_color(COLORS[BLACK]);
-        auto new_model = glm::translate(model, glm::vec3(0.0, -0.2, 0.0));
-        gfx->set_model(glm::scale(new_model, glm::vec3(1.1, .1, 1.1)));
-        gfx->draw_cube();
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(1.1f, 1.1f, 0.1f), BlockTexture::Blank, BLACK);
     }
     if (!gravitable_) {
-        gfx->set_color(COLORS[WHITE]);
-        auto new_model = glm::translate(model, glm::vec3(0.0, 0.2, 0.0));
-        gfx->set_model(glm::scale(new_model, glm::vec3(1.1, .1, 1.1)));
-        gfx->draw_cube();
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(1.1f, 1.1f, 0.1f), BlockTexture::Blank, WHITE);
     }
 }

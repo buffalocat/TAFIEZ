@@ -2,6 +2,7 @@
 #include "wall.h"
 
 #include "graphicsmanager.h"
+#include "texture_constants.h"
 
 Wall::Wall(): PushBlock({0,0,0}, 0, false, false, Sticky::None) {
     tangible_ = true;

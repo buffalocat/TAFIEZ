@@ -50,6 +50,12 @@ RoomMap* Room::map() {
     return map_.get();
 }
 
+Camera* Room::camera() {
+	return camera_.get();
+}
+
+#include <ctime>
+
 void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer) {
     update_view(gfx, cam_pos, cam_pos, ortho);
     if (one_layer) {
@@ -57,6 +63,7 @@ void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
+	gfx->draw();
 }
 
 void Room::draw(GraphicsManager* gfx, GameObject* target, bool ortho, bool one_layer) {
@@ -66,15 +73,16 @@ void Room::draw(GraphicsManager* gfx, GameObject* target, bool ortho, bool one_l
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
+	gfx->draw();
 }
 
 void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho) {
     glm::mat4 model, view, projection;
     if (ortho) {
         camera_->set_current_pos(rpos);
-        view = glm::lookAt(glm::vec3(rpos.x, rpos.z, rpos.y),
-                           glm::vec3(rpos.x, rpos.z - 1.0f, rpos.y),
-                           glm::vec3(0.0f, 0.0f, -1.0f));
+        view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
+                           glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0f),
+                           glm::vec3(0.0f, -1.0f, 0.0f));
         projection = glm::ortho(-ORTHO_WIDTH/2.0f, ORTHO_WIDTH/2.0f, -ORTHO_HEIGHT/2.0f, ORTHO_HEIGHT/2.0f, -2.5f, 2.5f);
     } else {
         camera_->set_target(vpos, rpos);
@@ -86,16 +94,16 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ort
         float cam_tilt = camera_->get_tilt();
         float cam_rotation = camera_->get_rotation();
         float cam_x = sin(cam_tilt) * sin(cam_rotation) * cam_radius;
-        float cam_y = cos(cam_tilt) * cam_radius;
-        float cam_z = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
+		float cam_y = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
+        float cam_z = cos(cam_tilt) * cam_radius;
 
-        view = glm::lookAt(glm::vec3(cam_x + target_pos.x, cam_y, cam_z + target_pos.y),
-                           glm::vec3(target_pos.x, 0.0f, target_pos.y),
-                           glm::vec3(0.0f, 1.0f, 0.0f));
+        view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
+                           glm::vec3(-target_pos.x, target_pos.y, 0.0f),
+                           glm::vec3(0.0f, 0.0f, 1.0f));
         projection = glm::perspective(glm::radians(60.0f), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 100.0f);
     }
-    gfx->set_view(view);
-    gfx->set_projection(projection);
+	view = glm::scale(view, glm::vec3(-1.0f, 1.0f, 1.0f));
+    gfx->set_PV(projection, view);
 }
 
 void Room::extend_by(Point3 d) {

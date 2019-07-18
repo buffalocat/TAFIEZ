@@ -38,5 +38,8 @@ Sokoban/Win32/*
 Sokoban/maps/temp/*
 !Sokoban/maps/temp/.keep
 
+# Resources
+!Sokoban/resources/*
+
 # ImGui ini
 *.ini

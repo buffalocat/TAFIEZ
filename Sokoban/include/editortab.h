@@ -2,13 +2,13 @@
 #define EDITORTAB_H
 
 #include <dear/imgui.h>
+#include <glm/glm.hpp>
 
 struct EditorRoom;
 class EditorState;
 class GraphicsManager;
 
 struct Point3;
-struct Color4;
 
 class EditorTab {
 public:
@@ -25,6 +25,6 @@ protected:
 };
 
 void clamp(int* n, int a, int b);
-ImVec4 unpack_color(Color4 v);
+ImVec4 unpack_color(glm::vec4 v);
 
 #endif // EDITORTAB_H

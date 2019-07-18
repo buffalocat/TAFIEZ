@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
+
+#include "model.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,81 +11,22 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Texture operator |(Texture a, Texture b) {
-    return static_cast<Texture>(static_cast<unsigned char>(a) |
-                                static_cast<unsigned char>(b));
-}
-
-
 GraphicsManager::GraphicsManager(GLFWwindow* window):
-window_ {window},
-shader_ {Shader("shaders/shader.vs", "shaders/shader.fs")} {
-    init_cube_buffer();
-    init_vertex_attributes();
-    load_texture_atlas();
-    shader_.use();
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	window_{ window },
+	shader_{ Shader("shaders/shader.vs", "shaders/shader.fs") },
+	instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") },
+	cube{ ModelInstancer("resources/uniform_cube.obj") }
+{
+	instanced_shader_.use();
+	load_texture_atlas();
+	instanced_shader_.setFloat("texScale", 1.0f/ TEXTURE_ATLAS_SIZE);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 GLFWwindow* GraphicsManager::window() {
     return window_;
-}
-
-const int STRIDE = 5;
-
-void GraphicsManager::init_vertex_attributes() {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, STRIDE * sizeof(float), (void*) nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, STRIDE * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-}
-
-// The atlas is a square of 2^k * 2^k square textures
-const int TEXTURE_ATLAS_SIZE = 4;
-
-void GraphicsManager::init_cube_buffer() {
-    float cubeVertices[8*STRIDE];
-    for (int i = 0; i < 8; ++i) {
-        int a, b, c;
-        a = i & 1;
-        b = (i >> 1) & 1;
-        c = (i >> 2) & 1;
-        cubeVertices[STRIDE*i] = a - 0.5f;
-        cubeVertices[STRIDE*i+1] = b - 0.5f;
-        cubeVertices[STRIDE*i+2] = c - 0.5f;
-        cubeVertices[STRIDE*i+3] = (i == 0 || i == 7) ? 1 : 0;
-        cubeVertices[STRIDE*i+4] = (a + b + c > 1) ? 1 : 0;
-    }
-
-    int cubeTriangles[36];
-
-    int i = 0;
-    for (int a : {1,2,4}) {
-        for (int b : {1,2,4}) {
-            if (a == b) continue;
-            for (int x : {0, a, a|b, 7, 7 & (~a), 7 & (~(a|b))}) {
-                cubeTriangles[i] = x;
-                ++i;
-            }
-        }
-    }
-
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeTriangles), cubeTriangles, GL_STATIC_DRAW);
 }
 
 void GraphicsManager::load_texture_atlas() {
@@ -98,43 +42,14 @@ void GraphicsManager::load_texture_atlas() {
     stbi_image_free(texture_data);
 }
 
-void GraphicsManager::set_model(glm::mat4 model) {
-    if (model != model_) {
-        model_ = model;
-        shader_.setMat4("model", model);
+void GraphicsManager::set_PV(glm::mat4 projection, glm::mat4 view) {
+	glm::mat4 PV = projection * view;
+    if (PV != PV_) {
+        PV_ = PV;
+		instanced_shader_.setMat4("PV", PV);
     }
 }
 
-void GraphicsManager::set_view(glm::mat4 view) {
-    if (view != view_) {
-        view_ = view;
-        shader_.setMat4("view", view);
-    }
-}
-
-void GraphicsManager::set_projection(glm::mat4 projection) {
-    if (projection != projection_) {
-        projection_ = projection;
-        shader_.setMat4("projection", projection);
-    }
-}
-
-void GraphicsManager::set_color(Color4 color) {
-    if (!(color == color_)) {
-        color_ = color;
-        shader_.setVec4("color", glm::vec4(color.r, color.g, color.b, color.a));
-    }
-}
-
-void GraphicsManager::set_tex(Texture tex) {
-    if (tex != tex_) {
-        tex_ = tex;
-        float u = (int)tex % TEXTURE_ATLAS_SIZE;
-        float v = (int)tex / TEXTURE_ATLAS_SIZE;
-        shader_.setVec2("tex", glm::vec2(u,v));
-    }
-}
-
-void GraphicsManager::draw_cube() {
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+void GraphicsManager::draw() {
+	cube.draw(instanced_shader_);
 }

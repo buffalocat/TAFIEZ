@@ -18,6 +18,6 @@ void clamp(int* n, int a, int b) {
     *n = std::max(a, std::min(b, *n));
 }
 
-ImVec4 unpack_color(Color4 v) {
-    return ImVec4(v.r, v.g, v.b, v.a);
+ImVec4 unpack_color(glm::vec4 v) {
+    return ImVec4(v.x, v.y, v.z, v.w);
 }

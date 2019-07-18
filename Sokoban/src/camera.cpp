@@ -80,6 +80,10 @@ CameraContext* FreeCameraContext::deserialize(MapFileI& file) {
     return new FreeCameraContext(x, y, w, h, p, rad, tilt, rot);
 }
 
+void FreeCameraContext::change_rotation(float dr) {
+	rotation_ += dr;
+}
+
 
 FixedCameraContext::FixedCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center):
 CameraContext(x, y, w, h, priority), radius_ {radius}, tilt_ {tilt}, rotation_ {rotation}, center_ {center} {}
@@ -230,6 +234,12 @@ float Camera::get_rotation() {
     return cur_rotation_;
 }
 
+void Camera::change_rotation(float dr) {
+	if (auto* free = dynamic_cast<FreeCameraContext*>(context_)) {
+		free->change_rotation(dr);
+	}
+}
+
 void Camera::set_target(Point3 vpos, FPoint3 rpos) {
     CameraContext* new_context = context_map_[vpos.x][vpos.y];
     if (!new_context->is_null()) {
@@ -262,9 +272,9 @@ void Camera::update() {
 // We have a few magic numbers for tweaking camera smoothness
 // This function may be something more interesting than exponential damping later
 float damp_avg(float target, float cur) {
-    if (fabs(target - cur) <= 0.0001) {
+    if (fabs(target - cur) <= 0.0001f) {
         return target;
     } else {
-        return (target + 8*cur)/9.0;
+        return (target + 8*cur)/9.0f;
     }
 }

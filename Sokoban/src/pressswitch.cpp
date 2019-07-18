@@ -6,6 +6,8 @@
 #include "roommap.h"
 #include "delta.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
+
 
 PressSwitch::PressSwitch(GameObject* parent, int color, bool persistent, bool active):
 Switch(parent, persistent, active), color_ {color} {}
@@ -58,21 +60,19 @@ void PressSwitch::cleanup_on_take(RoomMap* room_map) {
 }
 
 void PressSwitch::draw(GraphicsManager* gfx, FPoint3 p) {
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z + 0.5, p.y));
-    model = glm::scale(model, glm::vec3(0.9f, 0.1f, 0.9f));
-    gfx->set_model(model);
-    gfx->set_color(COLORS[color_]);
-    if (persistent_) {
-        if (active_) {
-            gfx->set_tex(Texture::SwitchDown);
-        } else {
-            gfx->set_tex(Texture::SwitchUp);
-        }
-    } else {
-        gfx->set_tex(Texture::Cross);
-    }
-    gfx->draw_cube();
-    gfx->set_tex(Texture::Blank);
+	BlockTexture tex;
+	if (persistent_) {
+		if (active_) {
+			tex = BlockTexture::SwitchDown;
+		}
+		else {
+			tex = BlockTexture::SwitchUp;
+		}
+	}
+	else {
+		tex = BlockTexture::Cross;
+	}
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), tex, color_);
 }
 
 std::unique_ptr<ObjectModifier> PressSwitch::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

@@ -14,7 +14,7 @@ GameObjectArray::GameObjectArray(): array_ {} {
 GameObjectArray::~GameObjectArray() {}
 
 void GameObjectArray::push_object(std::unique_ptr<GameObject> obj) {
-    obj->id_ = array_.size();
+    obj->id_ = (int)array_.size();
     array_.push_back(std::move(obj));
 }
 

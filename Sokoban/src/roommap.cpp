@@ -365,7 +365,7 @@ void ObjectDestroyer::operator()(int id) {
 void RoomMap::extend_by(Point3 d) {
     GameObjIDFunc destroyer = ObjectDestroyer{obj_array_, this};
     if (d.z < 0) {
-        for (int i = layers_.size() - 1; i >= layers_.size() + d.z; --i) {
+        for (int i = (int)layers_.size() - 1; i >= layers_.size() + d.z; --i) {
             layers_[i]->apply_to_rect(MapRect{0,0,width_,height_}, destroyer);
         }
         layers_.erase(layers_.begin(), layers_.begin() + d.z);

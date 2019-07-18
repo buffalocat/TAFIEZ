@@ -46,7 +46,7 @@ MapFileI& operator>>(MapFileI& f, int& v) {
 MapFileI& operator>>(MapFileI& f, float& v) {
     unsigned char b[2];
     f.read(b, 2);
-    v = (float)b[0] + (float)b[1]/256.0;
+    v = (float)b[0] + (float)b[1]/256.0f;
     return f;
 }
 

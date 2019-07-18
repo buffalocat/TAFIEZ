@@ -21,6 +21,7 @@ void Effects::update() {
 }
 
 void Effects::draw(GraphicsManager* gfx) {
+	/*
     for (auto& trail : trails_) {
         Color4 color = COLORS[trail.color];
         color.a = trail.opacity/MAX_OPACITY;
@@ -33,6 +34,7 @@ void Effects::draw(GraphicsManager* gfx) {
         gfx->draw_cube();
     }
     trails_.erase(std::remove_if(trails_.begin(), trails_.end(), [](FallTrail t) {return t.opacity == 0;}), trails_.end());
+	*/
 }
 
 void Effects::push_trail(GameObject* block, int height, int drop) {

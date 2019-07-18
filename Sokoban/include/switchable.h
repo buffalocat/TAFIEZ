@@ -2,7 +2,6 @@
 #define SWITCHABLE_H
 
 
-
 #include "objectmodifier.h"
 
 class RoomMap;

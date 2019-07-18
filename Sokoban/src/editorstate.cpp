@@ -137,7 +137,7 @@ bool EditorState::load_room(const std::string& name, bool from_main) {
     } else {
         path = MAPS_TEMP + name + ".map";
     }
-    if (!std::filesystem::exists(path.c_str())) {
+    if (!std::filesystem::exists(path)) {
         return false;
     }
     MapFileI file {path};

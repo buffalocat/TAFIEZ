@@ -42,6 +42,8 @@ public:
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
+	void change_rotation(float dr);
+
 private:
     float radius_;
     float tilt_;
@@ -104,6 +106,7 @@ public:
     FPoint3 get_pos();
     float get_tilt();
     float get_rotation();
+	void change_rotation(float);
     void push_context(std::unique_ptr<CameraContext>);
 
 private:

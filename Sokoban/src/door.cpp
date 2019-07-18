@@ -5,6 +5,8 @@
 #include "gameobject.h"
 #include "graphicsmanager.h"
 
+#include "texture_constants.h"
+
 #include "roommap.h"
 #include "moveprocessor.h"
 
@@ -71,15 +73,8 @@ void Door::cleanup_on_take(RoomMap* room_map) {
 }
 
 void Door::draw(GraphicsManager* gfx, FPoint3 p) {
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z + 0.5f, p.y));
-    model = glm::scale(model, glm::vec3(0.9f, 0.1f, 0.9f));
-    gfx->set_model(model);
-    if (dest_ && state()) {
-        gfx->set_color(COLORS[BLUE]);
-    } else {
-        gfx->set_color(COLORS[DARK_RED]);
-    }
-    gfx->draw_cube();
+	int color = (dest_ && state()) ? BLUE : DARK_RED;
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Blank, color);
 }
 
 std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "snakeblock.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
+
 #include "mapfile.h"
 #include "component.h"
 #include "delta.h"
@@ -138,35 +140,26 @@ bool SnakeBlock::moving_push_comp() {
 
 void SnakeBlock::draw(GraphicsManager* gfx) {
     FPoint3 p {real_pos()};
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z, p.y));
-    model = glm::scale(model, glm::vec3(0.7071f, 1, 0.7071f));
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 1, 0));
-    gfx->set_model(model);
-    gfx->set_color(COLORS[color_]);
-    Texture tex;
-    if (ends_ == 1) {
-        tex = Texture::BrokenEdges;
-    } else {
-        tex = Texture::LightEdges;
-    }
-    if (dynamic_cast<AutoBlock*>(modifier())) {
-        tex = tex | Texture::AutoBlock;
-    } else if (dynamic_cast<Car*>(modifier())) {
-        tex = tex | Texture::Car;
-    }
-    gfx->set_tex(tex);
-    gfx->draw_cube();
-    draw_force_indicators(gfx, model);
-    gfx->set_tex(Texture::Blank);
+	BlockTexture tex;
+	if (ends_ == 1) {
+		tex = BlockTexture::BrokenEdges;
+	}
+	else {
+		tex = BlockTexture::LightEdges;
+	}
+	if (dynamic_cast<AutoBlock*>(modifier())) {
+		tex = tex | BlockTexture::AutoBlock;
+	}
+	else if (dynamic_cast<Car*>(modifier())) {
+		tex = tex | BlockTexture::Car;
+	}
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.7071f, 0.7071f, 1.0f), tex, color_);
+    draw_force_indicators(gfx, p);
     for (auto link : links_) {
-        FPoint3 q = link->real_pos();
-        FPoint3 d {q.x - p.x, q.y - p.y, 0};
-        gfx->set_color(COLORS[BLACK]);
-        model = glm::translate(glm::mat4(), glm::vec3(0.2f*d.x, 0.5f, 0.2f*d.y));
-        model = glm::translate(model, glm::vec3(p.x, p.z, p.y));
-        model = glm::scale(model, glm::vec3(0.1f + 0.2f*abs(d.x), 0.2f, 0.1f + 0.2f*abs(d.y)));
-        gfx->set_model(model);
-        gfx->draw_cube();
+		FPoint3 q = link->real_pos();
+		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
+		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.y + 0.5f),
+			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
     }
     if (modifier_) {
         modifier()->draw(gfx, p);

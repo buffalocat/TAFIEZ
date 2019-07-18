@@ -15,6 +15,7 @@
 #include "player.h"
 #include "room.h"
 #include "roommap.h"
+#include "camera.h"
 #include "moveprocessor.h"
 #include "door.h"
 #include "mapfile.h"
@@ -121,6 +122,17 @@ void PlayingState::handle_input() {
             return;
         }
     }
+	if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
+		room_->camera()->change_rotation(-0.05f);
+	}
+	if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
+		room_->camera()->change_rotation(0.05f);
+	}
+	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
+		player_->toggle_riding(room_map, delta_frame_.get());
+		input_cooldown = MAX_COOLDOWN;
+		return;
+	}
     if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
         player_->toggle_riding(room_map, delta_frame_.get());
         input_cooldown = MAX_COOLDOWN;

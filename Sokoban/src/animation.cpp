@@ -32,7 +32,7 @@ std::unique_ptr<PositionalAnimation> LinearAnimation::duplicate() {
 }
 
 
-const float GATE_INTERPOLATION[] = {.96, .9, .8, .6, 0};
+const float GATE_INTERPOLATION[] = {.96f, .9f, .8f, .6f, 0.0f};
 
 GateTransitionAnimation::GateTransitionAnimation(bool state): Animation(), state_ {state} {
     frames_ = SWITCH_RESPONSE_FRAMES - 1;

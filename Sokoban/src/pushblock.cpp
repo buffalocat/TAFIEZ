@@ -4,6 +4,7 @@
 #include "roommap.h"
 #include "mapfile.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
 
 #include "objectmodifier.h"
 #include "autoblock.h"
@@ -52,32 +53,28 @@ Sticky PushBlock::sticky() {
 
 void PushBlock::draw(GraphicsManager* gfx) {
     FPoint3 p {real_pos()};
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z, p.y));
-    gfx->set_model(model);
-    gfx->set_color(COLORS[color_]);
-    Texture tex {Texture::Blank};
+    BlockTexture tex {BlockTexture::Blank};
     switch (sticky_) {
     case Sticky::None:
-        tex = Texture::Edges;
+        tex = BlockTexture::Edges;
         break;
     case Sticky::Weak:
-        tex = Texture::BrokenEdges;
+        tex = BlockTexture::BrokenEdges;
         break;
     case Sticky::Strong:
-        tex = Texture::LightEdges;
+        tex = BlockTexture::LightEdges;
         break;
     case Sticky::AllStick:
-        tex = Texture::Corners;
+        tex = BlockTexture::Corners;
         break;
     }
     if (dynamic_cast<AutoBlock*>(modifier())) {
-        tex = tex | Texture::AutoBlock;
+        tex = tex | BlockTexture::AutoBlock;
     } else if (dynamic_cast<Car*>(modifier())) {
-        tex = tex | Texture::Car;
+        tex = tex | BlockTexture::Car;
     }
-    gfx->set_tex(tex);
-    gfx->draw_cube();
-    draw_force_indicators(gfx, model);
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
+    draw_force_indicators(gfx, p);
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

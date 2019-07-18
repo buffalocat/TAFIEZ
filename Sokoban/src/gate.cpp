@@ -9,6 +9,7 @@
 
 #include "moveprocessor.h"
 #include "graphicsmanager.h"
+#include "texture_constants.h"
 
 Gate::Gate(GameObject* parent, GateBody* body, int color, bool def, bool active, bool waiting):
 Switchable(parent, def, active, waiting), color_ {color}, body_ {body} {}
@@ -103,12 +104,7 @@ void Gate::cleanup_on_take(RoomMap* room_map) {
 // TODO: cleanup GateBody on destruction (if retracted!)
 
 void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
-    glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(p.x, p.z + 0.5f, p.y));
-    model = glm::scale(model, glm::vec3(0.8f, 0.1f, 0.8f));
-    gfx->set_tex(Texture::Blank);
-    gfx->set_model(model);
-    gfx->set_color(COLORS[color_]);
-    gfx->draw_cube();
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), BlockTexture::Blank, color_);
 }
 
 std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* room_map, DeltaFrame* delta_frame) {
