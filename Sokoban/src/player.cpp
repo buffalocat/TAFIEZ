@@ -67,7 +67,7 @@ void Player::draw(GraphicsManager* gfx) {
 		break;
 	}
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.7f * (state_ == RidingState::Riding)),
-		glm::vec3(0.7f, 0.7f, 0.7f), BlockTexture::Blank, color);
+		glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::Blank, color);
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

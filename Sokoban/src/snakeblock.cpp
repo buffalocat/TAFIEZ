@@ -158,7 +158,7 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
     for (auto link : links_) {
 		FPoint3 q = link->real_pos();
 		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
-		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.y + 0.5f),
+		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.z + 0.5f),
 			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
     }
     if (modifier_) {
