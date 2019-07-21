@@ -15,6 +15,7 @@ public:
     virtual ~Switch();
 
     void push_signaler(Signaler*);
+	void remove_signaler(Signaler*);
     void connect_to_signalers();
     virtual void check_send_signal(RoomMap*, DeltaFrame*) = 0;
     virtual bool should_toggle(RoomMap*) = 0;

@@ -16,6 +16,7 @@ public:
     virtual ~Switchable();
 
     void push_signaler(Signaler*);
+	void remove_signaler(Signaler*);
     void connect_to_signalers();
     bool state();
     virtual bool can_set_state(bool state, RoomMap*) = 0;

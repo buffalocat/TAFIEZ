@@ -74,7 +74,7 @@ void PushBlock::draw(GraphicsManager* gfx) {
         tex = tex | BlockTexture::Car;
     }
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
-    draw_force_indicators(gfx, p);
+    draw_force_indicators(gfx, p, 1.1f);
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

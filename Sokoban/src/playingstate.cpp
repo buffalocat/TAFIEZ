@@ -139,9 +139,12 @@ void PlayingState::handle_input() {
         return;
     } else if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
         move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), true);
-        move_processor_->color_change(player_);
-        // TODO: when there's color change animation, don't reset MP yet!
-        input_cooldown = MAX_COOLDOWN;
+		if (move_processor_->color_change(player_)) {
+			input_cooldown = MAX_COOLDOWN;
+		}
+		else {
+			move_processor_.reset(nullptr);
+		}
         return;
     }
 }

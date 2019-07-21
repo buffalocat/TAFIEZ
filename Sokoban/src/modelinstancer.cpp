@@ -27,7 +27,7 @@ void ModelInstancer::setup_buffer() {
 void ModelInstancer::fill_buffer() {
 	glBindBuffer(GL_ARRAY_BUFFER, buffer_);
 	glBufferData(GL_ARRAY_BUFFER, MAX_INSTANCES * sizeof(InstanceData), nullptr, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, instances_.size() * sizeof(InstanceData), &instances_[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, instances_.size() * sizeof(InstanceData), instances_.data(), GL_STATIC_DRAW);
 }
 
 void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color) {

@@ -1,8 +1,6 @@
 #ifndef MOVEPROCESSOR_H
 #define MOVEPROCESSOR_H
 
-
-
 class Player;
 class GameObject;
 class PlayingState;
@@ -15,6 +13,7 @@ class GateBody;
 struct Point3;
 
 enum class MoveStep {
+	UNINITIALIZED = 0,
     Horizontal = 1,
     PreFallSwitch = 2,
     ColorChange = 3,
@@ -28,7 +27,7 @@ public:
     ~MoveProcessor();
 
     bool try_move(Player*, Point3);
-    void color_change(Player*);
+    bool color_change(Player*);
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);

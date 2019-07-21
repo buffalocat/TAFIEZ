@@ -50,6 +50,15 @@ int SwitchTab::get_signaler_labels(const char* labels[], std::vector<std::unique
     return i;
 }
 
+void erase_switch(Switch* sw) {
+	switches->erase(std::remove(switches->begin(), switches->end(), sw), switches->end());
+	sw->remove_signaler(selected_sig);
+}
+
+void erase_switchable(Switchable* swble) {
+	switchables->erase(std::remove(switchables->begin(), switchables->end(), swble), switchables->end());
+	swble->remove_signaler(selected_sig);
+}
 
 void SwitchTab::main_loop(EditorRoom* eroom) {
     ImGui::Text("The Switch Tab");
@@ -98,6 +107,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
         char buf[32];
         sprintf_s(buf, "Erase##SWITCH_a_%d", i);
         if (ImGui::Button(buf)) {
+			erase_switch(s);
             switches->erase(std::remove(switches->begin(), switches->end(), s), switches->end());
         }
     }
@@ -113,6 +123,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
         char buf[32];
         sprintf_s(buf, "Erase##SWITCH_b_%d", i);
         if (ImGui::Button(buf)) {
+			erase_switchable(s);
             switchables->erase(std::remove(switchables->begin(), switchables->end(), s), switchables->end());
         }
     }
@@ -176,6 +187,12 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 
     if (inspect_mode) {
         if (ImGui::Button("Erase Selected Signaler##SWITCH")) {
+			for (auto sw : *switches) {
+				sw->remove_signaler(selected_sig);
+			}
+			for (auto swble : *switchables) {
+				swble->remove_signaler(selected_sig);
+			}
             eroom->map()->remove_signaler(selected_sig);
             selected_sig = nullptr;
         }
@@ -211,11 +228,17 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
             auto swble = dynamic_cast<Switchable*>(mod);
             if (swble && std::find(switchables->begin(), switchables->end(), swble) == switchables->end()) {
                 switchables->push_back(swble);
+				if (inspect_mode) {
+					swble->push_signaler(selected_sig);
+				}
                 return;
             }
             auto sw = dynamic_cast<Switch*>(mod);
             if (sw && std::find(switches->begin(), switches->end(), sw) == switches->end())  {
                 switches->push_back(sw);
+				if (inspect_mode) {
+					sw->push_signaler(selected_sig);
+				}
                 return;
             }
         }
@@ -228,7 +251,11 @@ void SwitchTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
     }
     if (GameObject* obj = eroom->map()->view(pos)) {
         ObjectModifier* mod = obj->modifier();
-        switches->erase(std::remove(switches->begin(), switches->end(), mod), switches->end());
-        switchables->erase(std::remove(switchables->begin(), switchables->end(), mod), switchables->end());
+		if (auto sw = dynamic_cast<Switch*>(mod)) {
+			erase_switch(sw);
+		}
+		else if (auto swble = dynamic_cast<Switchable*>(mod)) {
+			erase_switchable(swble);
+		}
     }
 }

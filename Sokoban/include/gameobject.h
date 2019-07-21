@@ -43,7 +43,7 @@ public:
     void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
 
     virtual void draw(GraphicsManager*) = 0;
-    void draw_force_indicators(GraphicsManager*, FPoint3 pos);
+    void draw_force_indicators(GraphicsManager*, FPoint3 pos, float radius);
 
     virtual void setup_on_put(RoomMap*);
     virtual void cleanup_on_take(RoomMap*);

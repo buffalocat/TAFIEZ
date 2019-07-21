@@ -17,6 +17,10 @@ void Switchable::push_signaler(Signaler* signaler) {
     signalers_.push_back(signaler);
 }
 
+void Switchable::remove_signaler(Signaler* signaler) {
+	signalers_.erase(std::remove(signalers_.begin(), signalers_.end(), signaler), signalers_.end());
+}
+
 void Switchable::connect_to_signalers() {
     for (Signaler* s : signalers_) {
         s->push_switchable(this);

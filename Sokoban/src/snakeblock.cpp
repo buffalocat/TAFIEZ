@@ -154,7 +154,7 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 		tex = tex | BlockTexture::Car;
 	}
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.7071f, 0.7071f, 1.0f), tex, color_);
-    draw_force_indicators(gfx, p);
+    draw_force_indicators(gfx, p, 0.85f);
     for (auto link : links_) {
 		FPoint3 q = link->real_pos();
 		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };

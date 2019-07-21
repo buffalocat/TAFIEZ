@@ -65,7 +65,7 @@ void MoveProcessor::move_general(Point3 dir) {
 }
 
 bool MoveProcessor::update() {
-    if (--frames_ == 0) {
+    if (--frames_ <= 0) {
         switch (state_) {
         case MoveStep::Horizontal:
             // Even if no switch checks occur, the next frame chunk
@@ -86,7 +86,7 @@ bool MoveProcessor::update() {
         block->update_animation();
     }
     update_gate_transitions();
-    return frames_ == 0;
+    return frames_ <= 0;
 }
 
 void MoveProcessor::abort() {
@@ -98,15 +98,17 @@ void MoveProcessor::abort() {
     }
 }
 
-void MoveProcessor::color_change(Player* player) {
+// Returns whether a color change occured
+bool MoveProcessor::color_change(Player* player) {
     Car* car = player->get_car(map_, false);
     if (!(car && car->cycle_color(false))) {
-        return;
+        return false;
     }
     if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
         snake->update_links_color(map_, delta_frame_);
     }
-    state_ = MoveStep::ColorChange;
+	state_ = MoveStep::ColorChange;
+	frames_ = 4;
     // TODO: consider renaming
     frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;
     delta_frame_->push(std::make_unique<ColorChangeDelta>(car, true));
@@ -116,6 +118,7 @@ void MoveProcessor::color_change(Player* player) {
             fall_check_.push_back(block);
         }
     }
+	return true;
 }
 
 void MoveProcessor::try_fall_step() {
@@ -177,19 +180,19 @@ void MoveProcessor::add_to_fall_check(GameObject* obj) {
     fall_check_.push_back(obj);
 }
 
-//TODO: This is a bit of a hack; the animation system should be overhauled when we understand it better
 void MoveProcessor::add_gate_transition(GateBody* gate_body, bool state) {
     if (animated_) {
-        gate_body->set_gate_transition_animation(state, this);
-        gate_transitions_.push_back(std::make_pair(gate_body, state));
+        //gate_body->set_gate_transition_animation(state, this);
+        //gate_transitions_.push_back(std::make_pair(gate_body, state));
     }
 }
 
+//TODO: fix this broken animation hack
 void MoveProcessor::update_gate_transitions() {
     for (auto& p : gate_transitions_) {
         // A retracting object disappears at this point
         if (p.first->update_state_animation() && !p.second) {
-            map_->take_loud(p.first, delta_frame_);
+            //map_->take_loud(p.first, delta_frame_);
         }
     }
     gate_transitions_.erase(std::remove_if(gate_transitions_.begin(), gate_transitions_.end(),

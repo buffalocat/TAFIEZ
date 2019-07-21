@@ -68,7 +68,10 @@ void Gate::apply_state_change(RoomMap* room_map, DeltaFrame* delta_frame, MovePr
         mp->add_gate_transition(body_, state());
         if (state()) {
             room_map->put_loud(body_, delta_frame);
-        }
+		}
+		else {
+			room_map->take_loud(body_, delta_frame);
+		}
         GameObject* above = room_map->view(body_->pos_ + Point3{0,0,1});
         if (above && above->gravitable_) {
             mp->add_to_fall_check(above);
@@ -105,6 +108,7 @@ void Gate::cleanup_on_take(RoomMap* room_map) {
 
 void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), BlockTexture::Blank, color_);
+
 }
 
 std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* room_map, DeltaFrame* delta_frame) {
