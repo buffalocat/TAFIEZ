@@ -13,6 +13,8 @@ public:
     void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
+	BlockTexture texture();
+
     bool is_agent();
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);

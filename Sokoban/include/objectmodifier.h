@@ -12,6 +12,8 @@ class MapFileI;
 class MapFileO;
 class GraphicsManager;
 
+enum class BlockTexture;
+
 // Base class of object modifiers such as Car, Door, Switch, and Gate
 class ObjectModifier {
 public:
@@ -26,7 +28,7 @@ public:
 
     virtual bool is_agent();
 
-    GameObject* parent_;
+	GameObject* parent_;
 
     virtual void draw(GraphicsManager*, FPoint3) {}
 
@@ -36,6 +38,8 @@ public:
     Point3 pos_above(); // A convenience function often needed by Modifiers
     bool pushable();
     bool gravitable();
+
+	virtual BlockTexture texture();
 
     virtual void setup_on_put(RoomMap* room_map);
     virtual void cleanup_on_take(RoomMap* room_map);

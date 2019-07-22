@@ -314,11 +314,11 @@ void Room::read_signaler(MapFileI& file) {
 }
 
 void Room::read_walls(MapFileI& file) {
-    unsigned char b[1];
-    file.read(b, 1);
+	unsigned int wall_count = file.read_uint32();
     Point3 pos;
-    for (int i = 0; i < b[0]; ++i) {
+    for (unsigned int i = 0; i < wall_count; ++i) {
         file >> pos;
+		map_->create_wall(pos);
     }
 }
 

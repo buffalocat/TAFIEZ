@@ -2,6 +2,7 @@
 #include "autoblock.h"
 
 #include "gameobject.h"
+#include "texture_constants.h"
 
 AutoBlock::AutoBlock(GameObject* parent, RoomMap* room_map): ObjectModifier(parent), map_ {room_map} {}
 
@@ -19,6 +20,10 @@ void AutoBlock::serialize(MapFileO&) {}
 
 void AutoBlock::deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent) {
     parent->set_modifier(std::make_unique<AutoBlock>(parent, room_map));
+}
+
+BlockTexture AutoBlock::texture() {
+	return BlockTexture::AutoBlock;
 }
 
 bool AutoBlock::is_agent() {

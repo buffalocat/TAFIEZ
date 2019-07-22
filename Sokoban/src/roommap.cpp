@@ -5,6 +5,7 @@
 
 #include "gameobjectarray.h"
 #include "gameobject.h"
+#include "wall.h"
 #include "delta.h"
 #include "snakeblock.h"
 #include "switch.h"
@@ -45,27 +46,29 @@ bool RoomMap::valid(Point3 pos) {
 }
 
 void RoomMap::push_full() {
-    layers_.push_back(std::make_unique<FullMapLayer>(this, width_, height_));
+    layers_.push_back(std::make_unique<FullMapLayer>(this, width_, height_, depth_));
     ++depth_;
 }
 
 void RoomMap::push_sparse() {
-    layers_.push_back(std::make_unique<SparseMapLayer>(this));
+    layers_.push_back(std::make_unique<SparseMapLayer>(this, depth_));
     ++depth_;
 }
 
 struct ObjectSerializationHandler {
-    void operator()(int);
+    void operator()(int, Point3);
 
     GameObjectArray& obj_array;
     MapFileO& file;
+	std::vector<Point3>& walls;
     std::vector<GameObject*>& rel_check_objs;
     std::vector<ObjectModifier*>& rel_check_mods;
 };
 
-void ObjectSerializationHandler::operator()(int id) {
+void ObjectSerializationHandler::operator()(int id, Point3 pos) {
     if (id == GLOBAL_WALL_ID) {
-        return;
+		walls.push_back(pos);
+		return;
     }
     GameObject* obj = obj_array[id];
     // NOTE: a MapLayer should never pass an invalid ( = 0) id here.
@@ -75,7 +78,7 @@ void ObjectSerializationHandler::operator()(int id) {
         return;
     }
     file << obj->obj_code();
-    file << obj->pos_;
+    file << pos;
     obj->serialize(file);
     if (ObjectModifier* mod = obj->modifier()) {
         file << mod->mod_code();
@@ -96,19 +99,22 @@ void RoomMap::serialize(MapFileO& file) const {
     for (auto& layer : layers_) {
         file << layer->type();
     }
-
+	std::vector<Point3> walls{};
     std::vector<GameObject*> rel_check_objs {};
     std::vector<ObjectModifier*> rel_check_mods {};
-    GameObjIDFunc ser_handler = ObjectSerializationHandler{obj_array_, file, rel_check_objs, rel_check_mods};
+    GameObjIDPosFunc ser_handler = ObjectSerializationHandler{obj_array_, file, walls, rel_check_objs, rel_check_mods};
     // Serialize raw object data
     file << MapCode::Objects;
     for (auto& layer : layers_) {
-        layer->apply_to_rect(MapRect{0,0,width_,height_}, ser_handler);
+        layer->apply_to_rect_with_pos(MapRect{0,0,width_,height_}, ser_handler);
     }
     file << ObjCode::NONE;
     // TODO: Actually Serialize Wall positions
     file << MapCode::Walls;
-    file << 0;
+	file.write_uint32((unsigned int)walls.size());
+	for (Point3 pos : walls) {
+		file << pos;
+	}
     // Serialize relational data
     for (auto obj : rel_check_objs) {
         obj->relation_serialize(file);
@@ -300,22 +306,25 @@ void RoomMap::alert_activated_listeners(DeltaFrame* delta_frame, MoveProcessor* 
 }
 
 struct ObjectDrawer {
-    void operator()(int);
+    void operator()(int, Point3);
 
     GameObjectArray& obj_array;
     GraphicsManager* gfx;
 };
 
-void ObjectDrawer::operator()(int id) {
+void ObjectDrawer::operator()(int id, Point3 pos) {
     if (id > GLOBAL_WALL_ID) {
         obj_array[id]->draw(gfx);
-    }
+	}
+	else {
+		Wall::draw(gfx, pos);
+	}
 }
 
 void RoomMap::draw(GraphicsManager* gfx, float angle) {
-    GameObjIDFunc drawer = ObjectDrawer{obj_array_, gfx};
+    GameObjIDPosFunc drawer = ObjectDrawer{obj_array_, gfx};
     for (auto& layer : layers_) {
-        layer->apply_to_rect(MapRect{0,0,width_,height_}, drawer);
+        layer->apply_to_rect_with_pos(MapRect{0,0,width_,height_}, drawer);
     }
     // TODO: draw walls!
     effects_->sort_by_distance(angle);
@@ -324,8 +333,8 @@ void RoomMap::draw(GraphicsManager* gfx, float angle) {
 }
 
 void RoomMap::draw_layer(GraphicsManager* gfx, int z) {
-    GameObjIDFunc drawer = ObjectDrawer{obj_array_, gfx};
-    layers_[z].get()->apply_to_rect(MapRect{0,0,width_,height_}, drawer);
+    GameObjIDPosFunc drawer = ObjectDrawer{obj_array_, gfx};
+    layers_[z].get()->apply_to_rect_with_pos(MapRect{0,0,width_,height_}, drawer);
 }
 
 struct ObjectShifter {
@@ -388,7 +397,7 @@ void RoomMap::extend_by(Point3 d) {
     }
     for (int i = 0; i < d.z; ++i) {
         // Don't use push_full because we're tracking the depth manually!
-        layers_.insert(layers_.end(), std::make_unique<FullMapLayer>(this, width_, height_));
+        layers_.insert(layers_.end(), std::make_unique<FullMapLayer>(this, width_, height_, depth_));
     }
 }
 
@@ -415,10 +424,10 @@ void RoomMap::shift_by(Point3 d) {
     height_ += d.y;
     depth_ += d.z;
     for (auto& layer : layers_) {
-        layer->shift_by(d.x, d.y);
+        layer->shift_by(d.x, d.y, d.z);
     }
-    for (int i = 0; i < d.z; ++i) {
-        layers_.insert(layers_.begin(), std::make_unique<FullMapLayer>(this, width_, height_));
+    for (int i = d.z - 1; i >= 0; --i) {
+        layers_.insert(layers_.begin(), std::make_unique<FullMapLayer>(this, width_, height_, i));
     }
     shift_all_objects(d);
 }

@@ -25,6 +25,7 @@ protected:
 };
 
 void clamp(int* n, int a, int b);
-ImVec4 unpack_color(glm::vec4 v);
+void color_button(int color_id);
+
 
 #endif // EDITORTAB_H

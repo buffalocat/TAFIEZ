@@ -21,19 +21,19 @@ Sticky operator &(Sticky a, Sticky b) {
 
 
 // id_ begins in an "inconsistent" state - it *must* be set by the GameObjectArray
-GameObject::GameObject(Point3 pos, int color, bool pushable, bool gravitable):
-    modifier_ {}, animation_ {}, comp_ {},
+GameObject::GameObject(Point3 pos, bool pushable, bool gravitable):
+    animation_ {},
     pos_ {pos}, id_ {-1},
-    color_ {color}, pushable_ {pushable}, gravitable_ {gravitable},
+    pushable_ {pushable}, gravitable_ {gravitable},
     tangible_ {false} {}
 
 GameObject::~GameObject() {}
 
 // Copy Constructor creates trivial unique_ptr members
 GameObject::GameObject(const GameObject& obj):
-    modifier_ {}, animation_ {}, comp_ {},
+    modifier_ {}, animation_ {},
     pos_ {obj.pos_}, id_ {-1},
-    color_ {obj.color_}, pushable_ {obj.pushable_}, gravitable_ {obj.gravitable_} {}
+    pushable_ {obj.pushable_}, gravitable_ {obj.gravitable_} {}
 
 std::string GameObject::to_str() {
     std::string mod_str {""};
@@ -54,6 +54,8 @@ bool GameObject::relation_check() {
 bool GameObject::skip_serialization() {
     return false;
 }
+
+void GameObject::serialize(MapFileO& file) {}
 
 void GameObject::relation_serialize(MapFileO& file) {}
 
@@ -104,47 +106,6 @@ ObjectModifier* GameObject::modifier() {
     return modifier_.get();
 }
 
-// NOTE: these can be static_casts as long as the code using them is careful
-PushComponent* GameObject::push_comp() {
-    return dynamic_cast<PushComponent*>(comp_);
-}
-
-FallComponent* GameObject::fall_comp() {
-    return dynamic_cast<FallComponent*>(comp_);
-}
-
-
-void GameObject::collect_sticky_component(RoomMap* room_map, Sticky sticky_level, Component* comp) {
-    std::vector<GameObject*> to_check {this};
-    while (!to_check.empty()) {
-        GameObject* cur = to_check.back();
-        to_check.pop_back();
-        if (cur->comp_) {
-            continue;
-        }
-        cur->comp_ = comp;
-        comp->blocks_.push_back(cur);
-        cur->collect_sticky_links(room_map, sticky_level, to_check);
-        cur->collect_special_links(room_map, sticky_level, to_check);
-        if (ObjectModifier* mod = cur->modifier()) {
-            mod->collect_sticky_links(room_map, sticky_level, to_check);
-        }
-    }
-}
-
-bool GameObject::has_sticky_neighbor(RoomMap* room_map) {
-    for (Point3 d : H_DIRECTIONS) {
-        if (GameObject* adj = room_map->view(pos_ + d)) {
-            if ((adj->color_ == color_) && static_cast<bool>(adj->sticky() & sticky())) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void GameObject::collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
-
 void GameObject::reset_animation() {
     animation_.reset(nullptr);
 }
@@ -189,4 +150,69 @@ void GameObject::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float ra
     if (!gravitable_) {
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
     }
+}
+
+
+// NOTE: these can be static_casts as long as the code using them is careful
+PushComponent* GameObject::push_comp() {
+	return dynamic_cast<PushComponent*>(comp_);
+}
+
+FallComponent* GameObject::fall_comp() {
+	return dynamic_cast<FallComponent*>(comp_);
+}
+
+void GameObject::collect_sticky_component(RoomMap* room_map, Sticky sticky_level, Component* comp) {
+	std::vector<GameObject*> to_check{ this };
+	while (!to_check.empty()) {
+		GameObject* cur = to_check.back();
+		to_check.pop_back();
+		if (cur->comp_) {
+			continue;
+		}
+		cur->comp_ = comp;
+		comp->blocks_.push_back(cur);
+		cur->collect_sticky_links(room_map, sticky_level, to_check);
+		cur->collect_special_links(room_map, sticky_level, to_check);
+		if (ObjectModifier* mod = cur->modifier()) {
+			mod->collect_sticky_links(room_map, sticky_level, to_check);
+		}
+	}
+}
+
+Sticky GameObject::sticky() {
+	return Sticky::None;
+}
+
+bool GameObject::has_sticky_neighbor(RoomMap* room_map) {
+	return false;
+}
+
+void GameObject::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
+
+void GameObject::collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
+
+int GameObject::color() {
+	return NO_COLOR;
+}
+
+
+ColoredBlock::ColoredBlock(Point3 pos, int color, bool pushable, bool gravitable) :
+	GameObject(pos, pushable, gravitable), color_ { color } {}
+
+ColoredBlock::~ColoredBlock() {}
+
+int ColoredBlock::color() {
+	return color_;
+}
+
+bool ColoredBlock::has_sticky_neighbor(RoomMap* room_map) {
+	for (Point3 d : H_DIRECTIONS) {
+		if (ColoredBlock* adj = dynamic_cast<ColoredBlock*>(room_map->view(pos_ + d))) {
+			if ((adj->color() == color()) && static_cast<bool>(adj->sticky() & sticky())) {
+				return true;
+			}
+		}
+	}
+	return false;
 }

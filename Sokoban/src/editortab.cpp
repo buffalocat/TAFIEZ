@@ -18,6 +18,7 @@ void clamp(int* n, int a, int b) {
     *n = std::max(a, std::min(b, *n));
 }
 
-ImVec4 unpack_color(glm::vec4 v) {
-    return ImVec4(v.x, v.y, v.z, v.w);
+void color_button(int color_id) {
+	glm::vec4 color = COLOR_VECTORS[color_id];
+	ImGui::ColorButton("##COLOR_BUTTON", ImVec4(color.x, color.y, color.z, color.w), 0, ImVec2(40, 40));
 }

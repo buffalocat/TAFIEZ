@@ -1,13 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-
-
-#include "pushblock.h"
+#include "gameobject.h"
 
 class Car;
 
-class Player: public PushBlock {
+class Player: public GameObject {
 public:
     Player(Point3 pos, RidingState state);
     virtual ~Player();
@@ -18,7 +16,6 @@ public:
 
     bool is_agent();
 
-    RidingState state();
     void toggle_riding(RoomMap* room_map, DeltaFrame*);
     Car* get_car(RoomMap* room_map, bool strict);
 

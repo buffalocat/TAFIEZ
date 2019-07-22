@@ -12,9 +12,10 @@ enum class MapCode {
     SnakeLink = 8, // Link two snakes (1 = Right, 2 = Down)
     DoorDest = 9, // Give a door a destination Map + Pos
     Signaler = 10, // List of Switches and Switchables linked to a Signaler
-    Walls = 11, // List of positions of walls
+    UNUSED = 11, // Formerly for walls, now followed by 0
     PlayerData = 12, // Like Walls, the Player is listed separately from other objects
     GateBodyLocation = 13, // Indicates that a GateBody needs to be paired with its parent
+	Walls = 14, // Initiates list of Wall Positions
     End = 255,
 };
 

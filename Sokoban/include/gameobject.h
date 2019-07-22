@@ -1,13 +1,11 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-
-
-
 #include <glm\glm.hpp>
 
 #include "common_enums.h"
 #include "point.h"
+#include "colorcycle.h"
 
 class ObjectModifier;
 class PositionalAnimation;
@@ -32,7 +30,7 @@ public:
 
     virtual ObjCode obj_code() = 0;
     virtual bool skip_serialization();
-    virtual void serialize(MapFileO& file) = 0;
+    virtual void serialize(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
 
@@ -51,17 +49,19 @@ public:
     virtual void setup_on_undestruction(RoomMap*);
     virtual void cleanup_on_destruction(RoomMap*);
 
-    PushComponent* push_comp();
-    FallComponent* fall_comp();
-
-    void collect_sticky_component(RoomMap*, Sticky, Component*);
-    virtual Sticky sticky() = 0;
-    bool has_sticky_neighbor(RoomMap*);
-    virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links) = 0;
-    virtual void collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
-
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
     ObjectModifier* modifier();
+
+	PushComponent* push_comp();
+	FallComponent* fall_comp();
+
+	void collect_sticky_component(RoomMap*, Sticky, Component*);
+	virtual Sticky sticky();
+	virtual bool has_sticky_neighbor(RoomMap*);
+	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
+	virtual void collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
+
+	virtual int color();
 
     void reset_animation();
     void set_linear_animation(Point3);
@@ -69,19 +69,31 @@ public:
     void shift_pos_from_animation();
     FPoint3 real_pos();
 
-    std::unique_ptr<ObjectModifier> modifier_;
+	std::unique_ptr<ObjectModifier> modifier_;
     std::unique_ptr<PositionalAnimation> animation_;
-    Component* comp_;
+	Component* comp_;
     Point3 pos_;
     int id_;
-    int color_;
     bool pushable_;
     bool gravitable_;
 
     bool tangible_;
 
 protected:
-    GameObject(Point3 pos, int color, bool pushable, bool gravitable);
+    GameObject(Point3 pos, bool pushable, bool gravitable);
+};
+
+// A block to which the player can be "bound" - it's most things that aren't Walls.
+// The common superclass of PushBlock and SnakeBlock (will there be more...?)
+class ColoredBlock : public GameObject {
+public:
+	ColoredBlock(Point3 pos, int color, bool pushable, bool gravitable);
+	virtual ~ColoredBlock();
+
+	int color();
+	bool has_sticky_neighbor(RoomMap*);
+
+	int color_;
 };
 
 #endif // GAMEOBJECT_H

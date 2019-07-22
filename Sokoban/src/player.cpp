@@ -11,7 +11,7 @@
 #include "mapfile.h"
 #include "car.h"
 
-Player::Player(Point3 pos, RidingState state): PushBlock(pos, PINK, true, true, Sticky::None), state_ {state} {}
+Player::Player(Point3 pos, RidingState state): GameObject(pos, true, true), state_ {state} {}
 
 Player::~Player() {}
 

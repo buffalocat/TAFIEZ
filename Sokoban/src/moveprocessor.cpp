@@ -48,9 +48,9 @@ void MoveProcessor::move_bound(Player* player, Point3 dir) {
         return;
     }
     // If the player is bound, it's on top of a block!
-    GameObject* car = map_->view(player->shifted_pos({0,0,-1}));
-    GameObject* adj = map_->view(car->shifted_pos(dir));
-    if (adj && car->color_ == adj->color_) {
+    auto* car = dynamic_cast<ColoredBlock*>(map_->view(player->shifted_pos({0,0,-1})));
+    auto* adj = dynamic_cast<ColoredBlock*>(map_->view(car->shifted_pos(dir)));
+    if (adj && car->color() == adj->color()) {
         map_->take(player);
         player->set_linear_animation(dir);
         delta_frame_->push(std::make_unique<MotionDelta>(player, dir, map_));

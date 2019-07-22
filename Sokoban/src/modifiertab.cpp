@@ -104,7 +104,7 @@ void ModifierTab::mod_tab_options() {
             gate->active_ = gate->default_;
             gate->waiting_ = gate->default_;
             ImGui::InputInt("color##PRESS_SWITCH_modify_COLOR", &gate->color_);
-            ImGui::ColorButton("##COLOR_BUTTON", unpack_color(COLORS[gate->color_]), 0, ImVec2(40,40));
+			color_button(gate->color_);
         }
         break;
     case ModCode::PressSwitch:
@@ -113,7 +113,7 @@ void ModifierTab::mod_tab_options() {
             PressSwitch* ps = mod ? static_cast<PressSwitch*>(mod) : &model_press_switch;
             ImGui::Checkbox("Persistent?##PRESS_SWITCH_persistent", &ps->persistent_);
             ImGui::InputInt("color##PRESS_SWITCH_modify_COLOR", &ps->color_);
-            ImGui::ColorButton("##COLOR_BUTTON", unpack_color(COLORS[ps->color_]), 0, ImVec2(40,40));
+			color_button(ps->color_);
         }
         break;
     case ModCode::AutoBlock: // No parameters for AutoBlock (yet)
@@ -132,10 +132,10 @@ const char* color_ordinals[5] = {
 
 void ModifierTab::select_color_cycle(ColorCycle& cycle) {
     ImGui::InputInt("Number of colors##COLOR_CYCLE_num", &cycle.size_);
-    clamp(&cycle.size_, 1, MAX_COLOR_CYCLE);
+    clamp(&cycle.size_, 0, MAX_COLOR_CYCLE);
     for (int i = 0; i < cycle.size_; ++i) {
-        ImGui::InputInt(color_ordinals[i], &cycle.color_[i]);
-        ImGui::ColorButton("##COLOR_BUTTON", unpack_color(COLORS[cycle.color_[i]]), 0, ImVec2(40,40));
+        ImGui::InputInt(color_ordinals[i], &cycle.colors_[i]);
+		color_button(cycle.colors_[i]);
     }
 }
 

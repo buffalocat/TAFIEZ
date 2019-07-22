@@ -6,7 +6,7 @@
 
 #include "gameobject.h"
 
-class SnakeBlock: public GameObject {
+class SnakeBlock: public ColoredBlock {
 public:
     SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends);
     virtual ~SnakeBlock();

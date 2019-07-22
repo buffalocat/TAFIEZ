@@ -68,10 +68,12 @@ Mesh Model::process_mesh(aiMesh* mesh, aiScene const* scene) {
 	return Mesh(std::move(vertices), std::move(indices));
 }
 
-void Model::bind_instance_buffer(unsigned int inst_buffer) {
+std::vector<int> Model::gather_mesh_vao() {
+	std::vector<int> vao_vec{};
 	for (Mesh& mesh : meshes) {
-		mesh.bind_instance_buffer(inst_buffer);
+		vao_vec.push_back(mesh.VAO);
 	}
+	return vao_vec;
 }
 
 void Model::draw(Shader shader, unsigned int instance_count) {

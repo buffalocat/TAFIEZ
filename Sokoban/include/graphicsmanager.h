@@ -17,7 +17,8 @@ public:
 
     void draw();
 
-	ModelInstancer cube;
+	CubeInstancer cube;
+	WallInstancer wall;
 
 private:
     GLFWwindow* window_;

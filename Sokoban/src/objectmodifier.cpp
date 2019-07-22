@@ -2,6 +2,7 @@
 #include "objectmodifier.h"
 
 #include "gameobject.h"
+#include "texture_constants.h"
 
 ObjectModifier::ObjectModifier(GameObject* parent): parent_ {parent} {}
 
@@ -37,6 +38,10 @@ bool ObjectModifier::pushable() {
 
 bool ObjectModifier::gravitable() {
     return parent_->gravitable_;
+}
+
+BlockTexture ObjectModifier::texture() {
+	return BlockTexture::Default;
 }
 
 void ObjectModifier::setup_on_put(RoomMap* room_map) {}

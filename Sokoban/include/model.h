@@ -12,8 +12,8 @@ class Model {
 public: 
 	Model(std::string const&);
 	~Model();
-	void bind_instance_buffer(unsigned int inst_buffer);
 	void draw(Shader shader, unsigned int instance_count = 1);
+	std::vector<int> gather_mesh_vao();
 private:
 	std::vector<Mesh> meshes;
 	void load_model(std::string const&);

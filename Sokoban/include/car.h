@@ -16,6 +16,8 @@ public:
     void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
+	virtual BlockTexture texture();
+
     void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
 
     bool cycle_color(bool undo);

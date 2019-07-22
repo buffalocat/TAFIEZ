@@ -10,13 +10,29 @@ enum class BlockTexture;
 class ModelInstancer {
 public:
 	ModelInstancer(std::string const& path);
-	~ModelInstancer();
+	virtual ~ModelInstancer();
 	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color);
-	void draw(Shader shader);
-private:
+	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color);
+	virtual void draw(Shader shader) = 0;
+	void set_instance_attributes(int VAO);
+protected:
 	Model model_;
 	std::vector<InstanceData> instances_;
 	unsigned int buffer_;
 	void setup_buffer();
 	void fill_buffer();
+};
+
+class CubeInstancer : public ModelInstancer {
+public:
+	CubeInstancer(std::string const& path);
+	~CubeInstancer();
+	void draw(Shader shader);
+};
+
+class WallInstancer : public ModelInstancer {
+public:
+	WallInstancer(std::string const& path);
+	~WallInstancer();
+	void draw(Shader shader);
 };

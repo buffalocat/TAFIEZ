@@ -13,13 +13,13 @@ bool MapRect::contains(Point2 p) {
 }
 
 
-MapLayer::MapLayer(RoomMap* room_map): parent_map_ {room_map} {}
+MapLayer::MapLayer(RoomMap* room_map, int z) : parent_map_{ room_map }, z_{ z } {}
 
 MapLayer::~MapLayer() {}
 
 
-FullMapLayer::FullMapLayer(RoomMap* room_map, int width, int height):
-        MapLayer(room_map), map_ {}, width_ {width}, height_ {height} {
+FullMapLayer::FullMapLayer(RoomMap* room_map, int width, int height, int z):
+	MapLayer(room_map, z), map_{}, width_{ width }, height_{ height } {
     for (int i = 0; i != width; ++i) {
         map_.push_back(std::vector<int>(height, 0));
     }
@@ -45,9 +45,20 @@ void FullMapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
     }
 }
 
-void FullMapLayer::shift_by(int dx, int dy) {
+void FullMapLayer::apply_to_rect_with_pos(MapRect rect, GameObjIDPosFunc& f) {
+	for (int i = rect.x; i < rect.x + rect.w; ++i) {
+		for (int j = rect.y; j < rect.y + rect.h; ++j) {
+			if (int id = map_[i][j]) {
+				f(id, { i, j, z_ });
+			}
+		}
+	}
+}
+
+void FullMapLayer::shift_by(int dx, int dy, int dz) {
     width_ += dx;
     height_ += dy;
+	z_ += dz;
     if (dy < 0) {
         for (auto& row : map_) {
             row.erase(row.begin(), row.begin() - dy);
@@ -84,7 +95,7 @@ void FullMapLayer::extend_by(int dx, int dy) {
 }
 
 
-SparseMapLayer::SparseMapLayer(RoomMap* room_map): MapLayer(room_map), map_ {} {}
+SparseMapLayer::SparseMapLayer(RoomMap* room_map, int z): MapLayer(room_map, z), map_ {} {}
 
 SparseMapLayer::~SparseMapLayer() {}
 
@@ -105,7 +116,16 @@ void SparseMapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
     }
 }
 
-void SparseMapLayer::shift_by(int dx, int dy) {
+void SparseMapLayer::apply_to_rect_with_pos(MapRect rect, GameObjIDPosFunc& f) {
+	for (auto& p : map_) {
+		if (rect.contains(p.first) && p.second) {
+			f(p.second, { p.first.x, p.first.y, z_ });
+		}
+	}
+}
+
+void SparseMapLayer::shift_by(int dx, int dy, int dz) {
+	z_ += dz;
     Point2 dpos = {dx,dy};
     std::unordered_map<Point2, int, Point2Hash> new_map {};
     for (auto& p : map_) {

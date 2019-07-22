@@ -15,7 +15,8 @@ GraphicsManager::GraphicsManager(GLFWwindow* window):
 	window_{ window },
 	shader_{ Shader("shaders/shader.vs", "shaders/shader.fs") },
 	instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") },
-	cube{ ModelInstancer("resources/uniform_cube.obj") }
+	cube{ CubeInstancer("resources/uniform_cube.obj") },
+	wall{ WallInstancer("resources/uniform_cube.obj") }
 {
 	instanced_shader_.use();
 	load_texture_atlas();
@@ -52,4 +53,5 @@ void GraphicsManager::set_PV(glm::mat4 projection, glm::mat4 view) {
 
 void GraphicsManager::draw() {
 	cube.draw(instanced_shader_);
+	wall.draw(instanced_shader_);
 }

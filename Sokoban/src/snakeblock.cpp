@@ -13,8 +13,6 @@
 #include "car.h"
 
 
-
-
 SnakeBlock* snake_cast(GameObject* obj) {
     if ((obj->sticky() & Sticky::Snake) != Sticky::None) {
         return static_cast<SnakeBlock*>(obj);
@@ -25,7 +23,7 @@ SnakeBlock* snake_cast(GameObject* obj) {
 
 
 SnakeBlock::SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends):
-GameObject(pos, color, pushable, gravitable), links_ {}, target_ {}, ends_ {ends}, distance_ {0}, dragged_ {false}  {}
+ColoredBlock(pos, color, pushable, gravitable), links_ {}, target_ {}, ends_ {ends}, distance_ {0}, dragged_ {false}  {}
 
 SnakeBlock::~SnakeBlock() {}
 
@@ -147,11 +145,8 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	else {
 		tex = BlockTexture::LightEdges;
 	}
-	if (dynamic_cast<AutoBlock*>(modifier())) {
-		tex = tex | BlockTexture::AutoBlock;
-	}
-	else if (dynamic_cast<Car*>(modifier())) {
-		tex = tex | BlockTexture::Car;
+	if (modifier_) {
+		tex = tex | modifier_->texture();
 	}
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.7071f, 0.7071f, 1.0f), tex, color_);
     draw_force_indicators(gfx, p, 0.85f);
@@ -201,7 +196,7 @@ void SnakeBlock::remove_link_one_way(SnakeBlock* sb) {
 
 bool SnakeBlock::can_link(SnakeBlock* snake) {
     return available() && snake->available() &&
-        (color_ == snake->color_) && (pos_.z == snake->pos_.z) &&
+        (color() == snake->color()) && (pos_.z == snake->pos_.z) &&
         (abs(pos_.x - snake->pos_.x) + abs(pos_.y - snake->pos_.y) == 1) &&
         !in_links(snake);
 }
@@ -212,7 +207,7 @@ void SnakeBlock::check_add_local_links(RoomMap* room_map, DeltaFrame* delta_fram
     }
     for (auto& d : H_DIRECTIONS) {
         auto snake = dynamic_cast<SnakeBlock*>(room_map->view(shifted_pos(d)));
-        if (snake && color_ == snake->color_ && snake->available() && !in_links(snake) && !snake->confused(room_map)) {
+        if (snake && color() == snake->color() && snake->available() && !in_links(snake) && !snake->confused(room_map)) {
             add_link(snake, delta_frame);
         }
     }

@@ -39,28 +39,6 @@ void Mesh::setup_mesh() {
 	glBindVertexArray(0);
 }
 
-void Mesh::bind_instance_buffer(unsigned int inst_buffer) {
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, inst_buffer);
-	// pos offset
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, PosOffset));
-	glVertexAttribDivisor(3, 1);
-	// scales
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, Scale));
-	glVertexAttribDivisor(4, 1);
-	// tex offset
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, TexOffset));
-	glVertexAttribDivisor(5, 1);
-	// color
-	glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, Color));
-	glVertexAttribDivisor(6, 1);
-
-	glBindVertexArray(0);
-}
 
 void Mesh::draw(unsigned int instance_count) {
 	glBindVertexArray(VAO);

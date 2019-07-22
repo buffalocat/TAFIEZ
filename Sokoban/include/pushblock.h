@@ -3,7 +3,7 @@
 
 #include "gameobject.h"
 
-class PushBlock: public GameObject {
+class PushBlock: public ColoredBlock {
 public:
     PushBlock(Point3 pos, int color, bool pushable, bool gravitable, Sticky sticky);
     virtual ~PushBlock();

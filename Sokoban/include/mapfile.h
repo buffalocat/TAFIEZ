@@ -22,6 +22,7 @@ public:
     void read(unsigned char* b, int n);
 
     unsigned char read_byte();
+	unsigned int read_uint32();
     Point3 read_point3();
     std::string read_str();
 
@@ -45,6 +46,8 @@ class MapFileO {
 public:
     MapFileO(const std::string& path);
     ~MapFileO();
+
+	void write_uint32(unsigned int);
 
     MapFileO& operator<<(unsigned char);
     MapFileO& operator<<(int);

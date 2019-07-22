@@ -16,8 +16,7 @@ TestPlayingState::~TestPlayingState() {}
 
 void TestPlayingState::init_player(Point3 pos) {
     RidingState rs;
-    // TODO: fix this hack
-    GameObject* below = room_->map()->view({pos.x, pos.y, pos.z - 1});
+    ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_->map()->view({pos.x, pos.y, pos.z - 1}));
     if (below) {
         if (dynamic_cast<Car*>(below->modifier())) {
             rs = RidingState::Riding;

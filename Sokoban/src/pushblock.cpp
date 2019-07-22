@@ -11,7 +11,7 @@
 #include "car.h"
 
 PushBlock::PushBlock(Point3 pos, int color, bool pushable, bool gravitable, Sticky sticky):
-GameObject(pos, color, pushable, gravitable), sticky_ {sticky} {}
+ColoredBlock(pos, color, pushable, gravitable), sticky_ {sticky} {}
 
 PushBlock::~PushBlock() {}
 
@@ -39,7 +39,7 @@ void PushBlock::collect_sticky_links(RoomMap* room_map, Sticky sticky_level, std
     if (sticky_condition != Sticky::None) {
         for (Point3 d : DIRECTIONS) {
             PushBlock* adj = dynamic_cast<PushBlock*>(room_map->view(pos_ + d));
-            if (adj && adj->color_ == color_ && ((adj->sticky_ & sticky_condition) != Sticky::None)) {
+            if (adj && adj->color() == color() && ((adj->sticky_ & sticky_condition) != Sticky::None)) {
                 links.push_back(adj);
             }
         }
@@ -73,7 +73,7 @@ void PushBlock::draw(GraphicsManager* gfx) {
     } else if (dynamic_cast<Car*>(modifier())) {
         tex = tex | BlockTexture::Car;
     }
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color());
     draw_force_indicators(gfx, p, 1.1f);
     if (modifier_) {
         modifier()->draw(gfx, p);

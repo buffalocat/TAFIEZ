@@ -22,6 +22,12 @@ unsigned char MapFileI::read_byte() {
     return b;
 }
 
+unsigned int MapFileI::read_uint32() {
+	unsigned char b[4];
+	file_.read((char *)b, 4);
+	return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
+}
+
 Point3 MapFileI::read_point3() {
     unsigned char b[3];
     read(b, 3);
@@ -93,6 +99,10 @@ MapFileO::MapFileO(const std::string& path): file_ {} {
 
 MapFileO::~MapFileO() {
     file_.close();
+}
+
+void MapFileO::write_uint32(unsigned int n) {
+	file_ << (unsigned char)n << (unsigned char)(n >> 8) << (unsigned char)(n >> 16) << (unsigned char)(n >> 24);
 }
 
 MapFileO& MapFileO::operator<<(unsigned char n) {
@@ -194,7 +204,7 @@ MapFileO& MapFileO::operator<<(const ColorCycle& color) {
     file_ << (unsigned char) color.size_;
     file_ << (unsigned char) color.index_;
     for (int i = 0; i < color.size_; ++i) {
-        file_ << (unsigned char) color.color_[i];
+        file_ << (unsigned char) color.colors_[i];
     }
     return *this;
 }

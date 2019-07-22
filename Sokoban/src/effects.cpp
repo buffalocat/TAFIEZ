@@ -2,6 +2,7 @@
 #include "effects.h"
 
 #include "graphicsmanager.h"
+#include "texture_constants.h"
 #include "gameobject.h"
 
 Effects::Effects() : trails_{} {}
@@ -21,22 +22,17 @@ void Effects::update() {
 }
 
 void Effects::draw(GraphicsManager* gfx) {
-	/*
     for (auto& trail : trails_) {
-        Color4 color = COLORS[trail.color];
-        color.a = trail.opacity/MAX_OPACITY;
-        gfx->set_color(color);
+        glm::vec4 color = COLOR_VECTORS[trail.color];
+        color.w = trail.opacity/MAX_OPACITY;
         Point3 base = trail.base;
-        glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(base.x, base.z, base.y));
-        model = glm::scale(model, glm::vec3(trail.opacity/MAX_WIDTH, trail.height, trail.opacity/MAX_WIDTH));
-        model = glm::translate(model, glm::vec3(0,0.5,0));
-        gfx->set_model(model);
-        gfx->draw_cube();
+		gfx->cube.push_instance(glm::vec3(base.x, base.y, base.z - trail.height/2.0f + 0.5f),
+			glm::vec3(trail.opacity / MAX_WIDTH, trail.height, trail.opacity / MAX_WIDTH),
+			BlockTexture::Blank, color);
     }
     trails_.erase(std::remove_if(trails_.begin(), trails_.end(), [](FallTrail t) {return t.opacity == 0;}), trails_.end());
-	*/
 }
 
 void Effects::push_trail(GameObject* block, int height, int drop) {
-    trails_.push_back({block->pos_ - Point3{0,0,drop}, height+drop, FALL_TRAIL_OPACITY, block->color_});
+    trails_.push_back({block->pos_ - Point3{0,0,drop}, height+drop, FALL_TRAIL_OPACITY, block->color()});
 }
