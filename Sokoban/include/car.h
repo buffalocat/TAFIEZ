@@ -21,6 +21,7 @@ public:
     void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
 
     bool cycle_color(bool undo);
+	int next_color();
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

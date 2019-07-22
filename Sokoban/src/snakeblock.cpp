@@ -156,6 +156,9 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.z + 0.5f),
 			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
     }
+	if (auto* car = dynamic_cast<Car*>(modifier())) {
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.71f, 0.71f, 0.71f), BlockTexture::AccentSquare, car->next_color());
+	}
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

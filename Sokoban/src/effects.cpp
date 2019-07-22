@@ -27,7 +27,7 @@ void Effects::draw(GraphicsManager* gfx) {
         color.w = trail.opacity/MAX_OPACITY;
         Point3 base = trail.base;
 		gfx->cube.push_instance(glm::vec3(base.x, base.y, base.z - trail.height/2.0f + 0.5f),
-			glm::vec3(trail.opacity / MAX_WIDTH, trail.height, trail.opacity / MAX_WIDTH),
+			glm::vec3(trail.opacity / MAX_WIDTH, trail.opacity / MAX_WIDTH, trail.height),
 			BlockTexture::Blank, color);
     }
     trails_.erase(std::remove_if(trails_.begin(), trails_.end(), [](FallTrail t) {return t.opacity == 0;}), trails_.end());

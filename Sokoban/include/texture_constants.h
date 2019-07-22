@@ -16,6 +16,8 @@ enum class BlockTexture {
 	SwitchDown = 6,
 	Blank = 7,
 	Wall = 20,
+	Door = 21,
+	AccentSquare = 22,
 
 	// "Additive" textures
 	Default = 0,
