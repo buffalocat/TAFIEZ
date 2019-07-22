@@ -9,6 +9,7 @@
 
 #include "gameobject.h"
 
+#include "wall.h"
 #include "car.h"
 #include "door.h"
 #include "gate.h"
@@ -40,9 +41,6 @@ static GameObject* selected_obj = nullptr;
 void ModifierTab::init() {
     selected_obj = nullptr;
 }
-
-void mod_tab_options();
-void select_color_cycle(ColorCycle&);
 
 void ModifierTab::main_loop(EditorRoom* eroom) {
     ImGui::Text("The Modifier Tab");
@@ -180,6 +178,13 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     default:
         return;
     }
+	// A Wall with a modifier can't be the global wall
+	if (obj->id_ == GLOBAL_WALL_ID) {
+		room_map->clear(pos);
+		auto new_wall = std::make_unique<Wall>(pos);
+		obj = new_wall.get();
+		room_map->create(std::move(new_wall), nullptr);
+	}
     mod->parent_ = obj;
     selected_obj = obj;
     obj->set_modifier(std::move(mod));
@@ -193,9 +198,16 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
     }
     RoomMap* room_map = eroom->map();
     if (GameObject* obj = room_map->view(pos)) {
-        if (ObjectModifier* mod = obj->modifier()) {
-            mod->cleanup_on_destruction(room_map);
-            obj->set_modifier({});
+		if (ObjectModifier* mod = obj->modifier()) {
+			// Revert a modified wall to a generic wall!
+			if (auto* wall = dynamic_cast<Wall*>(obj)) {
+				room_map->destroy(obj, nullptr);
+				room_map->create_wall(pos);
+			}
+			else {
+				mod->cleanup_on_destruction(room_map);
+				obj->set_modifier({});
+			}
         }
     }
 }

@@ -12,6 +12,7 @@
 #include "pushblock.h"
 #include "snakeblock.h"
 #include "gatebody.h"
+#include "wall.h"
 
 #include "car.h"
 #include "door.h"
@@ -215,8 +216,8 @@ void Room::read_objects(MapFileI& file) {
         CASE_OBJCODE(PushBlock)
         CASE_OBJCODE(SnakeBlock)
         CASE_OBJCODE(GateBody)
+		CASE_OBJCODE(Wall)
         // Some Object types should never actually be serialized (as "Objects")
-        case ObjCode::Wall:
         case ObjCode::Player:
             break;
         case ObjCode::NONE:

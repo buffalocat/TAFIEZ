@@ -46,11 +46,13 @@ public:
 
     void create(std::unique_ptr<GameObject>, DeltaFrame*);
     void create_abstract(std::unique_ptr<GameObject>, DeltaFrame*);
-    void create_wall(Point3);
     void uncreate(GameObject*);
     void uncreate_abstract(GameObject*);
     void destroy(GameObject*, DeltaFrame*);
     void undestroy(GameObject*);
+
+	void create_wall(Point3);
+	void clear(Point3);
 
     void just_shift(GameObject*, Point3);
     void just_batch_shift(std::vector<GameObject*>, Point3);

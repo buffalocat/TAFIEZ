@@ -13,7 +13,6 @@ public:
     std::string name();
 	ObjCode obj_code();
 
-    bool skip_serialization();
 	void draw(GraphicsManager*);
     static void draw(GraphicsManager* gfx, Point3 p);
 };

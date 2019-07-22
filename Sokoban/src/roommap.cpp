@@ -235,6 +235,10 @@ void RoomMap::create_wall(Point3 pos) {
     at(pos) = GLOBAL_WALL_ID;
 }
 
+void RoomMap::clear(Point3 pos) {
+	at(pos) = 0;
+}
+
 void RoomMap::uncreate(GameObject* obj) {
     if (obj->is_agent()) {
         remove_agent(obj);
