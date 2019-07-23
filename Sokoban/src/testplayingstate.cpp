@@ -16,16 +16,13 @@ TestPlayingState::TestPlayingState(const std::string& name, Point3 pos): Playing
 TestPlayingState::~TestPlayingState() {}
 
 void TestPlayingState::init_player(Point3 pos) {
-    RidingState rs;
-    ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_->map()->view({pos.x, pos.y, pos.z - 1}));
-    if (below) {
+    RidingState rs = RidingState::Free;
+    if (ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_->map()->view({ pos.x, pos.y, pos.z - 1 }))) {
         if (dynamic_cast<Car*>(below->modifier())) {
             rs = RidingState::Riding;
         } else {
             rs = RidingState::Bound;
         }
-    } else {
-        rs = RidingState::Free;
     }
     auto player = std::make_unique<Player>(pos, rs);
     player_ = player.get();

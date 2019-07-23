@@ -27,6 +27,20 @@ bool Player::skip_serialization() {
     return true;
 }
 
+int Player::color() {
+	switch (state_) {
+	case RidingState::Free:
+		return BLUE;
+		break;
+	case RidingState::Bound:
+		return PINK;
+		break;
+	case RidingState::Riding:
+		return RED;
+		break;
+	}
+}
+
 bool Player::is_agent() {
     return true;
 }
@@ -53,21 +67,9 @@ Car* Player::get_car(RoomMap* room_map, bool strict) {
 }
 
 void Player::draw(GraphicsManager* gfx) {
-    FPoint3 p = real_pos();
-	int color;
-	switch (state_) {
-	case RidingState::Free:
-		color = BLUE;
-		break;
-	case RidingState::Bound:
-		color = PINK;
-		break;
-	case RidingState::Riding:
-		color = RED;
-		break;
-	}
+    FPoint3 p = real_pos();	
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.7f * (state_ == RidingState::Riding)),
-		glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::Blank, color);
+		glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::Blank, color());
     if (modifier_) {
         modifier()->draw(gfx, p);
     }

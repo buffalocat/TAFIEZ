@@ -13,6 +13,7 @@ public:
     std::string name();
     ObjCode obj_code();
     bool skip_serialization();
+	int color();
 
     bool is_agent();
 
