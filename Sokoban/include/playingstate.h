@@ -38,6 +38,7 @@ public:
     bool can_use_door(Door*, std::vector<DoorTravellingObj>&, Room**);
 
 	void snap_camera_to_player();
+	void init_player(Point3);
 
 protected:
     std::unordered_map<std::string, std::unique_ptr<Room>> loaded_rooms_;

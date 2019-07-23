@@ -3,9 +3,6 @@
 
 #include <map>
 
-
-
-
 #include "editorbasestate.h"
 #include "editortab.h"
 #include "room.h"

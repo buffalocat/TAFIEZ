@@ -206,3 +206,17 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 void PlayingState::snap_camera_to_player() {
 	room_->set_cam_pos(player_->pos_);
 }
+
+void PlayingState::init_player(Point3 pos) {
+	RidingState rs = RidingState::Free;
+	if (ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_->map()->view({ pos.x, pos.y, pos.z - 1 }))) {
+		if (dynamic_cast<Car*>(below->modifier())) {
+			rs = RidingState::Riding;
+		} else {
+			rs = RidingState::Bound;
+		}
+	}
+	auto player = std::make_unique<Player>(pos, rs);
+	player_ = player.get();
+	room_->map()->create(std::move(player), nullptr);
+}

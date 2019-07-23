@@ -41,5 +41,9 @@ Sokoban/maps/temp/*
 # Resources
 !Sokoban/resources/*
 
+# Save Files
+Sokoban/saves/*
+!Sokoban/saves/.keep
+
 # ImGui ini
 *.ini
