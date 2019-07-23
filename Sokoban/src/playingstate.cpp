@@ -50,8 +50,6 @@ void PlayingState::main_loop() {
     }
 }
 
-
-
 void PlayingState::handle_input() {
     static int input_cooldown = 0;
     static int undo_combo = 0;
@@ -149,6 +147,14 @@ void PlayingState::handle_input() {
     }
 }
 
+Room* PlayingState::active_room() {
+	return room_;
+}
+
+bool PlayingState::activate_room(Room* room) {
+	return activate_room(room->name());
+}
+
 bool PlayingState::activate_room(const std::string& name) {
     if (!loaded_rooms_.count(name)) {
         if (!load_room(name)) {
@@ -159,6 +165,7 @@ bool PlayingState::activate_room(const std::string& name) {
     return true;
 }
 
+// TODO: load_room should be able to throw, maybe
 bool PlayingState::load_room(const std::string& name) {
     // This will be much more complicated when save files are a thing
     std::string path = MAPS_TEMP + name + ".map";
@@ -177,31 +184,25 @@ bool PlayingState::load_room(const std::string& name) {
     return true;
 }
 
-bool PlayingState::can_use_door(Door* door, std::vector<GameObject*>& objs, bool* same_room) {
+bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
     MapLocation* dest = door->dest();
     if (!loaded_rooms_.count(dest->name)) {
         load_room(dest->name);
     }
     Room* dest_room = loaded_rooms_[dest->name].get();
+	*dest_room_ptr = dest_room;
     RoomMap* cur_map = room_->map();
     RoomMap* dest_map = dest_room->map();
     Point3 dest_pos_local = Point3{dest->pos} + Point3{dest_room->offset_pos_};
-    *same_room = (cur_map == dest_map);
-    for (GameObject* obj : objs) {
-        Point3 offset = obj->pos_ - door->pos();
-        if (dest_map->view(dest_pos_local + offset)) {
+    for (auto& obj : objs) {
+        obj.dest = dest_pos_local + obj.raw->pos_ - door->pos();
+        if (dest_map->view(obj.dest)) {
             return false;
         }
     }
     return true;
 }
-/* This code will still be used, but not here
-    delta_frame_->push(std::make_unique<DoorMoveDelta>(this, room_, objs));
-    for (GameObject* obj : objs) {
-        Point3 offset = obj->pos_ - door->pos();
-        cur_map->take(obj);
-        obj->pos_ = dest->pos + offset;
-        dest_map->put(obj);
-    }
+
+void PlayingState::snap_camera_to_player() {
+	room_->set_cam_pos(player_->pos_);
 }
-*/

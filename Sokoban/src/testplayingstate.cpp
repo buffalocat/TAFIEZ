@@ -8,7 +8,8 @@
 
 TestPlayingState::TestPlayingState(const std::string& name, Point3 pos): PlayingState() {
     activate_room(name);
-    init_player(pos);
+	init_player(pos);
+	snap_camera_to_player();
     room_->map()->set_initial_state(false);
 }
 

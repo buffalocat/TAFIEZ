@@ -22,6 +22,7 @@ class DoorMoveDelta;
 struct Point3;
 
 class Door;
+struct DoorTravellingObj;
 
 class PlayingState: public GameState {
 public:
@@ -29,10 +30,14 @@ public:
     virtual ~PlayingState();
     void main_loop();
     void handle_input();
+	Room* active_room();
+	bool activate_room(Room*);
     bool activate_room(const std::string&);
     bool load_room(const std::string&);
 
-    bool can_use_door(Door*, std::vector<GameObject*>&, bool* same_room);
+    bool can_use_door(Door*, std::vector<DoorTravellingObj>&, Room**);
+
+	void snap_camera_to_player();
 
 protected:
     std::unordered_map<std::string, std::unique_ptr<Room>> loaded_rooms_;

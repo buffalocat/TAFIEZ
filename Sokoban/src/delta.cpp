@@ -109,7 +109,7 @@ obj_ {obj}, map_ {room_map} {}
 PutDelta::~PutDelta() {}
 
 void PutDelta::revert() {
-    map_->just_take(obj_);
+    map_->take_real(obj_, nullptr);
 }
 
 
@@ -122,7 +122,7 @@ obj_ {obj}, map_ {room_map} {}
 TakeDelta::~TakeDelta() {}
 
 void TakeDelta::revert() {
-    map_->just_put(obj_);
+    map_->put_real(obj_, nullptr);
 }
 
 
@@ -146,13 +146,23 @@ void BatchMotionDelta::revert() {
 }
 
 
-AbstractMotionDelta::AbstractMotionDelta(GameObject* obj, Point3 dpos):
+AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos):
 obj_ {obj}, dpos_ {dpos} {}
 
-AbstractMotionDelta::~AbstractMotionDelta() {}
+AbstractShiftDelta::~AbstractShiftDelta() {}
 
-void AbstractMotionDelta::revert() {
+void AbstractShiftDelta::revert() {
     obj_->pos_ -= dpos_;
+}
+
+
+AbstractPutDelta::AbstractPutDelta(GameObject* obj, Point3 pos) :
+	obj_{ obj }, pos_{ pos } {}
+
+AbstractPutDelta::~AbstractPutDelta() {}
+
+void AbstractPutDelta::revert() {
+	obj_->pos_ = pos_;
 }
 
 
@@ -174,25 +184,14 @@ void RemoveLinkDelta::revert() {
 }
 
 
-DoorMoveDelta::DoorMoveDelta(PlayingState* state, Room* room, std::vector<GameObject*>& objs):
-state_ {state}, room_ {room}, pairs_ {} {
-    for (GameObject* obj : objs) {
-        pairs_.push_back(std::make_pair(obj, obj->pos_));
-    }
-}
+RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room):
+state_ {state}, room_ {room} {}
 
-DoorMoveDelta::~DoorMoveDelta() {}
+RoomChangeDelta::~RoomChangeDelta() {}
 
-void DoorMoveDelta::revert() {
-    RoomMap* cur_map = state_->room_->map();
-    RoomMap* dest_map = room_->map();
-    state_->room_ = room_;
-    for (auto& p : pairs_) {
-        GameObject* obj = p.first;
-        cur_map->just_take(obj);
-        obj->pos_ = p.second;
-        dest_map->just_put(obj);
-    }
+//TODO: keep some local state in the DeltaFrame? If so, this also changes *that* Room
+void RoomChangeDelta::revert() {
+    state_->activate_room(room_);
 }
 
 

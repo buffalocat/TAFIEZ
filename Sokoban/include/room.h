@@ -1,9 +1,6 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-
-
-
 #include "point.h"
 
 class GameObjectArray;

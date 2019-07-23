@@ -34,6 +34,10 @@ MapLocation* Door::dest() {
     return dest_.get();
 }
 
+bool Door::usable() {
+	return state() && dest_;
+}
+
 void Door::serialize(MapFileO& file) {
     file << default_ << active_;
 }
@@ -60,7 +64,7 @@ bool Door::can_set_state(bool state, RoomMap* room_map) {
 }
 
 void Door::map_callback(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-    mp->try_door_move(this);
+    mp->plan_door_move(this);
 }
 
 void Door::setup_on_put(RoomMap* room_map) {
@@ -73,7 +77,7 @@ void Door::cleanup_on_take(RoomMap* room_map) {
 }
 
 void Door::draw(GraphicsManager* gfx, FPoint3 p) {
-	int color = (dest_ && state()) ? BLUE : DARK_RED;
+	int color = (dest_ && state()) ? GREEN : DARK_RED;
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Door, color);
 }
 

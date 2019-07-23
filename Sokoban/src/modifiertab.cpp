@@ -30,8 +30,8 @@ static bool inspect_mode = false;
 // Model objects that new objects are created from
 static Car model_car {nullptr, {}};
 static Door model_door {nullptr, true, false};
-static Gate model_gate {nullptr, nullptr, 0, false, false, false};
-static PressSwitch model_press_switch {nullptr, 0, false, false};
+static Gate model_gate {nullptr, nullptr, GREEN, false, false, false};
+static PressSwitch model_press_switch {nullptr, GREEN, false, false};
 
 static ColorCycle model_color_cycle {};
 
@@ -162,8 +162,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     case ModCode::Gate: {
             auto gate = std::make_unique<Gate>(model_gate);
             gate->parent_ = obj;
-            // Create the GateBody too, so that serialization occurs properly!
-            auto gate_body = std::make_unique<GateBody>(gate.get(), gate->pos_above());
+			auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{0, 0, 1});
             gate->body_ = gate_body.get();
             room_map->create_abstract(std::move(gate_body), nullptr);
             mod = std::move(gate);

@@ -36,6 +36,7 @@ public:
 
     void set_dest(Point3_S16, const std::string&);
     MapLocation* dest();
+	bool usable();
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 

@@ -111,6 +111,11 @@ void HorizontalStepProcessor::collect_moving_and_weak_links(PushComponent* comp,
 void HorizontalStepProcessor::perform_horizontal_step() {
     // Any block which moved forward could have moved off a ledge
     fall_check_ = moving_blocks_;
+	for (auto* block : moving_blocks_) {
+		if (auto* above = map_->view(block->shifted_pos({ 0,0,1 }))) {
+			fall_check_.push_back(above);
+		}
+	}
     std::unordered_set<SnakeBlock*> link_add_check {};
     link_add_check.insert(moving_snakes_.begin(), moving_snakes_.end());
     for (auto sb : moving_snakes_) {

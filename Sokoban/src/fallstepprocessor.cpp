@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "fallstepprocessor.h"
 
-
-
-
 #include "component.h"
 #include "gameobject.h"
 #include "roommap.h"

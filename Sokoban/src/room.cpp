@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "room.h"
 
-
-
 #include "roommap.h"
 #include "camera.h"
 

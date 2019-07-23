@@ -39,6 +39,8 @@ public:
     Point3 shifted_pos(Point3 d);
     void shift_internal_pos(Point3 d);
     void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
+	void abstract_put(Point3 pos, DeltaFrame* delta_frame);
+
 
     virtual void draw(GraphicsManager*) = 0;
     void draw_force_indicators(GraphicsManager*, FPoint3 pos, float radius);

@@ -165,14 +165,24 @@ void RoomMap::put(GameObject* obj) {
     activate_listeners_at(obj->pos_);
 }
 
-void RoomMap::take_loud(GameObject* obj, DeltaFrame* delta_frame) {
-    delta_frame->push(std::make_unique<TakeDelta>(obj, this));
+void RoomMap::take_real(GameObject* obj, DeltaFrame* delta_frame) {
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<TakeDelta>(obj, this));
+	}
     take(obj);
+	if (obj->is_agent()) {
+		remove_agent(obj);
+	}
 }
 
-void RoomMap::put_loud(GameObject* obj, DeltaFrame* delta_frame) {
-    delta_frame->push(std::make_unique<PutDelta>(obj, this));
+void RoomMap::put_real(GameObject* obj, DeltaFrame* delta_frame) {
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<PutDelta>(obj, this));
+	}
     put(obj);
+	if (obj->is_agent()) {
+        agents_.push_back(obj);
+    }
 }
 
 void RoomMap::shift(GameObject* obj, Point3 dpos, DeltaFrame* delta_frame) {

@@ -126,13 +126,16 @@ void GameObject::shift_pos_from_animation() {
     pos_ = animation_->shift_pos(pos_);
 }
 
-
-
 void GameObject::abstract_shift(Point3 dpos, DeltaFrame* delta_frame) {
     if (!(dpos == Point3{})) {
         pos_ += dpos;
-        delta_frame->push(std::make_unique<AbstractMotionDelta>(this, dpos));
+        delta_frame->push(std::make_unique<AbstractShiftDelta>(this, dpos));
     }
+}
+
+void GameObject::abstract_put(Point3 pos, DeltaFrame* delta_frame) {
+	delta_frame->push(std::make_unique<AbstractPutDelta>(this, pos_));
+	pos_ = pos;
 }
 
 FPoint3 GameObject::real_pos() {

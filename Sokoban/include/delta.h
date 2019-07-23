@@ -148,15 +148,27 @@ private:
 };
 
 // Object motion outside of the map
-class AbstractMotionDelta: public Delta {
+class AbstractShiftDelta: public Delta {
 public:
-    AbstractMotionDelta(GameObject* obj, Point3 dpos);
-    ~AbstractMotionDelta();
+    AbstractShiftDelta(GameObject* obj, Point3 dpos);
+    ~AbstractShiftDelta();
     void revert();
 
 private:
     GameObject* obj_;
     Point3 dpos_;
+};
+
+
+class AbstractPutDelta : public Delta {
+public:
+	AbstractPutDelta(GameObject* obj, Point3 pos);
+	~AbstractPutDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+	Point3 pos_;
 };
 
 
@@ -184,16 +196,15 @@ private:
 };
 
 
-class DoorMoveDelta: public Delta {
+class RoomChangeDelta: public Delta {
 public:
-    DoorMoveDelta(PlayingState* state, Room* room, std::vector<GameObject*>& objs);
-    ~DoorMoveDelta();
+	RoomChangeDelta(PlayingState* state, Room* room);
+    ~RoomChangeDelta();
     void revert();
 
 private:
     PlayingState* state_;
     Room* room_;
-    std::vector<std::pair<GameObject*, Point3>> pairs_;
 };
 
 

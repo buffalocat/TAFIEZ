@@ -41,8 +41,8 @@ public:
     void just_put(GameObject*);
     void take(GameObject*);
     void put(GameObject*);
-    void take_loud(GameObject*, DeltaFrame*);
-    void put_loud(GameObject*, DeltaFrame*);
+    void take_real(GameObject*, DeltaFrame*);
+    void put_real(GameObject*, DeltaFrame*);
 
     void create(std::unique_ptr<GameObject>, DeltaFrame*);
     void create_abstract(std::unique_ptr<GameObject>, DeltaFrame*);
