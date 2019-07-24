@@ -11,6 +11,7 @@
 #include "snakeblock.h"
 #include "gatebody.h"
 #include "wall.h"
+#include "player.h"
 
 #include "car.h"
 #include "door.h"
@@ -114,7 +115,7 @@ void Room::shift_by(Point3 d) {
     // TODO: shift camera rects also?
 }
 
-void Room::write_to_file(MapFileO& file, Point3 start_pos) {
+void Room::write_to_file(MapFileO& file) {
     file << MapCode::Dimensions;
     file << map_->width_;
     file << map_->height_;
@@ -123,9 +124,6 @@ void Room::write_to_file(MapFileO& file, Point3 start_pos) {
     file << MapCode::OffsetPos;
     file << offset_pos_;
 
-    file << MapCode::DefaultPos;
-    file << start_pos;
-
     map_->serialize(file);
 
     camera_->serialize(file);
@@ -133,7 +131,7 @@ void Room::write_to_file(MapFileO& file, Point3 start_pos) {
     file << MapCode::End;
 }
 
-void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_pos) {
+void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player_ptr) {
     unsigned char b[8];
     bool reading_file = true;
     while (reading_file) {
@@ -149,17 +147,14 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_p
         case MapCode::SparseLayer:
             //map_->push_sparse();
             break;
-        case MapCode::DefaultPos:
+        case MapCode::DefaultPos_DEFUNCT:
             file.read(b, 3);
-            if (start_pos) {
-                *start_pos = {b[0], b[1], b[2]};
-            }
             break;
         case MapCode::OffsetPos:
             file >> offset_pos_;
             break;
         case MapCode::Objects:
-            read_objects(file);
+            read_objects(file, player_ptr);
             break;
         case MapCode::CameraRects:
             read_camera_rects(file);
@@ -176,9 +171,6 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_p
         case MapCode::Walls:
             read_walls(file);
             break;
-        case MapCode::PlayerData:
-            read_player_data(file);
-            break;
         case MapCode::End:
             reading_file = false;
             break;
@@ -189,9 +181,6 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_p
         }
     }
 }
-
-// TODO: fix (de)serialization in general!!!!!
-
 
 #define CASE_OBJCODE(CLASS)\
 case ObjCode::CLASS:\
@@ -204,7 +193,7 @@ case ModCode::CLASS:\
     break;
 
 
-void Room::read_objects(MapFileI& file) {
+void Room::read_objects(MapFileI& file, Player** player_ptr) {
     unsigned char b;
     std::unique_ptr<GameObject> obj {};
     while (true) {
@@ -217,12 +206,22 @@ void Room::read_objects(MapFileI& file) {
 		CASE_OBJCODE(Wall)
         // Some Object types should never actually be serialized (as "Objects")
         case ObjCode::Player:
-            break;
+		{
+			obj = Player::deserialize(file);
+			if (player_ptr) {
+				*player_ptr = static_cast<Player*>(obj.get());
+			} else {
+				// TODO: make this less fragile?
+				file.read(&b, 1);
+				continue;
+			}
+			break;
+		}
         case ObjCode::NONE:
             return;
         default:
             throw std::runtime_error("Unknown Object code encountered in .map file (it's probably corrupt/an old version)");
-            break;
+			break;
         }
         file.read(&b, 1);
         switch (static_cast<ModCode>(b)) {
@@ -237,7 +236,7 @@ void Room::read_objects(MapFileI& file) {
             throw std::runtime_error("Unknown Modifier code encountered in .map file (it's probably corrupt/an old version)");
             break;
         }
-        map_->create(std::move(obj), nullptr);
+		map_->create(std::move(obj), nullptr);
     }
 }
 
@@ -319,8 +318,4 @@ void Room::read_walls(MapFileI& file) {
         file >> pos;
 		map_->create_wall(pos);
     }
-}
-
-void Room::read_player_data(MapFileI& file) {
-
 }

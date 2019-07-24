@@ -236,6 +236,7 @@
     <ClInclude Include="include\Resource.h" />
     <ClInclude Include="include\room.h" />
     <ClInclude Include="include\roommap.h" />
+    <ClInclude Include="include\savefile.h" />
     <ClInclude Include="include\saveloadtab.h" />
     <ClInclude Include="include\shader.h" />
     <ClInclude Include="include\signaler.h" />
@@ -243,7 +244,6 @@
     <ClInclude Include="include\snaketab.h" />
     <ClInclude Include="include\Sokoban.h" />
     <ClInclude Include="include\stdafx.h" />
-    <ClInclude Include="include\string_constants.h" />
     <ClInclude Include="include\switch.h" />
     <ClInclude Include="include\switchable.h" />
     <ClInclude Include="include\switchtab.h" />
@@ -295,6 +295,7 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\car.cpp" />
     <ClCompile Include="src\colorcycle.cpp" />
+    <ClCompile Include="src\common_constants.cpp" />
     <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\delta.cpp" />
     <ClCompile Include="src\door.cpp" />
@@ -336,6 +337,7 @@
     <ClCompile Include="src\realplayingstate.cpp" />
     <ClCompile Include="src\room.cpp" />
     <ClCompile Include="src\roommap.cpp" />
+    <ClCompile Include="src\savefile.cpp" />
     <ClCompile Include="src\saveloadtab.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\signaler.cpp" />

@@ -50,7 +50,6 @@ Sticky PushBlock::sticky() {
     return sticky_;
 }
 
-
 void PushBlock::draw(GraphicsManager* gfx) {
     FPoint3 p {real_pos()};
     BlockTexture tex {BlockTexture::Blank};

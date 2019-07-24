@@ -9,11 +9,11 @@
 #include "testplayingstate.h"
 #include "gameobject.h"
 #include "player.h"
+#include "car.h"
 #include "mapfile.h"
 #include "room.h"
 #include "roommap.h"
 #include "camera.h"
-#include "string_constants.h"
 
 #include "saveloadtab.h"
 #include "objecttab.h"
@@ -21,6 +21,7 @@
 #include "switchtab.h"
 #include "modifiertab.h"
 #include "snaketab.h"
+
 
 #define INIT_TAB(NAME)\
 tabs_[#NAME] = std::make_unique<NAME ## Tab>(this, gfx);
@@ -131,23 +132,22 @@ void EditorState::new_room(const std::string& name, int width, int height, int d
 }
 
 bool EditorState::load_room(const std::string& name, bool from_main) {
-    std::string path;
+    std::filesystem::path path;
     if (from_main) {
-        path = MAPS_MAIN + name + ".map";
+        path = (MAPS_MAIN / name).concat(".map");
     } else {
-        path = MAPS_TEMP + name + ".map";
+        path = (MAPS_TEMP / name).concat(".map");
     }
     if (!std::filesystem::exists(path)) {
-        return false;
+		return false;
     }
     MapFileI file {path};
-    Point3 start_pos {0,0,2};
     std::unique_ptr<Room> room = std::make_unique<Room>(name);
-    room->load_from_file(*objs_, file, &start_pos);
 
-    //TODO: (consider?) load .mapd file here!!
-
-    room->map()->create(std::make_unique<Player>(start_pos, RidingState::Free), nullptr);
+	Player* player = nullptr;
+    room->load_from_file(*objs_, file, &player);
+	player->state_ = RidingState::Free;
+	Point3 start_pos = player->pos_;
     room->map()->set_initial_state(true);
     room->set_cam_pos(start_pos);
     rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
@@ -155,14 +155,28 @@ bool EditorState::load_room(const std::string& name, bool from_main) {
 }
 
 void EditorState::save_room(EditorRoom* eroom, bool commit) {
-    std::string path;
+    std::filesystem::path path;
     if (commit) {
-        path = MAPS_MAIN + eroom->name() + ".map";
+        path = (MAPS_MAIN / eroom->name()).concat(".map");
     } else {
-        path = MAPS_TEMP + eroom->name() + ".map";
+		path = (MAPS_TEMP / eroom->name()).concat(".map");
     }
     MapFileO file{path};
-    eroom->room->write_to_file(file, eroom->start_pos);
+	RoomMap* room_map = eroom->map();
+	Player* player = dynamic_cast<Player*>(room_map->view(eroom->start_pos));
+	set_player_state(player, room_map);
+    eroom->room->write_to_file(file);
+	player->state_ = RidingState::Free;
+}
+
+void EditorState::set_player_state(Player* player, RoomMap* room_map) {
+	if (ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_map->view(player->shifted_pos({ 0,0,-1 })))) {
+		if (dynamic_cast<Car*>(below->modifier())) {
+			player->state_ = RidingState::Riding;
+		} else {
+			player->state_ = RidingState::Bound;
+		}
+	}
 }
 
 EditorRoom* EditorState::reload(EditorRoom* eroom) {
@@ -204,7 +218,7 @@ void EditorState::begin_test() {
             save_room(p.second.get(), false);
         }
     }
-    auto playing_state = std::make_unique<TestPlayingState>(active_room_->room->name(), active_room_->start_pos);
+    auto playing_state = std::make_unique<TestPlayingState>(active_room_->room->name());
     create_child(std::move(playing_state));
 }
 

@@ -5,15 +5,15 @@ enum class MapCode {
     Dimensions = 1, // The dimensions of the room as 1 byte integers
     FullLayer = 2, // Create a new full layer
     SparseLayer = 3, // Create a new sparse layer
-    DefaultPos = 4, // Mark the position to start the player at when loading from this map (only useful for testing, or a select few rooms)
+	DefaultPos_DEFUNCT = 4, // Followed by a Point3
     OffsetPos = 5, // The position that (0,0) was at when the room was created
     Objects = 6, // Read in all map objects
     CameraRects = 7, // Get a camera context rectangle
     SnakeLink = 8, // Link two snakes (1 = Right, 2 = Down)
     DoorDest = 9, // Give a door a destination Map + Pos
     Signaler = 10, // List of Switches and Switchables linked to a Signaler
-    UNUSED = 11, // Formerly for walls, now followed by 0
-    PlayerData = 12, // Like Walls, the Player is listed separately from other objects
+    UNUSED_11 = 11, // Formerly for walls, now followed by 0
+    UNUSED_12 = 12, // Formerly for the player, now nothing
     GateBodyLocation = 13, // Indicates that a GateBody needs to be paired with its parent
 	Walls = 14, // Initiates list of Wall Positions
     End = 255,

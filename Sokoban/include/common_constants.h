@@ -2,6 +2,7 @@
 #define COMMON_CONSTANTS_H
 
 #include "point.h"
+#include <filesystem>
 
 const int GLOBAL_WALL_ID = 1;
 
@@ -47,5 +48,8 @@ const int UNDO_COOLDOWN_FINAL = 2;
 const int MAX_UNDO_DEPTH = 1000;
 
 const int FAST_MAP_MOVE = 10;
+
+extern const std::filesystem::path MAPS_MAIN;
+extern const std::filesystem::path MAPS_TEMP;
 
 #endif // COMMON_CONSTANTS_H

@@ -2,6 +2,7 @@
 #define MAPFILE_H
 
 #include <fstream>
+#include <filesystem>
 
 
 #include "point.h"
@@ -17,7 +18,7 @@ enum class RidingState;
 
 class MapFileI {
 public:
-    MapFileI(const std::string& path);
+    MapFileI(const std::filesystem::path& path);
     ~MapFileI();
     void read(unsigned char* b, int n);
 
@@ -44,7 +45,7 @@ MapFileI& operator>>(MapFileI& f, ColorCycle& v);
 
 class MapFileO {
 public:
-    MapFileO(const std::string& path);
+    MapFileO(const std::filesystem::path& path);
     ~MapFileO();
 
 	void write_uint32(unsigned int);

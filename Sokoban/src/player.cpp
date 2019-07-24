@@ -15,16 +15,22 @@ Player::Player(Point3 pos, RidingState state): GameObject(pos, true, true), stat
 
 Player::~Player() {}
 
+void Player::serialize(MapFileO& file) {
+	file << state_;
+}
+
+std::unique_ptr<GameObject> Player::deserialize(MapFileI& file) {
+	Point3 pos{ file.read_point3() };
+	RidingState state = static_cast<RidingState>(file.read_byte());
+	return std::make_unique<Player>(pos, state);
+}
+
 std::string Player::name() {
     return "Player";
 }
 
 ObjCode Player::obj_code() {
     return ObjCode::Player;
-}
-
-bool Player::skip_serialization() {
-    return true;
 }
 
 int Player::color() {
@@ -37,6 +43,9 @@ int Player::color() {
 		break;
 	case RidingState::Riding:
 		return RED;
+		break;
+	default:
+		return NO_COLOR;
 		break;
 	}
 }

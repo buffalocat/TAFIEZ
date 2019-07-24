@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef EDITORSTATE_H
 #define EDITORSTATE_H
 
@@ -7,6 +9,8 @@
 #include "editortab.h"
 #include "room.h"
 #include "gameobjectarray.h"
+
+class RoomMap;
 
 struct EditorRoom {
     std::unique_ptr<Room> room;
@@ -53,6 +57,7 @@ public:
     void new_room(const std::string& name, int width, int height, int depth);
     bool load_room(const std::string& name, bool from_main);
     void save_room(EditorRoom* eroom, bool commit);
+	void set_player_state(Player* player, RoomMap* room_map);
     EditorRoom* reload(EditorRoom* eroom);
     void unload_current_room();
     void commit_current_room();

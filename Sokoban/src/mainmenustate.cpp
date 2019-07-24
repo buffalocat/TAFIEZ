@@ -34,7 +34,7 @@ void MainMenuState::main_loop() {
 	case Menu::New:
 		if (ImGui::Button("Start New Game on File 1##MAINMENU")) {
 			// Create new file here
-			create_child(std::make_unique<RealPlayingState>("1"));
+			create_child(std::make_unique<RealPlayingState>("1", "story1"));
 		}
 		if (ImGui::Button("Back##MAINMENU")) {
 			menu_type_ = Menu::Top;
@@ -43,7 +43,7 @@ void MainMenuState::main_loop() {
 	case Menu::Load:
 		if (ImGui::Button("Load Game from File 1##MAINMENU")) {
 			// load file here
-			create_child(std::make_unique<RealPlayingState>("story1"));
+			create_child(std::make_unique<RealPlayingState>("1", "story1"));
 		}
 		if (ImGui::Button("Back##MAINMENU")) {
 			menu_type_ = Menu::Top;

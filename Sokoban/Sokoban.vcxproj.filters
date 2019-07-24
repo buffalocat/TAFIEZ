@@ -31,14 +31,14 @@
     <Filter Include="Source Files\Object Modifiers">
       <UniqueIdentifier>{635292d5-157c-40fe-adc8-a3e74bbd5222}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\constants">
-      <UniqueIdentifier>{2d2e22d9-7855-4b66-9fe2-30dd85747b7d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{6f2c8154-821e-4424-8676-0de829fc8046}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Move Processing">
       <UniqueIdentifier>{62ebdd7e-e1a7-462f-b1ac-920b25678aa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="constants">
+      <UniqueIdentifier>{2d2e22d9-7855-4b66-9fe2-30dd85747b7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -224,19 +224,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\color_constants.h">
-      <Filter>Header Files\constants</Filter>
+      <Filter>constants</Filter>
     </ClInclude>
     <ClInclude Include="include\common_constants.h">
-      <Filter>Header Files\constants</Filter>
+      <Filter>constants</Filter>
     </ClInclude>
     <ClInclude Include="include\common_enums.h">
-      <Filter>Header Files\constants</Filter>
+      <Filter>constants</Filter>
     </ClInclude>
     <ClInclude Include="include\texture_constants.h">
-      <Filter>Header Files\constants</Filter>
+      <Filter>constants</Filter>
     </ClInclude>
-    <ClInclude Include="include\string_constants.h">
-      <Filter>Header Files\constants</Filter>
+    <ClInclude Include="include\savefile.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -419,6 +419,12 @@
     </ClCompile>
     <ClCompile Include="src\component.cpp">
       <Filter>Source Files\Move Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\savefile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common_constants.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -10,9 +10,11 @@ public:
     Player(Point3 pos, RidingState state);
     virtual ~Player();
 
+	void serialize(MapFileO& file);
+	static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+
     std::string name();
     ObjCode obj_code();
-    bool skip_serialization();
 	int color();
 
     bool is_agent();

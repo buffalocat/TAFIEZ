@@ -22,7 +22,6 @@
 #include "car.h"
 
 #include "common_constants.h"
-#include "string_constants.h"
 
 const std::unordered_map<int, Point3> MOVEMENT_KEYS {
     {GLFW_KEY_RIGHT, {1, 0, 0}},
@@ -31,6 +30,9 @@ const std::unordered_map<int, Point3> MOVEMENT_KEYS {
     {GLFW_KEY_UP,    {0,-1, 0}},
 };
 
+PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
+	room{ std::move(arg_room) },
+	changed{ true } {}
 
 PlayingState::PlayingState():
     GameState(), loaded_rooms_ {}, objs_ {std::make_unique<GameObjectArray>()},
@@ -157,39 +159,20 @@ bool PlayingState::activate_room(Room* room) {
 
 bool PlayingState::activate_room(const std::string& name) {
     if (!loaded_rooms_.count(name)) {
-        if (!load_room(name)) {
+        if (!load_room(name, false)) {
             return false;
         }
     }
-    room_ = loaded_rooms_[name].get();
-    return true;
-}
-
-// TODO: load_room should be able to throw, maybe
-bool PlayingState::load_room(const std::string& name) {
-    // This will be much more complicated when save files are a thing
-    std::string path = MAPS_TEMP + name + ".map";
-    if (!std::filesystem::exists(path.c_str())) {
-        path = MAPS_MAIN + name + ".map";
-        if (!std::filesystem::exists(path.c_str())) {
-            return false;
-        }
-    }
-    MapFileI file {path};
-    auto room = std::make_unique<Room>(name);
-    room->load_from_file(*objs_, file);
-    // Load dynamic component!
-    room->map()->set_initial_state(false);
-    loaded_rooms_[name] = std::move(room);
+    room_ = loaded_rooms_[name]->room.get();
     return true;
 }
 
 bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
     MapLocation* dest = door->dest();
     if (!loaded_rooms_.count(dest->name)) {
-        load_room(dest->name);
+        load_room(dest->name, false);
     }
-    Room* dest_room = loaded_rooms_[dest->name].get();
+    Room* dest_room = loaded_rooms_[dest->name]->room.get();
 	*dest_room_ptr = dest_room;
     RoomMap* cur_map = room_->map();
     RoomMap* dest_map = dest_room->map();
@@ -205,18 +188,4 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 
 void PlayingState::snap_camera_to_player() {
 	room_->set_cam_pos(player_->pos_);
-}
-
-void PlayingState::init_player(Point3 pos) {
-	RidingState rs = RidingState::Free;
-	if (ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_->map()->view({ pos.x, pos.y, pos.z - 1 }))) {
-		if (dynamic_cast<Car*>(below->modifier())) {
-			rs = RidingState::Riding;
-		} else {
-			rs = RidingState::Bound;
-		}
-	}
-	auto player = std::make_unique<Player>(pos, rs);
-	player_ = player.get();
-	room_->map()->create(std::move(player), nullptr);
 }

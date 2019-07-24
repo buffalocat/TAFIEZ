@@ -109,7 +109,7 @@ void RoomMap::serialize(MapFileO& file) const {
         layer->apply_to_rect_with_pos(MapRect{0,0,width_,height_}, ser_handler);
     }
     file << ObjCode::NONE;
-    // TODO: Actually Serialize Wall positions
+    // TODO: Serialize Wall positions *efficiently*
     file << MapCode::Walls;
 	file.write_uint32((unsigned int)walls.size());
 	for (Point3 pos : walls) {

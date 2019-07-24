@@ -3,15 +3,18 @@
 
 #include "playingstate.h"
 
+class SaveFile;
+
 class RealPlayingState: public PlayingState {
 public:
-    RealPlayingState(const std::string& savefile_dir);
+    RealPlayingState(const std::string& savefile_dir, const std::string& starting_map);
     virtual ~RealPlayingState();
+	bool load_room(const std::string& path, bool use_default_player);
     void create_new_savefile();
     void load_savefile();
 
 private:
-    std::string savefile_dir_;
+	std::unique_ptr<SaveFile> savefile_;
 };
 
 

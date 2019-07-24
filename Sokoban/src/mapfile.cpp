@@ -3,7 +3,7 @@
 
 #include "colorcycle.h"
 
-MapFileI::MapFileI(const std::string& path): file_ {} {
+MapFileI::MapFileI(const std::filesystem::path& path): file_ {} {
     file_.open(path, std::ios::in | std::ios::binary);
 }
 
@@ -93,7 +93,7 @@ MapFileI& operator>>(MapFileI& f, ColorCycle& v) {
 }
 
 
-MapFileO::MapFileO(const std::string& path): file_ {} {
+MapFileO::MapFileO(const std::filesystem::path& path): file_ {} {
     file_.open(path, std::ios::out | std::ios::binary);
 }
 

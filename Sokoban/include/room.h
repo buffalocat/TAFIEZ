@@ -10,6 +10,7 @@ class Camera;
 class MapFileI;
 class MapFileO;
 class GameObject;
+class Player;
 
 class Room {
 public:
@@ -22,8 +23,8 @@ public:
     RoomMap* map();
 	Camera* camera();
 
-    void write_to_file(MapFileO& file, Point3 start_pos);
-    void load_from_file(GameObjectArray& objs, MapFileI& file, Point3* start_pos=nullptr);
+    void write_to_file(MapFileO& file);
+    void load_from_file(GameObjectArray& objs, MapFileI& file, Player** player_ptr);
 
     void draw(GraphicsManager*, Point3 cam_pos, bool ortho, bool one_layer);
     void draw(GraphicsManager*, GameObject* target, bool ortho, bool one_layer);
@@ -42,13 +43,12 @@ public:
     // This is used exclusively for making sure doors between rooms stay accurate
 
 private:
-    void read_objects(MapFileI& file);
+    void read_objects(MapFileI& file, Player** player_ptr);
     void read_camera_rects(MapFileI& file);
     void read_snake_link(MapFileI& file);
     void read_door_dest(MapFileI& file);
     void read_signaler(MapFileI& file);
     void read_walls(MapFileI& file);
-    void read_player_data(MapFileI& file);
 };
 
 

@@ -8,8 +8,10 @@
 
 class TestPlayingState: public PlayingState {
 public:
-    TestPlayingState(const std::string& name, Point3 pos);
+    TestPlayingState(const std::string& map_name);
     virtual ~TestPlayingState();
+
+	bool load_room(const std::string&, bool use_default_player);
 
 private:
 };
