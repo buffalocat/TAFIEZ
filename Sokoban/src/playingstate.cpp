@@ -21,6 +21,8 @@
 #include "mapfile.h"
 #include "car.h"
 
+#include "realplayingstate.h"
+
 #include "common_constants.h"
 
 const std::unordered_map<int, Point3> MOVEMENT_KEYS {
@@ -146,7 +148,12 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
         return;
-    }
+	} else if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+		if (auto* rps = dynamic_cast<RealPlayingState*>(this)) {
+			rps->make_subsave();
+			input_cooldown = MAX_COOLDOWN;
+		}
+	}
 }
 
 Room* PlayingState::active_room() {
@@ -163,7 +170,9 @@ bool PlayingState::activate_room(const std::string& name) {
             return false;
         }
     }
-    room_ = loaded_rooms_[name]->room.get();
+	auto* proom = loaded_rooms_[name].get();
+	proom->changed = true;
+    room_ = proom->room.get();
     return true;
 }
 

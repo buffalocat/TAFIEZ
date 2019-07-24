@@ -7,11 +7,13 @@ class SaveFile;
 
 class RealPlayingState: public PlayingState {
 public:
-    RealPlayingState(const std::string& savefile_dir, const std::string& starting_map);
+    RealPlayingState(std::unique_ptr<SaveFile> save);
     virtual ~RealPlayingState();
+
+	void start_from_map(const std::string& starting_map);
 	bool load_room(const std::string& path, bool use_default_player);
-    void create_new_savefile();
-    void load_savefile();
+	void make_subsave();
+	void load_most_recent_subsave();
 
 private:
 	std::unique_ptr<SaveFile> savefile_;

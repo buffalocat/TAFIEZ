@@ -3,6 +3,7 @@
 
 #include "editorstate.h"
 #include "realplayingstate.h"
+#include "savefile.h"
 
 MainMenuState::MainMenuState() : GameState(), menu_type_{ Menu::Top } {}
 
@@ -33,8 +34,15 @@ void MainMenuState::main_loop() {
 		break;
 	case Menu::New:
 		if (ImGui::Button("Start New Game on File 1##MAINMENU")) {
-			// Create new file here
-			create_child(std::make_unique<RealPlayingState>("1", "story1"));
+			auto savefile_dir = "1";
+			auto savefile = std::make_unique<SaveFile>(savefile_dir);
+			if (savefile->create()) {
+				auto playing_state = std::make_unique<RealPlayingState>(std::move(savefile));
+				playing_state->start_from_map("story1");
+				create_child(std::move(playing_state));
+			} else {
+				std::cout << "That file already exists! Load it or delete it!" << std::endl;
+			}
 		}
 		if (ImGui::Button("Back##MAINMENU")) {
 			menu_type_ = Menu::Top;
@@ -42,8 +50,15 @@ void MainMenuState::main_loop() {
 		break;
 	case Menu::Load:
 		if (ImGui::Button("Load Game from File 1##MAINMENU")) {
-			// load file here
-			create_child(std::make_unique<RealPlayingState>("1", "story1"));
+			auto savefile_dir = "1";
+			auto savefile = std::make_unique<SaveFile>(savefile_dir);
+			if (savefile->load_meta()) {
+				auto playing_state = std::make_unique<RealPlayingState>(std::move(savefile));
+				playing_state->load_most_recent_subsave();
+				create_child(std::move(playing_state));
+			} else {
+				std::cout << "That doesn't exist!!" << std::endl;
+			}
 		}
 		if (ImGui::Button("Back##MAINMENU")) {
 			menu_type_ = Menu::Top;
@@ -52,6 +67,7 @@ void MainMenuState::main_loop() {
 	case Menu::Delete:
 		if (ImGui::Button("Delete Save File 1?##MAINMENU")) {
 			// Delete the file (ARE YOU SURE??)
+			std::filesystem::remove_all(std::filesystem::path("saves") / "1");
 		}
 		if (ImGui::Button("Back##MAINMENU")) {
 			menu_type_ = Menu::Top;
