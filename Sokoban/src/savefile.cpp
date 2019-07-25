@@ -9,6 +9,7 @@
 SaveFile::SaveFile(const std::string& base) :
 	base_ {std::filesystem::path("saves") / base},
 	room_subsave_{},
+	global_{},
 	cur_subsave_{ 0 },
 	next_subsave_{ 1 } {}
 
@@ -22,6 +23,29 @@ bool SaveFile::create() {
 		return true;
 	}
 }
+
+void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>& loaded_rooms, std::string const& cur_room_name) {
+	cur_subsave_ = next_subsave_;
+	++next_subsave_;
+	std::filesystem::path subsave_path = base_ / std::to_string(cur_subsave_);
+	std::filesystem::create_directory(subsave_path);
+	for (auto& p : loaded_rooms) {
+		auto* proom = p.second.get();
+		if (proom->changed) {
+			save_room(proom->room.get(), subsave_path);
+			proom->changed = false;
+			room_subsave_[proom->room->name()] = cur_subsave_;
+		}
+	}
+	loaded_rooms[cur_room_name]->changed = true;
+	save_room_data(subsave_path, cur_room_name);
+	save_meta();
+}
+
+void SaveFile::load_most_recent_subsave(std::string* cur_room_name) {
+	load_room_data(base_ / std::to_string(cur_subsave_), cur_room_name);
+}
+
 
 bool SaveFile::load_meta() {
 	auto meta_path = base_ / "meta.sav";
@@ -79,28 +103,6 @@ std::filesystem::path SaveFile::get_path(std::string const& name, bool* from_mai
 		*from_main = true;
 		return (std::filesystem::path("maps") / "main" / name).concat(".map");
 	}
-}
-
-void SaveFile::load_most_recent_subsave(std::string* cur_room_name) {
-	load_room_data(base_ / std::to_string(cur_subsave_), cur_room_name);
-}
-
-void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>& loaded_rooms, std::string const& cur_room_name) {
-	cur_subsave_ = next_subsave_;
-	++next_subsave_;
-	std::filesystem::path subsave_path = base_ / std::to_string(cur_subsave_);
-	std::filesystem::create_directory(subsave_path);
-	for (auto& p : loaded_rooms) {
-		auto* proom = p.second.get();
-		if (proom->changed) {
-			save_room(proom->room.get(), subsave_path);
-			proom->changed = false;
-			room_subsave_[proom->room->name()] = cur_subsave_;
-		}
-	}
-	loaded_rooms[cur_room_name]->changed = true;
-	save_room_data(subsave_path, cur_room_name);
-	save_meta();
 }
 
 void SaveFile::save_room(Room* room, std::filesystem::path path) {

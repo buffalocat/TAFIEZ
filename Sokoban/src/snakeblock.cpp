@@ -229,7 +229,10 @@ void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* room_map, std::unorde
 }
 
 void SnakeBlock::break_unmoving_links(std::vector<GameObject*>& fall_check, DeltaFrame* delta_frame) {
-    auto links_copy = links_;
+	if (links_.size() <= 1) {
+		return;
+	}
+	auto links_copy = links_;
     for (SnakeBlock* link : links_copy) {
         if (PushComponent* comp = link->push_comp()) {
             if (comp->blocked_) {

@@ -19,7 +19,7 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
     ImGui::Text("The Save/Load Tab");
 
     static char map_name_input[64] = "";
-    ImGui::InputText(".map##SAVELOAD", map_name_input, IM_ARRAYSIZE(map_name_input));
+    ImGui::InputText(".map##SAVELOAD", map_name_input, IM_ARRAYSIZE(map_name_input), ImGuiInputTextFlags_CharsNoBlank);
 
     if (ImGui::Button("Load Map##SAVELOAD")) {
         if (editor_->load_room(map_name_input, true)) {

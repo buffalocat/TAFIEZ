@@ -26,9 +26,6 @@ struct PlayingRoom {
 	std::unique_ptr<Room> room;
 	bool changed;
 	PlayingRoom(std::unique_ptr<Room>);
-
-	RoomMap* map();
-	std::string name();
 };
 
 class PlayingState: public GameState {
@@ -41,6 +38,7 @@ public:
 	bool activate_room(Room*);
     bool activate_room(const std::string&);
     virtual bool load_room(const std::string&, bool use_default_player) = 0;
+	virtual void make_subsave();
 
     bool can_use_door(Door*, std::vector<DoorTravellingObj>&, Room**);
 

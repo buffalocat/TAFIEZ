@@ -149,10 +149,8 @@ void PlayingState::handle_input() {
 		}
         return;
 	} else if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-		if (auto* rps = dynamic_cast<RealPlayingState*>(this)) {
-			rps->make_subsave();
-			input_cooldown = MAX_COOLDOWN;
-		}
+		make_subsave();
+		input_cooldown = MAX_COOLDOWN;
 	}
 }
 
@@ -175,6 +173,8 @@ bool PlayingState::activate_room(const std::string& name) {
     room_ = proom->room.get();
     return true;
 }
+
+void PlayingState::make_subsave() {}
 
 bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
     MapLocation* dest = door->dest();
