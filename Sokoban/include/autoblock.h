@@ -13,6 +13,8 @@ public:
     void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
+	bool valid_parent(GameObject*);
+
 	BlockTexture texture();
 
 	void setup_on_put(RoomMap* room_map);

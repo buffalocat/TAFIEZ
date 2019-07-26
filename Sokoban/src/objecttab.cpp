@@ -156,6 +156,11 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 		return nullptr;
 	}
 	if (prev) {
+		if (auto* mod = prev->modifier()) {
+			if (!mod->valid_parent(obj.get())) {
+				return nullptr;
+			}
+		}
 		obj->modifier_ = std::move(prev->modifier_);
 		prev->modifier_.reset(nullptr);
 	}

@@ -14,9 +14,11 @@ bool ObjectModifier::relation_check() {
 
 void ObjectModifier::relation_serialize(MapFileO&) {}
 
-bool ObjectModifier::is_agent() {
-    return false;
+// The "default" case is "Block"
+bool ObjectModifier::valid_parent(GameObject* obj) {
+	return dynamic_cast<Block*>(obj);
 }
+
 
 Point3 ObjectModifier::pos() {
     return parent_->pos_;

@@ -29,6 +29,10 @@ void Car::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
     parent->set_modifier(std::make_unique<Car>(parent, color_cycle));
 }
 
+bool Car::valid_parent(GameObject* obj) {
+	return dynamic_cast<ColoredBlock*>(obj);
+}
+
 BlockTexture Car::texture() {
 	return BlockTexture::Car;
 }

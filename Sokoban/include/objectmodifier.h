@@ -26,8 +26,7 @@ public:
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
 
-    virtual bool is_agent();
-
+	virtual bool valid_parent(GameObject*);
 	GameObject* parent_;
 
     virtual void draw(GraphicsManager*, FPoint3) {}

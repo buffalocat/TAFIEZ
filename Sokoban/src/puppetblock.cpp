@@ -23,6 +23,10 @@ void PuppetBlock::deserialize(MapFileI& file, RoomMap* room_map, GameObject* par
 	parent->set_modifier(std::make_unique<PuppetBlock>(parent, room_map));
 }
 
+bool PuppetBlock::valid_parent(GameObject* obj) {
+	return dynamic_cast<ColoredBlock*>(obj);
+}
+
 BlockTexture PuppetBlock::texture() {
 	return BlockTexture::PuppetBlock;
 }

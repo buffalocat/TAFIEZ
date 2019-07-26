@@ -141,9 +141,6 @@ void ModifierTab::select_color_cycle(ColorCycle& cycle) {
     }
 }
 
-
-// TODO: write "virtual bool valid_parent(GameObject*)" in ObjectModifier
-// Use this to determine whether creation AND adoption are valid
 void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     RoomMap* room_map = eroom->map();
     selected_obj = nullptr;
@@ -160,22 +157,13 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	std::unique_ptr<ObjectModifier> mod{};
     switch (mod_code) {
     case ModCode::Car:
-		if (!dynamic_cast<ColoredBlock*>(obj)) {
-			return;
-		}
         mod = std::make_unique<Car>(model_car);
         break;
     case ModCode::Door:
-		if (!dynamic_cast<Block*>(obj)) {
-			return;
-		}
         mod = std::make_unique<Door>(model_door);
         break;
 	case ModCode::Gate:
 	{
-		if (!dynamic_cast<Block*>(obj)) {
-			return;
-		}
 		auto gate = std::make_unique<Gate>(model_gate);
 		gate->parent_ = obj;
 		auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{ 0, 0, 1 });
@@ -185,26 +173,20 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	}
 	case ModCode::PressSwitch:
-		if (!dynamic_cast<Block*>(obj)) {
-			return;
-		}
         mod = std::make_unique<PressSwitch>(model_press_switch);
         break;
     case ModCode::AutoBlock:
-		if (!dynamic_cast<ColoredBlock*>(obj)) {
-			return;
-		}
         mod = std::make_unique<AutoBlock>(obj, eroom->map());
         break;
 	case ModCode::PuppetBlock:
-		if (!dynamic_cast<ColoredBlock*>(obj)) {
-			return;
-		}
 		mod = std::make_unique<PuppetBlock>(obj, eroom->map());
 		break;
     default:
         return;
     }
+	if (!mod->valid_parent(obj)) {
+		return;
+	}
 	// A Wall with a modifier can't be the global wall
 	if (obj->id_ == GLOBAL_WALL_ID) {
 		room_map->clear(pos);

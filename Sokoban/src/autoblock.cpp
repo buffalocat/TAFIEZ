@@ -23,6 +23,10 @@ void AutoBlock::deserialize(MapFileI& file, RoomMap* room_map, GameObject* paren
     parent->set_modifier(std::make_unique<AutoBlock>(parent, room_map));
 }
 
+bool AutoBlock::valid_parent(GameObject* obj) {
+	return dynamic_cast<ColoredBlock*>(obj);
+}
+
 BlockTexture AutoBlock::texture() {
 	return BlockTexture::AutoBlock;
 }
