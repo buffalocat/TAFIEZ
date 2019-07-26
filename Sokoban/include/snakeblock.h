@@ -36,6 +36,7 @@ public:
     bool can_link(SnakeBlock*);
 
     void draw(GraphicsManager*);
+	void draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius);
 
     bool available();
     bool confused(RoomMap*);

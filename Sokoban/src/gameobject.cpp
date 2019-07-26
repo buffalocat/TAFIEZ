@@ -143,16 +143,6 @@ FPoint3 GameObject::real_pos() {
 	}
 }
 
-void GameObject::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius) {
-	if (!pushable_) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
-	}
-	if (!gravitable_) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
-	}
-}
-
-
 // NOTE: these can be static_casts as long as the code using them is careful
 PushComponent* GameObject::push_comp() {
 	return dynamic_cast<PushComponent*>(comp_);

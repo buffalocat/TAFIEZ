@@ -72,11 +72,21 @@ void PushBlock::draw(GraphicsManager* gfx) {
 	}
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color());
     draw_force_indicators(gfx, p, 1.1f);
-	// TODO: make this less of a hack (also in SnakeBlock::draw())
 	if (auto* car = dynamic_cast<Car*>(modifier())) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::AccentSquare, car->next_color());
+		if (int color = car->next_color()) {
+			gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::AccentSquare, color);
+		}
 	}
     if (modifier_) {
         modifier()->draw(gfx, p);
     }
+}
+
+void PushBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius) {
+	if (!pushable_) {
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
+	}
+	if (!gravitable_) {
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
+	}
 }

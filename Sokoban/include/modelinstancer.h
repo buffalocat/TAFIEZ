@@ -23,10 +23,10 @@ protected:
 	void fill_buffer();
 };
 
-class CubeInstancer : public ModelInstancer {
+class DynamicInstancer : public ModelInstancer {
 public:
-	CubeInstancer(std::string const& path);
-	~CubeInstancer();
+	DynamicInstancer(std::string const& path);
+	~DynamicInstancer();
 	void draw(Shader shader);
 };
 

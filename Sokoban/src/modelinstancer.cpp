@@ -63,11 +63,11 @@ void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture 
 	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
 }
 
-CubeInstancer::CubeInstancer(std::string const& path) : ModelInstancer(path) {}
+DynamicInstancer::DynamicInstancer(std::string const& path) : ModelInstancer(path) {}
 
-CubeInstancer::~CubeInstancer() {}
+DynamicInstancer::~DynamicInstancer() {}
 
-void CubeInstancer::draw(Shader shader) {
+void DynamicInstancer::draw(Shader shader) {
 	fill_buffer();
 	model_.draw(shader, (unsigned int)instances_.size());
 	instances_.clear();

@@ -147,8 +147,8 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	if (modifier_) {
 		tex = tex | modifier_->texture();
 	}
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.7071f, 0.7071f, 1.0f), tex, color_);
-	draw_force_indicators(gfx, p, 0.85f);
+	gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
+	draw_force_indicators(gfx, p, 1.1f);
 	for (auto link : links_) {
 		FPoint3 q = link->real_pos();
 		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
@@ -156,10 +156,21 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
 	}
 	if (auto* car = dynamic_cast<Car*>(modifier())) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.71f, 0.71f, 0.71f), BlockTexture::AccentSquare, car->next_color());
+		if (int color = car->next_color()) {
+			gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::AccentSquare, color);
+		}
 	}
 	if (modifier_) {
 		modifier()->draw(gfx, p);
+	}
+}
+
+void SnakeBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius) {
+	if (!pushable_) {
+		gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
+	}
+	if (!gravitable_) {
+		gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
 	}
 }
 
