@@ -11,7 +11,9 @@
 #include "mapfile.h"
 #include "car.h"
 
-Player::Player(Point3 pos, RidingState state): GameObject(pos, true, true), state_ {state} {}
+Player::Player(Point3 pos, RidingState state): GameObject(pos, true, true), state_ {state} {
+	driven_ = true;
+}
 
 Player::~Player() {}
 

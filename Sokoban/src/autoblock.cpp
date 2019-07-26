@@ -3,6 +3,7 @@
 
 #include "gameobject.h"
 #include "texture_constants.h"
+#include "roommap.h"
 
 AutoBlock::AutoBlock(GameObject* parent, RoomMap* room_map): ObjectModifier(parent), map_ {room_map} {}
 
@@ -26,8 +27,12 @@ BlockTexture AutoBlock::texture() {
 	return BlockTexture::AutoBlock;
 }
 
-bool AutoBlock::is_agent() {
-    return true;
+void AutoBlock::setup_on_put(RoomMap* room_map) {
+	room_map->autos_.push_back(this);
+}
+
+void AutoBlock::cleanup_on_take(RoomMap* room_map) {
+	room_map->remove_auto(this);
 }
 
 std::unique_ptr<ObjectModifier> AutoBlock::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

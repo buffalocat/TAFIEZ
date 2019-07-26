@@ -231,6 +231,7 @@
     <ClInclude Include="include\playingstate.h" />
     <ClInclude Include="include\point.h" />
     <ClInclude Include="include\pressswitch.h" />
+    <ClInclude Include="include\puppetblock.h" />
     <ClInclude Include="include\pushblock.h" />
     <ClInclude Include="include\realplayingstate.h" />
     <ClInclude Include="include\Resource.h" />
@@ -333,6 +334,7 @@
     <ClCompile Include="src\playingstate.cpp" />
     <ClCompile Include="src\point.cpp" />
     <ClCompile Include="src\pressswitch.cpp" />
+    <ClCompile Include="src\puppetblock.cpp" />
     <ClCompile Include="src\pushblock.cpp" />
     <ClCompile Include="src\realplayingstate.cpp" />
     <ClCompile Include="src\room.cpp" />

@@ -19,18 +19,18 @@
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
 
-MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* room_map, DeltaFrame* delta_frame, bool animated) :
+MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* room_map, DeltaFrame* delta_frame, Player* player, bool animated) :
 	fall_check_{}, moving_blocks_{},
-	playing_state_{ playing_state }, map_{ room_map }, delta_frame_{ delta_frame },
+	playing_state_{ playing_state }, map_{ room_map }, delta_frame_{ delta_frame }, player_{ player },
 	entry_door_{}, door_travelling_objs_{}, dest_room_{},
 	frames_{ 0 }, state_{}, door_state_{},
 	animated_{ animated } {}
 
 MoveProcessor::~MoveProcessor() {}
 
-bool MoveProcessor::try_move(Player* player, Point3 dir) {
-	if (player->state_ == RidingState::Bound) {
-		move_bound(player, dir);
+bool MoveProcessor::try_move(Point3 dir) {
+	if (player_->state_ == RidingState::Bound) {
+		move_bound(dir);
 	} else {
 		move_general(dir);
 	}
@@ -42,26 +42,26 @@ bool MoveProcessor::try_move(Player* player, Point3 dir) {
 	return true;
 }
 
-void MoveProcessor::move_bound(Player* player, Point3 dir) {
+void MoveProcessor::move_bound(Point3 dir) {
 	// When Player is Bound, no other agents move
-	if (map_->view(player->shifted_pos(dir))) {
+	if (map_->view(player_->shifted_pos(dir))) {
 		return;
 	}
 	// If the player is bound, it's on top of a block!
-	auto* car = dynamic_cast<ColoredBlock*>(map_->view(player->shifted_pos({ 0,0,-1 })));
+	auto* car = dynamic_cast<ColoredBlock*>(map_->view(player_->shifted_pos({ 0,0,-1 })));
 	auto* adj = dynamic_cast<ColoredBlock*>(map_->view(car->shifted_pos(dir)));
 	if (adj && car->color() == adj->color()) {
-		map_->take(player);
-		player->set_linear_animation(dir);
-		delta_frame_->push(std::make_unique<MotionDelta>(player, dir, map_));
-		moving_blocks_.push_back(player);
-		player->shift_pos_from_animation();
-		map_->put(player);
+		map_->take(player_);
+		player_->set_linear_animation(dir);
+		delta_frame_->push(std::make_unique<MotionDelta>(player_, dir, map_));
+		moving_blocks_.push_back(player_);
+		player_->shift_pos_from_animation();
+		map_->put(player_);
 	}
 }
 
 void MoveProcessor::move_general(Point3 dir) {
-	HorizontalStepProcessor(map_, delta_frame_, dir, fall_check_, moving_blocks_).run();
+	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
 }
 
 bool MoveProcessor::update() {
@@ -106,9 +106,9 @@ void MoveProcessor::abort() {
 }
 
 // Returns whether a color change occured
-bool MoveProcessor::color_change(Player* player) {
+bool MoveProcessor::color_change() {
 	// TODO: make this more general (in particular, be careful with the fall check!)
-	Car* car = player->get_car(map_, false);
+	Car* car = player_->get_car(map_, false);
 	if (!(car && car->cycle_color(false))) {
 		return false;
 	}

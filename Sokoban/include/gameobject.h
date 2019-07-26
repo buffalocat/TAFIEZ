@@ -34,13 +34,10 @@ public:
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
 
-    virtual bool is_agent();
-
     Point3 shifted_pos(Point3 d);
     void shift_internal_pos(Point3 d);
     void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
 	void abstract_put(Point3 pos, DeltaFrame* delta_frame);
-
 
     virtual void draw(GraphicsManager*) = 0;
     void draw_force_indicators(GraphicsManager*, FPoint3 pos, float radius);
@@ -52,7 +49,6 @@ public:
     virtual void cleanup_on_destruction(RoomMap*);
 
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
-    ObjectModifier* modifier();
 
 	PushComponent* push_comp();
 	FallComponent* fall_comp();
@@ -63,6 +59,7 @@ public:
 	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 	virtual void collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 
+	ObjectModifier* modifier();
 	virtual int color();
 
     void reset_animation();
@@ -78,16 +75,26 @@ public:
     int id_;
     bool pushable_;
     bool gravitable_;
-
+	// Does the object occupy its map position?
     bool tangible_;
+	// Temporary flag for active cars/autos/puppets
+	bool driven_;
 
 protected:
     GameObject(Point3 pos, bool pushable, bool gravitable);
 };
 
+// TODO: add copy constructors?
+// Move pushable and gravitable here, maybe??
+class Block : public GameObject {
+public:
+	Block(Point3 pos, bool pushable, bool gravitable);
+	virtual ~Block();
+};
+
 // A block to which the player can be "bound" - it's most things that aren't Walls.
 // The common superclass of PushBlock and SnakeBlock (will there be more...?)
-class ColoredBlock : public GameObject {
+class ColoredBlock : public Block {
 public:
 	ColoredBlock(Point3 pos, int color, bool pushable, bool gravitable);
 	virtual ~ColoredBlock();

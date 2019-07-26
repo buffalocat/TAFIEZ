@@ -35,6 +35,7 @@ enum class ModCode {
     PressSwitch = 3,
     Gate = 4,
     AutoBlock = 5,
+	PuppetBlock = 6,
 };
 
 enum class CameraCode {

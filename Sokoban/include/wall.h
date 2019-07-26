@@ -3,7 +3,7 @@
 
 #include "gameobject.h"
 
-class Wall: public GameObject {
+class Wall: public Block {
 public:
     Wall();
 	Wall(Point3);

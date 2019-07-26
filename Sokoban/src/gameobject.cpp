@@ -15,122 +15,119 @@
 
 
 Sticky operator &(Sticky a, Sticky b) {
-    return static_cast<Sticky>(static_cast<unsigned char>(a) &
-                               static_cast<unsigned char>(b));
+	return static_cast<Sticky>(static_cast<unsigned char>(a) &
+		static_cast<unsigned char>(b));
 }
 
 
 // id_ begins in an "inconsistent" state - it *must* be set by the GameObjectArray
-GameObject::GameObject(Point3 pos, bool pushable, bool gravitable):
-    animation_ {},
-    pos_ {pos}, id_ {-1},
-    pushable_ {pushable}, gravitable_ {gravitable},
-    tangible_ {false} {}
+GameObject::GameObject(Point3 pos, bool pushable, bool gravitable) :
+	modifier_{}, animation_ {},
+	pos_{ pos }, id_{ -1 },
+	pushable_{ pushable }, gravitable_{ gravitable },
+	tangible_{ false }, driven_{ false } {}
 
 GameObject::~GameObject() {}
 
 // Copy Constructor creates trivial unique_ptr members
-GameObject::GameObject(const GameObject& obj):
-    modifier_ {}, animation_ {},
-    pos_ {obj.pos_}, id_ {-1},
-    pushable_ {obj.pushable_}, gravitable_ {obj.gravitable_} {}
+GameObject::GameObject(const GameObject& obj) :
+	modifier_{}, animation_{},
+	pos_{ obj.pos_ }, id_{ -1 },
+	pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ },
+	tangible_{ false }, driven_{ false } {}
 
 std::string GameObject::to_str() {
-    std::string mod_str {""};
-    if (modifier_) {
-        mod_str = "-" + modifier_->name();
-    }
-    char buf[64] = "";
-    // TODO: Make this less ugly
-    // This is only used to make the editor more user friendly, so it's not a huge deal.
-    sprintf_s(buf, "%s:%s:%s%s", pushable_ ? "P" : "NP", gravitable_ ? "G" : "NG", name().c_str(), mod_str.c_str());
-    return std::string{buf};
+	std::string mod_str{ "" };
+	if (modifier_) {
+		mod_str = "-" + modifier_->name();
+	}
+	char buf[64] = "";
+	// TODO: Make this less ugly
+	// This is only used to make the editor more user friendly, so it's not a huge deal.
+	sprintf_s(buf, "%s:%s:%s%s", pushable_ ? "P" : "NP", gravitable_ ? "G" : "NG", name().c_str(), mod_str.c_str());
+	return std::string{ buf };
 }
 
 bool GameObject::relation_check() {
-    return false;
+	return false;
 }
 
 bool GameObject::skip_serialization() {
-    return false;
+	return false;
 }
 
 void GameObject::serialize(MapFileO& file) {}
 
 void GameObject::relation_serialize(MapFileO& file) {}
 
-bool GameObject::is_agent() {
-    return (modifier_ && modifier()->is_agent());
-}
-
 Point3 GameObject::shifted_pos(Point3 d) {
-    return pos_ + d;
+	return pos_ + d;
 }
 
 void GameObject::shift_internal_pos(Point3 d) {
-    pos_ += d;
-    if (modifier_) {
-        modifier_->shift_internal_pos(d);
-    }
+	pos_ += d;
+	if (modifier_) {
+		modifier_->shift_internal_pos(d);
+	}
 }
 
 void GameObject::setup_on_put(RoomMap* room_map) {
-    if (modifier_) {
-        modifier_->setup_on_put(room_map);
-    }
+	if (modifier_) {
+		modifier_->setup_on_put(room_map);
+	}
 }
 
 void GameObject::cleanup_on_take(RoomMap* room_map) {
-    if (modifier_) {
-        modifier_->cleanup_on_take(room_map);
-    }
+	if (modifier_) {
+		modifier_->cleanup_on_take(room_map);
+	}
 }
 
 void GameObject::cleanup_on_destruction(RoomMap* room_map) {
-    if (modifier_) {
-        modifier_->cleanup_on_destruction(room_map);
-    }
+	if (modifier_) {
+		modifier_->cleanup_on_destruction(room_map);
+	}
 }
 
 void GameObject::setup_on_undestruction(RoomMap* room_map) {
-    if (modifier_) {
-        modifier_->setup_on_undestruction(room_map);
-    }
+	if (modifier_) {
+		modifier_->setup_on_undestruction(room_map);
+	}
 }
 
 void GameObject::set_modifier(std::unique_ptr<ObjectModifier> mod) {
-    modifier_ = std::move(mod);
+	modifier_ = std::move(mod);
 }
 
 ObjectModifier* GameObject::modifier() {
-    return modifier_.get();
+	return modifier_.get();
 }
 
 void GameObject::reset_animation() {
-    animation_.reset(nullptr);
+	animation_.reset(nullptr);
 }
 
 void GameObject::set_linear_animation(Point3 d) {
-    animation_ = std::make_unique<LinearAnimation>(d);
+	animation_ = std::make_unique<LinearAnimation>(d);
 }
 
 bool GameObject::update_animation() {
-    if (animation_ && animation_->update()) {
-        animation_.reset(nullptr);
-        return true;
-    }
-    return false;
+	if (animation_ && animation_->update()) {
+		animation_.reset(nullptr);
+		return true;
+	}
+	return false;
 }
 
 void GameObject::shift_pos_from_animation() {
-    pos_ = animation_->shift_pos(pos_);
+	pos_ = animation_->shift_pos(pos_);
 }
 
 void GameObject::abstract_shift(Point3 dpos, DeltaFrame* delta_frame) {
-    if (!(dpos == Point3{})) {
-        pos_ += dpos;
-        delta_frame->push(std::make_unique<AbstractShiftDelta>(this, dpos));
-    }
+	if (!(dpos == Point3{})) {
+		pos_ += dpos;
+		delta_frame->push(std::make_unique<AbstractShiftDelta>(this, dpos));
+	}
 }
 
 void GameObject::abstract_put(Point3 pos, DeltaFrame* delta_frame) {
@@ -139,20 +136,20 @@ void GameObject::abstract_put(Point3 pos, DeltaFrame* delta_frame) {
 }
 
 FPoint3 GameObject::real_pos() {
-    if (animation_) {
-        return pos_ + animation_->dpos();
-    } else {
-        return pos_;
-    }
+	if (animation_) {
+		return pos_ + animation_->dpos();
+	} else {
+		return pos_;
+	}
 }
 
 void GameObject::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius) {
-    if (!pushable_) {
+	if (!pushable_) {
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
-    }
-    if (!gravitable_) {
+	}
+	if (!gravitable_) {
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
-    }
+	}
 }
 
 
@@ -200,8 +197,14 @@ int GameObject::color() {
 }
 
 
+Block::Block(Point3 pos, bool pushable, bool gravitable) :
+	GameObject(pos, pushable, gravitable) {}
+
+Block::~Block() {}
+
+
 ColoredBlock::ColoredBlock(Point3 pos, int color, bool pushable, bool gravitable) :
-	GameObject(pos, pushable, gravitable), color_ { color } {}
+	Block(pos, pushable, gravitable), color_{ color } {}
 
 ColoredBlock::~ColoredBlock() {}
 

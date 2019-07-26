@@ -6,9 +6,9 @@
 #include "mapfile.h"
 #include "objectmodifier.h"
 
-Wall::Wall() : GameObject({ 0,0,0 }, false, false) {}
+Wall::Wall() : Block({ 0,0,0 }, false, false) {}
 
-Wall::Wall(Point3 pos) : GameObject(pos, false, false) {}
+Wall::Wall(Point3 pos) : Block(pos, false, false) {}
 
 Wall::~Wall() {}
 

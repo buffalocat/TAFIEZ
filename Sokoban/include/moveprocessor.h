@@ -40,11 +40,11 @@ struct DoorTravellingObj {
 
 class MoveProcessor {
 public:
-    MoveProcessor(PlayingState*, RoomMap*, DeltaFrame*, bool);
+    MoveProcessor(PlayingState*, RoomMap*, DeltaFrame*, Player*, bool);
     ~MoveProcessor();
 
-    bool try_move(Player*, Point3);
-    bool color_change(Player*);
+    bool try_move(Point3);
+    bool color_change();
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);
@@ -66,7 +66,7 @@ public:
     void abort();
 
 private:
-    void move_bound(Player*, Point3);
+    void move_bound(Point3);
     void move_general(Point3);
 
     std::vector<GameObject*> moving_blocks_;
@@ -77,6 +77,7 @@ private:
     PlayingState* playing_state_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
+	Player* player_;
 
 	Door* entry_door_;
 	std::vector<DoorTravellingObj> door_travelling_objs_;

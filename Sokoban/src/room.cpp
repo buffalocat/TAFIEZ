@@ -18,6 +18,7 @@
 #include "gate.h"
 #include "pressswitch.h"
 #include "autoblock.h"
+#include "puppetblock.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -230,6 +231,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
         CASE_MODCODE(Gate)
         CASE_MODCODE(PressSwitch)
         CASE_MODCODE(AutoBlock)
+		CASE_MODCODE(PuppetBlock)
         case ModCode::NONE:
             break;
         default:

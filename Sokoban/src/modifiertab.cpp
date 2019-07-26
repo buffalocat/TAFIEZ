@@ -16,6 +16,7 @@
 #include "gatebody.h"
 #include "pressswitch.h"
 #include "autoblock.h"
+#include "puppetblock.h"
 
 #include "colorcycle.h"
 
@@ -60,6 +61,7 @@ void ModifierTab::mod_tab_options() {
     if (inspect_mode) {
         if (selected_obj) {
             mod = selected_obj->modifier();
+			// TODO: use selected pos separately!! Like in ObjectTab
             Point3 pos = selected_obj->pos_;
             ImGui::Text("Current selected object position: (%d,%d,%d)", pos.x, pos.y, pos.z);
             if (!mod) {
@@ -76,6 +78,7 @@ void ModifierTab::mod_tab_options() {
         ImGui::RadioButton("Gate##MOD_object", &mod_code, ModCode::Gate);
         ImGui::RadioButton("PressSwitch##MOD_object", &mod_code, ModCode::PressSwitch);
         ImGui::RadioButton("AutoBlock##MOD_object", &mod_code, ModCode::AutoBlock);
+		ImGui::RadioButton("PuppetBlock##MOD_object", &mod_code, ModCode::PuppetBlock);
     }
     ImGui::Separator();
     switch (mod ? mod->mod_code() : mod_code) {
@@ -114,7 +117,8 @@ void ModifierTab::mod_tab_options() {
 			color_button(ps->color_);
         }
         break;
-    case ModCode::AutoBlock: // No parameters for AutoBlock (yet)
+    case ModCode::AutoBlock:
+	case ModCode::PuppetBlock:
     default:
         break;
     }
@@ -138,6 +142,8 @@ void ModifierTab::select_color_cycle(ColorCycle& cycle) {
 }
 
 
+// TODO: write "virtual bool valid_parent(GameObject*)" in ObjectModifier
+// Use this to determine whether creation AND adoption are valid
 void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     RoomMap* room_map = eroom->map();
     selected_obj = nullptr;
@@ -151,29 +157,51 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
         selected_obj = obj;
         return;
     }
-    std::unique_ptr<ObjectModifier> mod;
+	std::unique_ptr<ObjectModifier> mod{};
     switch (mod_code) {
     case ModCode::Car:
+		if (!dynamic_cast<ColoredBlock*>(obj)) {
+			return;
+		}
         mod = std::make_unique<Car>(model_car);
         break;
     case ModCode::Door:
+		if (!dynamic_cast<Block*>(obj)) {
+			return;
+		}
         mod = std::make_unique<Door>(model_door);
         break;
-    case ModCode::Gate: {
-            auto gate = std::make_unique<Gate>(model_gate);
-            gate->parent_ = obj;
-			auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{0, 0, 1});
-            gate->body_ = gate_body.get();
-            room_map->create_abstract(std::move(gate_body), nullptr);
-            mod = std::move(gate);
-        }
-        break;
-    case ModCode::PressSwitch:
+	case ModCode::Gate:
+	{
+		if (!dynamic_cast<Block*>(obj)) {
+			return;
+		}
+		auto gate = std::make_unique<Gate>(model_gate);
+		gate->parent_ = obj;
+		auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{ 0, 0, 1 });
+		gate->body_ = gate_body.get();
+		room_map->create_abstract(std::move(gate_body), nullptr);
+		mod = std::move(gate);
+		break;
+	}
+	case ModCode::PressSwitch:
+		if (!dynamic_cast<Block*>(obj)) {
+			return;
+		}
         mod = std::make_unique<PressSwitch>(model_press_switch);
         break;
     case ModCode::AutoBlock:
+		if (!dynamic_cast<ColoredBlock*>(obj)) {
+			return;
+		}
         mod = std::make_unique<AutoBlock>(obj, eroom->map());
         break;
+	case ModCode::PuppetBlock:
+		if (!dynamic_cast<ColoredBlock*>(obj)) {
+			return;
+		}
+		mod = std::make_unique<PuppetBlock>(obj, eroom->map());
+		break;
     default:
         return;
     }
@@ -210,4 +238,3 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
         }
     }
 }
-

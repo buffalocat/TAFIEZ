@@ -15,7 +15,8 @@ public:
 
 	BlockTexture texture();
 
-    bool is_agent();
+	void setup_on_put(RoomMap* room_map);
+	void cleanup_on_take(RoomMap* room_map);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

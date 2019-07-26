@@ -113,9 +113,9 @@ void PlayingState::handle_input() {
     }
     for (auto p : MOVEMENT_KEYS) {
         if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
-            move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), true);
+            move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
             // p.second == direction of movement
-            if (!move_processor_->try_move(player_, p.second)) {
+            if (!move_processor_->try_move(p.second)) {
                 move_processor_.reset(nullptr);
                 return;
             }
@@ -140,8 +140,8 @@ void PlayingState::handle_input() {
         input_cooldown = MAX_COOLDOWN;
         return;
     } else if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-        move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), true);
-		if (move_processor_->color_change(player_)) {
+        move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
+		if (move_processor_->color_change()) {
 			input_cooldown = MAX_COOLDOWN;
 		}
 		else {

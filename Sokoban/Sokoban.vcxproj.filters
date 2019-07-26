@@ -238,6 +238,9 @@
     <ClInclude Include="include\savefile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\puppetblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -425,6 +428,9 @@
     </ClCompile>
     <ClCompile Include="src\common_constants.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\puppetblock.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

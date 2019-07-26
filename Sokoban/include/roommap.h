@@ -1,8 +1,6 @@
 #ifndef ROOMMAP_H
 #define ROOMMAP_H
 
-
-
 #include <unordered_map>
 #include <unordered_set>
 
@@ -15,11 +13,14 @@ class MapLayer;
 class GraphicsManager;
 class DeltaFrame;
 class MoveProcessor;
-class GameObject;
 class ObjectModifier;
-class SnakeBlock;
 class MapFileO;
 class RoomMap;
+
+class GameObject;
+class SnakeBlock;
+class AutoBlock;
+class PuppetBlock;
 
 typedef void(ObjectModifier::*MapCallback)(RoomMap*,DeltaFrame*);
 
@@ -76,9 +77,9 @@ public:
     void push_signaler(std::unique_ptr<Signaler>);
     void check_signalers(DeltaFrame*, MoveProcessor*);
     void remove_signaler(Signaler*);
-    void remove_obj_from_signalers(ObjectModifier*);
 
-    void remove_agent(GameObject* obj);
+	void remove_auto(AutoBlock* obj);
+	void remove_puppet(PuppetBlock* obj);
 
     void add_listener(ObjectModifier*, Point3);
     void remove_listener(ObjectModifier*, Point3);
@@ -93,9 +94,11 @@ public:
     int height_;
     int depth_;
 
-    std::vector<GameObject*> agents_;
+    std::vector<AutoBlock*> autos_;
+	std::vector<PuppetBlock*> puppets_;
 
     GameObjectArray& obj_array_;
+
 private:
     std::vector<std::unique_ptr<MapLayer>> layers_;
 

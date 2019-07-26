@@ -42,7 +42,7 @@ public:
     void collect_maybe_confused_neighbors(RoomMap*, std::unordered_set<SnakeBlock*>& check);
     void update_links_color(RoomMap*, DeltaFrame*);
     void check_add_local_links(RoomMap*, DeltaFrame*);
-    void break_unmoving_links(std::vector<GameObject*>& fall_check, DeltaFrame*);
+	void break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* room_map, DeltaFrame* delta_frame, Point3 dir);
 
     void reset_internal_state();
 
@@ -55,6 +55,7 @@ public:
 
     std::vector<SnakeBlock*> links_;
     SnakeBlock* target_;
+
     int ends_;
     unsigned int distance_;
     bool dragged_;

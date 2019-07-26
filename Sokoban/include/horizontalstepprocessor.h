@@ -17,15 +17,12 @@ class DeltaFrame;
 
 class HorizontalStepProcessor {
 public:
-    HorizontalStepProcessor(RoomMap*, DeltaFrame*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
+    HorizontalStepProcessor(RoomMap*, DeltaFrame*, Player*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
     ~HorizontalStepProcessor();
 
-    // NOTE: We can probably eliminate player from here eventually
-    // When the map can provide a list of all moving agents
     void run();
 
 private:
-    void prepare_horizontal_move();
     void perform_horizontal_step();
 
     bool compute_push_component_tree(GameObject* block);
@@ -42,6 +39,7 @@ private:
 
     RoomMap* map_;
     DeltaFrame* delta_frame_;
+	Player* player_;
     Point3 dir_;
 };
 

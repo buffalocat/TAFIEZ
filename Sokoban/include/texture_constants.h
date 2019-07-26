@@ -11,18 +11,19 @@ enum class BlockTexture {
 	Corners = 1,
 	BrokenEdges = 2,
 	Edges = 3,
-	Cross = 4,
-	SwitchUp = 5,
-	SwitchDown = 6,
-	Blank = 7,
+	Cross = 16,
+	SwitchUp = 17,
+	SwitchDown = 18,
+	Blank = 19,
 	Wall = 20,
 	Door = 21,
 	AccentSquare = 22,
 
 	// "Additive" textures
 	Default = 0,
+	Car = 4,
 	AutoBlock = 8,
-	Car = 12,
+	PuppetBlock = 12,
 };
 
 BlockTexture operator |(BlockTexture a, BlockTexture b);
