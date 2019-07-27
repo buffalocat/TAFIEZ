@@ -90,7 +90,7 @@ FixedCameraContext::FixedCameraContext(std::string label, int x, int y, int w, i
 FixedCameraContext::~FixedCameraContext() {}
 
 FPoint3 FixedCameraContext::center(FPoint3 pos) {
-	return center_;
+	return center_ + FPoint3{ -0.5, -0.5, -0.5 };
 }
 
 float FixedCameraContext::radius(FPoint3 pos) {

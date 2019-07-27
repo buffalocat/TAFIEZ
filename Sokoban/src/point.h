@@ -7,7 +7,6 @@
 struct Point2 {
     int x;
     int y;
-    Point2& operator+=(const Point2& p);
 };
 
 struct Point3;
@@ -52,6 +51,8 @@ Point3 operator-(const Point3& p, const Point3& q);
 Point3 operator-(const Point3& p);
 
 FPoint3 operator+(const Point3& p, const FPoint3& q);
+FPoint3 operator+(const FPoint3& p, const FPoint3& q);
+
 
 bool operator==(const Point2& a, const Point2& b);
 

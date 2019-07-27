@@ -37,6 +37,10 @@ FPoint3 operator+(const Point3& p, const FPoint3& q) {
     return {p.x + q.x, p.y + q.y, p.z + q.z};
 }
 
+FPoint3 operator+(const FPoint3& p, const FPoint3& q) {
+	return { p.x + q.x, p.y + q.y, p.z + q.z };
+}
+
 bool operator==(const Point2& a, const Point2& b) {
     return a.x == b.x && a.y == b.y;
 }

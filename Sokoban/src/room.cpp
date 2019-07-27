@@ -90,7 +90,7 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ort
         camera_->update();
 
         float cam_radius = camera_->get_radius();
-        FPoint3 target_pos = camera_->get_pos();
+		FPoint3 target_pos = camera_->get_pos();
 
         float cam_tilt = camera_->get_tilt();
         float cam_rotation = camera_->get_rotation();

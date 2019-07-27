@@ -20,7 +20,11 @@ public:
 
 	void normalize_a_b();
 
+	void manual_camera_options(EditorRoom*);
+	void autoclamp_camera_options(EditorRoom*);
+
 private:
+	std::string label_;
 	int xa, ya, xb, yb;
 	int x_, y_, w_, h_, priority_;
 	float rad_, tilt_, rot_;
