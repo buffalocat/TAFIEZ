@@ -78,7 +78,7 @@ void ObjectTab::object_tab_options() {
             PushBlock* pb = obj ? static_cast<PushBlock*>(obj) : &model_pb;
             ImGui::Checkbox("Pushable?##PB_modify_push", &pb->pushable_);
             ImGui::Checkbox("Gravitable?##PB_modify_grav", &pb->gravitable_);
-            ImGui::InputInt("color##PB_modify_COLOR", &pb->color_);
+            ImGui::InputInt("Color##PB_modify_COLOR", &pb->color_);
 			color_button(pb->color_);
             ImGui::Text("Stickiness");
             ImGui::RadioButton("NonStick##PB_modify_sticky", &pb->sticky_, Sticky::None);
@@ -92,7 +92,7 @@ void ObjectTab::object_tab_options() {
             SnakeBlock* sb = obj ? static_cast<SnakeBlock*>(obj) : &model_sb;
             ImGui::Checkbox("Pushable?##SB_modify_push", &sb->pushable_);
             ImGui::Checkbox("Gravitable?##SB_modify_grav", &sb->gravitable_);
-            ImGui::InputInt("color##SB_modify_COLOR", &sb->color_);
+            ImGui::InputInt("Color##SB_modify_COLOR", &sb->color_);
 			color_button(sb->color_);
             ImGui::Text("Number of Ends");
             ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);

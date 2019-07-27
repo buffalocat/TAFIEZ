@@ -152,8 +152,6 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 			}
 			persistent = &selected_sig->persistent_;
 			threshold = &selected_sig->threshold_;
-		} else {
-			return;
 		}
 	} else {
 		ImGui::InputText("Label##SWITCH_signaler_label", label_buf, MAX_LABEL_LENGTH);

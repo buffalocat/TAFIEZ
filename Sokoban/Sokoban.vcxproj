@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
@@ -80,14 +80,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
     <ReferencePath>$(SolutionDir);$(VC_ReferencesPath_x64);</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
-    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <ReferencePath>$(SolutionDir);$(VC_ReferencesPath_x86);</ReferencePath>
@@ -95,7 +95,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <SourcePath>$(SolutionDir)$(ProjectName)\src\;$(VC_SourcePath);</SourcePath>
-    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)include\;$(SolutionDir)$(ProjectName)\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -192,68 +192,68 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h" />
-    <ClInclude Include="include\animation.h" />
-    <ClInclude Include="include\autoblock.h" />
-    <ClInclude Include="include\camera.h" />
-    <ClInclude Include="include\cameratab.h" />
-    <ClInclude Include="include\car.h" />
-    <ClInclude Include="include\colorcycle.h" />
-    <ClInclude Include="include\color_constants.h" />
-    <ClInclude Include="include\common_constants.h" />
-    <ClInclude Include="include\common_enums.h" />
-    <ClInclude Include="include\component.h" />
-    <ClInclude Include="include\delta.h" />
-    <ClInclude Include="include\door.h" />
-    <ClInclude Include="include\doorselectstate.h" />
-    <ClInclude Include="include\doortab.h" />
-    <ClInclude Include="include\editorbasestate.h" />
-    <ClInclude Include="include\editorstate.h" />
-    <ClInclude Include="include\editortab.h" />
-    <ClInclude Include="include\effects.h" />
-    <ClInclude Include="include\fallstepprocessor.h" />
-    <ClInclude Include="include\gameobject.h" />
-    <ClInclude Include="include\gameobjectarray.h" />
-    <ClInclude Include="include\gamestate.h" />
-    <ClInclude Include="include\gate.h" />
-    <ClInclude Include="include\gatebody.h" />
-    <ClInclude Include="include\graphicsmanager.h" />
-    <ClInclude Include="include\horizontalstepprocessor.h" />
-    <ClInclude Include="include\mainmenustate.h" />
-    <ClInclude Include="include\mapfile.h" />
-    <ClInclude Include="include\maplayer.h" />
-    <ClInclude Include="include\mesh.h" />
-    <ClInclude Include="include\modelinstancer.h" />
-    <ClInclude Include="include\model.h" />
-    <ClInclude Include="include\modifiertab.h" />
-    <ClInclude Include="include\moveprocessor.h" />
-    <ClInclude Include="include\objectmodifier.h" />
-    <ClInclude Include="include\objecttab.h" />
-    <ClInclude Include="include\player.h" />
-    <ClInclude Include="include\playingstate.h" />
-    <ClInclude Include="include\point.h" />
-    <ClInclude Include="include\pressswitch.h" />
-    <ClInclude Include="include\puppetblock.h" />
-    <ClInclude Include="include\pushblock.h" />
-    <ClInclude Include="include\realplayingstate.h" />
-    <ClInclude Include="include\Resource.h" />
-    <ClInclude Include="include\room.h" />
-    <ClInclude Include="include\roommap.h" />
-    <ClInclude Include="include\savefile.h" />
-    <ClInclude Include="include\saveloadtab.h" />
-    <ClInclude Include="include\shader.h" />
-    <ClInclude Include="include\signaler.h" />
-    <ClInclude Include="include\snakeblock.h" />
-    <ClInclude Include="include\snaketab.h" />
-    <ClInclude Include="include\Sokoban.h" />
-    <ClInclude Include="include\stdafx.h" />
-    <ClInclude Include="include\switch.h" />
-    <ClInclude Include="include\switchable.h" />
-    <ClInclude Include="include\switchtab.h" />
-    <ClInclude Include="include\targetver.h" />
-    <ClInclude Include="include\testplayingstate.h" />
-    <ClInclude Include="include\texture_constants.h" />
-    <ClInclude Include="include\vertexlayout.h" />
-    <ClInclude Include="include\wall.h" />
+    <ClInclude Include="src\animation.h" />
+    <ClInclude Include="src\autoblock.h" />
+    <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\cameratab.h" />
+    <ClInclude Include="src\car.h" />
+    <ClInclude Include="src\colorcycle.h" />
+    <ClInclude Include="src\color_constants.h" />
+    <ClInclude Include="src\common_constants.h" />
+    <ClInclude Include="src\common_enums.h" />
+    <ClInclude Include="src\component.h" />
+    <ClInclude Include="src\delta.h" />
+    <ClInclude Include="src\door.h" />
+    <ClInclude Include="src\doorselectstate.h" />
+    <ClInclude Include="src\doortab.h" />
+    <ClInclude Include="src\editorbasestate.h" />
+    <ClInclude Include="src\editorstate.h" />
+    <ClInclude Include="src\editortab.h" />
+    <ClInclude Include="src\effects.h" />
+    <ClInclude Include="src\fallstepprocessor.h" />
+    <ClInclude Include="src\gameobject.h" />
+    <ClInclude Include="src\gameobjectarray.h" />
+    <ClInclude Include="src\gamestate.h" />
+    <ClInclude Include="src\gate.h" />
+    <ClInclude Include="src\gatebody.h" />
+    <ClInclude Include="src\graphicsmanager.h" />
+    <ClInclude Include="src\horizontalstepprocessor.h" />
+    <ClInclude Include="src\mainmenustate.h" />
+    <ClInclude Include="src\mapfile.h" />
+    <ClInclude Include="src\maplayer.h" />
+    <ClInclude Include="src\mesh.h" />
+    <ClInclude Include="src\modelinstancer.h" />
+    <ClInclude Include="src\model.h" />
+    <ClInclude Include="src\modifiertab.h" />
+    <ClInclude Include="src\moveprocessor.h" />
+    <ClInclude Include="src\objectmodifier.h" />
+    <ClInclude Include="src\objecttab.h" />
+    <ClInclude Include="src\player.h" />
+    <ClInclude Include="src\playingstate.h" />
+    <ClInclude Include="src\point.h" />
+    <ClInclude Include="src\pressswitch.h" />
+    <ClInclude Include="src\puppetblock.h" />
+    <ClInclude Include="src\pushblock.h" />
+    <ClInclude Include="src\realplayingstate.h" />
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\room.h" />
+    <ClInclude Include="src\roommap.h" />
+    <ClInclude Include="src\savefile.h" />
+    <ClInclude Include="src\saveloadtab.h" />
+    <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\signaler.h" />
+    <ClInclude Include="src\snakeblock.h" />
+    <ClInclude Include="src\snaketab.h" />
+    <ClInclude Include="src\Sokoban.h" />
+    <ClInclude Include="src\stdafx.h" />
+    <ClInclude Include="src\switch.h" />
+    <ClInclude Include="src\switchable.h" />
+    <ClInclude Include="src\switchtab.h" />
+    <ClInclude Include="src\targetver.h" />
+    <ClInclude Include="src\testplayingstate.h" />
+    <ClInclude Include="src\texture_constants.h" />
+    <ClInclude Include="src\vertexlayout.h" />
+    <ClInclude Include="src\wall.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\include\dear\imgui.cpp">

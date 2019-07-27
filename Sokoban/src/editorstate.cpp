@@ -21,6 +21,7 @@
 #include "switchtab.h"
 #include "modifiertab.h"
 #include "snaketab.h"
+#include "cameratab.h"
 
 
 #define INIT_TAB(NAME)\
@@ -49,6 +50,7 @@ objs_ {std::make_unique<GameObjectArray>()} {
     INIT_TAB(Switch);
     INIT_TAB(Modifier);
     INIT_TAB(Snake);
+	INIT_TAB(Camera);
     active_tab_ = tabs_["SaveLoad"].get();
 }
 

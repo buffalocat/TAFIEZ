@@ -80,7 +80,7 @@ void Room::draw(GraphicsManager* gfx, GameObject* target, bool ortho, bool one_l
 void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho) {
     glm::mat4 model, view, projection;
     if (ortho) {
-        camera_->set_current_pos(rpos);
+        camera_->set_current_pos(vpos);
         view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
                            glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0f),
                            glm::vec3(0.0f, -1.0f, 0.0f));

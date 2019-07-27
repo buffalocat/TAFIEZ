@@ -40,9 +40,9 @@ public:
 
 	void change_rotation(float dr);
 
-    float radius_;
+    float rad_;
     float tilt_;
-    float rotation_;
+    float rot_;
 };
 
 class FixedCameraContext: public CameraContext {
@@ -56,9 +56,9 @@ public:
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
-    float radius_;
+    float rad_;
     float tilt_;
-    float rotation_;
+    float rot_;
     FPoint3 center_;
 };
 
@@ -72,7 +72,7 @@ public:
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
-    float radius_;
+    float rad_;
     float tilt_;
     int xpad_;
     int ypad_;
@@ -93,13 +93,15 @@ public:
     void serialize(MapFileO& file);
     void update();
     void set_target(Point3, FPoint3);
-    void set_current_pos(FPoint3);
+    void set_current_pos(Point3);
     float get_radius();
     FPoint3 get_pos();
     float get_tilt();
     float get_rotation();
 	void change_rotation(float);
+
     void push_context(std::unique_ptr<CameraContext>);
+	void remove_context(CameraContext*);
 	std::vector<std::unique_ptr<CameraContext>>& loaded_contexts();
 
 private:
@@ -115,8 +117,8 @@ private:
     float cur_rad_;
     float target_tilt_;
     float cur_tilt_;
-    float target_rotation_;
-    float cur_rotation_;
+    float target_rot_;
+    float cur_rot_;
 };
 
 float damp_avg(float target, float cur);

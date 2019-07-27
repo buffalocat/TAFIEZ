@@ -4,6 +4,10 @@
 #include "point.h"
 #include <filesystem>
 
+extern const float DEFAULT_CAM_RADIUS;
+extern const float DEFAULT_CAM_TILT;
+extern const float DEFAULT_CAM_ROTATION;
+
 const int GLOBAL_WALL_ID = 1;
 
 const int MAX_COLOR_CYCLE = 5;
