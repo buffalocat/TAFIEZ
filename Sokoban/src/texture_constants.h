@@ -7,17 +7,20 @@ const int TEXTURE_ATLAS_SIZE = 8;
 
 // Reading off the texture atlas starting from top, left to right
 enum class BlockTexture {
+	// ColoredBlocks
 	LightEdges = 0,
 	Corners = 1,
 	BrokenEdges = 2,
 	Edges = 3,
-	Cross = 16,
-	SwitchUp = 17,
-	SwitchDown = 18,
-	Blank = 19,
-	Wall = 20,
-	Door = 21,
-	AccentSquare = 22,
+	// Special
+	Blank = 16,
+	Wall = 17,
+	AccentSquare = 18,
+	// Double (Followed by blank)
+	Door = 32,
+	Cross = 33,
+	SwitchUp = 34,
+	SwitchDown = 35,	
 
 	// "Additive" textures
 	Default = 0,

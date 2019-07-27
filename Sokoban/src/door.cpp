@@ -78,7 +78,7 @@ void Door::cleanup_on_take(RoomMap* room_map) {
 
 void Door::draw(GraphicsManager* gfx, FPoint3 p) {
 	int color = (dest_ && state()) ? GREEN : DARK_RED;
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Door, color);
+	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Door, color);
 }
 
 std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

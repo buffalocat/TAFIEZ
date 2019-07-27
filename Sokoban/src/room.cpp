@@ -305,10 +305,10 @@ void Room::read_signaler(MapFileI& file) {
     file.read(b, 6);
     auto signaler = std::make_unique<Signaler>(label, b[0], b[1], b[2], b[3]);
     for (int i = 0; i < b[4]; ++i) {
-        signaler->push_switch_mutual(static_cast<Switch*>(map_->view(file.read_point3())->modifier()));
+        signaler->push_switch_mutual(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()));
     }
     for (int i = 0; i < b[5]; ++i) {
-        signaler->push_switchable_mutual(static_cast<Switchable*>(map_->view(file.read_point3())->modifier()));
+        signaler->push_switchable_mutual(dynamic_cast<Switchable*>(map_->view(file.read_point3())->modifier()));
     }
     map_->push_signaler(std::move(signaler));
 }

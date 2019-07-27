@@ -195,6 +195,7 @@
     <ClInclude Include="include\animation.h" />
     <ClInclude Include="include\autoblock.h" />
     <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\cameratab.h" />
     <ClInclude Include="include\car.h" />
     <ClInclude Include="include\colorcycle.h" />
     <ClInclude Include="include\color_constants.h" />
@@ -294,6 +295,7 @@
     <ClCompile Include="src\animation.cpp" />
     <ClCompile Include="src\autoblock.cpp" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\cameratab.cpp" />
     <ClCompile Include="src\car.cpp" />
     <ClCompile Include="src\colorcycle.cpp" />
     <ClCompile Include="src\common_constants.cpp" />

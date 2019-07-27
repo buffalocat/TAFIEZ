@@ -201,7 +201,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
         }
         selected_obj = nullptr;
         // When we "destroy" a wall, it doesn't actually destroy the unique Wall object
-		if (dynamic_cast<Wall*>(obj)) {
+		if (obj->id_ == GLOBAL_WALL_ID) {
 			room_map_->at(pos) = 0;
 		}
 		else {

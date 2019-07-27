@@ -72,7 +72,7 @@ void PressSwitch::draw(GraphicsManager* gfx, FPoint3 p) {
 	else {
 		tex = BlockTexture::Cross;
 	}
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), tex, color_);
+	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
 }
 
 std::unique_ptr<ObjectModifier> PressSwitch::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

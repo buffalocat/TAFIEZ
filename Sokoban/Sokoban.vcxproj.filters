@@ -241,6 +241,9 @@
     <ClInclude Include="include\puppetblock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\cameratab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -431,6 +434,9 @@
     </ClCompile>
     <ClCompile Include="src\puppetblock.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cameratab.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

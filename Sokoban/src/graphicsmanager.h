@@ -18,7 +18,9 @@ public:
     void draw();
 
 	DynamicInstancer cube;
+	DynamicInstancer top_cube;
 	DynamicInstancer diamond;
+	DynamicInstancer six_squares;
 	WallInstancer wall;
 
 private:

@@ -25,13 +25,17 @@ void Signaler::push_switch(Switch* obj) {
 }
 
 void Signaler::push_switchable_mutual(Switchable* obj) {
-    switchables_.push_back(obj);
-    obj->push_signaler(this);
+	if (obj) {
+		switchables_.push_back(obj);
+		obj->push_signaler(this);
+	}
 }
 
 void Signaler::push_switch_mutual(Switch* obj) {
-    switches_.push_back(obj);
-    obj->push_signaler(this);
+	if (obj) {
+		switches_.push_back(obj);
+		obj->push_signaler(this);
+	}
 }
 
 void Signaler::receive_signal(bool signal) {

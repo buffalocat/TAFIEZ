@@ -1,9 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-
-
-
 #include "point.h"
 
 class RoomMap;
@@ -12,7 +9,7 @@ class MapFileO;
 
 class CameraContext {
 public:
-    CameraContext(int x, int y, int w, int h, int priority);
+    CameraContext(std::string label, int x, int y, int w, int h, int priority);
     virtual ~CameraContext() = 0;
     virtual bool is_null();
     virtual FPoint3 center(FPoint3);
@@ -21,19 +18,18 @@ public:
     virtual float rotation(FPoint3);
     virtual void serialize(MapFileO& file);
 
-protected:
-    int x_;
+	std::string label_;
+
+	int x_;
     int y_;
     int w_;
     int h_;
     int priority_;
-
-    friend class Camera;
 };
 
 class FreeCameraContext: public CameraContext {
 public:
-    FreeCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, float rotation);
+    FreeCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation);
     ~FreeCameraContext();
     FPoint3 center(FPoint3);
     float radius(FPoint3);
@@ -44,7 +40,6 @@ public:
 
 	void change_rotation(float dr);
 
-private:
     float radius_;
     float tilt_;
     float rotation_;
@@ -52,7 +47,7 @@ private:
 
 class FixedCameraContext: public CameraContext {
 public:
-    FixedCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center);
+    FixedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center);
     ~FixedCameraContext();
     FPoint3 center(FPoint3);
     float radius(FPoint3);
@@ -61,17 +56,15 @@ public:
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
-private:
     float radius_;
     float tilt_;
     float rotation_;
     FPoint3 center_;
-    friend class Camera;
 };
 
 class ClampedCameraContext: public CameraContext {
 public:
-    ClampedCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, int xpad, int ypad);
+    ClampedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, int xpad, int ypad);
     ~ClampedCameraContext();
     FPoint3 center(FPoint3);
     float radius(FPoint3);
@@ -79,7 +72,6 @@ public:
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
-private:
     float radius_;
     float tilt_;
     int xpad_;
@@ -88,7 +80,7 @@ private:
 
 class NullCameraContext: public CameraContext {
 public:
-    NullCameraContext(int x, int y, int w, int h, int priority);
+    NullCameraContext(std::string label, int x, int y, int w, int h, int priority);
     ~NullCameraContext();
     bool is_null();
     void serialize(MapFileO& file);
@@ -108,6 +100,7 @@ public:
     float get_rotation();
 	void change_rotation(float);
     void push_context(std::unique_ptr<CameraContext>);
+	std::vector<std::unique_ptr<CameraContext>>& loaded_contexts();
 
 private:
     int width_;

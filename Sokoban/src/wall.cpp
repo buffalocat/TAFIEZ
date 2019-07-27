@@ -27,7 +27,7 @@ ObjCode Wall::obj_code() {
 
 void Wall::draw(GraphicsManager* gfx) {
 	Point3 p = pos_;
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), (BlockTexture)20, GREY_VECTORS[p.z % NUM_GREYS]);
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Wall, GREY_VECTORS[p.z % NUM_GREYS]);
 	if (modifier_) {
 		modifier()->draw(gfx, p);
 	}
@@ -35,5 +35,5 @@ void Wall::draw(GraphicsManager* gfx) {
 
 // TODO: Replace with a batch drawing mechanism!
 void Wall::draw(GraphicsManager* gfx, Point3 p) {
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), (BlockTexture)20, GREY_VECTORS[p.z % NUM_GREYS]);
+	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Wall, GREY_VECTORS[p.z % NUM_GREYS]);
 }

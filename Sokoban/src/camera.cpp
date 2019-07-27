@@ -12,7 +12,7 @@ const float DEFAULT_CAM_TILT = 0.5;
 const float DEFAULT_CAM_ROTATION = 0.0;
 
 
-CameraContext::CameraContext(int x, int y, int w, int h, int priority): x_ {x}, y_ {y}, w_ {w}, h_ {h}, priority_ {priority} {}
+CameraContext::CameraContext(std::string label, int x, int y, int w, int h, int priority): x_ {x}, y_ {y}, w_ {w}, h_ {h}, priority_ {priority} {}
 
 CameraContext::~CameraContext() {}
 
@@ -37,6 +37,7 @@ float CameraContext::rotation(FPoint3 pos) {
 }
 
 void CameraContext::serialize(MapFileO& file) {
+	file << label_;
     file << x_;
     file << y_;
     file << w_;
@@ -44,8 +45,8 @@ void CameraContext::serialize(MapFileO& file) {
     file << priority_;
 }
 
-FreeCameraContext::FreeCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, float rotation):
-CameraContext(x, y, w, h, priority), radius_ {radius}, tilt_ {tilt}, rotation_ {rotation} {}
+FreeCameraContext::FreeCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation) :
+CameraContext(label, x, y, w, h, priority), radius_ {radius}, tilt_ {tilt}, rotation_ {rotation} {}
 
 FreeCameraContext::~FreeCameraContext() {}
 
@@ -74,10 +75,11 @@ void FreeCameraContext::serialize(MapFileO& file) {
 }
 
 CameraContext* FreeCameraContext::deserialize(MapFileI& file) {
+	std::string label = file.read_str();
     int x, y, w, h, p;
     float rad, tilt, rot;
     file >> x >> y >> w >> h >> p >> rad >> tilt >> rot;
-    return new FreeCameraContext(x, y, w, h, p, rad, tilt, rot);
+    return new FreeCameraContext(label, x, y, w, h, p, rad, tilt, rot);
 }
 
 void FreeCameraContext::change_rotation(float dr) {
@@ -85,8 +87,8 @@ void FreeCameraContext::change_rotation(float dr) {
 }
 
 
-FixedCameraContext::FixedCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center):
-CameraContext(x, y, w, h, priority), radius_ {radius}, tilt_ {tilt}, rotation_ {rotation}, center_ {center} {}
+FixedCameraContext::FixedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center):
+CameraContext(label, x, y, w, h, priority), radius_ {radius}, tilt_ {tilt}, rotation_ {rotation}, center_ {center} {}
 
 FixedCameraContext::~FixedCameraContext() {}
 
@@ -116,15 +118,16 @@ void FixedCameraContext::serialize(MapFileO& file) {
 }
 
 CameraContext* FixedCameraContext::deserialize(MapFileI& file) {
+	std::string label = file.read_str();
     int x, y, w, h, p;
     float rad, tilt, rot;
     FPoint3 center {};
     file >> x >> y >> w >> h >> p >> rad >> tilt >> rot >> center;
-    return new FixedCameraContext(x, y, w, h, p, rad, tilt, rot, center);
+    return new FixedCameraContext(label, x, y, w, h, p, rad, tilt, rot, center);
 }
 
-ClampedCameraContext::ClampedCameraContext(int x, int y, int w, int h, int priority, float radius, float tilt, int xpad, int ypad):
-CameraContext(x, y, w, h, priority), radius_ {radius}, xpad_ {xpad}, ypad_ {ypad} {}
+ClampedCameraContext::ClampedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, int xpad, int ypad):
+CameraContext(label, x, y, w, h, priority), radius_ {radius}, xpad_ {xpad}, ypad_ {ypad} {}
 
 ClampedCameraContext::~ClampedCameraContext() {}
 
@@ -154,14 +157,15 @@ void ClampedCameraContext::serialize(MapFileO& file) {
 }
 
 CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
+	std::string label = file.read_str();
     int x, y, w, h, p, xpad, ypad;
     float rad, tilt;
     file >> x >> y >> w >> h >> p >> rad >> tilt >> xpad >> ypad;
-    return new ClampedCameraContext(x, y, w, h, p, rad, tilt, xpad, ypad);
+    return new ClampedCameraContext(label, x, y, w, h, p, rad, tilt, xpad, ypad);
 }
 
-NullCameraContext::NullCameraContext(int x, int y, int w, int h, int priority):
-    CameraContext(x, y, w, h, priority) {}
+NullCameraContext::NullCameraContext(std::string label, int x, int y, int w, int h, int priority):
+    CameraContext(label, x, y, w, h, priority) {}
 
 NullCameraContext::~NullCameraContext() {}
 
@@ -175,14 +179,15 @@ void NullCameraContext::serialize(MapFileO& file) {
 }
 
 CameraContext* NullCameraContext::deserialize(MapFileI& file) {
+	std::string label = file.read_str();
     int x, y, w, h, p;
     file >> x >> y >> w >> h >> p;
-    return new NullCameraContext(x, y, w, h, p);
+    return new NullCameraContext(label, x, y, w, h, p);
 }
 
 
 Camera::Camera(int w, int h): width_ {w}, height_ {h},
-    default_context_ {FreeCameraContext(0, 0, w, h, 0, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, DEFAULT_CAM_ROTATION)},
+    default_context_ {FreeCameraContext("DEFAULT", 0, 0, w, h, 0, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, DEFAULT_CAM_ROTATION)},
     context_ {}, loaded_contexts_ {},
     context_map_ {},
     target_pos_ {FPoint3{0,0,0}}, cur_pos_ {FPoint3{0,0,0}},
@@ -267,6 +272,10 @@ void Camera::update() {
     cur_rad_ = damp_avg(target_rad_, cur_rad_);
     cur_tilt_ = damp_avg(target_tilt_, cur_tilt_);
     cur_rotation_ = damp_avg(target_rotation_, cur_rotation_);
+}
+
+std::vector<std::unique_ptr<CameraContext>>& Camera::loaded_contexts() {
+	return loaded_contexts_;
 }
 
 // We have a few magic numbers for tweaking camera smoothness
