@@ -16,18 +16,15 @@ public:
 	void handle_right_click(EditorRoom*, Point3);
 
 	int get_context_labels(const char* labels[], std::vector<std::unique_ptr<CameraContext>>& contexts);
-	void camera_type_choice(CameraCode* cam_code_ptr);
 
-	void normalize_a_b();
-
-	void manual_camera_options(EditorRoom*);
-	void autoclamp_camera_options(EditorRoom*);
+	void normalize_rect_a_b();
+	void normalize_vis_a_b();
 
 private:
 	std::string label_;
-	int xa, ya, xb, yb;
-	int x_, y_, w_, h_, priority_;
-	float rad_, tilt_, rot_;
-	int xpad_, ypad_;
-	FPoint3 center_;
+	IntRect rect_;
+	int priority_;
+	bool null_child_;
+	double rad_, tilt_;
+	FloatRect vis_;
 };

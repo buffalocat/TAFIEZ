@@ -16,7 +16,7 @@ class Effects {
 public:
     Effects();
     ~Effects();
-    void sort_by_distance(float angle);
+    void sort_by_distance(double angle);
     void update();
     void draw(GraphicsManager*);
     void push_trail(GameObject*, int height, int drop);

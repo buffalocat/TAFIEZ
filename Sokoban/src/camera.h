@@ -9,82 +9,47 @@ class MapFileO;
 
 class CameraContext {
 public:
-    CameraContext(std::string label, int x, int y, int w, int h, int priority);
+    CameraContext(std::string label, IntRect rect, int priority, bool null_child);
     virtual ~CameraContext() = 0;
     virtual bool is_null();
     virtual FPoint3 center(FPoint3);
-    virtual float radius(FPoint3);
-    virtual float tilt(FPoint3);
-    virtual float rotation(FPoint3);
-    virtual void serialize(MapFileO& file);
+    virtual double radius(FPoint3);
+    virtual double tilt(FPoint3);
+    virtual double rotation(FPoint3);
+    virtual void serialize(MapFileO& file) = 0;
 
 	std::string label_;
 
-	int x_;
-    int y_;
-    int w_;
-    int h_;
+	IntRect rect_;
     int priority_;
-};
-
-class FreeCameraContext: public CameraContext {
-public:
-    FreeCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation);
-    ~FreeCameraContext();
-    FPoint3 center(FPoint3);
-    float radius(FPoint3);
-    float tilt(FPoint3);
-    float rotation(FPoint3);
-    void serialize(MapFileO& file);
-    static CameraContext* deserialize(MapFileI& file);
-
-	void change_rotation(float dr);
-
-    float rad_;
-    float tilt_;
-    float rot_;
-};
-
-class FixedCameraContext: public CameraContext {
-public:
-    FixedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, float rotation, FPoint3 center);
-    ~FixedCameraContext();
-    FPoint3 center(FPoint3);
-    float radius(FPoint3);
-    float tilt(FPoint3);
-    float rotation(FPoint3);
-    void serialize(MapFileO& file);
-    static CameraContext* deserialize(MapFileI& file);
-
-    float rad_;
-    float tilt_;
-    float rot_;
-    FPoint3 center_;
+	bool null_child_;
 };
 
 class ClampedCameraContext: public CameraContext {
 public:
-    ClampedCameraContext(std::string label, int x, int y, int w, int h, int priority, float radius, float tilt, int xpad, int ypad);
+    ClampedCameraContext(std::string label, IntRect rect, int priority, bool null_child,
+		double radius, double tilt, FloatRect vis);
     ~ClampedCameraContext();
     FPoint3 center(FPoint3);
-    float radius(FPoint3);
-    float tilt(FPoint3);
+    double radius(FPoint3);
+    double tilt(FPoint3);
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
 
-    float rad_;
-    float tilt_;
-    int xpad_;
-    int ypad_;
+    double rad_;
+    double tilt_;
+	FloatRect center_;
 };
 
 class NullCameraContext: public CameraContext {
 public:
-    NullCameraContext(std::string label, int x, int y, int w, int h, int priority);
+    NullCameraContext(std::string label, IntRect rect, int priority, bool independent);
     ~NullCameraContext();
     bool is_null();
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
+
+	bool independent_;
 };
 
 class Camera {
@@ -93,12 +58,11 @@ public:
     void serialize(MapFileO& file);
     void update();
     void set_target(Point3, FPoint3);
-    void set_current_pos(Point3);
-    float get_radius();
+    void set_current_to_target();
+    double get_radius();
     FPoint3 get_pos();
-    float get_tilt();
-    float get_rotation();
-	void change_rotation(float);
+    double get_tilt();
+    double get_rotation();
 
     void push_context(std::unique_ptr<CameraContext>);
 	void remove_context(CameraContext*);
@@ -107,21 +71,21 @@ public:
 private:
     int width_;
     int height_;
-    FreeCameraContext default_context_;
+    ClampedCameraContext default_context_;
     CameraContext* context_;
     std::vector<std::unique_ptr<CameraContext>> loaded_contexts_;
     std::vector<std::vector<CameraContext*>> context_map_;
     FPoint3 target_pos_;
     FPoint3 cur_pos_;
-    float target_rad_;
-    float cur_rad_;
-    float target_tilt_;
-    float cur_tilt_;
-    float target_rot_;
-    float cur_rot_;
+    double target_rad_;
+    double cur_rad_;
+    double target_tilt_;
+    double cur_tilt_;
+    double target_rot_;
+    double cur_rot_;
 };
 
-float damp_avg(float target, float cur);
+double damp_avg(double target, double cur);
 
 
 #endif // CAMERA_H

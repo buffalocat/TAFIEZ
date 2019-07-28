@@ -127,9 +127,10 @@ void EditorState::new_room(const std::string& name, int width, int height, int d
     }
     auto room = std::make_unique<Room>(name);
     room->initialize(*objs_, width, height, depth);
-    room->map()->create(std::make_unique<Player>(Point3 {0,0,2}, RidingState::Free), nullptr);
-    room->set_cam_pos({0,0,2});
-    rooms_[name] = std::make_unique<EditorRoom>(std::move(room), Point3 {0,0,2});
+	Point3 player_pos{ 0,0,2 };
+    room->map()->create(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
+	room->set_cam_pos(player_pos, player_pos);
+    rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos);
     set_active_room(name);
 }
 
@@ -151,7 +152,7 @@ bool EditorState::load_room(const std::string& name, bool from_main) {
 	player->state_ = RidingState::Free;
 	Point3 start_pos = player->pos_;
     room->map()->set_initial_state(true);
-    room->set_cam_pos(start_pos);
+    room->set_cam_pos(start_pos, start_pos);
     rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
     return true;
 }

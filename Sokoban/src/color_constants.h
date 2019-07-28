@@ -42,7 +42,7 @@ const glm::vec4 COLOR_VECTORS[] = {
 
 const int NUM_GREYS = 8;
 
-const float GREY_INTENSITIES[NUM_GREYS] = { 0.1f, 0.17f, 0.25f, 0.37f, 0.5f, 0.64f, 0.79f, 0.95f};
+const double GREY_INTENSITIES[NUM_GREYS] = { 0.1f, 0.17f, 0.25f, 0.37f, 0.5f, 0.64f, 0.79f, 0.95f};
 
 #define MAKE_GREY(i) glm::vec4{i, i, i, 1.0f},
 

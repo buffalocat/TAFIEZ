@@ -17,7 +17,7 @@ public:
     ObjCode obj_code();
 	int color();
 
-    bool is_agent();
+	FPoint3 cam_pos();
 
     void toggle_riding(RoomMap* room_map, DeltaFrame*);
     Car* get_car(RoomMap* room_map, bool strict);

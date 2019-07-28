@@ -20,7 +20,7 @@ LinearAnimation::LinearAnimation(Point3 d): PositionalAnimation(), d_ {d} {
 LinearAnimation::~LinearAnimation() {}
 
 FPoint3 LinearAnimation::dpos() {
-    return (-(float)frames_/(float)HORIZONTAL_MOVEMENT_FRAMES)*FPoint3{d_};
+    return (-(float)frames_/HORIZONTAL_MOVEMENT_FRAMES)*FPoint3{d_};
 }
 
 Point3 LinearAnimation::shift_pos(Point3 p) {
@@ -32,7 +32,7 @@ std::unique_ptr<PositionalAnimation> LinearAnimation::duplicate() {
 }
 
 
-const float GATE_INTERPOLATION[] = {.96f, .9f, .8f, .6f, 0.0f};
+const double GATE_INTERPOLATION[] = {.96, .9, .8, .6, 0.0};
 
 GateTransitionAnimation::GateTransitionAnimation(bool state): Animation(), state_ {state} {
     frames_ = SWITCH_RESPONSE_FRAMES - 1;
@@ -40,9 +40,9 @@ GateTransitionAnimation::GateTransitionAnimation(bool state): Animation(), state
 
 GateTransitionAnimation::~GateTransitionAnimation() {}
 
-float GateTransitionAnimation::height() {
+double GateTransitionAnimation::height() { 
     if (state_) {
-        return 1.0f - GATE_INTERPOLATION[4 - frames_];
+        return 1.0 - GATE_INTERPOLATION[4 - frames_];
     } else {
         return GATE_INTERPOLATION[4 - frames_];
     }

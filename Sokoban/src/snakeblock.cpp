@@ -165,7 +165,7 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	}
 }
 
-void SnakeBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, float radius) {
+void SnakeBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, double radius) {
 	if (!pushable_) {
 		gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
 	}

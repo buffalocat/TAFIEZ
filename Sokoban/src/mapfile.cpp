@@ -49,10 +49,17 @@ MapFileI& operator>>(MapFileI& f, int& v) {
     return f;
 }
 
-MapFileI& operator>>(MapFileI& f, float& v) {
+MapFileI& operator>>(MapFileI& f, bool& v) {
+	unsigned char b;
+	f.read(&b, 1);
+	v = b;
+	return f;
+}
+
+MapFileI& operator>>(MapFileI& f, double& v) {
     unsigned char b[2];
     f.read(b, 2);
-    v = (float)b[0] + (float)b[1]/256.0f;
+    v = (double)b[0] + (double)b[1]/256.0f;
     return f;
 }
 
@@ -82,6 +89,16 @@ MapFileI& operator>>(MapFileI& f, Point3& v) {
 MapFileI& operator>>(MapFileI& f, FPoint3& v) {
     f >> v.x >> v.y >> v.z;
     return f;
+}
+
+MapFileI& operator>>(MapFileI& f, IntRect& r) {
+	f >> r.xa >> r.ya >> r.xb >> r.yb;
+	return f;
+}
+
+MapFileI& operator>>(MapFileI& f, FloatRect& r) {
+	f >> r.xa >> r.ya >> r.xb >> r.yb;
+	return f;
 }
 
 MapFileI& operator>>(MapFileI& f, ColorCycle& v) {
@@ -120,7 +137,7 @@ MapFileO& MapFileO::operator<<(unsigned int n) {
     return *this;
 }
 
-MapFileO& MapFileO::operator<<(float f) {
+MapFileO& MapFileO::operator<<(double f) {
     file_ << (unsigned char)f;
     file_ << (unsigned char)(256.0*f);
     return *this;
@@ -156,10 +173,20 @@ MapFileO& MapFileO::operator<<(Point3 pos) {
 }
 
 MapFileO& MapFileO::operator<<(FPoint3 pos) {
-    *this << pos.x;
+	*this << pos.x;
     *this << pos.y;
     *this << pos.z;
     return *this;
+}
+
+MapFileO& MapFileO::operator<<(IntRect r) {
+	*this << r.xa << r.ya << r.xb << r.yb;
+	return *this;
+}
+
+MapFileO& MapFileO::operator<<(FloatRect r) {
+	*this << r.xa << r.ya << r.xb << r.yb;
+	return *this;
 }
 
 MapFileO& MapFileO::operator<<(const std::string& str) {

@@ -4,9 +4,9 @@
 #include "point.h"
 #include <filesystem>
 
-extern const float DEFAULT_CAM_RADIUS;
-extern const float DEFAULT_CAM_TILT;
-extern const float DEFAULT_CAM_ROTATION;
+extern const double DEFAULT_CAM_RADIUS;
+extern const double DEFAULT_CAM_TILT;
+extern const double DEFAULT_CAM_ROTATION;
 
 const int GLOBAL_WALL_ID = 1;
 
@@ -29,8 +29,11 @@ const int SCREEN_HEIGHT = 600;
 #endif
 const int MESH_SIZE = 50;
 
-constexpr float ORTHO_WIDTH = (float)SCREEN_WIDTH/(float)MESH_SIZE;
-constexpr float ORTHO_HEIGHT = (float)SCREEN_HEIGHT/(float)MESH_SIZE;
+extern const double FOV_VERTICAL;
+extern const double ASPECT_RATIO;
+
+constexpr double ORTHO_WIDTH = (double)SCREEN_WIDTH/(double)MESH_SIZE;
+constexpr double ORTHO_HEIGHT = (double)SCREEN_HEIGHT/(double)MESH_SIZE;
 
 const int DEFAULT_BOARD_WIDTH = 17;
 const int DEFAULT_BOARD_HEIGHT = 13;

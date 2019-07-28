@@ -35,12 +35,23 @@ struct Point3 {
 };
 
 struct FPoint3 {
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
     FPoint3(): x {}, y {}, z {} {}
-    FPoint3(float ax, float ay, float az): x {ax}, y {ay}, z {az} {}
-    FPoint3(const Point3& p): x {static_cast<float>(p.x)}, y {static_cast<float>(p.y)}, z {static_cast<float>(p.z)} {}
+    FPoint3(double ax, double ay, double az): x {ax}, y {ay}, z {az} {}
+    FPoint3(const Point3& p): x {static_cast<double>(p.x)}, y {static_cast<double>(p.y)}, z {static_cast<double>(p.z)} {}
+};
+
+struct IntRect {
+	int xa, ya, xb, yb;
+};
+
+struct FloatRect {
+	double xa, ya, xb, yb;
+	FloatRect();
+	FloatRect(double xa, double ya, double xb, double yb);
+	FloatRect(int xa, int ya, int xb, int yb);
 };
 
 Point2 operator+(const Point2& p, const Point2& q);
@@ -60,7 +71,7 @@ bool operator==(const Point3& a, const Point3& b);
 
 Point3 operator*(const int a, const Point3& p);
 
-FPoint3 operator*(const float a, const FPoint3& p);
+FPoint3 operator*(const double a, const FPoint3& p);
 
 std::ostream& operator<<(std::ostream& os, const Point2& p);
 

@@ -1,4 +1,8 @@
 #include "stdafx.h"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "cameratab.h"
 #include "editorstate.h"
 
@@ -6,28 +10,33 @@
 #include "common_enums.h"
 #include "camera.h"
 
+// Half of the vertical FOV angle
+static double VERT_ANGLE;
+// 2*width_factor*radius = width of visible rectangle
+static double WIDTH_FACTOR;
+
 CameraTab::CameraTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx),
-label_{},
-xa{}, ya{}, xb{}, yb{}, x_{}, y_{}, w_{}, h_{}, priority_{},
-rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT }, rot_{ DEFAULT_CAM_ROTATION },
-xpad_{}, ypad_{}, center_{} {}
+label_{}, rect_{}, vis_{}, priority_{10},
+rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT } {
+	VERT_ANGLE = FOV_VERTICAL / 2.0;
+	WIDTH_FACTOR = tan(VERT_ANGLE) * ASPECT_RATIO;
+}
 
 CameraTab::~CameraTab() {}
 
 static bool inspect_mode = false;
 static CameraContext* selected_cam = nullptr;
 
-static int* x_ptr = nullptr;
-static int* y_ptr = nullptr;
-static int* w_ptr = nullptr;
-static int* h_ptr = nullptr;
+static IntRect* rect_ptr = nullptr;
 static int* priority_ptr = nullptr;
-static float* rad_ptr = nullptr;
-static float* tilt_ptr = nullptr;
-static float* rot_ptr = nullptr;
-static int* xpad_ptr = nullptr;
-static int* ypad_ptr = nullptr;
-static FPoint3* center_ptr = nullptr;
+static bool* null_child_ptr = nullptr;
+static double* rad_ptr = nullptr;
+static double* tilt_ptr = nullptr;
+
+static bool bind_vis_to_area = true;
+static double max_radius = DEFAULT_CAM_RADIUS;
+
+static FloatRect computed_center = {0,0,0,0};
 
 void CameraTab::init() {
 	inspect_mode = false;
@@ -47,17 +56,36 @@ int CameraTab::get_context_labels(const char* labels[], std::vector<std::unique_
 	return i;
 }
 
-void CameraTab::camera_type_choice(CameraCode* cam_code_ptr) {
-	ImGui::RadioButton("Free##OBJECT_object", cam_code_ptr, CameraCode::Free);
-	ImGui::RadioButton("Fixed##OBJECT_object", cam_code_ptr, CameraCode::Fixed);
-	ImGui::RadioButton("Clamped##OBJECT_object", cam_code_ptr, CameraCode::Clamped);
-	ImGui::RadioButton("Null##OBJECT_object", cam_code_ptr, CameraCode::Null);
+FloatRect compute_vis_from_center(FloatRect center) {
+	double tilt = *tilt_ptr;
+	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
+	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
+	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
+	double rad = *rad_ptr;
+	return FloatRect{ round(center.xa - rad * hor_excess_factor + 0.5), center.ya - rad * upper_excess_factor + 0.5,
+		center.xb + rad * hor_excess_factor - 0.5, center.yb + rad * lower_excess_factor - 0.5};
 }
 
-enum class CameraCreationMode {
-	Manual,
-	AutoClamp,
-};
+double compute_actual_radius(FloatRect vis) {
+	double tilt = *tilt_ptr;
+	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
+	double hor_max_radius = (vis.xb + 1 - vis.xa) / (2 * hor_excess_factor);
+	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
+	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
+	double vert_max_radius = (vis.yb + 1 - vis.ya) / (upper_excess_factor + lower_excess_factor);
+	return std::min(max_radius, std::min(hor_max_radius, vert_max_radius));
+}
+
+FloatRect compute_center_from_vis(FloatRect vis) {
+	double tilt = *tilt_ptr;
+	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
+	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
+	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
+	double rad = *rad_ptr;
+	auto f = FloatRect{ vis.xa + rad * hor_excess_factor - 0.5, vis.ya + rad * upper_excess_factor - 0.5,
+		vis.xb - rad * hor_excess_factor + 0.5, vis.yb - rad * lower_excess_factor + 0.5 };
+	return f;
+}
 
 void CameraTab::main_loop(EditorRoom* eroom) {
 	ImGui::Text("The Camera Tab");
@@ -67,48 +95,43 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 		return;
 	}
 
-	center_.z = (float)eroom->cam_pos.z;
-
-	ImGui::Text("Selected Corners: (%d, %d), (%d, %d)", xa, ya, xb, yb);
-
 	ImGui::Checkbox("Inspect Mode##CAMERA_inspect", &inspect_mode);
 	ImGui::Separator();
 
-	rad_ptr = nullptr;
-	tilt_ptr = nullptr;
-	rot_ptr = nullptr;
-	xpad_ptr = nullptr;
-	ypad_ptr = nullptr;
-	center_ptr = nullptr;
+	rad_ptr = &rad_;
+	tilt_ptr = &tilt_;
 
 	if (inspect_mode) {
 		static int current = 0;
 		auto& contexts = eroom->room->camera()->loaded_contexts();
 		const char* labels[1024];
 		int len = get_context_labels(labels, contexts);
+		auto* prev_selected = selected_cam;
 		if (ImGui::ListBox("Camera Contexts##CAMERA", &current, labels, len, len)) {
 			selected_cam = contexts[current].get();
 		}
 		if (selected_cam) {
-			xa = selected_cam->x_;
-			xb = xa + selected_cam->w_ - 1;
-			ya = selected_cam->y_;
-			yb = ya + selected_cam->h_ - 1;
-			x_ptr = &selected_cam->x_;
-			y_ptr = &selected_cam->y_;
-			w_ptr = &selected_cam->w_;
-			h_ptr = &selected_cam->h_;
+			rect_ptr = &selected_cam->rect_;
 			priority_ptr = &selected_cam->priority_;
+			null_child_ptr = &selected_cam->null_child_;
+			if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
+				rad_ptr = &clamped->rad_;
+				tilt_ptr = &clamped->tilt_;
+				if (selected_cam != prev_selected) {
+					max_radius = clamped->rad_;
+					vis_ = compute_vis_from_center(clamped->center_);
+				}
+			}
 		} else {
 			ImGui::Text("No CameraContext selected.");
 			return;
 		}
 	} else {
-		x_ptr = &x_;
-		y_ptr = &y_;
-		w_ptr = &w_;
-		h_ptr = &h_;
+		rect_ptr = &rect_;
 		priority_ptr = &priority_;
+		null_child_ptr = &null_child_;
+		rad_ptr = &rad_;
+		tilt_ptr = &tilt_;
 	}
 
 	ImGui::Separator();
@@ -125,8 +148,8 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 			if (ImGui::Button("Erase Selected CameraContext##CAMERA")) {
 				eroom->room->camera()->remove_context(selected_cam);
 				selected_cam = nullptr;
+				return;
 			}
-			return;
 		}
 	} else {
 		ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH);
@@ -134,170 +157,88 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 
 	label_ = label_buf;
 
-	ImGui::Text("Rect: (%d, %d, %d, %d)", *x_ptr, *y_ptr, *w_ptr, *h_ptr);
+	ImGui::Text("Context Area Corners: (%d, %d), (%d, %d)", rect_ptr->xa, rect_ptr->ya, rect_ptr->xb, rect_ptr->yb);
+	ImGui::Checkbox("Match Visible to Context Area?", &bind_vis_to_area);
+	if (bind_vis_to_area) {
+		vis_ = { rect_ptr->xa, rect_ptr->ya, rect_ptr->xb, rect_ptr->yb };
+	} else {
+		ImGui::Text("Visible Corners: (%.2f, %.2f), (%.2f, %.2f)", vis_.xa, vis_.ya, vis_.xb, vis_.yb);
+	}
+
 	ImGui::InputInt("Priority##CAMERA", priority_ptr);
 	
 	ImGui::Separator();
 
-	static CameraCreationMode mode = CameraCreationMode::Manual;
-	ImGui::RadioButton("Manual##CAMERA", &mode, CameraCreationMode::Manual);
-	ImGui::RadioButton("AutoClamp##CAMERA", &mode, CameraCreationMode::AutoClamp);
-	switch (mode) {
-	case CameraCreationMode::Manual:
-		manual_camera_options(eroom);
-		break;
-	case CameraCreationMode::AutoClamp:
-		autoclamp_camera_options(eroom);
-		break;
+	ImGui::InputDouble("Max Radius##CAMERA", &max_radius);
+	if (tilt_ptr) {
+		ImGui::InputDouble("Tilt##CAMERA", tilt_ptr);
 	}
-}
-
-void CameraTab::manual_camera_options(EditorRoom* eroom) {
-	static CameraCode cam_code = CameraCode::NONE;
+	*rad_ptr = compute_actual_radius(vis_);
+	ImGui::Text("Actual Radius: %f", *rad_ptr);
+	ImGui::Checkbox("Null Boundary?##CAMERA", null_child_ptr);
 
 	if (inspect_mode) {
-		if (auto* free = dynamic_cast<FreeCameraContext*>(selected_cam)) {
-			rad_ptr = &free->rad_;
-			tilt_ptr = &free->tilt_;
-			rot_ptr = &free->rot_;
-		} else if (auto* fixed = dynamic_cast<FixedCameraContext*>(selected_cam)) {
-			rad_ptr = &fixed->rad_;
-			tilt_ptr = &fixed->tilt_;
-			rot_ptr = &fixed->rot_;
-			center_ptr = &fixed->center_;
-		} else if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
-			rad_ptr = &clamped->rad_;
-			tilt_ptr = &clamped->tilt_;
-			xpad_ptr = &clamped->xpad_;
-			ypad_ptr = &clamped->ypad_;
+		if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
+			clamped->center_ = compute_center_from_vis(vis_);
 		}
 	} else {
-		camera_type_choice(&cam_code);
-
-		switch (cam_code) {
-		case CameraCode::Free:
-			rad_ptr = &rad_;
-			tilt_ptr = &tilt_;
-			rot_ptr = &rot_;
-			break;
-		case CameraCode::Clamped:
-			rad_ptr = &rad_;
-			tilt_ptr = &tilt_;
-			rot_ptr = &rot_;
-			xpad_ptr = &xpad_;
-			ypad_ptr = &ypad_;
-			break;
-		case CameraCode::Fixed:
-			rad_ptr = &rad_;
-			tilt_ptr = &tilt_;
-			rot_ptr = &rot_;
-			center_ptr = &center_;
-			break;
-		default:
-			break;
-		}
-	}
-
-	if (rad_ptr) {
-		ImGui::InputFloat("Radius##CAMERA_MANUAL", rad_ptr);
-	}
-	if (tilt_ptr) {
-		ImGui::InputFloat("Tilt##CAMERA_MANUAL", tilt_ptr);
-	}
-	if (rot_ptr) {
-		ImGui::InputFloat("Rotation##CAMERA_MANUAL", rot_ptr);
-	}
-	if (xpad_ptr) {
-		ImGui::InputInt("x-pad##CAMERA_MANUAL", xpad_ptr);
-	}
-	if (ypad_ptr) {
-		ImGui::InputInt("y-pad##CAMERA_MANUAL", ypad_ptr);
-	}
-	if (ImGui::Button("Align Center##CAMERA_MANUAL")) {
-		center_ptr->x = *x_ptr + (*w_ptr) / 2.0;
-		center_ptr->y = *y_ptr + (*h_ptr) / 2.0;
-		center_ptr->z = eroom->cam_pos.z;
-	}
-	if (center_ptr) {
-		ImGui::InputFloat("Center x##CAMERA_cx", &(center_ptr->x));
-		ImGui::InputFloat("Center y##CAMERA_cy", &(center_ptr->y));
-		ImGui::InputFloat("Center z##CAMERA_cz", &(center_ptr->z));
-	}
-
-	ImGui::Separator();
-
-	if (!inspect_mode) {
 		if (ImGui::Button("Make CameraContext##CAMERA")) {
-			std::unique_ptr<CameraContext> new_cam{};
-			switch (cam_code) {
-			case CameraCode::Free:
-				new_cam = std::make_unique<FreeCameraContext>(label_, x_, y_, w_, h_, priority_, rad_, tilt_, rot_);
-				break;
-			case CameraCode::Fixed:
-				new_cam = std::make_unique<FixedCameraContext>(label_, x_, y_, w_, h_, priority_, rad_, tilt_, rot_, center_);
-				break;
-			case CameraCode::Clamped:
-				new_cam = std::make_unique<ClampedCameraContext>(label_, x_, y_, w_, h_, priority_, rad_, tilt_, xpad_, ypad_);
-				break;
-			case CameraCode::Null:
-				new_cam = std::make_unique<NullCameraContext>(label_, x_, y_, w_, h_, priority_);
-				break;
-			default:
-				break;
-			}
-			if (new_cam) {
-				eroom->room->camera()->push_context(std::move(new_cam));
-			}
-		}
+			compute_center_from_vis(vis_);
+			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, null_child_, rad_, tilt_, compute_center_from_vis(vis_)));
+		}	
 	}
 }
 
-void CameraTab::autoclamp_camera_options(EditorRoom* eroom) {
-	static float max_radius;
-
-	ImGui::InputFloat("Max Radius##CAMERA_AUTOCLAMP", &max_radius);
-	if (tilt_ptr) {
-		ImGui::InputFloat("Tilt##CAMERA_MANUAL", tilt_ptr);
+void CameraTab::normalize_rect_a_b() {
+	if (rect_ptr->xa > rect_ptr->xb) {
+		int temp = rect_ptr->xa;
+		rect_ptr->xa = rect_ptr->xb;
+		rect_ptr->xb = temp;
 	}
-
-	if (!inspect_mode) {
-		if (ImGui::Button("Make CameraContext##CAMERA")) {
-			std::unique_ptr<CameraContext> new_cam{};
-			if (true) {
-				new_cam = std::make_unique<FixedCameraContext>(label_, x_, y_, w_, h_, priority_, rad_, tilt_, rot_, center_);
-			} else {
-				new_cam = std::make_unique<ClampedCameraContext>(label_, x_, y_, w_, h_, priority_, rad_, tilt_, xpad_, ypad_);
-			}
-			eroom->room->camera()->push_context(std::move(new_cam));
-		}
+	if (rect_ptr->ya > rect_ptr->yb) {
+		int temp = rect_ptr->ya;
+		rect_ptr->ya = rect_ptr->yb;
+		rect_ptr->yb = temp;
 	}
 }
 
-void CameraTab::normalize_a_b() {
-	if (xa <= xb) {
-		*x_ptr = xa;
-		*w_ptr = xb + 1 - xa;
-	} else {
-		*x_ptr = xb;
-		*w_ptr = xa + 1 - xb;
+void CameraTab::normalize_vis_a_b() {
+	if (vis_.xa > vis_.xb) {
+		double temp = vis_.xa;
+		vis_.xa = vis_.xb;
+		vis_.xb = temp;
 	}
-	if (ya <= yb) {
-		*y_ptr = ya;
-		*h_ptr = yb + 1 - ya;
-	} else {
-		*y_ptr = yb;
-		*h_ptr = ya + 1 - yb;
+	if (vis_.ya > vis_.yb) {
+		double temp = vis_.ya;
+		vis_.ya = vis_.yb;
+		vis_.yb = temp;
 	}
 }
 
 void CameraTab::handle_left_click(EditorRoom*, Point3 p) {
-	xa = p.x;
-	ya = p.y;
-	normalize_a_b();
+	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+		if (!bind_vis_to_area) {
+			vis_.xa = (double)p.x;
+			vis_.ya = (double)p.y;
+			normalize_vis_a_b();
+		}
+	} else {
+		rect_ptr->xa = p.x;
+		rect_ptr->ya = p.y;
+		normalize_rect_a_b();
+	}
 }
 
 void CameraTab::handle_right_click(EditorRoom*, Point3 p) {
-	xb = p.x;
-	yb = p.y;
-	normalize_a_b();
+	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+		if (!bind_vis_to_area) {
+			vis_.xb = (double)p.x;
+			vis_.yb = (double)p.y;
+			normalize_vis_a_b();
+		}
+	} else {
+		rect_ptr->xb = p.x;
+		rect_ptr->yb = p.y;
+		normalize_rect_a_b();
+	}
 }

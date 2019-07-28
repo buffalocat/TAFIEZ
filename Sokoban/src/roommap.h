@@ -62,7 +62,7 @@ public:
 
     void serialize(MapFileO& file) const;
 
-    void draw(GraphicsManager*, float angle);
+    void draw(GraphicsManager*, double angle);
     void draw_layer(GraphicsManager*, int z);
 
     void shift_all_objects(Point3 d);

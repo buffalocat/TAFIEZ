@@ -10,10 +10,10 @@ Effects::Effects() : trails_{} {}
 Effects::~Effects() {}
 
 const unsigned int FALL_TRAIL_OPACITY = 8;
-const float MAX_OPACITY = 10.0;
-const float MAX_WIDTH = 16.0;
+const double MAX_OPACITY = 10.0;
+const double MAX_WIDTH = 16.0;
 
-void Effects::sort_by_distance(float angle) {}
+void Effects::sort_by_distance(double angle) {}
 
 void Effects::update() {
     for (auto& trail : trails_) {
@@ -24,7 +24,7 @@ void Effects::update() {
 void Effects::draw(GraphicsManager* gfx) {
     for (auto& trail : trails_) {
         glm::vec4 color = COLOR_VECTORS[trail.color];
-        color.w = trail.opacity/MAX_OPACITY;
+        color.w = (float)(trail.opacity/MAX_OPACITY);
         Point3 base = trail.base;
 		gfx->cube.push_instance(glm::vec3(base.x, base.y, base.z + 0.5f - trail.height/2.0f),
 			glm::vec3(trail.opacity / MAX_WIDTH, trail.opacity / MAX_WIDTH, trail.height),

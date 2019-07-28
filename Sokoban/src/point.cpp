@@ -5,6 +5,12 @@ Point3_S16::Point3_S16(const Point3& p): x {p.x}, y {p.y}, z {p.z} {}
 
 Point3::Point3(const Point3_S16& p): x {p.x}, y {p.y}, z {p.z} {}
 
+FloatRect::FloatRect() : xa{}, ya{}, xb{}, yb{} {}
+FloatRect::FloatRect(double ixa, double iya, double ixb, double iyb) :
+	xa{ ixa }, ya{ iya }, xb{ ixb }, yb{ iyb } {}
+FloatRect::FloatRect(int ixa, int iya, int ixb, int iyb) :
+	xa{ (double)ixa }, ya{ (double)iya }, xb{ (double)ixb }, yb{ (double)iyb } {}
+
 Point3& Point3::operator+=(const Point3& p) {
     return *this = *this + p;
 }
@@ -53,7 +59,7 @@ Point3 operator*(const int a, const Point3& p) {
     return {a*p.x, a*p.y, a*p.z};
 }
 
-FPoint3 operator*(const float a, const FPoint3& p) {
+FPoint3 operator*(const double a, const FPoint3& p) {
     return {a*p.x, a*p.y, a*p.z};
 }
 

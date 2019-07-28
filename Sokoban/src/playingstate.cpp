@@ -74,12 +74,12 @@ void PlayingState::handle_input() {
                 delta_frame_ = std::make_unique<DeltaFrame>();
                 room_->map()->reset_local_state();
                 if (player_) {
-                    room_->set_cam_pos(player_->pos_);
+                    room_->set_cam_pos(player_->pos_, player_->cam_pos());
                 }
             } else if (undo_stack_->non_empty()) {
                 undo_stack_->pop();
                 if (player_) {
-                    room_->set_cam_pos(player_->pos_);
+                    room_->set_cam_pos(player_->pos_, player_->cam_pos());
                 }
             }
             return;
@@ -124,12 +124,6 @@ void PlayingState::handle_input() {
             return;
         }
     }
-	if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-		room_->camera()->change_rotation(-0.05f);
-	}
-	if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-		room_->camera()->change_rotation(0.05f);
-	}
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
 		player_->toggle_riding(room_map, delta_frame_.get());
 		input_cooldown = MAX_COOLDOWN;
@@ -196,5 +190,5 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 }
 
 void PlayingState::snap_camera_to_player() {
-	room_->set_cam_pos(player_->pos_);
+	room_->set_cam_pos(player_->pos_, player_->cam_pos());
 }

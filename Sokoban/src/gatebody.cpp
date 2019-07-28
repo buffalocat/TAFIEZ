@@ -105,7 +105,7 @@ bool GateBody::state_animation() {
 
 void GateBody::draw(GraphicsManager* gfx) {
     FPoint3 p {real_pos()};
-    float height = transition_animation_ ? transition_animation_->height() : 1.0f;
+    double height = transition_animation_ ? transition_animation_->height() : 1.0f;
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
 		glm::vec3(0.7f, 0.7f, height), BlockTexture::Edges, color_);
 }

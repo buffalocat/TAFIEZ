@@ -41,7 +41,7 @@ class GateTransitionAnimation: public Animation {
 public:
     GateTransitionAnimation(bool state);
     ~GateTransitionAnimation();
-    float height();
+    double height();
 
 private:
     bool state_;

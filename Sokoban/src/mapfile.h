@@ -4,7 +4,6 @@
 #include <fstream>
 #include <filesystem>
 
-
 #include "point.h"
 
 class ColorCycle;
@@ -32,12 +31,15 @@ private:
 };
 
 MapFileI& operator>>(MapFileI& f, int& v);
-MapFileI& operator>>(MapFileI& f, float& v);
+MapFileI& operator>>(MapFileI& f, bool& v);
+MapFileI& operator>>(MapFileI& f, double& v);
 
 MapFileI& operator>>(MapFileI& f, Point2& v);
 MapFileI& operator>>(MapFileI& f, Point3& v);
 MapFileI& operator>>(MapFileI& f, Point3_S16& v);
 MapFileI& operator>>(MapFileI& f, FPoint3& v);
+MapFileI& operator>>(MapFileI& f, IntRect& v);
+MapFileI& operator>>(MapFileI& f, FloatRect& v);
 
 MapFileI& operator>>(MapFileI& f, ColorCycle& v);
 
@@ -54,12 +56,14 @@ public:
     MapFileO& operator<<(int);
     MapFileO& operator<<(unsigned int);
     MapFileO& operator<<(bool);
-    MapFileO& operator<<(float);
+    MapFileO& operator<<(double);
 
     MapFileO& operator<<(Point2);
     MapFileO& operator<<(Point3);
     MapFileO& operator<<(Point3_S16);
     MapFileO& operator<<(FPoint3);
+	MapFileO& operator<<(IntRect);
+	MapFileO& operator<<(FloatRect);
 
     MapFileO& operator<<(const std::string&);
     MapFileO& operator<<(const ColorCycle&);

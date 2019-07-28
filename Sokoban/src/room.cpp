@@ -39,8 +39,9 @@ void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
     camera_ = std::make_unique<Camera>(w, h);
 }
 
-void Room::set_cam_pos(Point3 pos) {
-    camera_->set_current_pos(pos);
+void Room::set_cam_pos(Point3 vpos, FPoint3 rpos) {
+	camera_->set_target(vpos, rpos);
+    camera_->set_current_to_target();
 }
 
 bool Room::valid(Point3 pos) {
@@ -67,10 +68,10 @@ void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer
 	gfx->draw();
 }
 
-void Room::draw(GraphicsManager* gfx, GameObject* target, bool ortho, bool one_layer) {
-    update_view(gfx, target->pos_, target->real_pos(), ortho);
+void Room::draw(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer) {
+    update_view(gfx, player->pos_, player->cam_pos(), ortho);
     if (one_layer) {
-        map_->draw_layer(gfx, target->pos_.z);
+        map_->draw_layer(gfx, player->pos_.z);
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
@@ -80,30 +81,31 @@ void Room::draw(GraphicsManager* gfx, GameObject* target, bool ortho, bool one_l
 void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho) {
     glm::mat4 model, view, projection;
     if (ortho) {
-        camera_->set_current_pos(vpos);
+        camera_->set_target(vpos, vpos);
+		camera_->set_current_to_target();
         view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
-                           glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0f),
-                           glm::vec3(0.0f, -1.0f, 0.0f));
-        projection = glm::ortho(-ORTHO_WIDTH/2.0f, ORTHO_WIDTH/2.0f, -ORTHO_HEIGHT/2.0f, ORTHO_HEIGHT/2.0f, -2.5f, 2.5f);
+                           glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0),
+                           glm::vec3(0.0, -1.0, 0.0));
+        projection = glm::ortho(-ORTHO_WIDTH/2.0, ORTHO_WIDTH/2.0, -ORTHO_HEIGHT/2.0, ORTHO_HEIGHT/2.0, -2.5, 2.5);
     } else {
         camera_->set_target(vpos, rpos);
         camera_->update();
 
-        float cam_radius = camera_->get_radius();
-		FPoint3 target_pos = camera_->get_pos();
+        double cam_radius = camera_->get_radius();
+		FPoint3 target_pos = camera_->get_pos() + FPoint3{ 0, 0, 0.5 };
 
-        float cam_tilt = camera_->get_tilt();
-        float cam_rotation = camera_->get_rotation();
-        float cam_x = sin(cam_tilt) * sin(cam_rotation) * cam_radius;
-		float cam_y = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
-        float cam_z = cos(cam_tilt) * cam_radius;
-
+        double cam_tilt = camera_->get_tilt();
+        double cam_rotation = camera_->get_rotation();
+        double cam_x = sin(cam_tilt) * sin(cam_rotation) * cam_radius;
+		double cam_y = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
+        double cam_z = cos(cam_tilt) * cam_radius;
+		
         view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
-                           glm::vec3(-target_pos.x, target_pos.y, 0.0f),
-                           glm::vec3(0.0f, 0.0f, 1.0f));
-        projection = glm::perspective(glm::radians(60.0f), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 100.0f);
+                           glm::vec3(-target_pos.x, target_pos.y, target_pos.z),
+                           glm::vec3(0.0, -1.0, 1.0));
+        projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
     }
-	view = glm::scale(view, glm::vec3(-1.0f, 1.0f, 1.0f));
+	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
     gfx->set_PV(projection, view);
 }
 
@@ -257,8 +259,6 @@ void Room::read_camera_rects(MapFileI& file) {
         file.read(b, 1);
         CameraCode code = static_cast<CameraCode>(b[0]);
         switch (code) {
-        CASE_CAMCODE(Free)
-        CASE_CAMCODE(Fixed)
         CASE_CAMCODE(Clamped)
         CASE_CAMCODE(Null)
         case CameraCode::NONE:
