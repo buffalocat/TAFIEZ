@@ -112,7 +112,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;OpenAL32.lib;</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -134,7 +134,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;OpenAL32.lib;</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h" />
+    <ClInclude Include="src\audiomanager.h" />
     <ClInclude Include="src\animation.h" />
     <ClInclude Include="src\autoblock.h" />
     <ClInclude Include="src\camera.h" />
@@ -292,6 +293,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\audiomanager.cpp" />
     <ClCompile Include="src\animation.cpp" />
     <ClCompile Include="src\autoblock.cpp" />
     <ClCompile Include="src\camera.cpp" />

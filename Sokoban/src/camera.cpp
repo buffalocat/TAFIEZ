@@ -202,6 +202,6 @@ double damp_avg(double target, double cur) {
 	if (fabs(target - cur) <= 0.0001f) {
 		return target;
 	} else {
-		return (target + 11 * cur) / 12.0f;
+		return (target + 5 * cur) / 6.0f;
 	}
 }
