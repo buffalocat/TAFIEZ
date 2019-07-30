@@ -38,6 +38,9 @@ Sokoban/Win32/*
 Sokoban/maps/temp/*
 !Sokoban/maps/temp/.keep
 
+# Map Backups
+Sokoban/maps/backup/*
+
 # Resources
 !Sokoban/resources/*
 
