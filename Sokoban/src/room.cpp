@@ -291,7 +291,11 @@ void Room::read_door_dest(MapFileI& file) {
     Point3_S16 exit_pos;
     file >> exit_pos;
     auto door = static_cast<Door*>(map_->view(pos)->modifier());
-    door->set_dest(exit_pos, file.read_str());
+	std::string exit_room = file.read_str();
+	if (exit_room.empty()) {
+		exit_room = name_;
+	}
+    door->set_data(exit_pos, name_, exit_room);
 }
 
 void Room::read_signaler(MapFileI& file) {

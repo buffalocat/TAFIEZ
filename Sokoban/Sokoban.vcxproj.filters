@@ -244,9 +244,6 @@
     <ClInclude Include="src\wall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\audiomanager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -441,7 +438,7 @@
     <ClCompile Include="src\cameratab.cpp">
       <Filter>Source Files\Editor Tabs</Filter>
     </ClCompile>
-    <ClCompile Include="src\audiomanager.cpp">
+    <ClCompile Include="src\color_constants.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

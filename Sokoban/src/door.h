@@ -1,22 +1,19 @@
 #ifndef DOOR_H
 #define DOOR_H
 
-
-
-
-#include "objectmodifier.h"
 #include "switchable.h"
 
-
+class Room;
 class RoomMap;
 class GraphicsManager;
 class MapFileI;
 class MapFileO;
 
-struct MapLocation {
+struct DoorData {
     Point3_S16 pos;
-    std::string name;
-    MapLocation(Point3_S16 p, const std::string& room_name);
+	std::string start;
+    std::string dest;
+    DoorData(Point3_S16 p, std::string start_room, std::string dest_room);
 };
 
 class Door: public Switchable {
@@ -34,8 +31,8 @@ public:
     void relation_serialize(MapFileO& file);
     bool can_set_state(bool state, RoomMap*);
 
-    void set_dest(Point3_S16, const std::string&);
-    MapLocation* dest();
+    void set_data(Point3_S16, std::string start, std::string dest);
+	DoorData* data();
 	bool usable();
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
@@ -48,7 +45,7 @@ public:
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 private:
-    std::unique_ptr<MapLocation> dest_;
+    std::unique_ptr<DoorData> data_;
 };
 
 #endif // DOOR_H

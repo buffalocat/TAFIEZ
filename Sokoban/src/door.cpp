@@ -10,13 +10,13 @@
 #include "roommap.h"
 #include "moveprocessor.h"
 
-MapLocation::MapLocation(Point3_S16 p, const std::string& room_name): pos {p}, name {room_name} {}
+DoorData::DoorData(Point3_S16 p, std::string start_room, std::string dest_room) : pos{ p }, start{ start_room }, dest{ dest_room } {}
 
-Door::Door(GameObject* parent, bool def, bool active): Switchable(parent, def, active, false), dest_ {} {}
+Door::Door(GameObject* parent, bool def, bool active): Switchable(parent, def, active, false), data_ {} {}
 
 Door::~Door() {}
 
-Door::Door(const Door& d): Switchable(d.parent_, d.default_, d.active_, d.waiting_), dest_ {} {}
+Door::Door(const Door& d): Switchable(d.parent_, d.default_, d.active_, d.waiting_), data_{} {}
 
 std::string Door::name() {
     return "Door";
@@ -26,16 +26,16 @@ ModCode Door::mod_code() {
     return ModCode::Door;
 }
 
-void Door::set_dest(Point3_S16 pos, const std::string& name) {
-    dest_ = std::make_unique<MapLocation>(pos,name);
+void Door::set_data(Point3_S16 pos, std::string start, std::string dest) {
+    data_ = std::make_unique<DoorData>(pos, start, dest);
 }
 
-MapLocation* Door::dest() {
-    return dest_.get();
+DoorData* Door::data() {
+    return data_.get();
 }
 
 bool Door::usable() {
-	return state() && dest_;
+	return state() && data_;
 }
 
 void Door::serialize(MapFileO& file) {
@@ -49,14 +49,18 @@ void Door::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 }
 
 bool Door::relation_check() {
-    return dest_ != nullptr;
+    return data_ != nullptr;
 }
 
 void Door::relation_serialize(MapFileO& file) {
     file << MapCode::DoorDest;
     file << parent_->pos_;
-    file << dest_->pos;
-    file << dest_->name;
+    file << data_->pos;
+	if (data_->dest == data_->start) {
+		file << std::string{};
+	} else {
+		file << data_->dest;
+	}
 }
 
 bool Door::can_set_state(bool state, RoomMap* room_map) {
@@ -77,13 +81,13 @@ void Door::cleanup_on_take(RoomMap* room_map) {
 }
 
 void Door::draw(GraphicsManager* gfx, FPoint3 p) {
-	int color = (dest_ && state()) ? GREEN : DARK_RED;
+	int color = (data_ && state()) ? GREEN : DARK_RED;
 	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Door, color);
 }
 
 std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {
     auto dup = std::make_unique<Door>(*this);
     dup->parent_ = parent;
-    dup->dest_ = std::make_unique<MapLocation>(*dest_);
+    dup->data_ = std::make_unique<DoorData>(*data_);
     return std::move(dup);
 }

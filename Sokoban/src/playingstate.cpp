@@ -171,15 +171,15 @@ bool PlayingState::activate_room(const std::string& name) {
 void PlayingState::make_subsave() {}
 
 bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
-    MapLocation* dest = door->dest();
-    if (!loaded_rooms_.count(dest->name)) {
-        load_room(dest->name, false);
+    DoorData* data = door->data();
+    if (!loaded_rooms_.count(data->dest)) {
+        load_room(data->dest, false);
     }
-    Room* dest_room = loaded_rooms_[dest->name]->room.get();
+    Room* dest_room = loaded_rooms_[data->dest]->room.get();
 	*dest_room_ptr = dest_room;
     RoomMap* cur_map = room_->map();
     RoomMap* dest_map = dest_room->map();
-    Point3 dest_pos_local = Point3{dest->pos} + Point3{dest_room->offset_pos_};
+    Point3 dest_pos_local = Point3{data->pos} + Point3{dest_room->offset_pos_};
     for (auto& obj : objs) {
         obj.dest = dest_pos_local + obj.raw->pos_ - door->pos();
         if (dest_map->view(obj.dest)) {

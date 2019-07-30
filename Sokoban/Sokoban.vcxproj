@@ -192,7 +192,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h" />
-    <ClInclude Include="src\audiomanager.h" />
     <ClInclude Include="src\animation.h" />
     <ClInclude Include="src\autoblock.h" />
     <ClInclude Include="src\camera.h" />
@@ -293,7 +292,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\audiomanager.cpp" />
     <ClCompile Include="src\animation.cpp" />
     <ClCompile Include="src\autoblock.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -350,6 +348,7 @@
     <ClCompile Include="src\snakeblock.cpp" />
     <ClCompile Include="src\snaketab.cpp" />
     <ClCompile Include="src\Sokoban.cpp" />
+    <ClCompile Include="src\color_constants.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
