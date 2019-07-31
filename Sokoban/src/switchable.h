@@ -12,7 +12,7 @@ class Signaler;
 
 class Switchable: public ObjectModifier {
 public:
-    Switchable(GameObject* parent, bool default_state, bool active, bool waiting);
+    Switchable(GameObject* parent, bool persistent, bool default_state, bool active, bool waiting);
     virtual ~Switchable();
 
     void push_signaler(Signaler*);
@@ -28,6 +28,7 @@ public:
     virtual void setup_on_undestruction(RoomMap* room_map);
 
 protected:
+	bool persistent_;
     bool default_;
     bool active_; // Opposite of default behavior
     bool waiting_; // Toggle active as soon as possible

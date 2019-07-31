@@ -78,7 +78,7 @@ void EditorState::main_loop() {
         handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
         handle_keyboard_input(active_room_->cam_pos, active_room_->room.get());
         active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
-    }
+	}
 
     // Draw the editor tabs
     for (const auto& p : tabs_) {
@@ -96,7 +96,7 @@ void EditorState::main_loop() {
     ImGui::End();
 }
 
-void EditorState::set_active_room(const std::string& name) {
+void EditorState::set_active_room(std::string name) {
     active_room_ = rooms_[name].get();
 }
 
@@ -109,14 +109,14 @@ int EditorState::get_room_names(const char* room_names[]) {
     return i;
 }
 
-EditorRoom* EditorState::get_room(const std::string& name) {
+EditorRoom* EditorState::get_room(std::string name) {
     if (rooms_.count(name)) {
         return rooms_[name].get();
     }
     return nullptr;
 }
 
-void EditorState::new_room(const std::string& name, int width, int height, int depth) {
+void EditorState::new_room(std::string name, int width, int height, int depth) {
     if (!name.size()) {
         std::cout << "Room name must be non-empty!" << std::endl;
         return;
@@ -134,7 +134,7 @@ void EditorState::new_room(const std::string& name, int width, int height, int d
     set_active_room(name);
 }
 
-bool EditorState::load_room(const std::string& name, bool from_main) {
+bool EditorState::load_room(std::string name, bool from_main) {
     std::filesystem::path path;
     if (from_main) {
         path = (MAPS_MAIN / name).concat(".map");
@@ -144,17 +144,22 @@ bool EditorState::load_room(const std::string& name, bool from_main) {
     if (!std::filesystem::exists(path)) {
 		return false;
     }
-    MapFileI file {path};
-    std::unique_ptr<Room> room = std::make_unique<Room>(name);
+	load_room_from_path(path);
+    return true;
+}
+
+void EditorState::load_room_from_path(std::filesystem::path path) {
+	MapFileI file{ path };
+	std::string name = path.stem().string();
+	std::unique_ptr<Room> room = std::make_unique<Room>(name);
 
 	Player* player = nullptr;
-    room->load_from_file(*objs_, file, &player);
+	room->load_from_file(*objs_, file, &player);
 	player->state_ = RidingState::Free;
 	Point3 start_pos = player->pos_;
-    room->map()->set_initial_state(true);
-    room->set_cam_pos(start_pos, start_pos);
-    rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
-    return true;
+	room->map()->set_initial_state(true);
+	room->set_cam_pos(start_pos, start_pos);
+	rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
 }
 
 void EditorState::save_room(EditorRoom* eroom, bool commit) {
@@ -188,6 +193,14 @@ EditorRoom* EditorState::reload(EditorRoom* eroom) {
     load_room(name, false);
     set_active_room(name);
     return active_room_;
+}
+
+void EditorState::load_save_cycle() {
+	for (auto& path : std::filesystem::directory_iterator(MAPS_MAIN)) {
+		load_room_from_path(path);
+	}
+	commit_all();
+	defer_to_parent();
 }
 
 void EditorState::unload_current_room() {

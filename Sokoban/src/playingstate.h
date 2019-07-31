@@ -38,7 +38,7 @@ public:
 	Room* active_room();
 	bool activate_room(Room*);
     bool activate_room(std::string);
-    void load_room_from_path(std::string name, std::filesystem::path path, bool use_default_player);
+    void load_room_from_path(std::filesystem::path path, bool use_default_player);
 	virtual bool load_room(std::string name, bool use_default_player) = 0;
 	virtual void make_subsave();
 

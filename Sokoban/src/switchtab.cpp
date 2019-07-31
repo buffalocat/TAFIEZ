@@ -16,7 +16,6 @@ SwitchTab::~SwitchTab() {}
 
 static bool inspect_mode = false;
 static Signaler* selected_sig = nullptr;
-static bool* persistent = nullptr;
 static int* threshold = nullptr;
 
 static std::vector<Switch*>* switches = nullptr;
@@ -33,7 +32,6 @@ static Threshold threshold_mode = Threshold::All;
 void SwitchTab::init() {
 	model_switches_.clear();
 	model_switchables_.clear();
-	model_persistent_ = false;
 	model_threshold_ = 0;
 	threshold_mode = Threshold::All;
 	selected_sig = nullptr;
@@ -142,7 +140,6 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 	const static int MAX_LABEL_LENGTH = 64;
 	static char label_buf[MAX_LABEL_LENGTH] = "";
 
-	persistent = &model_persistent_;
 	threshold = &model_threshold_;
 	if (inspect_mode) {
 		if (selected_sig) {
@@ -150,16 +147,12 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 			if (ImGui::InputText("Label##SWITCH_signaler_label", label_buf, MAX_LABEL_LENGTH)) {
 				selected_sig->label_ = std::string(label_buf);
 			}
-			persistent = &selected_sig->persistent_;
 			threshold = &selected_sig->threshold_;
 		}
 	} else {
 		ImGui::InputText("Label##SWITCH_signaler_label", label_buf, MAX_LABEL_LENGTH);
-		persistent = &model_persistent_;
 		threshold = &model_threshold_;
 	}
-
-	ImGui::Checkbox("Persistent?##SWITCH_persistent", persistent);
 
 	ImGui::Separator();
 	ImGui::Text("Activation Threshold:");
@@ -202,7 +195,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 	if (model_switchables_.size() && model_switches_.size()) {
 		if (ImGui::Button("Make Signaler##SWITCH")) {
 			std::string label{ label_buf };
-			auto signaler = std::make_unique<Signaler>(label, 0, *threshold, *persistent, false);
+			auto signaler = std::make_unique<Signaler>(label, 0, *threshold);
 			for (auto& obj : model_switches_) {
 				signaler->push_switch_mutual(obj);
 			}

@@ -159,8 +159,9 @@ bool PlayingState::activate_room(std::string name) {
     return true;
 }
 
-void PlayingState::load_room_from_path(std::string name, std::filesystem::path path, bool use_default_player) {
+void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
 	MapFileI file{ path };
+	std::string name = path.stem().string();
 	auto room = std::make_unique<Room>(name);
 	if (use_default_player) {
 		room->load_from_file(*objs_, file, &player_);

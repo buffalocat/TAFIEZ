@@ -20,7 +20,8 @@ bool TestPlayingState::load_room_from_temp(std::string name, bool use_default_pl
 	if (!std::filesystem::exists(path)) {
 		return false;
 	}
-	load_room_from_path(name, path, use_default_player);
+	load_room_from_path(path, use_default_player);
+	return true;
 }
 
 bool TestPlayingState::load_room(std::string name, bool use_default_player) {
@@ -28,5 +29,6 @@ bool TestPlayingState::load_room(std::string name, bool use_default_player) {
 	if (!std::filesystem::exists(path)) {
 		return false;
 	}
-	load_room_from_path(name, path, use_default_player);
+	load_room_from_path(path, use_default_player);
+	return true;
 }

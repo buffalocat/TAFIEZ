@@ -18,7 +18,7 @@ struct DoorData {
 
 class Door: public Switchable {
 public:
-    Door(GameObject* parent, bool def, bool active);
+    Door(GameObject* parent, bool persistent, bool def, bool active);
     virtual ~Door();
     Door(const Door&);
 

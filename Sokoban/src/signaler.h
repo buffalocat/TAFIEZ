@@ -14,7 +14,7 @@ class ObjectModifier;
 
 class Signaler {
 public:
-    Signaler(const std::string& label, int count, int threshold, bool persistent, bool active);
+    Signaler(const std::string& label, int count, int threshold);
     virtual ~Signaler();
 
     void serialize(MapFileO& file);
@@ -35,8 +35,7 @@ private:
     std::string label_;
     int count_;
     int threshold_;
-    bool active_;
-    bool persistent_;
+	bool active_;
 
     friend class SwitchTab;
 };

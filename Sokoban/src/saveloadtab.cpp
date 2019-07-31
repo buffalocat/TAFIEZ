@@ -60,7 +60,14 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 		editor_->commit_all();
 	}
 
-    ImGui::Separator();
+	ImGui::Separator();
+
+	if (!eroom) {
+		if (ImGui::Button("Load/Save Cycle All Maps in Main")) {
+			editor_->load_save_cycle();
+		}
+		return;
+	}
 
 	if (ImGui::Button("Save Current Map##SAVELOAD")) {
 		editor_->commit_current_room();
@@ -71,10 +78,6 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
     }
 
     ImGui::Separator();
-
-    if (!eroom) {
-        return;
-    }
 
     Point3 cur_room_dims { eroom->map()->width_, eroom->map()->height_, eroom->map()->depth_};
     ImGui::Text("Current Room Dimensions: (%d,%d,%d)", cur_room_dims.x, cur_room_dims.y, cur_room_dims.z);
@@ -128,8 +131,6 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
         }
         eroom = editor_->reload(eroom);
     }
-
-
 }
 
 void SaveLoadTab::handle_left_click(EditorRoom* eroom, Point3 pos) {

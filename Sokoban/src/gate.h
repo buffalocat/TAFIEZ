@@ -10,7 +10,7 @@ class MapFileO;
 
 class Gate: public Switchable {
 public:
-    Gate(GameObject* parent, GateBody* body, int color, bool def, bool active, bool waiting);
+    Gate(GameObject* parent, GateBody* body, int color, bool persistent, bool def, bool active, bool waiting);
     virtual ~Gate();
 
     std::string name();
