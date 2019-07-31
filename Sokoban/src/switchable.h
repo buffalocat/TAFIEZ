@@ -27,8 +27,9 @@ public:
     virtual void cleanup_on_destruction(RoomMap* room_map);
     virtual void setup_on_undestruction(RoomMap* room_map);
 
-protected:
 	bool persistent_;
+
+protected:
     bool default_;
     bool active_; // Opposite of default behavior
     bool waiting_; // Toggle active as soon as possible

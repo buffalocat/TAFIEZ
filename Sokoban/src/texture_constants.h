@@ -20,7 +20,11 @@ enum class BlockTexture {
 	Door = 32,
 	Cross = 33,
 	SwitchUp = 34,
-	SwitchDown = 35,	
+	SwitchDown = 35,
+	GateBase = 36,
+	GateBody = 37,
+	GateBasePersistent = 38,
+	GateBodyPersistent = 39,
 
 	// "Additive" textures
 	Default = 0,

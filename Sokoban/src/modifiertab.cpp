@@ -94,6 +94,7 @@ void ModifierTab::mod_tab_options() {
         {
             ImGui::Text("Door");
             Door* door = mod ? static_cast<Door*>(mod) : &model_door;
+			ImGui::Checkbox("Persistent?##DOOR_persistent", &door->persistent_);
             ImGui::Checkbox("Active by Default?##DOOR_default", &door->default_);
         }
         break;
@@ -101,6 +102,7 @@ void ModifierTab::mod_tab_options() {
         {
             ImGui::Text("Gate");
             Gate* gate = mod ? static_cast<Gate*>(mod) : &model_gate;
+			ImGui::Checkbox("Persistent?##GATE_persistent", &gate->persistent_);
             ImGui::Checkbox("Active by Default?##GATE_default", &gate->default_);
             gate->active_ = gate->default_;
             gate->waiting_ = gate->default_;

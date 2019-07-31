@@ -107,7 +107,8 @@ void Gate::cleanup_on_take(RoomMap* room_map) {
 // TODO: cleanup GateBody on destruction (if retracted!)
 
 void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), BlockTexture::Blank, color_);
+	BlockTexture tex = persistent_ ? BlockTexture::GateBasePersistent : BlockTexture::GateBase;
+	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
 
 }
 
