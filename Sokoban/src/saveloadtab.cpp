@@ -56,11 +56,15 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
         editor_->set_active_room(std::string(room_names[current]));
     }
 
+	if (ImGui::Button("Save All Maps##SAVELOAD")) {
+		editor_->commit_all();
+	}
+
     ImGui::Separator();
 
-    if (ImGui::Button("Save All Maps##SAVELOAD")) {
-        editor_->commit_all();
-    }
+	if (ImGui::Button("Save Current Map##SAVELOAD")) {
+		editor_->commit_current_room();
+	}
 
     if (ImGui::Button("Begin Test Session##SAVELOAD")) {
         editor_->begin_test();
@@ -70,10 +74,6 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 
     if (!eroom) {
         return;
-    }
-
-    if (ImGui::Button("Save Current Map##SAVELOAD")) {
-        editor_->commit_current_room();
     }
 
     Point3 cur_room_dims { eroom->map()->width_, eroom->map()->height_, eroom->map()->depth_};
@@ -128,6 +128,8 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
         }
         eroom = editor_->reload(eroom);
     }
+
+
 }
 
 void SaveLoadTab::handle_left_click(EditorRoom* eroom, Point3 pos) {

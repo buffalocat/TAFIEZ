@@ -147,7 +147,7 @@ bool PlayingState::activate_room(Room* room) {
 	return activate_room(room->name());
 }
 
-bool PlayingState::activate_room(const std::string& name) {
+bool PlayingState::activate_room(std::string name) {
     if (!loaded_rooms_.count(name)) {
         if (!load_room(name, false)) {
             return false;
@@ -157,6 +157,18 @@ bool PlayingState::activate_room(const std::string& name) {
 	proom->changed = true;
     room_ = proom->room.get();
     return true;
+}
+
+void PlayingState::load_room_from_path(std::string name, std::filesystem::path path, bool use_default_player) {
+	MapFileI file{ path };
+	auto room = std::make_unique<Room>(name);
+	if (use_default_player) {
+		room->load_from_file(*objs_, file, &player_);
+	} else {
+		room->load_from_file(*objs_, file, nullptr);
+	}
+	room->map()->set_initial_state(false);
+	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }
 
 void PlayingState::make_subsave() {}

@@ -1,6 +1,7 @@
 #ifndef PLAYINGSTATE_H
 #define PLAYINGSTATE_H
 
+#include <filesystem>
 #include <map>
 
 #include "gamestate.h"
@@ -36,8 +37,9 @@ public:
     void handle_input();
 	Room* active_room();
 	bool activate_room(Room*);
-    bool activate_room(const std::string&);
-    virtual bool load_room(const std::string&, bool use_default_player) = 0;
+    bool activate_room(std::string);
+    void load_room_from_path(std::string name, std::filesystem::path path, bool use_default_player);
+	virtual bool load_room(std::string name, bool use_default_player) = 0;
 	virtual void make_subsave();
 
     bool can_use_door(Door*, std::vector<DoorTravellingObj>&, Room**);

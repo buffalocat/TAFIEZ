@@ -10,8 +10,8 @@ public:
     RealPlayingState(std::unique_ptr<SaveFile> save);
     virtual ~RealPlayingState();
 
-	void start_from_map(const std::string& starting_map);
-	bool load_room(const std::string& path, bool use_default_player);
+	void start_from_map(std::string starting_map);
+	bool load_room(std::string name, bool use_default_player);
 	void make_subsave();
 	void load_most_recent_subsave();
 
