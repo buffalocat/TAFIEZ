@@ -76,7 +76,7 @@ void DoorTab::main_loop(EditorRoom* eroom) {
     }
 
     ImGui::Text("Destination Position: (%d,%d,%d)", exit_pos_.x, exit_pos_.y, exit_pos_.z);
-    if (GameObject* obj = eroom->map()->view(exit_pos_)) {
+    if (GameObject* obj = exit_room_->map()->view(exit_pos_)) {
         ImGui::Text(obj->to_str().c_str());
         if (Door* exit_door = dynamic_cast<Door*>(obj->modifier())) {
             ImGui::Text("The exit position is also a door.");

@@ -111,6 +111,19 @@ void PlayingState::handle_input() {
     if (!dynamic_cast<Player*>(room_map->view(player_->pos_))) {
         return;
     }
+	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
+		player_->toggle_riding(room_map, delta_frame_.get());
+		input_cooldown = MAX_COOLDOWN;
+		return;
+	} else if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
+		move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
+		if (move_processor_->color_change()) {
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		} else {
+			move_processor_.reset(nullptr);
+		}
+	}
     for (auto p : MOVEMENT_KEYS) {
         if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
             move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
@@ -124,28 +137,6 @@ void PlayingState::handle_input() {
             return;
         }
     }
-	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
-		player_->toggle_riding(room_map, delta_frame_.get());
-		input_cooldown = MAX_COOLDOWN;
-		return;
-	}
-    if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
-        player_->toggle_riding(room_map, delta_frame_.get());
-        input_cooldown = MAX_COOLDOWN;
-        return;
-    } else if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-        move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
-		if (move_processor_->color_change()) {
-			input_cooldown = MAX_COOLDOWN;
-		}
-		else {
-			move_processor_.reset(nullptr);
-		}
-        return;
-	} else if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-		make_subsave();
-		input_cooldown = MAX_COOLDOWN;
-	}
 }
 
 Room* PlayingState::active_room() {
