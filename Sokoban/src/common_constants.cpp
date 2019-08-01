@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "common_constants.h"
-#include <glm/glm.hpp>
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 900;

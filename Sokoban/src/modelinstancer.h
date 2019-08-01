@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model.h"
-#include <glm/glm.hpp>
 
 class Shader;
 struct InstanceData;

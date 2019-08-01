@@ -2,7 +2,6 @@
 #define COMMON_CONSTANTS_H
 
 #include "point.h"
-#include <filesystem>
 
 // True constants
 const int MAX_COLOR_CYCLE = 5; // Must be defined here because it's an array length

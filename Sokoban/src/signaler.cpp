@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "signaler.h"
 
-
-
 #include "switch.h"
 #include "switchable.h"
 #include "delta.h"

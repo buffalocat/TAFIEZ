@@ -1,10 +1,5 @@
 #pragma once
 
-#include <filesystem>
-#include <string>
-
-#include <assimp/scene.h>
-
 class Mesh;
 class Shader;
 

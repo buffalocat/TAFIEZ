@@ -1,24 +1,6 @@
 #ifndef COMMON_ENUMS_H
 #define COMMON_ENUMS_H
 
-enum class MapCode {
-    Dimensions = 1, // The dimensions of the room as 1 byte integers
-    FullLayer = 2, // Create a new full layer
-    SparseLayer = 3, // Create a new sparse layer
-	DefaultPos_DEFUNCT = 4, // Followed by a Point3
-    OffsetPos = 5, // The position that (0,0) was at when the room was created
-    Objects = 6, // Read in all map objects
-    CameraRects = 7, // Get a camera context rectangle
-    SnakeLink = 8, // Link two snakes (1 = Right, 2 = Down)
-    DoorDest = 9, // Give a door a destination Map + Pos
-    Signaler = 10, // List of Switches and Switchables linked to a Signaler
-    UNUSED_11 = 11, // Formerly for walls, now followed by 0
-    UNUSED_12 = 12, // Formerly for the player, now nothing
-    GateBodyLocation = 13, // Indicates that a GateBody needs to be paired with its parent
-	Walls = 14, // Initiates list of Wall Positions
-    End = 255,
-};
-
 enum class ObjCode {
     NONE = 0,
     PushBlock = 1,

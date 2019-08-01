@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include <glad/glad.h>
-
 #include "mesh.h"
 #include "vertexlayout.h"
 

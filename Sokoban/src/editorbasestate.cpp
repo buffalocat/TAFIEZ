@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "editorbasestate.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "common_constants.h"
 #include "room.h"
 #include "roommap.h"

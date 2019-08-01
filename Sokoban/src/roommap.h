@@ -1,9 +1,6 @@
 #ifndef ROOMMAP_H
 #define ROOMMAP_H
 
-#include <unordered_map>
-#include <unordered_set>
-
 #include "point.h"
 
 class GameObjectArray;
@@ -32,9 +29,6 @@ public:
 
     //void print_listeners();
 
-    void push_full();
-    void push_sparse();
-
     int& at(Point3);
     GameObject* view(Point3);
 
@@ -60,7 +54,7 @@ public:
     void shift(GameObject*, Point3, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, DeltaFrame*);
 
-    void serialize(MapFileO& file) const;
+    void serialize(MapFileO& file);
 
     void draw(GraphicsManager*, double angle);
     void draw_layer(GraphicsManager*, int z);
@@ -98,10 +92,9 @@ public:
 	std::vector<PuppetBlock*> puppets_;
 
     GameObjectArray& obj_array_;
+	std::vector<MapLayer> layers_;
 
 private:
-    std::vector<std::unique_ptr<MapLayer>> layers_;
-
     std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_;
     std::vector<std::unique_ptr<Signaler>> signalers_;
 

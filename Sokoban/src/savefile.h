@@ -1,8 +1,5 @@
 #pragma once
 
-#include <filesystem>
-#include <map>
-
 struct PlayingRoom;
 class Room;
 class GlobalData {};

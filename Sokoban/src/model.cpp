@@ -5,9 +5,6 @@
 #include "vertexlayout.h"
 #include "shader.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-
 Model::Model(std::string const& path) : meshes{} {
 	load_model(path);
 }

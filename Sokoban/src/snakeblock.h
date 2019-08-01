@@ -1,9 +1,6 @@
 #ifndef SNAKEBLOCK_H
 #define SNAKEBLOCK_H
 
-
-#include <unordered_set>
-
 #include "gameobject.h"
 
 class SnakeBlock: public ColoredBlock {

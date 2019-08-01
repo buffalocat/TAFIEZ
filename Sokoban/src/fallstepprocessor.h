@@ -1,9 +1,6 @@
 #ifndef FALLSTEPPROCESSOR_H
 #define FALLSTEPPROCESSOR_H
 
-
-#include <unordered_set>
-
 #include "component.h"
 
 class RoomMap;

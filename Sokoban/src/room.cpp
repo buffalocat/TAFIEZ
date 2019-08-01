@@ -2,6 +2,7 @@
 #include "room.h"
 
 #include "roommap.h"
+#include "maplayer.h"
 #include "camera.h"
 
 #include "graphicsmanager.h"
@@ -55,8 +56,6 @@ RoomMap* Room::map() {
 Camera* Room::camera() {
 	return camera_.get();
 }
-
-#include <ctime>
 
 void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer) {
     update_view(gfx, cam_pos, cam_pos, ortho);
@@ -144,15 +143,6 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
             file.read(b, 3);
             initialize(objs, b[0], b[1], b[2]);
             break;
-        case MapCode::FullLayer: // These codes are useless for now!
-            //map_->push_full();
-            break;
-        case MapCode::SparseLayer:
-            //map_->push_sparse();
-            break;
-        case MapCode::DefaultPos_DEFUNCT:
-            file.read(b, 3);
-            break;
         case MapCode::OffsetPos:
             file >> offset_pos_;
             break;
@@ -171,8 +161,11 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
         case MapCode::Signaler:
             read_signaler(file);
             break;
-        case MapCode::Walls:
-            read_walls(file);
+		case MapCode::WallRuns:
+			read_wall_runs(file);
+			break;
+        case MapCode::WallPositions:
+            read_wall_positions(file);
             break;
         case MapCode::End:
             reading_file = false;
@@ -317,11 +310,17 @@ void Room::read_signaler(MapFileI& file) {
     map_->push_signaler(std::move(signaler));
 }
 
-void Room::read_walls(MapFileI& file) {
+void Room::read_wall_positions(MapFileI& file) {
 	unsigned int wall_count = file.read_uint32();
     Point3 pos;
     for (unsigned int i = 0; i < wall_count; ++i) {
         file >> pos;
 		map_->create_wall(pos);
     }
+}
+
+void Room::read_wall_runs(MapFileI& file) {
+	for (auto& layer : map_->layers_) {
+		layer.deserialize_wall_runs(file);
+	}
 }

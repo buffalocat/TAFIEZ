@@ -1,9 +1,6 @@
 #ifndef PLAYINGSTATE_H
 #define PLAYINGSTATE_H
 
-#include <filesystem>
-#include <map>
-
 #include "gamestate.h"
 
 class GameObjectArray;

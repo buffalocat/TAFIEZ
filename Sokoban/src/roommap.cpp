@@ -17,12 +17,11 @@
 
 RoomMap::RoomMap(GameObjectArray& obj_array, int width, int height, int depth) :
 	autos_{}, puppets_{}, obj_array_{ obj_array },
-	width_{ width }, height_{ height }, depth_{},
+	width_{ width }, height_{ height }, depth_{ depth },
 	layers_{}, listeners_{}, signalers_{},
 	effects_{ std::make_unique<Effects>() } {
-	// TODO: Eventually, fix the way that maplayers are chosen
-	for (int i = 0; i < depth; ++i) {
-		push_full();
+	for (int z = 0; z < depth; ++z) {
+		layers_.push_back(MapLayer(this, width_, height_, z));
 	}
 }
 
@@ -43,29 +42,17 @@ bool RoomMap::valid(Point3 pos) {
 	return (0 <= pos.x) && (pos.x < width_) && (0 <= pos.y) && (pos.y < height_) && (0 <= pos.z) && (pos.z < depth_);
 }
 
-void RoomMap::push_full() {
-	layers_.push_back(std::make_unique<FullMapLayer>(this, width_, height_, depth_));
-	++depth_;
-}
-
-void RoomMap::push_sparse() {
-	layers_.push_back(std::make_unique<SparseMapLayer>(this, depth_));
-	++depth_;
-}
-
 struct ObjectSerializationHandler {
-	void operator()(int, Point3);
+	void operator()(int);
 
 	GameObjectArray& obj_array;
 	MapFileO& file;
-	std::vector<Point3>& walls;
 	std::vector<GameObject*>& rel_check_objs;
 	std::vector<ObjectModifier*>& rel_check_mods;
 };
 
-void ObjectSerializationHandler::operator()(int id, Point3 pos) {
+void ObjectSerializationHandler::operator()(int id) {
 	if (id == GLOBAL_WALL_ID) {
-		walls.push_back(pos);
 		return;
 	}
 	GameObject* obj = obj_array[id];
@@ -76,7 +63,7 @@ void ObjectSerializationHandler::operator()(int id, Point3 pos) {
 		return;
 	}
 	file << obj->obj_code();
-	file << pos;
+	file << obj->pos_;
 	obj->serialize(file);
 	if (ObjectModifier* mod = obj->modifier()) {
 		file << mod->mod_code();
@@ -92,27 +79,17 @@ void ObjectSerializationHandler::operator()(int id, Point3 pos) {
 	}
 }
 
-void RoomMap::serialize(MapFileO& file) const {
+void RoomMap::serialize(MapFileO& file) {
 	// Serialize layer types
-	for (auto& layer : layers_) {
-		file << layer->type();
-	}
-	std::vector<Point3> walls{};
 	std::vector<GameObject*> rel_check_objs{};
 	std::vector<ObjectModifier*> rel_check_mods{};
-	GameObjIDPosFunc ser_handler = ObjectSerializationHandler{ obj_array_, file, walls, rel_check_objs, rel_check_mods };
+	GameObjIDFunc ser_handler = ObjectSerializationHandler{ obj_array_, file, rel_check_objs, rel_check_mods };
 	// Serialize raw object data
 	file << MapCode::Objects;
 	for (auto& layer : layers_) {
-		layer->apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, ser_handler);
+		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, ser_handler);
 	}
 	file << ObjCode::NONE;
-	// TODO: Serialize Wall positions *efficiently*
-	file << MapCode::Walls;
-	file.write_uint32((unsigned int)walls.size());
-	for (Point3 pos : walls) {
-		file << pos;
-	}
 	// Serialize relational data
 	for (auto obj : rel_check_objs) {
 		obj->relation_serialize(file);
@@ -124,10 +101,14 @@ void RoomMap::serialize(MapFileO& file) const {
 	for (auto& signaler : signalers_) {
 		signaler->serialize(file);
 	}
+	file << MapCode::WallRuns;
+	for (auto& layer : layers_) {
+		layer.serialize_wall_runs(file);
+	}
 }
 
 int& RoomMap::at(Point3 pos) {
-	return layers_[pos.z]->at(pos.h());
+	return layers_[pos.z].at(pos.h());
 }
 
 // Pretend that every out-of-bounds "object" is a Wall, unless it's below the map
@@ -135,7 +116,7 @@ GameObject* RoomMap::view(Point3 pos) {
 	if (pos.z < 0) {
 		return nullptr;
 	} else if (valid(pos)) {
-		return obj_array_[layers_[pos.z]->at(pos.h())];
+		return obj_array_[layers_[pos.z].at(pos.h())];
 	} else {
 		return obj_array_[GLOBAL_WALL_ID];
 	}
@@ -316,7 +297,7 @@ void RoomMap::draw(GraphicsManager* gfx, double angle) {
 	GameObjIDPosFunc drawer = ObjectDrawer{ obj_array_, gfx };
 	// TODO: use a smarter map rectangle!
 	for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
-		(*it)->apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, drawer);
+		it->apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, drawer);
 	}
 	// TODO: draw walls!
 	effects_->sort_by_distance(angle);
@@ -326,7 +307,7 @@ void RoomMap::draw(GraphicsManager* gfx, double angle) {
 
 void RoomMap::draw_layer(GraphicsManager* gfx, int z) {
 	GameObjIDPosFunc drawer = ObjectDrawer{ obj_array_, gfx };
-	layers_[z].get()->apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, drawer);
+	layers_[z].apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, drawer);
 }
 
 struct ObjectShifter {
@@ -346,7 +327,7 @@ void ObjectShifter::operator()(int id) {
 void RoomMap::shift_all_objects(Point3 d) {
 	GameObjIDFunc shifter = ObjectShifter{ obj_array_, this, d };
 	for (auto& layer : layers_) {
-		layer->apply_to_rect(MapRect{ 0,0,width_,height_ }, shifter);
+		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, shifter);
 	}
 }
 
@@ -367,30 +348,29 @@ void RoomMap::extend_by(Point3 d) {
 	GameObjIDFunc destroyer = ObjectDestroyer{ obj_array_, this };
 	if (d.z < 0) {
 		for (int i = (int)layers_.size() - 1; i >= layers_.size() + d.z; --i) {
-			layers_[i]->apply_to_rect(MapRect{ 0,0,width_,height_ }, destroyer);
+			layers_[i].apply_to_rect(MapRect{ 0,0,width_,height_ }, destroyer);
 		}
 		layers_.erase(layers_.begin(), layers_.begin() + d.z);
 	}
 	if (d.y < 0) {
 		for (auto& layer : layers_) {
-			layer->apply_to_rect(MapRect{ 0, height_ + d.y, width_, height_ }, destroyer);
+			layer.apply_to_rect(MapRect{ 0, height_ + d.y, width_, height_ }, destroyer);
 		}
 	}
 	if (d.x < 0) {
 		for (auto& layer : layers_) {
-			layer->apply_to_rect(MapRect{ width_ + d.x, 0, width_, height_ }, destroyer);
+			layer.apply_to_rect(MapRect{ width_ + d.x, 0, width_, height_ }, destroyer);
 		}
 	}
 	width_ += d.x;
 	height_ += d.y;
-	depth_ += d.z;
 	for (auto& layer : layers_) {
-		layer->extend_by(d.x, d.y);
+		layer.extend_by(d.x, d.y);
 	}
 	for (int i = 0; i < d.z; ++i) {
-		// Don't use push_full because we're tracking the depth manually!
-		layers_.insert(layers_.end(), std::make_unique<FullMapLayer>(this, width_, height_, depth_));
+		layers_.insert(layers_.end(), MapLayer(this, width_, height_, depth_ + i));
 	}
+	depth_ += d.z;
 }
 
 void RoomMap::shift_by(Point3 d) {
@@ -398,28 +378,28 @@ void RoomMap::shift_by(Point3 d) {
 	// First clean up objects if necessary, then actually shift the map
 	if (d.z < 0) {
 		for (int i = 0; i < -d.z; ++i) {
-			layers_[i]->apply_to_rect(MapRect{ 0,0,width_,height_ }, destroyer);
+			layers_[i].apply_to_rect(MapRect{ 0,0,width_,height_ }, destroyer);
 		}
 		layers_.erase(layers_.begin(), layers_.begin() - d.z);
 	}
 	if (d.y < 0) {
 		for (auto& layer : layers_) {
-			layer->apply_to_rect(MapRect{ 0,0,width_,-d.y }, destroyer);
+			layer.apply_to_rect(MapRect{ 0,0,width_,-d.y }, destroyer);
 		}
 	}
 	if (d.x < 0) {
 		for (auto& layer : layers_) {
-			layer->apply_to_rect(MapRect{ 0,0,-d.x,height_ }, destroyer);
+			layer.apply_to_rect(MapRect{ 0,0,-d.x,height_ }, destroyer);
 		}
 	}
 	width_ += d.x;
 	height_ += d.y;
 	depth_ += d.z;
 	for (auto& layer : layers_) {
-		layer->shift_by(d.x, d.y, d.z);
+		layer.shift_by(d.x, d.y, d.z);
 	}
 	for (int i = d.z - 1; i >= 0; --i) {
-		layers_.insert(layers_.begin(), std::make_unique<FullMapLayer>(this, width_, height_, i));
+		layers_.insert(layers_.begin(), MapLayer(this, width_, height_, i));
 	}
 	shift_all_objects(d);
 }
@@ -453,7 +433,7 @@ void RoomMap::set_initial_state(bool editor_mode) {
 	MoveProcessor mp = MoveProcessor(nullptr, this, &dummy_df, nullptr, false);
 	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, mp, this, &dummy_df };
 	for (auto& layer : layers_) {
-		layer->apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
+		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
 	}
 	// In editor mode, don't check switches or gravity.
 	if (editor_mode) {
@@ -483,7 +463,7 @@ void RoomMap::initialize_automatic_snake_links() {
 	DeltaFrame dummy_df{};
 	GameObjIDFunc snake_initializer = SnakeInitializer{ obj_array_, this, &dummy_df };
 	for (auto& layer : layers_) {
-		layer->apply_to_rect(MapRect{ 0,0,width_,height_ }, snake_initializer);
+		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, snake_initializer);
 	}
 }
 

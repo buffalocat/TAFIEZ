@@ -4,9 +4,6 @@
 #include "gamestate.h"
 #include "point.h"
 
-#include <dear/imgui.h>
-
-
 class Room;
 class RoomMap;
 

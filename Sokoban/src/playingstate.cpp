@@ -3,11 +3,6 @@
 
 #include "graphicsmanager.h"
 
-#include <filesystem>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "gameobject.h"
 
 #include "gameobjectarray.h"

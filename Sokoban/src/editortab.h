@@ -1,9 +1,6 @@
 #ifndef EDITORTAB_H
 #define EDITORTAB_H
 
-#include <dear/imgui.h>
-#include <glm/glm.hpp>
-
 struct EditorRoom;
 class EditorState;
 class GraphicsManager;

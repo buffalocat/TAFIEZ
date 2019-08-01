@@ -1,8 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <ostream>
-
 // Standard Points serialize their components as unsigned chars
 struct Point2 {
     int x;

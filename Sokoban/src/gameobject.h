@@ -1,8 +1,6 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include <glm\glm.hpp>
-
 #include "common_enums.h"
 #include "point.h"
 #include "colorcycle.h"

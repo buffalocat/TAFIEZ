@@ -3,7 +3,6 @@
 
 #include "room.h"
 #include "playingstate.h"
-#include <fstream>
 #include "mapfile.h"
 
 SaveFile::SaveFile(const std::string& base) :

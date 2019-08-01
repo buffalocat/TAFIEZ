@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "editorstate.h"
 
-#include <filesystem>
-
 #include "gameobjectarray.h"
 #include "graphicsmanager.h"
 #include "gamestate.h"

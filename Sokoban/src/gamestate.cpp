@@ -3,9 +3,6 @@
 
 #include "graphicsmanager.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 GameState::GameState():
 gfx_ {}, window_ {},
 parent_ {}, current_state_ptr_ {},

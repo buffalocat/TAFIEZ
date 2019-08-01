@@ -48,7 +48,8 @@ private:
     void read_snake_link(MapFileI& file);
     void read_door_dest(MapFileI& file);
     void read_signaler(MapFileI& file);
-    void read_walls(MapFileI& file);
+	void read_wall_positions(MapFileI& file);
+    void read_wall_runs(MapFileI& file);
 };
 
 

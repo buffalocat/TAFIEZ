@@ -1,10 +1,6 @@
 #ifndef DELTA_H
 #define DELTA_H
 
-#include <deque>
-
-
-
 #include "point.h"
 
 class Room;

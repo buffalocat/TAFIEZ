@@ -13,29 +13,20 @@ bool MapRect::contains(Point2 p) {
 }
 
 
-MapLayer::MapLayer(RoomMap* room_map, int z) : parent_map_{ room_map }, z_{ z } {}
+MapLayer::MapLayer(RoomMap* room_map, int width, int height, int z) :
+	parent_map_{ room_map }, map_{}, width_{ width }, height_{ height }, z_{ z } {
+	for (int i = 0; i != width; ++i) {
+		map_.push_back(std::vector<int>(height, 0));
+	}
+}
 
 MapLayer::~MapLayer() {}
 
-
-FullMapLayer::FullMapLayer(RoomMap* room_map, int width, int height, int z):
-	MapLayer(room_map, z), map_{}, width_{ width }, height_{ height } {
-    for (int i = 0; i != width; ++i) {
-        map_.push_back(std::vector<int>(height, 0));
-    }
-}
-
-FullMapLayer::~FullMapLayer() {}
-
-int& FullMapLayer::at(Point2 pos) {
+int& MapLayer::at(Point2 pos) {
     return map_[pos.x][pos.y];
 }
 
-MapCode FullMapLayer::type() {
-    return MapCode::FullLayer;
-}
-
-void FullMapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
+void MapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
     for (int i = rect.x; i < rect.x + rect.w; ++i) {
         for (int j = rect.y; j < rect.y + rect.h; ++j) {
             if (int id = map_[i][j]) {
@@ -45,27 +36,27 @@ void FullMapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
     }
 }
 
-void FullMapLayer::apply_to_rect_with_pos(MapRect rect, GameObjIDPosFunc& f) {
+void MapLayer::apply_to_rect_with_pos(MapRect rect, GameObjIDPosFunc& f) {
 	for (int i = rect.x; i < rect.x + rect.w; ++i) {
 		for (int j = rect.y; j < rect.y + rect.h; ++j) {
 			if (int id = map_[i][j]) {
-				f(id, { i, j, z_ });
+				f(id, { i,j,z_ });
 			}
 		}
 	}
 }
 
-void FullMapLayer::shift_by(int dx, int dy, int dz) {
+void MapLayer::shift_by(int dx, int dy, int dz) {
     width_ += dx;
     height_ += dy;
 	z_ += dz;
     if (dy < 0) {
-        for (auto& row : map_) {
-            row.erase(row.begin(), row.begin() - dy);
+        for (auto& col : map_) {
+			col.erase(col.begin(), col.begin() - dy);
         }
     } else if (dy > 0) {
-        for (auto& row : map_) {
-            row.insert(row.begin(), dy, 0);
+        for (auto& col : map_) {
+			col.insert(col.begin(), dy, 0);
         }
     }
     if (dx < 0) {
@@ -75,16 +66,16 @@ void FullMapLayer::shift_by(int dx, int dy, int dz) {
     }
 }
 
-void FullMapLayer::extend_by(int dx, int dy) {
+void MapLayer::extend_by(int dx, int dy) {
     width_ += dx;
     height_ += dy;
     if (dy < 0) {
-        for (auto& row : map_) {
-            row.erase(row.end() + dy, row.end());
+        for (auto& col : map_) {
+			col.erase(col.end() + dy, col.end());
         }
     } else if (dy > 0) {
-        for (auto& row : map_) {
-            row.insert(row.end(), dy, 0);
+        for (auto& col : map_) {
+			col.insert(col.end(), dy, 0);
         }
     }
     if (dx < 0) {
@@ -94,44 +85,34 @@ void FullMapLayer::extend_by(int dx, int dy) {
     }
 }
 
-
-SparseMapLayer::SparseMapLayer(RoomMap* room_map, int z): MapLayer(room_map, z), map_ {} {}
-
-SparseMapLayer::~SparseMapLayer() {}
-
-// TODO: fix the way that SparseMapLayers can fill up with empty data
-int& SparseMapLayer::at(Point2 pos) {
-    return map_[pos];
-}
-
-MapCode SparseMapLayer::type() {
-    return MapCode::SparseLayer;
-}
-
-void SparseMapLayer::apply_to_rect(MapRect rect, GameObjIDFunc& f) {
-    for (auto& p : map_) {
-        if (rect.contains(p.first) && p.second) {
-            f(p.second);
-        }
-    }
-}
-
-void SparseMapLayer::apply_to_rect_with_pos(MapRect rect, GameObjIDPosFunc& f) {
-	for (auto& p : map_) {
-		if (rect.contains(p.first) && p.second) {
-			f(p.second, { p.first.x, p.first.y, z_ });
+void MapLayer::serialize_wall_runs(MapFileO& file) {
+	for (auto& col : map_) {
+		int count = 0;
+		bool wall = false;
+		for (int id : col) {
+			if ((id == GLOBAL_WALL_ID) != wall) {
+				wall = !wall;
+				file << count;
+				count = 0;
+			}
+			++count;
 		}
+		file << count;
 	}
 }
 
-void SparseMapLayer::shift_by(int dx, int dy, int dz) {
-	z_ += dz;
-    Point2 dpos = {dx,dy};
-    std::unordered_map<Point2, int, Point2Hash> new_map {};
-    for (auto& p : map_) {
-        new_map[p.first + dpos] = p.second;
-    }
-    map_ = std::move(new_map);
+void MapLayer::deserialize_wall_runs(MapFileI& file) {
+	for (auto& col : map_) {
+		int y = 0;
+		while (y < height_) {
+			y += file.read_byte();
+			if (y == height_) {
+				break;
+			}
+			for (int i = file.read_byte(); i > 0; --i) {
+				col[y] = GLOBAL_WALL_ID;
+				++y;
+			}
+		}
+	}
 }
-
-void SparseMapLayer::extend_by(int dx, int dy) {}
