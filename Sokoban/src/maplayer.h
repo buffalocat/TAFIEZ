@@ -38,7 +38,6 @@ public:
 	void serialize_wall_runs(MapFileO& file);
 	void deserialize_wall_runs(MapFileI& file);
 
-protected:
     RoomMap* parent_map_;
 	std::vector<std::vector<int>> map_;
 	int width_;

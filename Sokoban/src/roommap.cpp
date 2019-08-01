@@ -350,7 +350,10 @@ void RoomMap::extend_by(Point3 d) {
 		for (int i = (int)layers_.size() - 1; i >= layers_.size() + d.z; --i) {
 			layers_[i].apply_to_rect(MapRect{ 0,0,width_,height_ }, destroyer);
 		}
-		layers_.erase(layers_.begin(), layers_.begin() + d.z);
+		layers_.erase(layers_.end() + d.z, layers_.end());
+		for (auto& layer : layers_) {
+			layer.z_ += d.z;
+		}
 	}
 	if (d.y < 0) {
 		for (auto& layer : layers_) {
