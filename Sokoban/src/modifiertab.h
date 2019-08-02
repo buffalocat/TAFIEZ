@@ -15,7 +15,7 @@ public:
     void handle_right_click(EditorRoom*, Point3);
 
     void mod_tab_options();
-    void select_color_cycle(ColorCycle&);
+    void select_color_cycle(ColorCycle*);
 };
 
 #endif // MODIFIERTAB_H

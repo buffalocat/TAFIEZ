@@ -86,7 +86,7 @@ void ModifierTab::mod_tab_options() {
         {
             ImGui::Text("Car");
             Car* car = mod ? static_cast<Car*>(mod) : &model_car;
-            ColorCycle& color_cycle = car ? car->color_cycle_ : model_color_cycle;
+            ColorCycle* color_cycle = car ? &car->color_cycle_ : &model_color_cycle;
             select_color_cycle(color_cycle);
         }
         break;
@@ -134,12 +134,12 @@ const char* color_ordinals[5] = {
     "Fifth Color##COLOR_CYCLE_color",
 };
 
-void ModifierTab::select_color_cycle(ColorCycle& cycle) {
-    ImGui::InputInt("Number of colors##COLOR_CYCLE_num", &cycle.size_);
-    clamp(&cycle.size_, 0, MAX_COLOR_CYCLE);
-    for (int i = 0; i < cycle.size_; ++i) {
-        ImGui::InputInt(color_ordinals[i], &cycle.colors_[i]);
-		color_button(cycle.colors_[i]);
+void ModifierTab::select_color_cycle(ColorCycle* cycle) {
+    ImGui::InputInt("Number of colors##COLOR_CYCLE_num", &cycle->size_);
+    clamp(&cycle->size_, 0, MAX_COLOR_CYCLE);
+    for (int i = 0; i < cycle->size_; ++i) {
+        ImGui::InputInt(color_ordinals[i], &cycle->colors_[i]);
+		color_button(cycle->colors_[i]);
     }
 }
 

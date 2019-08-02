@@ -357,16 +357,16 @@ void RoomMap::extend_by(Point3 d) {
 	}
 	if (d.y < 0) {
 		for (auto& layer : layers_) {
-			layer.apply_to_rect(MapRect{ 0, height_ + d.y, width_, height_ }, destroyer);
+			layer.apply_to_rect(MapRect{ 0, height_ + d.y, width_, -d.y }, destroyer);
 		}
 	}
+	height_ += d.y;
 	if (d.x < 0) {
 		for (auto& layer : layers_) {
-			layer.apply_to_rect(MapRect{ width_ + d.x, 0, width_, height_ }, destroyer);
+			layer.apply_to_rect(MapRect{ width_ + d.x, 0, -d.x, height_ }, destroyer);
 		}
 	}
 	width_ += d.x;
-	height_ += d.y;
 	for (auto& layer : layers_) {
 		layer.extend_by(d.x, d.y);
 	}

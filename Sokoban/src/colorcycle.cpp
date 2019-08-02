@@ -14,7 +14,10 @@ ColorCycle::ColorCycle(unsigned char* b): colors_ {}, size_ {b[0]}, index_ {b[1]
 ColorCycle::~ColorCycle() {}
 
 int ColorCycle::next_color() {
-    return colors_[index_];
+	if (size_) {
+		return colors_[index_];
+	}
+	return 0;
 }
 
 // Swap parent_color with the next color in the cycle
