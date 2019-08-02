@@ -30,6 +30,10 @@ void Door::set_data(Point3_S16 pos, std::string start, std::string dest) {
     data_ = std::make_unique<DoorData>(pos, start, dest);
 }
 
+void Door::reset_data() {
+	data_.reset(nullptr);
+}
+
 DoorData* Door::data() {
     return data_.get();
 }

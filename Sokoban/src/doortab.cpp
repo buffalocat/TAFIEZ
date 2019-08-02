@@ -44,6 +44,9 @@ void DoorTab::main_loop(EditorRoom* eroom) {
         if (!exit_room_) {
             ImGui::Text("...but that room's .map file doesn't appear to exist.");
         }
+		if (ImGui::Button("Reset the destination to nothing?##DOOR")) {
+			entrance_->reset_data();
+		}
     } else {
         ImGui::Text("This door doesn't have a destination yet");
     }

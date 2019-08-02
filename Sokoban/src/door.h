@@ -32,6 +32,7 @@ public:
     bool can_set_state(bool state, RoomMap*);
 
     void set_data(Point3_S16, std::string start, std::string dest);
+	void reset_data();
 	DoorData* data();
 	bool usable();
 
