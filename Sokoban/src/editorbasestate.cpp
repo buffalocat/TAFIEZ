@@ -80,15 +80,7 @@ void EditorBaseState::handle_mouse_input(Point3 cam_pos, Room* room) {
     }
 }
 
-void EditorBaseState::handle_keyboard_input(Point3& cam_pos, Room* room) {
-    if (keyboard_cooldown_ > 0) {
-        --keyboard_cooldown_;
-        return;
-    }
-    if (want_capture_keyboard()) {
-        return;
-    }
-    keyboard_cooldown_ = MAX_COOLDOWN;
+bool EditorBaseState::handle_keyboard_input(Point3& cam_pos, Room* room) {
     for (auto p : EDITOR_MOVEMENT_KEYS) {
         if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
             if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
@@ -97,15 +89,16 @@ void EditorBaseState::handle_keyboard_input(Point3& cam_pos, Room* room) {
                 cam_pos += p.second;
             }
             clamp_to_room(cam_pos, room);
-            return;
+            return true;
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_C)) {
         ortho_cam_ = !ortho_cam_;
-        return;
+        return true;
     } else if (glfwGetKey(window_, GLFW_KEY_F)) {
         one_layer_ = !one_layer_;
-        return;
-    }
-    keyboard_cooldown_ = 0;
+        return true;
+	}
+	return false;
 }
+

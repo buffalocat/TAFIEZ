@@ -21,7 +21,6 @@ rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT } {
 
 CameraTab::~CameraTab() {}
 
-static bool inspect_mode = false;
 static CameraContext* selected_cam = nullptr;
 
 static IntRect* rect_ptr = nullptr;
@@ -36,7 +35,7 @@ static double max_radius = DEFAULT_CAM_RADIUS;
 static FloatRect computed_center = {0,0,0,0};
 
 void CameraTab::init() {
-	inspect_mode = false;
+	inspect_mode_ = false;
 	selected_cam = nullptr;
 }
 
@@ -92,13 +91,13 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 		return;
 	}
 
-	ImGui::Checkbox("Inspect Mode##CAMERA_inspect", &inspect_mode);
+	ImGui::Checkbox("Inspect Mode##CAMERA_inspect", &inspect_mode_);
 	ImGui::Separator();
 
 	rad_ptr = &rad_;
 	tilt_ptr = &tilt_;
 
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		static int current = 0;
 		auto& contexts = eroom->room->camera()->loaded_contexts();
 		const char* labels[1024];
@@ -136,7 +135,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	const static int MAX_LABEL_LENGTH = 64;
 	static char label_buf[MAX_LABEL_LENGTH] = "";
 
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		if (selected_cam) {
 			snprintf(label_buf, MAX_LABEL_LENGTH, "%s", selected_cam->label_.c_str());
 			if (ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH)) {
@@ -174,7 +173,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	ImGui::Text("Actual Radius: %f", *rad_ptr);
 	ImGui::Checkbox("Null Boundary?##CAMERA", null_child_ptr);
 
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
 			clamped->center_ = compute_center_from_vis(vis_);
 		}

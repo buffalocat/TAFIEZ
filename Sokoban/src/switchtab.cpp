@@ -14,7 +14,6 @@ model_switches_{}, model_switchables_{}, model_persistent_{}, model_threshold_{}
 
 SwitchTab::~SwitchTab() {}
 
-static bool inspect_mode = false;
 static Signaler* selected_sig = nullptr;
 static int* threshold = nullptr;
 
@@ -67,10 +66,10 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 		ImGui::Text("No room loaded.");
 		return;
 	}
-	ImGui::Checkbox("Inspect Mode##SWITCH_inspect", &inspect_mode);
+	ImGui::Checkbox("Inspect Mode##SWITCH_inspect", &inspect_mode_);
 	ImGui::Separator();
 
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		static int current = 0;
 		auto& signalers = eroom->map()->signalers_;
 		const char* labels[1024];
@@ -130,7 +129,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 
 	ImGui::Separator();
 
-	if (!inspect_mode) {
+	if (!inspect_mode_) {
 		if (ImGui::Button("Empty Queued Objects##SWITCH")) {
 			model_switches_.clear();
 			model_switchables_.clear();
@@ -141,7 +140,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 	static char label_buf[MAX_LABEL_LENGTH] = "";
 
 	threshold = &model_threshold_;
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		if (selected_sig) {
 			snprintf(label_buf, MAX_LABEL_LENGTH, "%s", selected_sig->label_.c_str());
 			if (ImGui::InputText("Label##SWITCH_signaler_label", label_buf, MAX_LABEL_LENGTH)) {
@@ -178,7 +177,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 
 	ImGui::Separator();
 
-	if (inspect_mode) {
+	if (inspect_mode_) {
 		if (ImGui::Button("Erase Selected Signaler##SWITCH")) {
 			for (auto sw : *switches) {
 				sw->remove_signaler(selected_sig);
@@ -218,7 +217,7 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 			auto swble = dynamic_cast<Switchable*>(mod);
 			if (swble && std::find(switchables->begin(), switchables->end(), swble) == switchables->end()) {
 				switchables->push_back(swble);
-				if (inspect_mode) {
+				if (inspect_mode_) {
 					swble->push_signaler(selected_sig);
 				}
 				return;
@@ -226,7 +225,7 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 			auto sw = dynamic_cast<Switch*>(mod);
 			if (sw && std::find(switches->begin(), switches->end(), sw) == switches->end()) {
 				switches->push_back(sw);
-				if (inspect_mode) {
+				if (inspect_mode_) {
 					sw->push_signaler(selected_sig);
 				}
 				return;

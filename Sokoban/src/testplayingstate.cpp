@@ -7,7 +7,7 @@
 #include "car.h"
 
 TestPlayingState::TestPlayingState(std::string map_name): PlayingState() {
-    load_room(map_name, true);
+    load_room_from_temp(map_name, true);
 	activate_room(map_name);
 	snap_camera_to_player();
     room_->map()->set_initial_state(false);

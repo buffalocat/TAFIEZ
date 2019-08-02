@@ -23,7 +23,7 @@
 
 
 #define INIT_TAB(NAME)\
-tabs_[#NAME] = std::make_unique<NAME ## Tab>(this, gfx);
+tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this, gfx)));
 
 EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos):
 room {std::move(arg_room)},
@@ -44,18 +44,33 @@ rooms_ {}, tabs_ {},
 objs_ {std::make_unique<GameObjectArray>()} {
     INIT_TAB(SaveLoad);
     INIT_TAB(Object);
+	INIT_TAB(Modifier);
+	INIT_TAB(Switch);
     INIT_TAB(Door);
-    INIT_TAB(Switch);
-    INIT_TAB(Modifier);
     INIT_TAB(Snake);
 	INIT_TAB(Camera);
-    active_tab_ = tabs_["SaveLoad"].get();
+    active_tab_ = tabs_[0].second.get();
 }
 
 #undef INIT_TAB
 
 EditorState::~EditorState() {}
 
+// These shortcuts are specific to EditorState, and *not* other classes
+// which inherit from EditorBaseState
+bool EditorState::handle_keyboard_input_main_state() {
+	for (int i = 0; i < tabs_.size(); ++i) {
+		if (glfwGetKey(window_, GLFW_KEY_1 + i) == GLFW_PRESS) {
+			set_active_tab_by_index(i);
+			return false;
+		}
+	}
+	if (glfwGetKey(window_, GLFW_KEY_T)) {
+		begin_test();
+		return true;
+	}
+	return false;
+}
 
 void EditorState::main_loop() {
     bool p_open = true;
@@ -63,6 +78,16 @@ void EditorState::main_loop() {
         ImGui::End();
         return;
     }
+
+	if (keyboard_cooldown_ > 0) {
+		--keyboard_cooldown_;
+	} else if (!want_capture_keyboard()) {
+		if (handle_keyboard_input_main_state()) {
+			keyboard_cooldown_ = MAX_COOLDOWN;
+		} else if (active_tab_->handle_keyboard_input()) {
+			keyboard_cooldown_ = MAX_COOLDOWN;
+		}
+	}
 
     if (active_room_) {
         ImGui::Text(("Current Room: " + active_room_->room->name()).c_str());
@@ -74,15 +99,19 @@ void EditorState::main_loop() {
         }
         active_room_->changed = true;
         handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
-        handle_keyboard_input(active_room_->cam_pos, active_room_->room.get());
+		if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
+			if (handle_keyboard_input(active_room_->cam_pos, active_room_->room.get())) {
+				keyboard_cooldown_ = MAX_COOLDOWN;
+			}
+		}
         active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
 	}
 
     // Draw the editor tabs
-    for (const auto& p : tabs_) {
+	for (int i = 0; i < tabs_.size(); ++i) {
+		auto& p = tabs_[i];
         if (ImGui::Button((p.first + "##ROOT").c_str())) {
-            active_tab_ = p.second.get();
-            active_tab_->init();
+			set_active_tab_by_index(i);
         } ImGui::SameLine();
     }
     ImGui::Text(""); //This consumes the stray SameLine from the loop
@@ -92,6 +121,11 @@ void EditorState::main_loop() {
     active_tab_->main_loop(active_room_);
     ImGui::EndChildFrame();
     ImGui::End();
+}
+
+void EditorState::set_active_tab_by_index(int i) {
+	active_tab_ = tabs_[i].second.get();
+	active_tab_->init();
 }
 
 void EditorState::set_active_room(std::string name) {

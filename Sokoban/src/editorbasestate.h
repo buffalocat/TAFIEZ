@@ -24,7 +24,7 @@ protected:
 
     Point3 get_pos_from_mouse(Point3 cam_pos);
     void handle_mouse_input(Point3, Room*);
-    void handle_keyboard_input(Point3&, Room*);
+    bool handle_keyboard_input(Point3&, Room*);
     void clamp_to_room(Point3&, Room*);
 
     virtual void handle_left_click(Point3) = 0;

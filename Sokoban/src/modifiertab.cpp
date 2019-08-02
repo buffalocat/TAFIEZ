@@ -26,7 +26,6 @@ ModifierTab::~ModifierTab() {}
 
 // Current object type
 static ModCode mod_code = ModCode::NONE;
-static bool inspect_mode = false;
 
 // Model objects that new objects are created from
 static Car model_car {nullptr, {}};
@@ -38,6 +37,7 @@ static ColorCycle model_color_cycle {};
 
 // Object Inspection
 static GameObject* selected_obj = nullptr;
+static Point3 selected_pos = { -1,-1,-1 };
 
 void ModifierTab::init() {
     selected_obj = nullptr;
@@ -51,19 +51,17 @@ void ModifierTab::main_loop(EditorRoom* eroom) {
         return;
     }
 
-    ImGui::Checkbox("Inspect Mode##MOD_inspect", &inspect_mode);
+    ImGui::Checkbox("Inspect Mode##MOD_inspect", &inspect_mode_);
 
     mod_tab_options();
 }
 
 void ModifierTab::mod_tab_options() {
     ObjectModifier* mod = nullptr;
-    if (inspect_mode) {
+    if (inspect_mode_) {
         if (selected_obj) {
             mod = selected_obj->modifier();
-			// TODO: use selected pos separately!! Like in ObjectTab
-            Point3 pos = selected_obj->pos_;
-            ImGui::Text("Current selected object position: (%d,%d,%d)", pos.x, pos.y, pos.z);
+            ImGui::Text("Current selected object position: (%d,%d,%d)", selected_pos.x, selected_pos.y, selected_pos.z);
             if (!mod) {
                 ImGui::Text("It currently has no modifier.");
                 return;
@@ -146,13 +144,14 @@ void ModifierTab::select_color_cycle(ColorCycle* cycle) {
 void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     RoomMap* room_map = eroom->map();
     selected_obj = nullptr;
+	selected_pos = pos;
     if (!room_map->valid(pos)) {
         return;
     }
     GameObject* obj = room_map->view(pos);
     if (!obj) {
         return;
-    } else if (inspect_mode || obj->modifier()) {
+    } else if (inspect_mode_ || obj->modifier()) {
         selected_obj = obj;
         return;
     }
@@ -204,7 +203,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
     selected_obj = nullptr;
     // Don't allow deletion in inspect mode
-    if (inspect_mode) {
+    if (inspect_mode_) {
         return;
     }
     RoomMap* room_map = eroom->map();

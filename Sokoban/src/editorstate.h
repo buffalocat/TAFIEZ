@@ -27,6 +27,7 @@ public:
     virtual ~EditorState();
     void main_loop();
 
+	bool handle_keyboard_input_main_state();
     void set_active_room(std::string name);
     int get_room_names(const char* room_names[]);
     EditorRoom* get_room(std::string name);
@@ -42,6 +43,7 @@ public:
     void commit_current_room();
     void commit_all();
 
+	void set_active_tab_by_index(int i);
     void begin_test();
 
     EditorRoom* active_room_;
@@ -49,7 +51,7 @@ public:
 
 private:
     std::map<std::string, std::unique_ptr<EditorRoom>> rooms_;
-    std::map<std::string, std::unique_ptr<EditorTab>> tabs_;
+    std::vector<std::pair<std::string, std::unique_ptr<EditorTab>>> tabs_;
 
     std::unique_ptr<GameObjectArray> objs_;
 
