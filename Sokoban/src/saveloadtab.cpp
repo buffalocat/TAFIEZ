@@ -32,9 +32,9 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 
     ImGui::Separator();
 
-    static int width = 17;
-    static int height = 13;
-    static int depth = 4;
+    static int width = DEFAULT_BOARD_WIDTH;
+    static int height = DEFAULT_BOARD_HEIGHT;
+    static int depth = DEFAULT_BOARD_DEPTH;
     ImGui::InputInt("Room Width##SAVELOAD", &width);
     ImGui::InputInt("Room Height##SAVELOAD", &height);
     ImGui::InputInt("Room Depth##SAVELOAD", &depth);

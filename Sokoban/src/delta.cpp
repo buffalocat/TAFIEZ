@@ -195,12 +195,13 @@ void RoomChangeDelta::revert() {
 }
 
 
-SwitchableDelta::SwitchableDelta(Switchable* obj, bool active, bool waiting):
-obj_ {obj}, active_ {active}, waiting_ {waiting} {}
+SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool waiting):
+	obj_{ obj }, count_{ count }, active_{ active }, waiting_{ waiting } {}
 
 SwitchableDelta::~SwitchableDelta() {}
 
 void SwitchableDelta::revert() {
+	obj_->count_ = count_;
     obj_->active_ = active_;
     obj_->waiting_ = waiting_;
 }

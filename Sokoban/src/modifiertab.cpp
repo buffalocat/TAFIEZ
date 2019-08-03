@@ -29,8 +29,8 @@ static ModCode mod_code = ModCode::NONE;
 
 // Model objects that new objects are created from
 static Car model_car {nullptr, {}};
-static Door model_door {nullptr, false, true, false};
-static Gate model_gate {nullptr, nullptr, GREEN, false, false, false, false};
+static Door model_door {nullptr, 0, false, true, false};
+static Gate model_gate {nullptr, nullptr, GREEN, 0, false, false, false, false};
 static PressSwitch model_press_switch {nullptr, GREEN, false, false};
 
 static ColorCycle model_color_cycle {};

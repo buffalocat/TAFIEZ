@@ -206,12 +206,13 @@ private:
 
 class SwitchableDelta: public Delta {
 public:
-    SwitchableDelta(Switchable* obj, bool active, bool waiting);
+    SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
     ~SwitchableDelta();
     void revert();
 
 private:
     Switchable* obj_;
+	int count_;
     bool active_;
     bool waiting_;
 };

@@ -12,11 +12,11 @@
 
 DoorData::DoorData(Point3_S16 p, std::string start_room, std::string dest_room) : pos{ p }, start{ start_room }, dest{ dest_room } {}
 
-Door::Door(GameObject* parent, bool persistent, bool def, bool active): Switchable(parent, persistent, def, active, false), data_ {} {}
+Door::Door(GameObject* parent, int count, bool persistent, bool def, bool active): Switchable(parent, count, persistent, def, active, false), data_ {} {}
 
 Door::~Door() {}
 
-Door::Door(const Door& d): Switchable(d.parent_, d.persistent_, d.default_, d.active_, d.waiting_), data_{} {}
+Door::Door(const Door& d): Switchable(d.parent_, d.count_, d.persistent_, d.default_, d.active_, d.waiting_), data_{} {}
 
 std::string Door::name() {
     return "Door";
@@ -43,13 +43,13 @@ bool Door::usable() {
 }
 
 void Door::serialize(MapFileO& file) {
-    file << persistent_ << default_ << active_;
+    file << count_ << persistent_ << default_ << active_;
 }
 
 void Door::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
-    unsigned char b[3];
-    file.read(b, 3);
-    parent->set_modifier(std::make_unique<Door>(parent, b[0], b[1], b[2]));
+    unsigned char b[4];
+    file.read(b, 4);
+    parent->set_modifier(std::make_unique<Door>(parent, b[0], b[1], b[2], b[3]));
 }
 
 bool Door::relation_check() {

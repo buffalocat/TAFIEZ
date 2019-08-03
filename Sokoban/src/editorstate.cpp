@@ -110,12 +110,6 @@ void EditorState::main_loop() {
         active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
 	}
 
-	// Draw the rest of the editor GUI
-	ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
-	active_tab_->main_loop(active_room_);
-	ImGui::EndChildFrame();
-	ImGui::End();
-
 	if (active_room_) {
 		handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
 		if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
@@ -124,6 +118,12 @@ void EditorState::main_loop() {
 			}
 		}
 	}
+
+	// Draw the rest of the editor GUI
+	ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
+	active_tab_->main_loop(active_room_);
+	ImGui::EndChildFrame();
+	ImGui::End();
 }
 
 void EditorState::set_active_tab_by_index(int i) {

@@ -11,8 +11,8 @@
 #include "graphicsmanager.h"
 #include "texture_constants.h"
 
-Gate::Gate(GameObject* parent, GateBody* body, int color, bool persistent, bool def, bool active, bool waiting):
-Switchable(parent, persistent, def, active, waiting), color_ {color}, body_ {body} {}
+Gate::Gate(GameObject* parent, GateBody* body, int color, int count, bool persistent, bool def, bool active, bool waiting):
+Switchable(parent, count, persistent, def, active, waiting), color_ {color}, body_ {body} {}
 
 Gate::~Gate() {}
 
@@ -26,18 +26,18 @@ ModCode Gate::mod_code() {
 
 void Gate::serialize(MapFileO& file) {
     bool body_alive = (body_ != nullptr);
-    file << color_ << persistent_ << default_ << active_ << waiting_ << body_alive;
+    file << color_ << count_ << persistent_ << default_ << active_ << waiting_ << body_alive;
     if (body_alive) {
         file << Point3_S16{body_->pos_ - pos()};
     }
 }
 
 void Gate::deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent) {
-    unsigned char b[6];
-    file.read(b, 6);
-    auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4]);
+    unsigned char b[7];
+    file.read(b, 7);
+    auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
     // Is the body alive?
-    if (b[5]) {
+    if (b[6]) {
         Point3_S16 body_pos {};
         file >> body_pos;
         auto gate_body_unique = std::make_unique<GateBody>(gate.get(), Point3{body_pos} + parent->pos_);

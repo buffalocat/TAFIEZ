@@ -31,7 +31,7 @@ extern const double ORTHO_HEIGHT;
 
 extern const int DEFAULT_BOARD_WIDTH;
 extern const int DEFAULT_BOARD_HEIGHT;
-
+extern const int DEFAULT_BOARD_DEPTH;
 
 // Must satisfy MAX_COOLDOWN < HORIZONTAL_MOVEMENT_FRAMES for smooth motion
 extern const int HORIZONTAL_MOVEMENT_FRAMES;
