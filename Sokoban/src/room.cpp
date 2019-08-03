@@ -313,19 +313,20 @@ void Room::read_threshold_signaler(MapFileI& file) {
 }
 
 void Room::read_parity_signaler(MapFileI& file) {
-	unsigned char b[3];
+	unsigned char b[4];
 	std::string label = file.read_str();
 	// All signalers should have some sort of mnemonic
 	// This forces the user of the editor to come up with names
 	if (label.empty()) {
 		label = "UNNAMED";
 	}
-	file.read(b, 3);
-	auto signaler = std::make_unique<ParitySignaler>(label, b[0], b[2]);
-	for (int i = 0; i < b[1]; ++i) {
+	file.read(b, 4);
+	int parity_level = b[1];
+	auto signaler = std::make_unique<ParitySignaler>(label, b[0], b[1], b[2]);
+	for (int i = 0; i < b[3]; ++i) {
 		signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
 	}
-	for (int i = 0; i < b[2]; ++i) {
+	for (int i = 0; i < parity_level; ++i) {
 		int n_swbles = file.read_byte();
 		for (int j = 0; j < n_swbles; ++j) {
 			signaler->push_switchable(dynamic_cast<Switchable*>(map_->view(file.read_point3())->modifier()), true, i);

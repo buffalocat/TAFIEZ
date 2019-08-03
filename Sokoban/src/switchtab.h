@@ -39,6 +39,7 @@ private:
 
 	std::vector<Switch*>* switches_ptr_;
 	std::vector<Switchable*>* switchables_ptr_;
+	std::vector<std::vector<Switchable*>>* p_switchables_ptr_;
 
 	std::string model_label_;
     int model_threshold_;

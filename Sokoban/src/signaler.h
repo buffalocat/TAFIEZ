@@ -57,7 +57,7 @@ private:
 
 class ParitySignaler : public Signaler {
 public:
-	ParitySignaler(std::string label, int count, int parity_level);
+	ParitySignaler(std::string label, int count, int parity_level, bool initialized);
 	~ParitySignaler();
 
 	void serialize(MapFileO& file);
@@ -66,10 +66,12 @@ public:
 	void remove_switchable(Switchable*, int index);
 
 	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
 private:
 	std::vector<std::vector<Switchable*>> switchables_;
 	int parity_level_;
+	bool initialized_;
 
 	friend class SwitchTab;
 };

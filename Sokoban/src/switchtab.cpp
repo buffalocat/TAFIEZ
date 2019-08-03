@@ -11,7 +11,7 @@
 
 SwitchTab::SwitchTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx),
 model_switches_{}, model_switchables_{}, model_p_switchables_{},
-switches_ptr_{}, switchables_ptr_{},
+switches_ptr_{}, switchables_ptr_{}, p_switchables_ptr_{},
 model_label_{}, model_threshold_{ 1 }, model_parity_level_{ 2 },
 parity_index_{ 0 },
 sig_type_{ SignalerType::Threshold } {}
@@ -157,7 +157,6 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ro
 	static int* threshold = nullptr;
 	static int switch_count = 0;
 
-	// If inspect_mode_, then t_sig is not null
 	if (inspect_mode_) {
 		threshold = &t_sig->threshold_;
 		switchables_ptr_ = &t_sig->switchables_;
@@ -198,10 +197,10 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ro
 
 	if (inspect_mode_) {
 		if (ImGui::Button("Erase Selected Signaler##SWITCH")) {
-			for (auto s : t_sig->switches_) {
+			for (auto* s : t_sig->switches_) {
 				s->remove_signaler(t_sig);
 			}
-			for (auto s : t_sig->switchables_) {
+			for (auto* s : t_sig->switchables_) {
 				s->remove_signaler(t_sig);
 			}
 			room_map->remove_signaler(t_sig);
@@ -216,21 +215,105 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ro
 		}
 		if (ImGui::Button("Make Signaler##SWITCH")) {
 			auto new_sig = std::make_unique<ThresholdSignaler>(model_label_, 0, model_threshold_);
-			for (auto& obj : model_switches_) {
+			for (auto* obj : model_switches_) {
 				new_sig->push_switch(obj, true);
 			}
-			for (auto& obj : model_switchables_) {
+			model_switches_.clear();
+			for (auto* obj : model_switchables_) {
 				new_sig->push_switchable(obj, true, 0);
 			}
-			room_map->push_signaler(std::move(new_sig));
-			model_switches_.clear();
 			model_switchables_.clear();
+			room_map->push_signaler(std::move(new_sig));
 		}
 	}
 }
 
 void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* room_map) {
+	static int* parity_level = nullptr;
 
+	if (inspect_mode_) {
+		p_switchables_ptr_ = &p_sig->switchables_;
+		parity_level = &p_sig->parity_level_;
+	} else {
+		p_switchables_ptr_ = &model_p_switchables_;
+		parity_level = &model_parity_level_;
+	}
+
+	ImGui::InputInt("Parity Level##SWITCH_parity_level", parity_level);
+	if (*parity_level < 2) {
+		*parity_level = 2;
+	}
+
+	// Keep the vector of switchable groups consistent with the parity level
+	int groups = (int)p_switchables_ptr_->size();
+	int diff = *parity_level - groups;
+	for (int i = 0; i < diff; ++i) {
+		p_switchables_ptr_->push_back({});
+	}
+	if (inspect_mode_) {
+		for (int i = *parity_level; i < groups; ++i) {
+			for (auto* s : (*p_switchables_ptr_)[i]) {
+				s->remove_signaler(p_sig);
+			}
+		}
+	}
+	if (diff < 0) {
+		p_switchables_ptr_->erase(p_switchables_ptr_->begin() + *parity_level, p_switchables_ptr_->end());
+	}
+	
+	ImGui::InputInt("Active Parity Index##SWITCH_parity_index", &parity_index_);
+	clamp(&parity_index_, 0, *parity_level - 1);
+
+	if (inspect_mode_) {
+		switchables_ptr_ = &p_sig->switchables_[parity_index_];
+	} else {
+		switchables_ptr_ = &model_p_switchables_[parity_index_];
+	}
+
+	ImGui::Separator();
+
+	for (int i = 0; i < *parity_level; ++i) {
+		char buf[32];
+		sprintf_s(buf, "Switchables %d", i);
+		print_switchable_list(&(*p_switchables_ptr_)[i], buf);
+		ImGui::Separator();
+	}
+
+	if (inspect_mode_) {
+		if (ImGui::Button("Erase Selected Signaler##SWITCH")) {
+			for (auto* s : p_sig->switches_) {
+				s->remove_signaler(p_sig);
+			}
+			for (auto& group : p_sig->switchables_) {
+				for (auto* s : group) {
+					s->remove_signaler(p_sig);
+				}
+			}
+			room_map->remove_signaler(p_sig);
+			selected_sig = nullptr;
+		}
+	} else {
+		if (ImGui::Button("Empty Queued Objects##SWITCH")) {
+			model_switches_.clear();
+			for (int i = 0; i < model_parity_level_; ++i) {
+				model_p_switchables_[i].clear();
+			}
+		}
+		if (ImGui::Button("Make Signaler##SWITCH")) {
+			auto new_sig = std::make_unique<ParitySignaler>(model_label_, 0, model_parity_level_, false);
+			for (auto* obj : model_switches_) {
+				new_sig->push_switch(obj, true);
+			}
+			model_switches_.clear();
+			for (int i = 0; i < model_parity_level_; ++i) {
+				for (auto* obj : model_p_switchables_[i]) {
+					new_sig->push_switchable(obj, true, i);
+				}
+				model_p_switchables_[i].clear();
+			}
+			room_map->push_signaler(std::move(new_sig));
+		}
+	}
 }
 
 void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {

@@ -411,7 +411,7 @@ struct RoomStateInitializer {
 	void operator()(int id);
 
 	GameObjectArray& obj_array;
-	MoveProcessor& mp;
+	MoveProcessor* mp;
 	RoomMap* room_map;
 	DeltaFrame* delta_frame;
 };
@@ -419,7 +419,7 @@ struct RoomStateInitializer {
 void RoomStateInitializer::operator()(int id) {
 	GameObject* obj = obj_array[id];
 	if (obj->gravitable_) {
-		mp.add_to_fall_check(obj);
+		mp->add_to_fall_check(obj);
 	}
 	if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(obj)) {
 		sb->check_add_local_links(room_map, delta_frame);
@@ -434,13 +434,18 @@ void RoomMap::set_initial_state(bool editor_mode) {
 	// don't have to do a bunch of redundant checks during play
 	DeltaFrame dummy_df{};
 	MoveProcessor mp = MoveProcessor(nullptr, this, &dummy_df, nullptr, false);
-	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, mp, this, &dummy_df };
+	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, &mp, this, &dummy_df };
 	for (auto& layer : layers_) {
 		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
 	}
 	// In editor mode, don't check switches or gravity.
 	if (editor_mode) {
 		return;
+	}
+	for (auto& sig : signalers_) {
+		if (auto* p_sig = dynamic_cast<ParitySignaler*>(sig.get())) {
+			p_sig->check_send_initial(this, &dummy_df, &mp);
+		}
 	}
 	mp.perform_switch_checks(true);
 	mp.try_fall_step();
