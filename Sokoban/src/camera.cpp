@@ -7,6 +7,8 @@
 #include "roommap.h"
 #include "mapfile.h"
 
+#include <SFML/Graphics/Text.hpp>
+
 CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool null_child) :
 	label_{ label }, rect_{ rect }, priority_{ priority }, null_child_{ null_child } {}
 
@@ -96,14 +98,16 @@ CameraContext* NullCameraContext::deserialize(MapFileI& file) {
 }
 
 
-Camera::Camera(int w, int h) : width_{ w }, height_{ h },
-default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
-context_{}, loaded_contexts_{},
-context_map_{},
-target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
-target_rad_{ DEFAULT_CAM_RADIUS }, cur_rad_{ DEFAULT_CAM_RADIUS },
-target_tilt_{ DEFAULT_CAM_TILT }, cur_tilt_{ DEFAULT_CAM_TILT },
-target_rot_{ DEFAULT_CAM_ROTATION }, cur_rot_{ DEFAULT_CAM_ROTATION }
+Camera::Camera(int w, int h) :
+	active_label_{}, label_display_cooldown_{},
+	width_{ w }, height_{ h },
+	default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
+	context_{}, loaded_contexts_{},
+	context_map_{},
+	target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
+	target_rad_{ DEFAULT_CAM_RADIUS }, cur_rad_{ DEFAULT_CAM_RADIUS },
+	target_tilt_{ DEFAULT_CAM_TILT }, cur_tilt_{ DEFAULT_CAM_TILT },
+	target_rot_{ DEFAULT_CAM_ROTATION }, cur_rot_{ DEFAULT_CAM_ROTATION }
 {
 	context_ = &default_context_;
 	context_map_ = std::vector<std::vector<CameraContext*>>(w, std::vector<CameraContext*>(h, context_));
@@ -170,11 +174,21 @@ void Camera::set_target(Point3 vpos, FPoint3 rpos) {
 	CameraContext* new_context = context_map_[vpos.x][vpos.y];
 	if (!new_context->is_null()) {
 		context_ = new_context;
+		if (!context_->label_.empty()) {
+			active_label_ = context_->label_;
+		}
 	}
 	target_pos_ = context_->center(rpos);
 	target_rad_ = context_->radius(rpos);
 	target_tilt_ = context_->tilt(rpos);
 	target_rot_ = context_->rotation(rpos);
+}
+
+void Camera::set_label(std::string label) {
+	if (!label.empty() && active_label_ != label) {
+		active_label_ = label;
+		label_display_cooldown_ = 20;
+	}
 }
 
 void Camera::set_current_to_target() {

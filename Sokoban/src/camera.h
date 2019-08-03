@@ -58,6 +58,7 @@ public:
     void serialize(MapFileO& file);
     void update();
     void set_target(Point3, FPoint3);
+	void set_label(std::string);
     void set_current_to_target();
     double get_radius();
     FPoint3 get_pos();
@@ -69,8 +70,10 @@ public:
 	std::vector<std::unique_ptr<CameraContext>>& loaded_contexts();
 
 private:
-    int width_;
-    int height_;
+	std::string active_label_;
+	int label_display_cooldown_;
+	int width_;
+	int height_;
     ClampedCameraContext default_context_;
     CameraContext* context_;
     std::vector<std::unique_ptr<CameraContext>> loaded_contexts_;
