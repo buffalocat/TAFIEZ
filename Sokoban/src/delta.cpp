@@ -211,16 +211,16 @@ SwitchToggleDelta::SwitchToggleDelta(Switch* obj): obj_ {obj} {}
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
 void SwitchToggleDelta::revert() {
-    obj_->toggle();
+    obj_->toggle(false);
 }
 
 
-SignalerToggleDelta::SignalerToggleDelta(Signaler* sig): sig_ {sig} {}
+SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) : sig_{ sig }, count_{ count } {}
 
-SignalerToggleDelta::~SignalerToggleDelta() {}
+SignalerCountDelta::~SignalerCountDelta() {}
 
-void SignalerToggleDelta::revert() {
-    sig_->toggle();
+void SignalerCountDelta::revert() {
+    sig_->reset_count(count_);
 }
 
 

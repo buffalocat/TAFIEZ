@@ -227,14 +227,15 @@ private:
     Switch* obj_;
 };
 
-class SignalerToggleDelta: public Delta {
+class SignalerCountDelta : public Delta {
 public:
-    SignalerToggleDelta(Signaler*);
-    ~SignalerToggleDelta();
+	SignalerCountDelta(Signaler*, int count);
+    ~SignalerCountDelta();
     void revert();
 
 private:
     Signaler* sig_;
+	int count_;
 };
 
 

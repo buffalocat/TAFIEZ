@@ -89,6 +89,15 @@ void EditorState::main_loop() {
 		}
 	}
 
+	// Draw the editor tabs
+	for (int i = 0; i < tabs_.size(); ++i) {
+		auto& p = tabs_[i];
+		if (ImGui::Button((p.first + "##ROOT").c_str())) {
+			set_active_tab_by_index(i);
+		} ImGui::SameLine();
+	}
+	ImGui::Text(""); //This consumes the stray SameLine from the loop
+
     if (active_room_) {
         ImGui::Text(("Current Room: " + active_room_->room->name()).c_str());
         ImGui::Text("Current Height: %d", active_room_->cam_pos.z);
@@ -98,29 +107,23 @@ void EditorState::main_loop() {
             ImGui::Text("Showing Neighboring Layers (F to toggle)");
         }
         active_room_->changed = true;
-        handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
+        active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
+	}
+
+	// Draw the rest of the editor GUI
+	ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
+	active_tab_->main_loop(active_room_);
+	ImGui::EndChildFrame();
+	ImGui::End();
+
+	if (active_room_) {
+		handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
 		if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
 			if (handle_keyboard_input(active_room_->cam_pos, active_room_->room.get())) {
 				keyboard_cooldown_ = MAX_COOLDOWN;
 			}
 		}
-        active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
 	}
-
-    // Draw the editor tabs
-	for (int i = 0; i < tabs_.size(); ++i) {
-		auto& p = tabs_[i];
-        if (ImGui::Button((p.first + "##ROOT").c_str())) {
-			set_active_tab_by_index(i);
-        } ImGui::SameLine();
-    }
-    ImGui::Text(""); //This consumes the stray SameLine from the loop
-
-    // Draw the rest of the editor GUI
-    ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
-    active_tab_->main_loop(active_room_);
-    ImGui::EndChildFrame();
-    ImGui::End();
 }
 
 void EditorState::set_active_tab_by_index(int i) {

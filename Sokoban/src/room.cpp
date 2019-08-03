@@ -158,9 +158,12 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
         case MapCode::DoorDest:
             read_door_dest(file);
             break;
-        case MapCode::Signaler:
-            read_signaler(file);
+        case MapCode::ThresholdSignaler:
+            read_threshold_signaler(file);
             break;
+		case MapCode::ParitySignaler:
+			read_parity_signaler(file);
+			break;
 		case MapCode::WallRuns:
 			read_wall_runs(file);
 			break;
@@ -172,7 +175,6 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
             break;
         default :
             std::cout << "unknown state code! " << (int)b[0] << std::endl;
-            //throw std::runtime_error("Unknown State code encountered in .map file (it's probably corrupt/an old version)");
             break;
         }
     }
@@ -291,7 +293,7 @@ void Room::read_door_dest(MapFileI& file) {
     door->set_data(exit_pos, name_, exit_room);
 }
 
-void Room::read_signaler(MapFileI& file) {
+void Room::read_threshold_signaler(MapFileI& file) {
     unsigned char b[4];
     std::string label = file.read_str();
     // All signalers should have some sort of mnemonic
@@ -300,14 +302,36 @@ void Room::read_signaler(MapFileI& file) {
         label = "UNNAMED";
     }
     file.read(b, 4);
-    auto signaler = std::make_unique<Signaler>(label, b[0], b[1]);
+    auto signaler = std::make_unique<ThresholdSignaler>(label, b[0], b[1]);
     for (int i = 0; i < b[2]; ++i) {
-        signaler->push_switch_mutual(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()));
+        signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
     }
     for (int i = 0; i < b[3]; ++i) {
-        signaler->push_switchable_mutual(dynamic_cast<Switchable*>(map_->view(file.read_point3())->modifier()));
+        signaler->push_switchable(dynamic_cast<Switchable*>(map_->view(file.read_point3())->modifier()), true, 0);
     }
     map_->push_signaler(std::move(signaler));
+}
+
+void Room::read_parity_signaler(MapFileI& file) {
+	unsigned char b[3];
+	std::string label = file.read_str();
+	// All signalers should have some sort of mnemonic
+	// This forces the user of the editor to come up with names
+	if (label.empty()) {
+		label = "UNNAMED";
+	}
+	file.read(b, 3);
+	auto signaler = std::make_unique<ParitySignaler>(label, b[0], b[2]);
+	for (int i = 0; i < b[1]; ++i) {
+		signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
+	}
+	for (int i = 0; i < b[2]; ++i) {
+		int n_swbles = file.read_byte();
+		for (int j = 0; j < n_swbles; ++j) {
+			signaler->push_switchable(dynamic_cast<Switchable*>(map_->view(file.read_point3())->modifier()), true, i);
+		}
+	}
+	map_->push_signaler(std::move(signaler));
 }
 
 void Room::read_wall_positions(MapFileI& file) {

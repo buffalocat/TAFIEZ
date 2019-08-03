@@ -15,9 +15,10 @@ public:
     Switchable(GameObject* parent, bool persistent, bool default_state, bool active, bool waiting);
     virtual ~Switchable();
 
-    void push_signaler(Signaler*);
+    void push_signaler(Signaler*, int index);
 	void remove_signaler(Signaler*);
     void connect_to_signalers();
+
     bool state();
     virtual bool can_set_state(bool state, RoomMap*) = 0;
     void receive_signal(bool signal, RoomMap*, DeltaFrame*, MoveProcessor*);
@@ -30,11 +31,12 @@ public:
 	bool persistent_;
 
 protected:
+	int count_;
     bool default_;
     bool active_; // Opposite of default behavior
     bool waiting_; // Toggle active as soon as possible
 
-    std::vector<Signaler*> signalers_;
+    std::vector<std::pair<Signaler*, int>> signalers_;
 
     friend class ModifierTab;
     friend class SwitchableDelta;

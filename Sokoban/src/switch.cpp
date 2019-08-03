@@ -4,9 +4,6 @@
 #include "roommap.h"
 #include "signaler.h"
 
-
-
-
 Switch::Switch(GameObject* parent, bool persistent, bool active): ObjectModifier(parent),
 persistent_ {persistent}, active_ {active}, signalers_ {} {}
 
@@ -22,20 +19,22 @@ void Switch::remove_signaler(Signaler* signaler) {
 
 void Switch::connect_to_signalers() {
     for (Signaler* s : signalers_) {
-        s->push_switch(this);
+        s->push_switch(this, false);
     }
 }
 
-void Switch::toggle() {
+void Switch::toggle(bool propagate) {
     active_ = !active_;
-    for (auto& signaler : signalers_) {
-        signaler->receive_signal(active_);
-    }
+	if (propagate) {
+		for (auto& signaler : signalers_) {
+			signaler->receive_signal(active_);
+		}
+	}
 }
 
 void Switch::cleanup_on_destruction(RoomMap* room_map) {
     for (Signaler* s : signalers_) {
-        s->remove_object(this);
+        s->remove_switch(this);
     }
 }
 

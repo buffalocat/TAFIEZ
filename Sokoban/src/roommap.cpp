@@ -128,7 +128,7 @@ void RoomMap::just_take(GameObject* obj) {
 	at(obj->pos_) -= obj->id_;
 }
 
-void RoomMap::just_put(GameObject* obj) {
+void RoomMap::just_put(GameObject* obj) { 
 	at(obj->pos_) += obj->id_;
 	obj->setup_on_put(this);
 	obj->tangible_ = true;
@@ -479,7 +479,7 @@ void RoomMap::push_signaler(std::unique_ptr<Signaler> signaler) {
 	signalers_.push_back(std::move(signaler));
 }
 
-// NOTE: this function breaks the "locality" rule, but it's probably not a big deal.
+// TODO: make this *not* violate locality (i.e., keep a set of "maybe activated" signalers)
 void RoomMap::check_signalers(DeltaFrame* delta_frame, MoveProcessor* mp) {
 	for (auto& signaler : signalers_) {
 		signaler->check_send_signal(this, delta_frame, mp);

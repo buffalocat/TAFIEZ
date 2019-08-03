@@ -38,7 +38,7 @@ void PressSwitch::check_send_signal(RoomMap* room_map, DeltaFrame* delta_frame) 
     }
     if (should_toggle(room_map)) {
         delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
-        toggle();
+        toggle(true);
     }
 }
 

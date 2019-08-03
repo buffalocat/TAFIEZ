@@ -19,7 +19,7 @@ public:
     void connect_to_signalers();
     virtual void check_send_signal(RoomMap*, DeltaFrame*) = 0;
     virtual bool should_toggle(RoomMap*) = 0;
-    void toggle();
+    void toggle(bool propagate);
 
     virtual void cleanup_on_destruction(RoomMap* room_map);
     virtual void setup_on_undestruction(RoomMap* room_map);
