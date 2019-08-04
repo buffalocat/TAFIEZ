@@ -22,7 +22,7 @@ HorizontalStepProcessor::~HorizontalStepProcessor() {}
 
 void HorizontalStepProcessor::run() {
 	// Initialize all agents, mark as driven
-	Car* car = player_->get_car(map_, true);
+	Car* car = player_->car_riding();
 	if (car) {
 		car->parent_->driven_ = true;
 	}

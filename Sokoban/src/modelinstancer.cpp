@@ -5,9 +5,7 @@
 #include "vertexlayout.h"
 #include "shader.h"
 
-const int MAX_INSTANCES = 10000;
-
-ModelInstancer::ModelInstancer(std::string const& path) :
+ModelInstancer::ModelInstancer(std::string path) :
 	model_{ Model(path) },
 	instances_{}
 {
@@ -19,8 +17,6 @@ ModelInstancer::~ModelInstancer() {}
 void ModelInstancer::setup_buffer() {
 	glGenBuffers(1, &buffer_);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-	// TODO: let MAX_INSTANCES depend on model explicitly
-	glBufferData(GL_ARRAY_BUFFER, MAX_INSTANCES * sizeof(InstanceData), nullptr, GL_STATIC_DRAW);
 
 	for (int VAO : model_.gather_mesh_vao()) {
 		set_instance_attributes(VAO);
@@ -51,8 +47,7 @@ void ModelInstancer::set_instance_attributes(int VAO) {
 
 void ModelInstancer::fill_buffer() {
 	glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-	glBufferData(GL_ARRAY_BUFFER, MAX_INSTANCES * sizeof(InstanceData), nullptr, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, instances_.size() * sizeof(InstanceData), instances_.data());
+	glBufferData(GL_ARRAY_BUFFER, instances_.size() * sizeof(InstanceData), instances_.data(), GL_STATIC_DRAW);
 }
 
 void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color) {
@@ -63,20 +58,41 @@ void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture 
 	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
 }
 
-DynamicInstancer::DynamicInstancer(std::string const& path) : ModelInstancer(path) {}
+DynamicInstancer::DynamicInstancer(std::string path) : ModelInstancer(path) {}
 
 DynamicInstancer::~DynamicInstancer() {}
 
 void DynamicInstancer::draw() {
 	fill_buffer();
-	model_.draw((unsigned int)instances_.size());
+	model_.draw_instanced((unsigned int)instances_.size());
 	instances_.clear();
 }
 
-WallInstancer::WallInstancer(std::string const& path) : ModelInstancer(path) {}
+SingleDrawer::SingleDrawer(std::string path) : DynamicInstancer(path) {}
+
+SingleDrawer::~SingleDrawer() {}
+
+void SingleDrawer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color) {
+	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), COLOR_VECTORS[color] });
+	process_draw();
+}
+
+void SingleDrawer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color) {
+	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
+	process_draw();
+}
+
+void SingleDrawer::process_draw() {
+	glBindBuffer(GL_ARRAY_BUFFER, buffer_);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData), instances_.data(), GL_STATIC_DRAW);
+	model_.draw_single();
+	instances_.clear();
+}
+
+WallInstancer::WallInstancer(std::string path) : ModelInstancer(path) {}
 
 WallInstancer::~WallInstancer() {}
 
 void WallInstancer::draw() {
-	model_.draw((unsigned int)instances_.size());
+	model_.draw_instanced((unsigned int)instances_.size());
 }

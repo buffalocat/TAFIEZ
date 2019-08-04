@@ -6,7 +6,8 @@ class Model {
 public: 
 	Model(std::string const&);
 	~Model();
-	void draw(unsigned int instance_count = 1);
+	void draw_instanced(unsigned int instance_count);
+	void draw_single();
 	std::vector<int> gather_mesh_vao();
 private:
 	std::vector<Mesh> meshes;

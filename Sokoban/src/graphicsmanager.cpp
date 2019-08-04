@@ -16,7 +16,8 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	top_cube{ DynamicInstancer("resources/top_cube.obj") },
 	diamond{ DynamicInstancer("resources/diamond.obj") },
 	six_squares{ DynamicInstancer("resources/six_squares.obj") },
-	windshield{ DynamicInstancer("resources/windshield.obj") },
+	windshield{ SingleDrawer("resources/windshield.obj") },
+	windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") },
 	wall{ WallInstancer("resources/uniform_cube.obj") }
 {
 	text_->init();
@@ -66,6 +67,5 @@ void GraphicsManager::draw_world() {
 	top_cube.draw();
 	diamond.draw();
 	six_squares.draw();
-	windshield.draw();
 	wall.draw();
 }

@@ -160,6 +160,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	auto room = std::make_unique<Room>(name);
 	if (use_default_player) {
 		room->load_from_file(*objs_, file, &player_);
+		player_->validate_state(room->map());
 	} else {
 		room->load_from_file(*objs_, file, nullptr);
 	}

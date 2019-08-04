@@ -190,7 +190,7 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 
 	Player* player = nullptr;
 	room->load_from_file(*objs_, file, &player);
-	player->state_ = RidingState::Free;
+	player->set_free();
 	Point3 start_pos = player->pos_;
 	room->map()->set_initial_state(true);
 	room->set_cam_pos(start_pos, start_pos);
@@ -207,19 +207,9 @@ void EditorState::save_room(EditorRoom* eroom, bool commit) {
     MapFileO file{path};
 	RoomMap* room_map = eroom->map();
 	Player* player = dynamic_cast<Player*>(room_map->view(eroom->start_pos));
-	set_player_state(player, room_map);
+	player->set_strictest(room_map);
     eroom->room->write_to_file(file);
-	player->state_ = RidingState::Free;
-}
-
-void EditorState::set_player_state(Player* player, RoomMap* room_map) {
-	if (ColoredBlock* below = dynamic_cast<ColoredBlock*>(room_map->view(player->shifted_pos({ 0,0,-1 })))) {
-		if (dynamic_cast<Car*>(below->modifier())) {
-			player->state_ = RidingState::Riding;
-		} else {
-			player->state_ = RidingState::Bound;
-		}
-	}
+	player->set_free();
 }
 
 EditorRoom* EditorState::reload(EditorRoom* eroom) {

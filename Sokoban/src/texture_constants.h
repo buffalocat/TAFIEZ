@@ -15,7 +15,7 @@ enum class BlockTexture {
 	// Special
 	Blank = 16,
 	Wall = 17,
-	AccentSquare = 18,
+	Darker = 18,
 	// Double-size
 	Door = 32,
 	Cross = 33,

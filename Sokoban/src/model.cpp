@@ -73,8 +73,14 @@ std::vector<int> Model::gather_mesh_vao() {
 	return vao_vec;
 }
 
-void Model::draw(unsigned int instance_count) {
+void Model::draw_instanced(unsigned int instance_count) {
 	for (Mesh& mesh : meshes) {
-		mesh.draw(instance_count);
+		mesh.draw_instanced(instance_count);
+	}
+}
+
+void Model::draw_single() {
+	for (Mesh& mesh : meshes) {
+		mesh.draw_single();
 	}
 }

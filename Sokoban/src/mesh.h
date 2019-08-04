@@ -8,7 +8,9 @@ public:
 	std::vector<unsigned int> indices;
 	Mesh(std::vector<Vertex>&&, std::vector<unsigned int>&&);
 	~Mesh();
-	void draw(unsigned int instance_count);
+	void draw_instanced(unsigned int instance_count);
+	void draw_single();
+
 private:
 	unsigned int VAO, VBO, EBO;
 	void setup_mesh();

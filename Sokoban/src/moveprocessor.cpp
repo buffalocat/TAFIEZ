@@ -29,7 +29,7 @@ MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* room_map, Del
 MoveProcessor::~MoveProcessor() {}
 
 bool MoveProcessor::try_move(Point3 dir) {
-	if (player_->state_ == RidingState::Bound) {
+	if (player_->bound()) {
 		move_bound(dir);
 	} else {
 		move_general(dir);
@@ -108,7 +108,7 @@ void MoveProcessor::abort() {
 // Returns whether a color change occured
 bool MoveProcessor::color_change() {
 	// TODO: make this more general (in particular, be careful with the fall check!)
-	Car* car = player_->get_car(map_, false);
+	Car* car = player_->car_bound(map_);
 	if (!(car && car->cycle_color(false))) {
 		return false;
 	}
@@ -176,12 +176,10 @@ void MoveProcessor::plan_door_move(Door* door) {
 		if (GameObject* above = map_->view(door->pos_above())) {
 			if (Player* player = dynamic_cast<Player*>(above)) {
 				door_travelling_objs_.push_back({ player, player->pos_ });
-			} else if (Car* car = dynamic_cast<Car*>(above->modifier())) {
-				if (Player* player = dynamic_cast<Player*>(map_->view(car->pos_above()))) {
-					if (player->state_ == RidingState::Riding) {
-						door_travelling_objs_.push_back({ player, player->pos_ });
-						door_travelling_objs_.push_back({ above, above->pos_ });
-					}
+			} else if (Car* car = player->car_riding()) {
+				if (above->modifier() == car) {
+					door_travelling_objs_.push_back({ player, player->pos_ });
+					door_travelling_objs_.push_back({ above, above->pos_ });
 				}
 			}
 		}

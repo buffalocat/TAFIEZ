@@ -19,12 +19,16 @@ public:
 	void render_text(std::string text, float opacity);
     void draw_world();
 
+	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube;
 	DynamicInstancer top_cube;
 	DynamicInstancer diamond;
 	DynamicInstancer six_squares;
-	DynamicInstancer windshield;
 	WallInstancer wall;
+
+	// Models which aren't common enough to be worth instancing
+	SingleDrawer windshield;
+	SingleDrawer windshield_diamond;
 
 private:
 	unsigned int atlas_;

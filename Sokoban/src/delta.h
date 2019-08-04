@@ -242,12 +242,13 @@ private:
 
 class RidingStateDelta: public Delta {
 public:
-    RidingStateDelta(Player* player, RidingState state);
+    RidingStateDelta(Player* player, Car* car, RidingState state);
     ~RidingStateDelta();
     void revert();
 
 private:
     Player* player_;
+	Car* car_;
     RidingState state_;
 };
 
