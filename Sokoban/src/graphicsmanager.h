@@ -23,6 +23,7 @@ public:
 	DynamicInstancer top_cube;
 	DynamicInstancer diamond;
 	DynamicInstancer six_squares;
+	DynamicInstancer windshield;
 	WallInstancer wall;
 
 private:

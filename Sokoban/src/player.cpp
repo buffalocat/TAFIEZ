@@ -74,12 +74,27 @@ Car* Player::get_car(RoomMap* room_map, bool strict) {
 }
 
 void Player::draw(GraphicsManager* gfx) {
-    FPoint3 p = real_pos();	
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.7f * (state_ == RidingState::Riding)),
-		glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::Blank, color());
+    FPoint3 p = real_pos();
+	switch (state_) {
+	case RidingState::Riding:
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.7f), glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::Blank, color());
+		gfx->windshield.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Blank, GREY);
+		break;
+	case RidingState::Bound:
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::Blank, color());
+		break;
+	case RidingState::Free:
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::Blank, color());
+		break;
+	}
+	
+	// TODO: make it so the player *can't* have a modifier
     if (modifier_) {
         modifier()->draw(gfx, p);
     }
+	if (state_ == RidingState::Riding) {
+		
+	}
 }
 
 FPoint3 Player::cam_pos() {
