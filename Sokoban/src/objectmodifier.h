@@ -29,7 +29,7 @@ public:
 	virtual bool valid_parent(GameObject*);
 	GameObject* parent_;
 
-    virtual void draw(GraphicsManager*, FPoint3) {}
+	virtual void draw(GraphicsManager*, FPoint3);
 
     Point3 pos();
     Point3 shifted_pos(Point3 d);

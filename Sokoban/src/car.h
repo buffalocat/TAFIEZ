@@ -1,10 +1,8 @@
 #ifndef CAR_H
 #define CAR_H
 
-
 #include "objectmodifier.h"
 #include "colorcycle.h"
-#include "mapfile.h"
 
 class Car: public ObjectModifier {
 public:
@@ -24,6 +22,8 @@ public:
 
     bool cycle_color(bool undo);
 	int next_color();
+
+	void draw(GraphicsManager* gfx, FPoint3 p);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

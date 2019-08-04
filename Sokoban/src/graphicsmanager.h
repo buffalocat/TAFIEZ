@@ -15,7 +15,7 @@ public:
 
     GLFWwindow* window();
 
-    void set_PV(glm::mat4, glm::mat4);
+    void set_PV(glm::mat4);
 	void render_text(std::string text, float opacity);
     void draw_world();
 

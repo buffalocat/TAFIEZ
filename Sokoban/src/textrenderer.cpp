@@ -20,10 +20,10 @@ void TextRenderer::init() {
 	if (FT_Init_FreeType(&ft)) {
 		std::cout << "Failed to initialize FreeType" << std::endl;
 	}
-	if (FT_New_Face(ft, "resources/quicksand/Quicksand-BoldItalic.otf", 0, &face)) {
+	if (FT_New_Face(ft, "resources/kalam/Kalam-Bold.ttf", 0, &face)) {
 		std::cout << "Failed to load the font" << std::endl;
 	}
-	FT_Set_Pixel_Sizes(face, 0, 72);
+	FT_Set_Pixel_Sizes(face, 0, 368);
 
 	// Initialize the texture
 	glGenTextures(1, &tex);
@@ -43,7 +43,7 @@ void TextRenderer::init() {
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, Position));
-	
+
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, TexCoords));
 
@@ -53,6 +53,9 @@ void TextRenderer::init() {
 void TextRenderer::render(const char* text, float x, float y, float sx, float sy, float opacity) {
 	shader_.use();
 	shader_.setVec4("color", glm::vec4(0.2, 1, 0.8, opacity));
+
+	sx *= 0.25f;
+	sy *= 0.25f;
 
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(VAO);
@@ -72,7 +75,7 @@ void TextRenderer::render(const char* text, float x, float y, float sx, float sy
 		text_width += g->advance.x >> 6;
 	}
 
-	x -= text_width * sx/2;
+	x -= text_width * sx / 2;
 
 	for (p = text; *p; p++) {
 		if (FT_Load_Char(face, *p, FT_LOAD_RENDER)) {
@@ -104,7 +107,7 @@ void TextRenderer::render(const char* text, float x, float y, float sx, float sy
 		};
 		glBufferData(GL_ARRAY_BUFFER, sizeof box, box, GL_DYNAMIC_DRAW);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		
+
 		x += (g->advance.x >> 6) * sx;
 		y += (g->advance.y >> 6) * sy;
 	}

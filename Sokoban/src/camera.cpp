@@ -190,7 +190,7 @@ void Camera::set_target(Point3 vpos, FPoint3 rpos) {
 void Camera::update_label(std::string label) {
 	if (!label.empty() && active_label_ != label) {
 		active_label_ = label;
-		label_display_cooldown_ = 120;
+		label_display_cooldown_ = AREA_NAME_DISPLAY_FRAMES;
 	}
 }
 
@@ -200,10 +200,10 @@ void Camera::draw_label(GraphicsManager* gfx) {
 	}
 	--label_display_cooldown_;
 	float opacity = 0;
-	if (label_display_cooldown_ > 110) {
-		opacity = (120 - label_display_cooldown_) / 10.0f;
-	} else if (label_display_cooldown_ < 10) {
-		opacity = label_display_cooldown_ / 10.0f;
+	if (label_display_cooldown_ > AREA_NAME_DISPLAY_FRAMES - AREA_NAME_FADE_FRAMES) {
+		opacity = (float)(AREA_NAME_DISPLAY_FRAMES - label_display_cooldown_) / (float)AREA_NAME_FADE_FRAMES;
+	} else if (label_display_cooldown_ < AREA_NAME_FADE_FRAMES) {
+		opacity = (float)label_display_cooldown_ / (float)AREA_NAME_FADE_FRAMES;
 	} else {
 		opacity = 1;
 	}

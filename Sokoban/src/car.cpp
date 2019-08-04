@@ -5,6 +5,8 @@
 #include "roommap.h"
 #include "player.h"
 #include "texture_constants.h"
+#include "mapfile.h"
+#include "graphicsmanager.h"
 
 
 Car::Car(GameObject* parent, ColorCycle color_cycle): ObjectModifier(parent), color_cycle_ {color_cycle} {}
@@ -53,6 +55,12 @@ bool Car::cycle_color(bool undo) {
 
 int Car::next_color() {
 	return color_cycle_.next_color();
+}
+
+void Car::draw(GraphicsManager* gfx, FPoint3 p) {
+	if (int color = next_color()) {
+		gfx->six_squares.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::Blank, color);
+	}
 }
 
 std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

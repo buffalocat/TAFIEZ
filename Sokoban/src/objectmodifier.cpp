@@ -46,6 +46,8 @@ BlockTexture ObjectModifier::texture() {
 	return BlockTexture::Default;
 }
 
+void ObjectModifier::draw(GraphicsManager* gfx, FPoint3 p) {}
+
 void ObjectModifier::setup_on_put(RoomMap* room_map) {}
 
 void ObjectModifier::cleanup_on_take(RoomMap* room_map) {}

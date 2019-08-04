@@ -73,9 +73,7 @@ void PushBlock::draw(GraphicsManager* gfx) {
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color());
     draw_force_indicators(gfx, p, 1.1f);
 	if (auto* car = dynamic_cast<Car*>(modifier())) {
-		if (int color = car->next_color()) {
-			gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::AccentSquare, color);
-		}
+		
 	}
     if (modifier_) {
         modifier()->draw(gfx, p);

@@ -15,11 +15,10 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	cube{ DynamicInstancer("resources/uniform_cube.obj") },
 	top_cube{ DynamicInstancer("resources/top_cube.obj") },
 	diamond{ DynamicInstancer("resources/diamond.obj") },
-	six_squares{ DynamicInstancer("resources/uniform_cube.obj") },
+	six_squares{ DynamicInstancer("resources/six_squares.obj") },
 	wall{ WallInstancer("resources/uniform_cube.obj") }
 {
 	text_->init();
-
 	instanced_shader_.use();
 	load_texture_atlas();
 	instanced_shader_.setFloat("texScale", 1.0f / TEXTURE_ATLAS_SIZE);
@@ -46,9 +45,8 @@ void GraphicsManager::load_texture_atlas() {
 	stbi_image_free(texture_data);
 }
 
-void GraphicsManager::set_PV(glm::mat4 projection, glm::mat4 view) {
+void GraphicsManager::set_PV(glm::mat4 PV) {
 	instanced_shader_.use();
-	glm::mat4 PV = projection * view;
 	if (PV != PV_) {
 		PV_ = PV;
 		instanced_shader_.setMat4("PV", PV);
@@ -62,12 +60,10 @@ void GraphicsManager::render_text(std::string text, float opacity) {
 }
 
 void GraphicsManager::draw_world() {
-	glFrontFace(GL_CW);
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	cube.draw();
 	top_cube.draw();
 	diamond.draw();
 	six_squares.draw();
 	wall.draw();
-	glFrontFace(GL_CCW);
 }

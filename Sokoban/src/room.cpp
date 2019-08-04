@@ -111,7 +111,7 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ort
         projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
     }
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
-    gfx->set_PV(projection, view);
+    gfx->set_PV(projection * view);
 }
 
 void Room::extend_by(Point3 d) {
