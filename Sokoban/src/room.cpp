@@ -64,7 +64,10 @@ void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
-	gfx->draw();
+	gfx->draw_world();
+	if (!ortho) {
+		camera_->draw_label(gfx);
+	}
 }
 
 void Room::draw(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer) {
@@ -74,7 +77,10 @@ void Room::draw(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
-	gfx->draw();
+	gfx->draw_world();
+	if (!ortho) {
+		camera_->draw_label(gfx);
+	}
 }
 
 void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho) {

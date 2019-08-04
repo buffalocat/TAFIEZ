@@ -21,7 +21,14 @@ void DoorSelectState::main_loop() {
     }
 
     handle_mouse_input(cam_pos_, room_);
-    handle_keyboard_input(cam_pos_, room_);
+	if (keyboard_cooldown_ > 0) {
+		--keyboard_cooldown_;
+	} else if (!want_capture_keyboard()) {
+		if (handle_keyboard_input(cam_pos_, room_)) {
+			keyboard_cooldown_ = MAX_COOLDOWN;
+		}
+	}
+
     room_->draw(gfx_, cam_pos_, true, one_layer_);
 
     display_hover_pos_object(cam_pos_, room_->map());

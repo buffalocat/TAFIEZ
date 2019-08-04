@@ -2,15 +2,15 @@
 
 #include "camera.h"
 
+#include "delta.h"
+#include "graphicsmanager.h"
 #include "common_constants.h"
 #include "common_enums.h"
 #include "roommap.h"
 #include "mapfile.h"
 
-#include <SFML/Graphics/Text.hpp>
-
-CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool null_child) :
-	label_{ label }, rect_{ rect }, priority_{ priority }, null_child_{ null_child } {}
+CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child) :
+	label_{ label }, rect_{ rect }, priority_{ priority }, named_area_{ named_area }, null_child_{ null_child } {}
 
 CameraContext::~CameraContext() {}
 
@@ -34,9 +34,10 @@ double CameraContext::rotation(FPoint3 pos) {
 	return DEFAULT_CAM_ROTATION;
 }
 
-ClampedCameraContext::ClampedCameraContext(std::string label, IntRect rect, int priority, bool null_child,
+ClampedCameraContext::ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
 	double radius, double tilt, FloatRect center) :
-	CameraContext(label, rect, priority, null_child), rad_{ radius }, tilt_{ tilt }, center_{ center } {}
+	CameraContext(label, rect, priority, named_area, null_child),
+	rad_{ radius }, tilt_{ tilt }, center_{ center } {}
 
 ClampedCameraContext::~ClampedCameraContext() {}
 
@@ -58,7 +59,7 @@ double ClampedCameraContext::tilt(FPoint3 pos) {
 
 void ClampedCameraContext::serialize(MapFileO& file) {
 	file << CameraCode::Clamped;
-	file << label_ << rect_ << priority_ << null_child_;
+	file << label_ << rect_ << priority_ << named_area_ << null_child_;
 	file << rad_ << tilt_ << center_;
 }
 
@@ -66,15 +67,15 @@ CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
 	std::string label = file.read_str();
 	IntRect rect;
 	int priority;
-	bool null_child;
+	bool named_area, null_child;
 	double rad, tilt;
 	FloatRect vis;
-	file >> rect >> priority >> null_child >> rad >> tilt >> vis;
-	return new ClampedCameraContext(label, rect, priority, null_child, rad, tilt, vis);
+	file >> rect >> priority >> named_area >> null_child >> rad >> tilt >> vis;
+	return new ClampedCameraContext(label, rect, priority, named_area, null_child, rad, tilt, vis);
 }
 
-NullCameraContext::NullCameraContext(std::string label, IntRect rect, int priority, bool independent) :
-	CameraContext(label, rect, priority, false), independent_{ independent } {}
+NullCameraContext::NullCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool independent) :
+	CameraContext(label, rect, priority, named_area, false), independent_{ independent } {}
 
 NullCameraContext::~NullCameraContext() {}
 
@@ -85,7 +86,7 @@ bool NullCameraContext::is_null() {
 void NullCameraContext::serialize(MapFileO& file) {
 	if (independent_) {
 		file << (unsigned char)CameraCode::Null;
-		file << label_ << rect_ << priority_;
+		file << label_ << rect_ << named_area_ << priority_;
 	}
 }
 
@@ -93,15 +94,17 @@ CameraContext* NullCameraContext::deserialize(MapFileI& file) {
 	std::string label = file.read_str();
 	IntRect rect;
 	int priority;
-	file >> rect >> priority;
-	return new NullCameraContext(label, rect, priority, true);
+	bool named_area;
+	file >> rect >> priority >> named_area;
+	return new NullCameraContext(label, rect, priority, named_area, true);
 }
 
 
 Camera::Camera(int w, int h) :
 	active_label_{}, label_display_cooldown_{},
 	width_{ w }, height_{ h },
-	default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
+	default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, false,
+		DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
 	context_{}, loaded_contexts_{},
 	context_map_{},
 	target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
@@ -134,7 +137,7 @@ void Camera::push_context(std::unique_ptr<CameraContext> context) {
 	if (context->null_child_) {
 		IntRect border_rect{ std::max(0, rect.xa - 1), std::max(0, rect.ya - 1),
 			std::min(width_ - 1, rect.xb + 1), std::min(height_ - 1, rect.yb + 1) };
-		push_context(std::make_unique<NullCameraContext>(context->label_ + "(NULL)", border_rect, priority - 1, false));
+		push_context(std::make_unique<NullCameraContext>(context->label_ + "(NULL)", border_rect, priority - 1, false, false));
 	}
 	loaded_contexts_.push_back(std::move(context));
 }
@@ -172,11 +175,11 @@ double Camera::get_rotation() {
 
 void Camera::set_target(Point3 vpos, FPoint3 rpos) {
 	CameraContext* new_context = context_map_[vpos.x][vpos.y];
+	if (new_context->named_area_) {
+		update_label(new_context->label_);
+	}
 	if (!new_context->is_null()) {
 		context_ = new_context;
-		if (!context_->label_.empty()) {
-			active_label_ = context_->label_;
-		}
 	}
 	target_pos_ = context_->center(rpos);
 	target_rad_ = context_->radius(rpos);
@@ -184,11 +187,27 @@ void Camera::set_target(Point3 vpos, FPoint3 rpos) {
 	target_rot_ = context_->rotation(rpos);
 }
 
-void Camera::set_label(std::string label) {
+void Camera::update_label(std::string label) {
 	if (!label.empty() && active_label_ != label) {
 		active_label_ = label;
-		label_display_cooldown_ = 20;
+		label_display_cooldown_ = 120;
 	}
+}
+
+void Camera::draw_label(GraphicsManager* gfx) {
+	if (label_display_cooldown_ == 0) {
+		return;
+	}
+	--label_display_cooldown_;
+	float opacity = 0;
+	if (label_display_cooldown_ > 110) {
+		opacity = (120 - label_display_cooldown_) / 10.0f;
+	} else if (label_display_cooldown_ < 10) {
+		opacity = label_display_cooldown_ / 10.0f;
+	} else {
+		opacity = 1;
+	}
+	gfx->render_text(active_label_, opacity);
 }
 
 void Camera::set_current_to_target() {

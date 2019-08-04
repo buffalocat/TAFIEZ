@@ -67,9 +67,9 @@ DynamicInstancer::DynamicInstancer(std::string const& path) : ModelInstancer(pat
 
 DynamicInstancer::~DynamicInstancer() {}
 
-void DynamicInstancer::draw(Shader shader) {
+void DynamicInstancer::draw() {
 	fill_buffer();
-	model_.draw(shader, (unsigned int)instances_.size());
+	model_.draw((unsigned int)instances_.size());
 	instances_.clear();
 }
 
@@ -77,6 +77,6 @@ WallInstancer::WallInstancer(std::string const& path) : ModelInstancer(path) {}
 
 WallInstancer::~WallInstancer() {}
 
-void WallInstancer::draw(Shader shader) {
-	model_.draw(shader, (unsigned int)instances_.size());
+void WallInstancer::draw() {
+	model_.draw((unsigned int)instances_.size());
 }

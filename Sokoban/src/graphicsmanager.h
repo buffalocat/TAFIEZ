@@ -2,20 +2,22 @@
 #define GRAPHICSMANAGER_H
 
 #include "color_constants.h"
-#include "shader.h"
 
 #include "modelinstancer.h"
 
 struct GLFWwindow;
+class TextRenderer;
 
 class GraphicsManager {
 public:
     GraphicsManager(GLFWwindow*);
+	~GraphicsManager();
+
     GLFWwindow* window();
 
     void set_PV(glm::mat4, glm::mat4);
-
-    void draw();
+	void render_text(std::string text, float opacity);
+    void draw_world();
 
 	DynamicInstancer cube;
 	DynamicInstancer top_cube;
@@ -24,8 +26,9 @@ public:
 	WallInstancer wall;
 
 private:
+	unsigned int atlas_;
     GLFWwindow* window_;
-    Shader shader_;
+	std::unique_ptr<TextRenderer> text_;
 	Shader instanced_shader_;
 
 	glm::mat4 PV_;

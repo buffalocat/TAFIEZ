@@ -25,11 +25,12 @@ static CameraContext* selected_cam = nullptr;
 
 static IntRect* rect_ptr = nullptr;
 static int* priority_ptr = nullptr;
+static bool* named_area_ptr = nullptr;
 static bool* null_child_ptr = nullptr;
 static double* rad_ptr = nullptr;
 static double* tilt_ptr = nullptr;
 
-static bool bind_vis_to_area = true;
+static bool bind_vis_to_area = false;
 static double max_radius = DEFAULT_CAM_RADIUS;
 
 static FloatRect computed_center = {0,0,0,0};
@@ -109,6 +110,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 		if (selected_cam) {
 			rect_ptr = &selected_cam->rect_;
 			priority_ptr = &selected_cam->priority_;
+			named_area_ptr = &selected_cam->named_area_;
 			null_child_ptr = &selected_cam->null_child_;
 			if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
 				rad_ptr = &clamped->rad_;
@@ -125,6 +127,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	} else {
 		rect_ptr = &rect_;
 		priority_ptr = &priority_;
+		named_area_ptr = &named_area_;
 		null_child_ptr = &null_child_;
 		rad_ptr = &rad_;
 		tilt_ptr = &tilt_;
@@ -171,6 +174,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	}
 	*rad_ptr = compute_actual_radius(vis_);
 	ImGui::Text("Actual Radius: %f", *rad_ptr);
+	ImGui::Checkbox("Named Area?##CAMERA", named_area_ptr);
 	ImGui::Checkbox("Null Boundary?##CAMERA", null_child_ptr);
 
 	if (inspect_mode_) {
@@ -180,7 +184,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	} else {
 		if (ImGui::Button("Make CameraContext##CAMERA")) {
 			compute_center_from_vis(vis_);
-			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, null_child_, rad_, tilt_, compute_center_from_vis(vis_)));
+			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, named_area_, null_child_, rad_, tilt_, compute_center_from_vis(vis_)));
 		}	
 	}
 }

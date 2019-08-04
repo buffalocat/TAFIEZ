@@ -3,6 +3,7 @@
 
 #include "point.h"
 
+class DeltaFrame;
 class GameObjectArray;
 class GraphicsManager;
 class RoomMap;

@@ -24,6 +24,7 @@ private:
 	std::string label_;
 	IntRect rect_;
 	int priority_;
+	bool named_area_;
 	bool null_child_;
 	double rad_, tilt_;
 	FloatRect vis_;

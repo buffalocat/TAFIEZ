@@ -3,13 +3,15 @@
 
 #include "point.h"
 
+class DeltaFrame;
 class RoomMap;
 class MapFileI;
 class MapFileO;
+class GraphicsManager;
 
 class CameraContext {
 public:
-    CameraContext(std::string label, IntRect rect, int priority, bool null_child);
+    CameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child);
     virtual ~CameraContext() = 0;
     virtual bool is_null();
     virtual FPoint3 center(FPoint3);
@@ -22,12 +24,13 @@ public:
 
 	IntRect rect_;
     int priority_;
+	bool named_area_;
 	bool null_child_;
 };
 
 class ClampedCameraContext: public CameraContext {
 public:
-    ClampedCameraContext(std::string label, IntRect rect, int priority, bool null_child,
+    ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
 		double radius, double tilt, FloatRect vis);
     ~ClampedCameraContext();
     FPoint3 center(FPoint3);
@@ -43,7 +46,7 @@ public:
 
 class NullCameraContext: public CameraContext {
 public:
-    NullCameraContext(std::string label, IntRect rect, int priority, bool independent);
+    NullCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool independent);
     ~NullCameraContext();
     bool is_null();
     void serialize(MapFileO& file);
@@ -58,7 +61,8 @@ public:
     void serialize(MapFileO& file);
     void update();
     void set_target(Point3, FPoint3);
-	void set_label(std::string);
+	void update_label(std::string);
+	void draw_label(GraphicsManager*);
     void set_current_to_target();
     double get_radius();
     FPoint3 get_pos();
@@ -86,6 +90,8 @@ private:
     double cur_tilt_;
     double target_rot_;
     double cur_rot_;
+
+	friend class LabelChangeDelta;
 };
 
 double damp_avg(double target, double cur);

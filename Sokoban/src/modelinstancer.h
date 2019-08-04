@@ -2,7 +2,6 @@
 
 #include "model.h"
 
-class Shader;
 struct InstanceData;
 enum class BlockTexture;
 
@@ -12,7 +11,7 @@ public:
 	virtual ~ModelInstancer();
 	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color);
 	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color);
-	virtual void draw(Shader shader) = 0;
+	virtual void draw() = 0;
 	void set_instance_attributes(int VAO);
 protected:
 	Model model_;
@@ -26,12 +25,12 @@ class DynamicInstancer : public ModelInstancer {
 public:
 	DynamicInstancer(std::string const& path);
 	~DynamicInstancer();
-	void draw(Shader shader);
+	void draw();
 };
 
 class WallInstancer : public ModelInstancer {
 public:
 	WallInstancer(std::string const& path);
 	~WallInstancer();
-	void draw(Shader shader);
+	void draw();
 };

@@ -1,13 +1,12 @@
 #pragma once
 
 class Mesh;
-class Shader;
 
 class Model {
 public: 
 	Model(std::string const&);
 	~Model();
-	void draw(Shader shader, unsigned int instance_count = 1);
+	void draw(unsigned int instance_count = 1);
 	std::vector<int> gather_mesh_vao();
 private:
 	std::vector<Mesh> meshes;
