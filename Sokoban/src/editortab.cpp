@@ -27,3 +27,17 @@ void color_button(int color_id) {
 	glm::vec4 color = COLOR_VECTORS[color_id];
 	ImGui::ColorButton("##COLOR_BUTTON", ImVec4(color.x, color.y, color.z, color.w), 0, ImVec2(40, 40));
 }
+
+void file_choice(std::filesystem::path path, char* output, int max_size) {
+	for (auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			std::string file_name = entry.path().stem().string();
+			if (ImGui::Selectable(file_name.c_str())) {
+				if (snprintf(output, max_size, file_name.c_str()) >= max_size) {
+					std::cout << "The file name '" << output << "' is too large" << std::endl;
+				}
+				break;
+			}
+		}
+	}
+}

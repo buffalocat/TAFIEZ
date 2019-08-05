@@ -10,6 +10,9 @@ public:
     ~SaveLoadTab();
     void main_loop(EditorRoom*);
     void handle_left_click(EditorRoom*, Point3);
+
+	void map_load_and_create();
+	void loaded_rooms_listbox();
 };
 
 #endif // SAVELOADTAB_H

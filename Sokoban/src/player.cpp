@@ -145,15 +145,15 @@ void Player::draw(GraphicsManager* gfx) {
 			player_model = &gfx->diamond;
 			windshield_model = &gfx->windshield_diamond;
 		}
-		player_model->push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::Blank, color());
+		player_model->push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::LightEdges, color());
 		windshield_model->push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Darker, car_->parent_->color());
 		break;
 	}
 	case RidingState::Bound:
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::Blank, color());
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
 		break;
 	case RidingState::Free:
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::Blank, color());
+		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
 		break;
 	}
 	

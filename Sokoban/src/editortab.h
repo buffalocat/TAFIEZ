@@ -25,6 +25,6 @@ protected:
 };
 
 void color_button(int color_id);
-
+void file_choice(std::filesystem::path path, char* output, int max_size);
 
 #endif // EDITORTAB_H
