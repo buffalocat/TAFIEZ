@@ -29,7 +29,7 @@ void DoorSelectState::main_loop() {
 		}
 	}
 
-    room_->draw(gfx_, cam_pos_, true, one_layer_);
+    room_->draw_at_pos(gfx_, cam_pos_, true, one_layer_);
 
     display_hover_pos_object(cam_pos_, room_->map());
 

@@ -24,7 +24,6 @@ protected:
 	bool inspect_mode_;
 };
 
-void clamp(int* n, int a, int b);
 void color_button(int color_id);
 
 

@@ -57,23 +57,19 @@ Camera* Room::camera() {
 	return camera_.get();
 }
 
-void Room::draw(GraphicsManager* gfx, Point3 cam_pos, bool ortho, bool one_layer) {
-    update_view(gfx, cam_pos, cam_pos, ortho);
-    if (one_layer) {
-        map_->draw_layer(gfx, cam_pos.z);
-    } else {
-        map_->draw(gfx, camera_->get_rotation());
-    }
-	gfx->draw_world();
-	if (!ortho) {
-		camera_->draw_label(gfx);
-	}
+void Room::draw_at_pos(GraphicsManager* gfx, Point3 pos, bool ortho, bool one_layer) {
+	draw(gfx, pos, pos, ortho, one_layer);
 }
 
-void Room::draw(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer) {
-    update_view(gfx, player->pos_, player->cam_pos(), ortho);
+void Room::draw_at_player(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer) {
+	draw(gfx, player->pos_, player->cam_pos(), ortho, one_layer);
+}
+
+void Room::draw(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho, bool one_layer) {
+	gfx->setup_graphics();
+    update_view(gfx, vpos, rpos, ortho);
     if (one_layer) {
-        map_->draw_layer(gfx, player->pos_.z);
+        map_->draw_layer(gfx, vpos.z);
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
@@ -114,13 +110,14 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ort
     gfx->set_PV(projection * view);
 }
 
-void Room::extend_by(Point3 d) {
-    map_->extend_by(d);
-}
-
 void Room::shift_by(Point3 d) {
     map_->shift_by(d);
-    // TODO: shift camera rects also?
+	camera_->shift_by(d);
+}
+
+void Room::extend_by(Point3 d) {
+	map_->extend_by(d);
+	camera_->extend_by(d);
 }
 
 void Room::write_to_file(MapFileO& file) {

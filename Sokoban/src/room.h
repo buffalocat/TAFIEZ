@@ -27,8 +27,9 @@ public:
     void write_to_file(MapFileO& file);
     void load_from_file(GameObjectArray& objs, MapFileI& file, Player** player_ptr);
 
-    void draw(GraphicsManager*, Point3 cam_pos, bool ortho, bool one_layer);
-    void draw(GraphicsManager*, Player* target, bool ortho, bool one_layer);
+    void draw_at_pos(GraphicsManager*, Point3 cam_pos, bool ortho, bool one_layer);
+    void draw_at_player(GraphicsManager*, Player* target, bool ortho, bool one_layer);
+	void draw(GraphicsManager*, Point3 vpos, FPoint3 rpos, bool ortho, bool one_layer);
     void update_view(GraphicsManager*, Point3 vpos, FPoint3 rpos, bool ortho);
 
     void extend_by(Point3 d);

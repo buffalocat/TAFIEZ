@@ -107,7 +107,7 @@ void EditorState::main_loop() {
             ImGui::Text("Showing Neighboring Layers (F to toggle)");
         }
         active_room_->changed = true;
-        active_room_->room->draw(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
+        active_room_->room->draw_at_pos(gfx_, active_room_->cam_pos, ortho_cam_, one_layer_);
 	}
 
 	if (active_room_) {

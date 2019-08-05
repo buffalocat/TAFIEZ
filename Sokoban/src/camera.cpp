@@ -34,6 +34,24 @@ double CameraContext::rotation(FPoint3 pos) {
 	return DEFAULT_CAM_ROTATION;
 }
 
+void CameraContext::shift_by(Point3 d, int width, int height) {
+	rect_.xa += d.x;
+	clamp(&rect_.xa, 0, width - 1);
+	rect_.xb += d.x;
+	clamp(&rect_.xb, 0, width - 1);
+	rect_.ya += d.y;
+	clamp(&rect_.ya, 0, height - 1);
+	rect_.yb += d.y;
+	clamp(&rect_.yb, 0, height - 1);
+}
+
+void CameraContext::extend_by(Point3 d, int width, int height) {
+	clamp(&rect_.xa, 0, width - 1);
+	clamp(&rect_.xb, 0, width - 1);
+	clamp(&rect_.ya, 0, height - 1);
+	clamp(&rect_.yb, 0, height - 1);
+}
+
 ClampedCameraContext::ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
 	double radius, double tilt, FloatRect center) :
 	CameraContext(label, rect, priority, named_area, null_child),
@@ -73,6 +91,15 @@ CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
 	file >> rect >> priority >> named_area >> null_child >> rad >> tilt >> vis;
 	return new ClampedCameraContext(label, rect, priority, named_area, null_child, rad, tilt, vis);
 }
+
+void ClampedCameraContext::shift_by(Point3 d, int width, int height) {
+	CameraContext::shift_by(d, width, height);
+	center_.xa += d.x;
+	center_.xb += d.x;
+	center_.ya += d.y;
+	center_.yb += d.y;
+}
+
 
 NullCameraContext::NullCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool independent) :
 	CameraContext(label, rect, priority, named_area, false), independent_{ independent } {}
@@ -226,6 +253,22 @@ void Camera::update() {
 
 std::vector<std::unique_ptr<CameraContext>>& Camera::loaded_contexts() {
 	return loaded_contexts_;
+}
+
+void Camera::shift_by(Point3 d) {
+	width_ += d.x;
+	height_ += d.y;
+	for (auto& context : loaded_contexts_) {
+		context->shift_by(d, width_, height_);
+	}
+}
+
+void Camera::extend_by(Point3 d) {
+	width_ += d.x;
+	height_ += d.y;
+	for (auto& context : loaded_contexts_) {
+		context->extend_by(d, width_, height_);
+	}
 }
 
 // We have a few magic numbers for tweaking camera smoothness

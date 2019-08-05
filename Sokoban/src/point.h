@@ -1,6 +1,8 @@
 #ifndef POINT_H
 #define POINT_H
 
+void clamp(int* n, int a, int b);
+
 // Standard Points serialize their components as unsigned chars
 struct Point2 {
     int x;

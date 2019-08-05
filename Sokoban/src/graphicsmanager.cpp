@@ -47,8 +47,12 @@ void GraphicsManager::load_texture_atlas() {
 	stbi_image_free(texture_data);
 }
 
-void GraphicsManager::set_PV(glm::mat4 PV) {
+void GraphicsManager::setup_graphics() {
 	instanced_shader_.use();
+	glBindTexture(GL_TEXTURE_2D, atlas_);
+}
+
+void GraphicsManager::set_PV(glm::mat4 PV) {
 	if (PV != PV_) {
 		PV_ = PV;
 		instanced_shader_.setMat4("PV", PV);
@@ -62,7 +66,6 @@ void GraphicsManager::render_text(std::string text, float opacity) {
 }
 
 void GraphicsManager::draw_world() {
-	glBindTexture(GL_TEXTURE_2D, atlas_);
 	cube.draw();
 	top_cube.draw();
 	diamond.draw();

@@ -60,14 +60,14 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 		editor_->commit_all();
 	}
 
-	ImGui::Separator();
-
 	if (!eroom) {
 		if (ImGui::Button("Load/Save Cycle All Maps in Main")) {
 			editor_->load_save_cycle();
 		}
 		return;
 	}
+
+	ImGui::Separator();
 
 	if (ImGui::Button("Save Current Map##SAVELOAD")) {
 		editor_->commit_current_room();
@@ -81,6 +81,32 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 
     Point3 cur_room_dims { eroom->map()->width_, eroom->map()->height_, eroom->map()->depth_};
     ImGui::Text("Current Room Dimensions: (%d,%d,%d)", cur_room_dims.x, cur_room_dims.y, cur_room_dims.z);
+
+	static int shift_width;
+	static int shift_height;
+	static int shift_depth;
+
+	ImGui::InputInt("Shift Width##SAVELOAD", &shift_width);
+	ImGui::InputInt("Shift Height##SAVELOAD", &shift_height);
+	ImGui::InputInt("Shift Depth##SAVELOAD", &shift_depth);
+
+	clamp(&shift_width, 1 - cur_room_dims.x, MAX_ROOM_DIMS - cur_room_dims.x);
+	clamp(&shift_height, 1 - cur_room_dims.y, MAX_ROOM_DIMS - cur_room_dims.y);
+	clamp(&shift_depth, 1 - cur_room_dims.z, MAX_ROOM_DIMS - cur_room_dims.z);
+
+	if (ImGui::Button("Shift room?##SAVELOAD")) {
+		Point3 dpos = { shift_width, shift_height, shift_depth };
+		eroom->room->shift_by(dpos);
+		shift_width = 0;
+		shift_height = 0;
+		shift_depth = 0;
+		eroom->start_pos += dpos;
+		eroom->room->offset_pos_ += dpos;
+		if (!eroom->map()->valid(eroom->start_pos)) {
+			eroom->start_pos = { 0,0,0 };
+		}
+		eroom = editor_->reload(eroom);
+	}
 
     static int extend_width;
     static int extend_height;
@@ -100,32 +126,6 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
         extend_width = 0;
         extend_height = 0;
         extend_depth = 0;
-        if (!eroom->map()->valid(eroom->start_pos)) {
-            eroom->start_pos = {0,0,0};
-        }
-        eroom = editor_->reload(eroom);
-    }
-
-    static int shift_width;
-    static int shift_height;
-    static int shift_depth;
-
-    ImGui::InputInt("Shift Width##SAVELOAD", &shift_width);
-    ImGui::InputInt("Shift Height##SAVELOAD", &shift_height);
-    ImGui::InputInt("Shift Depth##SAVELOAD", &shift_depth);
-
-    clamp(&shift_width, 1 - cur_room_dims.x, MAX_ROOM_DIMS - cur_room_dims.x);
-    clamp(&shift_height, 1 - cur_room_dims.y, MAX_ROOM_DIMS - cur_room_dims.y);
-    clamp(&shift_depth, 1 - cur_room_dims.z, MAX_ROOM_DIMS - cur_room_dims.z);
-
-    if (ImGui::Button("Shift room?##SAVELOAD")) {
-        Point3 dpos = {shift_width, shift_height, shift_depth};
-        eroom->room->shift_by(dpos);
-        shift_width = 0;
-        shift_height = 0;
-        shift_depth = 0;
-        eroom->start_pos += dpos;
-        eroom->room->offset_pos_ += dpos;
         if (!eroom->map()->valid(eroom->start_pos)) {
             eroom->start_pos = {0,0,0};
         }

@@ -15,9 +15,11 @@ public:
 
     GLFWwindow* window();
 
+	void setup_graphics();
     void set_PV(glm::mat4);
-	void render_text(std::string text, float opacity);
     void draw_world();
+
+	void render_text(std::string text, float opacity);
 
 	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube;

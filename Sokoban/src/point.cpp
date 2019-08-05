@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "point.h"
 
+void clamp(int* n, int a, int b) {
+	*n = std::max(a, std::min(b, *n));
+}
+
 Point3_S16::Point3_S16(const Point3& p): x {p.x}, y {p.y}, z {p.z} {}
 
 Point3::Point3(const Point3_S16& p): x {p.x}, y {p.y}, z {p.z} {}

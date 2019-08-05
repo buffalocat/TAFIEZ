@@ -20,6 +20,9 @@ public:
     virtual double rotation(FPoint3);
     virtual void serialize(MapFileO& file) = 0;
 
+	virtual void shift_by(Point3 d, int width, int height);
+	virtual void extend_by(Point3 d, int width, int height);
+
 	std::string label_;
 
 	IntRect rect_;
@@ -31,13 +34,15 @@ public:
 class ClampedCameraContext: public CameraContext {
 public:
     ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
-		double radius, double tilt, FloatRect vis);
+		double radius, double tilt, FloatRect center);
     ~ClampedCameraContext();
     FPoint3 center(FPoint3);
     double radius(FPoint3);
     double tilt(FPoint3);
     void serialize(MapFileO& file);
     static CameraContext* deserialize(MapFileI& file);
+
+	void shift_by(Point3 d, int width, int height);
 
     double rad_;
     double tilt_;
@@ -72,6 +77,9 @@ public:
     void push_context(std::unique_ptr<CameraContext>);
 	void remove_context(CameraContext*);
 	std::vector<std::unique_ptr<CameraContext>>& loaded_contexts();
+
+	void shift_by(Point3 d);
+	void extend_by(Point3 d);
 
 private:
 	std::string active_label_;
