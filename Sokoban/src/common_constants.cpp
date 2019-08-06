@@ -26,8 +26,8 @@ const int COLOR_CHANGE_MOVEMENT_FRAMES = 4;
 const int FALL_MOVEMENT_FRAMES = 4;
 const int MAX_COOLDOWN = 7;
 
-const int AREA_NAME_DISPLAY_FRAMES = 180;
-const int AREA_NAME_FADE_FRAMES = 20;
+const unsigned int AREA_NAME_DISPLAY_FRAMES = 180;
+const unsigned int AREA_NAME_FADE_FRAMES = 20;
 
 const int UNDO_COMBO_FIRST = 4;
 const int UNDO_COMBO_SECOND = 10;

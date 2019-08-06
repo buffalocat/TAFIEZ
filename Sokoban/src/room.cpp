@@ -41,7 +41,8 @@ void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
 }
 
 void Room::set_cam_pos(Point3 vpos, FPoint3 rpos) {
-	camera_->set_target(vpos, rpos);
+	camera_->update_context(vpos);
+	camera_->set_target(rpos);
     camera_->set_current_to_target();
 }
 
@@ -57,39 +58,40 @@ Camera* Room::camera() {
 	return camera_.get();
 }
 
-void Room::draw_at_pos(GraphicsManager* gfx, Point3 pos, bool ortho, bool one_layer) {
-	draw(gfx, pos, pos, ortho, one_layer);
+void Room::draw_at_pos(GraphicsManager* gfx, Point3 pos, bool display_labels, bool ortho, bool one_layer) {
+	draw(gfx, pos, pos, display_labels, ortho, one_layer);
 }
 
-void Room::draw_at_player(GraphicsManager* gfx, Player* player, bool ortho, bool one_layer) {
-	draw(gfx, player->pos_, player->cam_pos(), ortho, one_layer);
+void Room::draw_at_player(GraphicsManager* gfx, Player* player, bool display_labels, bool ortho, bool one_layer) {
+	draw(gfx, player->pos_, player->cam_pos(), display_labels, ortho, one_layer);
 }
 
-void Room::draw(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho, bool one_layer) {
-	gfx->setup_graphics();
-    update_view(gfx, vpos, rpos, ortho);
+void Room::draw(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer) {
+	gfx->prepare_object_rendering();
+    update_view(gfx, vpos, rpos, display_labels, ortho);
     if (one_layer) {
         map_->draw_layer(gfx, vpos.z);
     } else {
         map_->draw(gfx, camera_->get_rotation());
     }
 	gfx->draw_world();
-	if (!ortho) {
-		camera_->draw_label(gfx);
-	}
+	gfx->draw_text();
 }
 
-void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool ortho) {
+void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {
     glm::mat4 model, view, projection;
+	if (camera_->update_context(vpos) && display_labels) {
+		camera_->update_label(gfx);
+	}
     if (ortho) {
-        camera_->set_target(vpos, vpos);
+        camera_->set_target(vpos);
 		camera_->set_current_to_target();
         view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
                            glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0),
                            glm::vec3(0.0, -1.0, 0.0));
         projection = glm::ortho(-ORTHO_WIDTH/2.0, ORTHO_WIDTH/2.0, -ORTHO_HEIGHT/2.0, ORTHO_HEIGHT/2.0, -2.5, 2.5);
     } else {
-        camera_->set_target(vpos, rpos);
+        camera_->set_target(rpos);
         camera_->update();
 
         double cam_radius = camera_->get_radius();

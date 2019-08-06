@@ -42,7 +42,6 @@ void ModelInstancer::set_instance_attributes(int VAO) {
 	glEnableVertexAttribArray(6);
 	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, Color));
 	glVertexAttribDivisor(6, 1);
-	glBindVertexArray(0);
 }
 
 void ModelInstancer::fill_buffer() {

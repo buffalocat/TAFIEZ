@@ -40,6 +40,9 @@
     <Filter Include="constants">
       <UniqueIdentifier>{2d2e22d9-7855-4b66-9fe2-30dd85747b7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c3fa030b-f894-4acf-8c52-439be43404fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Sokoban.rc">
@@ -447,5 +450,25 @@
     <ClCompile Include="src\textrenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\text_shader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\instanced_shader.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\instanced_shader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\shader.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\shader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\text_shader.fs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

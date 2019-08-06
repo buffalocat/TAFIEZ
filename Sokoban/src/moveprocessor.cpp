@@ -171,14 +171,14 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 
 void MoveProcessor::plan_door_move(Door* door) {
 	if (door_state_ == DoorState::None && door->usable()) {
-		// TODO: make this more general later
 		// Also, it should probably be the responsibility of the objects/door, not the MoveProcessor
+		// TODO: rethink these checks to be SAFE
 		if (GameObject* above = map_->view(door->pos_above())) {
-			if (Player* player = dynamic_cast<Player*>(above)) {
-				door_travelling_objs_.push_back({ player, player->pos_ });
-			} else if (Car* car = player->car_riding()) {
+			if (player_ == above) {
+				door_travelling_objs_.push_back({ player_, player_->pos_ });
+			} else if (Car* car = player_->car_riding()) {
 				if (above->modifier() == car) {
-					door_travelling_objs_.push_back({ player, player->pos_ });
+					door_travelling_objs_.push_back({ player_, player_->pos_ });
 					door_travelling_objs_.push_back({ above, above->pos_ });
 				}
 			}

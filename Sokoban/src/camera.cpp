@@ -8,6 +8,8 @@
 #include "common_enums.h"
 #include "roommap.h"
 #include "mapfile.h"
+#include "textrenderer.h"
+
 
 CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child) :
 	label_{ label }, rect_{ rect }, priority_{ priority }, named_area_{ named_area }, null_child_{ null_child } {}
@@ -200,41 +202,32 @@ double Camera::get_rotation() {
 	return cur_rot_;
 }
 
-void Camera::set_target(Point3 vpos, FPoint3 rpos) {
-	CameraContext* new_context = context_map_[vpos.x][vpos.y];
-	if (new_context->named_area_) {
-		update_label(new_context->label_);
-	}
+bool Camera::update_context(Point3 vpos) {
+	auto* new_context = context_map_[vpos.x][vpos.y];
 	if (!new_context->is_null()) {
+		auto* old_context = context_;
 		context_ = new_context;
+		return old_context != new_context;
+	} else {
+		return false;
 	}
+}
+
+void Camera::set_target(FPoint3 rpos) {
 	target_pos_ = context_->center(rpos);
 	target_rad_ = context_->radius(rpos);
 	target_tilt_ = context_->tilt(rpos);
 	target_rot_ = context_->rotation(rpos);
 }
 
-void Camera::update_label(std::string label) {
-	if (!label.empty() && active_label_ != label) {
-		active_label_ = label;
-		label_display_cooldown_ = AREA_NAME_DISPLAY_FRAMES;
+void Camera::update_label(GraphicsManager* gfx) {
+	if (context_->named_area_) {
+		std::string label = context_->label_;
+		if (!label.empty() && active_label_ != label) {
+			active_label_ = label;
+			gfx->text_->make_room_label(label);
+		}
 	}
-}
-
-void Camera::draw_label(GraphicsManager* gfx) {
-	if (label_display_cooldown_ == 0) {
-		return;
-	}
-	--label_display_cooldown_;
-	float opacity = 0;
-	if (label_display_cooldown_ > AREA_NAME_DISPLAY_FRAMES - AREA_NAME_FADE_FRAMES) {
-		opacity = (float)(AREA_NAME_DISPLAY_FRAMES - label_display_cooldown_) / (float)AREA_NAME_FADE_FRAMES;
-	} else if (label_display_cooldown_ < AREA_NAME_FADE_FRAMES) {
-		opacity = (float)label_display_cooldown_ / (float)AREA_NAME_FADE_FRAMES;
-	} else {
-		opacity = 1;
-	}
-	gfx->render_text(active_label_, opacity);
 }
 
 void Camera::set_current_to_target() {

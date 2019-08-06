@@ -33,18 +33,14 @@ void Mesh::setup_mesh() {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 	glVertexAttribDivisor(2, 0);
-
-	glBindVertexArray(0);
 }
 
 void Mesh::draw_instanced(unsigned int instance_count) {
 	glBindVertexArray(VAO);
 	glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0, instance_count);
-	glBindVertexArray(0);
 }
 
 void Mesh::draw_single() {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }

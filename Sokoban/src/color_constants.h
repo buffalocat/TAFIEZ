@@ -20,6 +20,7 @@ enum {
     GREY = 12,
     DARK_GREY = 13,
     WHITE = 14,
+	CYAN = 15,
 	NUM_COLORS,
 };
 

@@ -9,8 +9,8 @@
 #include <stb_image.h>
 
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
-	window_{ window },
 	text_{ std::make_unique<TextRenderer>() },
+	window_{ window },
 	instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") },
 	cube{ DynamicInstancer("resources/uniform_cube.obj") },
 	top_cube{ DynamicInstancer("resources/top_cube.obj") },
@@ -25,6 +25,7 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	load_texture_atlas();
 	instanced_shader_.setFloat("texScale", 1.0f / TEXTURE_ATLAS_SIZE);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -47,7 +48,7 @@ void GraphicsManager::load_texture_atlas() {
 	stbi_image_free(texture_data);
 }
 
-void GraphicsManager::setup_graphics() {
+void GraphicsManager::prepare_object_rendering() {
 	instanced_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 }
@@ -59,16 +60,14 @@ void GraphicsManager::set_PV(glm::mat4 PV) {
 	}
 }
 
-void GraphicsManager::render_text(std::string text, float opacity) {
-	static const float sx = 2.0f / SCREEN_WIDTH;
-	static const float sy = 2.0f / SCREEN_HEIGHT;
-	text_->render(text.c_str(), 0, 0.8f, sx, sy, opacity);
-}
-
 void GraphicsManager::draw_world() {
 	cube.draw();
 	top_cube.draw();
 	diamond.draw();
 	six_squares.draw();
 	wall.draw();
+}
+
+void GraphicsManager::draw_text() {
+	text_->render_text();
 }

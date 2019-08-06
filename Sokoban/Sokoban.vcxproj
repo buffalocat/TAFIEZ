@@ -370,6 +370,14 @@
     <ClCompile Include="src\texture_constants.cpp" />
     <ClCompile Include="src\wall.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\instanced_shader.fs" />
+    <None Include="shaders\instanced_shader.vs" />
+    <None Include="shaders\shader.fs" />
+    <None Include="shaders\shader.vs" />
+    <None Include="shaders\text_shader.fs" />
+    <None Include="shaders\text_shader.vs" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

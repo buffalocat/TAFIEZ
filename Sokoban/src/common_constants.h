@@ -40,8 +40,8 @@ extern const int COLOR_CHANGE_MOVEMENT_FRAMES;
 extern const int FALL_MOVEMENT_FRAMES;
 extern const int MAX_COOLDOWN;
 
-extern const int AREA_NAME_DISPLAY_FRAMES;
-extern const int AREA_NAME_FADE_FRAMES;
+extern const unsigned int AREA_NAME_DISPLAY_FRAMES;
+extern const unsigned int AREA_NAME_FADE_FRAMES;
 
 extern const int UNDO_COMBO_FIRST;
 extern const int UNDO_COMBO_SECOND;

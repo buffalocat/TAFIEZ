@@ -43,7 +43,7 @@ void PlayingState::main_loop() {
         delta_frame_ = std::make_unique<DeltaFrame>();
     }
     handle_input();
-    room_->draw_at_player(gfx_, player_, false, false);
+    room_->draw_at_player(gfx_, player_, true, false, false);
     if (!move_processor_) {
         undo_stack_->push(std::move(delta_frame_));
     }

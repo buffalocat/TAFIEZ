@@ -2,11 +2,11 @@
 #define GRAPHICSMANAGER_H
 
 #include "color_constants.h"
-
 #include "modelinstancer.h"
 
 struct GLFWwindow;
 class TextRenderer;
+class StringDrawer;
 
 class GraphicsManager {
 public:
@@ -15,11 +15,10 @@ public:
 
     GLFWwindow* window();
 
-	void setup_graphics();
+	void prepare_object_rendering();
     void set_PV(glm::mat4);
     void draw_world();
-
-	void render_text(std::string text, float opacity);
+	void draw_text();
 
 	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube;
@@ -32,10 +31,11 @@ public:
 	SingleDrawer windshield;
 	SingleDrawer windshield_diamond;
 
-private:
-	unsigned int atlas_;
-    GLFWwindow* window_;
 	std::unique_ptr<TextRenderer> text_;
+
+private:
+	GLFWwindow* window_;
+	GLuint atlas_;
 	Shader instanced_shader_;
 
 	glm::mat4 PV_;

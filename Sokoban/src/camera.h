@@ -65,14 +65,15 @@ public:
     Camera(int w, int h);
     void serialize(MapFileO& file);
     void update();
-    void set_target(Point3, FPoint3);
-	void update_label(std::string);
-	void draw_label(GraphicsManager*);
+	bool update_context(Point3 vpos);
+    void set_target(FPoint3 rpos);
     void set_current_to_target();
     double get_radius();
     FPoint3 get_pos();
     double get_tilt();
     double get_rotation();
+
+	void update_label(GraphicsManager* gfx);
 
     void push_context(std::unique_ptr<CameraContext>);
 	void remove_context(CameraContext*);
