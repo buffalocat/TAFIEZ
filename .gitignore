@@ -41,6 +41,9 @@ Sokoban/maps/temp/*
 # Map Backups
 Sokoban/maps/backup/*
 
+# Editor Globals
+Sokoban/maps/global.sav
+
 # Resources
 !Sokoban/resources/*
 

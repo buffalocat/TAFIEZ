@@ -5,7 +5,7 @@
 #include "editorstate.h"
 #include "color_constants.h"
 
-EditorTab::EditorTab(EditorState* editor, GraphicsManager* gfx) : editor_{ editor }, gfx_{ gfx }, inspect_mode_{ false } {}
+EditorTab::EditorTab(EditorState* editor, GraphicsManager* gfx) : editor_{ editor }, gfx_{ gfx } {}
 
 EditorTab::~EditorTab() {}
 

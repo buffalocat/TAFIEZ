@@ -4,7 +4,7 @@
 #include "graphicsmanager.h"
 
 #include "gameobject.h"
-
+#include "savefile.h"
 #include "gameobjectarray.h"
 #include "delta.h"
 #include "player.h"
@@ -20,92 +20,90 @@
 
 #include "common_constants.h"
 
-const std::unordered_map<int, Point3> MOVEMENT_KEYS {
-    {GLFW_KEY_RIGHT, {1, 0, 0}},
-    {GLFW_KEY_LEFT,  {-1,0, 0}},
-    {GLFW_KEY_DOWN,  {0, 1, 0}},
-    {GLFW_KEY_UP,    {0,-1, 0}},
+const std::unordered_map<int, Point3> MOVEMENT_KEYS{
+	{GLFW_KEY_RIGHT, {1, 0, 0}},
+	{GLFW_KEY_LEFT,  {-1,0, 0}},
+	{GLFW_KEY_DOWN,  {0, 1, 0}},
+	{GLFW_KEY_UP,    {0,-1, 0}},
 };
 
 PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
-	room{ std::move(arg_room) },
-	changed{ true } {}
+	room{ std::move(arg_room) } {}
 
-PlayingState::PlayingState():
-    GameState(), loaded_rooms_ {}, objs_ {std::make_unique<GameObjectArray>()},
-    move_processor_ {}, room_ {}, player_ {},
-    undo_stack_ {std::make_unique<UndoStack>(MAX_UNDO_DEPTH)} {}
+PlayingState::PlayingState() :
+	GameState(),
+	undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) } {}
 
 PlayingState::~PlayingState() {}
 
 void PlayingState::main_loop() {
-    if (!move_processor_) {
-        delta_frame_ = std::make_unique<DeltaFrame>();
-    }
-    handle_input();
-    room_->draw_at_player(gfx_, player_, true, false, false);
-    if (!move_processor_) {
-        undo_stack_->push(std::move(delta_frame_));
-    }
+	if (!move_processor_) {
+		delta_frame_ = std::make_unique<DeltaFrame>();
+	}
+	handle_input();
+	room_->draw_at_player(gfx_, player_, true, false, false);
+	if (!move_processor_) {
+		undo_stack_->push(std::move(delta_frame_));
+	}
 }
 
 void PlayingState::handle_input() {
-    static int input_cooldown = 0;
-    static int undo_combo = 0;
-    if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
-        if (input_cooldown == 0) {
-            ++undo_combo;
-            if (undo_combo < UNDO_COMBO_FIRST) {
-                input_cooldown = UNDO_COOLDOWN_FIRST;
-            } else if (undo_combo < UNDO_COMBO_SECOND) {
-                input_cooldown = UNDO_COOLDOWN_SECOND;
-            } else {
-                input_cooldown = UNDO_COOLDOWN_FINAL;
-            }
-            if (move_processor_) {
-                move_processor_->abort();
-                move_processor_.reset(nullptr);
-                delta_frame_->revert();
-                delta_frame_ = std::make_unique<DeltaFrame>();
-                room_->map()->reset_local_state();
-                if (player_) {
-                    room_->set_cam_pos(player_->pos_, player_->cam_pos());
-                }
-            } else if (undo_stack_->non_empty()) {
-                undo_stack_->pop();
-                if (player_) {
-                    room_->set_cam_pos(player_->pos_, player_->cam_pos());
-                }
-            }
-            return;
-        }
-    } else {
-        undo_combo = 0;
-    }
-    bool ignore_input = false;
-    if (input_cooldown > 0) {
-        --input_cooldown;
-        ignore_input = true;
-    }
-    // Ignore all other input if an animation is occurring
-    if (move_processor_) {
-        if (move_processor_->update()) {
-            move_processor_.reset(nullptr);
-            undo_stack_->push(std::move(delta_frame_));
-            delta_frame_ = std::make_unique<DeltaFrame>();
-        } else {
-            return;
-        }
-    }
-    if (ignore_input) {
-        return;
-    }
-    RoomMap* room_map = room_->map();
-    // TODO: Make a real "death" flag/state
-    // Don't allow other input if player is "dead"
-    if (!dynamic_cast<Player*>(room_map->view(player_->pos_))) {
-        return;
-    }
+	static int input_cooldown = 0;
+	static int undo_combo = 0;
+	if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
+		if (input_cooldown == 0) {
+			++undo_combo;
+			if (undo_combo < UNDO_COMBO_FIRST) {
+				input_cooldown = UNDO_COOLDOWN_FIRST;
+			} else if (undo_combo < UNDO_COMBO_SECOND) {
+				input_cooldown = UNDO_COOLDOWN_SECOND;
+			} else {
+				input_cooldown = UNDO_COOLDOWN_FINAL;
+			}
+			if (move_processor_) {
+				move_processor_->abort();
+				move_processor_.reset(nullptr);
+				delta_frame_->revert();
+				delta_frame_ = std::make_unique<DeltaFrame>();
+				room_->map()->reset_local_state();
+				if (player_) {
+					room_->set_cam_pos(player_->pos_, player_->cam_pos());
+				}
+			} else if (undo_stack_->non_empty()) {
+				undo_stack_->pop();
+				if (player_) {
+					room_->set_cam_pos(player_->pos_, player_->cam_pos());
+				}
+			}
+			return;
+		}
+	} else {
+		undo_combo = 0;
+	}
+	bool ignore_input = false;
+	if (input_cooldown > 0) {
+		--input_cooldown;
+		ignore_input = true;
+	}
+	// Ignore all other input if an animation is occurring
+	if (move_processor_) {
+		if (move_processor_->update()) {
+			move_processor_.reset(nullptr);
+			undo_stack_->push(std::move(delta_frame_));
+			delta_frame_ = std::make_unique<DeltaFrame>();
+		} else {
+			return;
+		}
+	}
+	if (ignore_input) {
+		return;
+	}
+	RoomMap* room_map = room_->map();
+	// TODO: Make a real "death" flag/state
+	// Don't allow other input if player is "dead"
+	if (!dynamic_cast<Player*>(room_map->view(player_->pos_))) {
+		return;
+	}
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
 		player_->toggle_riding(room_map, delta_frame_.get());
 		input_cooldown = MAX_COOLDOWN;
@@ -119,19 +117,19 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
 	}
-    for (auto p : MOVEMENT_KEYS) {
-        if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
-            move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
-            // p.second == direction of movement
-            if (!move_processor_->try_move(p.second)) {
-                move_processor_.reset(nullptr);
-                return;
-            }
-            input_cooldown = MAX_COOLDOWN;
-            Point3 pos_below;
-            return;
-        }
-    }
+	for (auto p : MOVEMENT_KEYS) {
+		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
+			move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
+			// p.second == direction of movement
+			if (!move_processor_->try_move(p.second)) {
+				move_processor_.reset(nullptr);
+				return;
+			}
+			input_cooldown = MAX_COOLDOWN;
+			Point3 pos_below;
+			return;
+		}
+	}
 }
 
 Room* PlayingState::active_room() {
@@ -143,15 +141,15 @@ bool PlayingState::activate_room(Room* room) {
 }
 
 bool PlayingState::activate_room(std::string name) {
-    if (!loaded_rooms_.count(name)) {
-        if (!load_room(name, false)) {
-            return false;
-        }
-    }
+	if (!loaded_rooms_.count(name)) {
+		if (!load_room(name, false)) {
+			return false;
+		}
+	}
 	auto* proom = loaded_rooms_[name].get();
 	proom->changed = true;
-    room_ = proom->room.get();
-    return true;
+	room_ = proom->room.get();
+	return true;
 }
 
 void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
@@ -171,22 +169,22 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 void PlayingState::make_subsave() {}
 
 bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
-    DoorData* data = door->data();
-    if (!loaded_rooms_.count(data->dest)) {
-        load_room(data->dest, false);
-    }
-    Room* dest_room = loaded_rooms_[data->dest]->room.get();
+	DoorData* data = door->data();
+	if (!loaded_rooms_.count(data->dest)) {
+		load_room(data->dest, false);
+	}
+	Room* dest_room = loaded_rooms_[data->dest]->room.get();
 	*dest_room_ptr = dest_room;
-    RoomMap* cur_map = room_->map();
-    RoomMap* dest_map = dest_room->map();
-    Point3 dest_pos_local = Point3{data->pos} + Point3{dest_room->offset_pos_};
-    for (auto& obj : objs) {
-        obj.dest = dest_pos_local + obj.raw->pos_ - door->pos();
-        if (dest_map->view(obj.dest)) {
-            return false;
-        }
-    }
-    return true;
+	RoomMap* cur_map = room_->map();
+	RoomMap* dest_map = dest_room->map();
+	Point3 dest_pos_local = Point3{ data->pos } +Point3{ dest_room->offset_pos_ };
+	for (auto& obj : objs) {
+		obj.dest = dest_pos_local + obj.raw->pos_ - door->pos();
+		if (dest_map->view(obj.dest)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void PlayingState::snap_camera_to_player() {

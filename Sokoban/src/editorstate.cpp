@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "editorstate.h"
 
+#include "savefile.h"
 #include "gameobjectarray.h"
 #include "graphicsmanager.h"
 #include "gamestate.h"
@@ -26,9 +27,7 @@
 tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this, gfx)));
 
 EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos):
-room {std::move(arg_room)},
-start_pos {pos}, cam_pos {pos},
-changed {true} {}
+room {std::move(arg_room)}, start_pos {pos}, cam_pos {pos} {}
 
 RoomMap* EditorRoom::map() {
     return room->map();
@@ -38,10 +37,7 @@ std::string EditorRoom::name() {
     return room->name();
 }
 
-EditorState::EditorState(GraphicsManager* gfx): EditorBaseState(),
-active_room_ {}, active_tab_ {},
-rooms_ {}, tabs_ {},
-objs_ {std::make_unique<GameObjectArray>()} {
+EditorState::EditorState(GraphicsManager* gfx): EditorBaseState() {
     INIT_TAB(SaveLoad);
     INIT_TAB(Object);
 	INIT_TAB(Modifier);
@@ -50,11 +46,14 @@ objs_ {std::make_unique<GameObjectArray>()} {
     INIT_TAB(Snake);
 	INIT_TAB(Camera);
     active_tab_ = tabs_[0].second.get();
+	globals_->load_flags("maps");
 }
 
 #undef INIT_TAB
 
-EditorState::~EditorState() {}
+EditorState::~EditorState() {
+	globals_->save_flags("maps");
+}
 
 // These shortcuts are specific to EditorState, and *not* other classes
 // which inherit from EditorBaseState

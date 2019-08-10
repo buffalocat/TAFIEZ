@@ -20,8 +20,8 @@ public:
 protected:
     EditorState* editor_;
     GraphicsManager* gfx_;
-
-	bool inspect_mode_;
+	
+	bool inspect_mode_ = false;
 };
 
 void color_button(int color_id);

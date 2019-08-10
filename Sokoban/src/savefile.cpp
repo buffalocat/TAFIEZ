@@ -5,12 +5,91 @@
 #include "playingstate.h"
 #include "mapfile.h"
 
-SaveFile::SaveFile(const std::string& base) :
-	base_ {std::filesystem::path("saves") / base},
-	room_subsave_{},
-	global_{},
-	cur_subsave_{ 0 },
-	next_subsave_{ 1 } {}
+
+GlobalData::GlobalData() {}
+
+GlobalData::~GlobalData() {}
+
+
+EditorGlobalData::EditorGlobalData() : GlobalData() {
+	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
+	rand_engine_.seed(seed);
+}
+
+EditorGlobalData::~EditorGlobalData() {}
+
+void EditorGlobalData::load_flags(std::filesystem::path path) {
+	auto flag_file_path = path / "global.sav";
+	if (std::filesystem::exists(flag_file_path)) {
+		auto flag_file = MapFileI(flag_file_path);
+		unsigned int num_flags = flag_file.read_uint32();
+		for (unsigned int i = 0; i < num_flags; ++i) {
+			unsigned int flag = flag_file.read_uint32();
+			flags_[flag] = flag_file.read_str();
+		}
+	}
+}
+
+void EditorGlobalData::save_flags(std::filesystem::path path) {
+	auto flag_file = MapFileO(path / "global.sav");
+	flag_file.write_uint32((unsigned int)flags_.size());
+	for (auto pair : flags_) {
+		flag_file.write_uint32(pair.first);
+		flag_file << pair.second;
+	}
+}
+
+unsigned int EditorGlobalData::generate_flag() {
+	unsigned int flag;
+	do {
+		flag = rand_engine_();
+	} while (flags_.count(flag));
+	return flag;
+}
+
+void EditorGlobalData::assign_flag(unsigned int flag, std::string room_name) {
+	flags_[flag] = room_name;
+}
+
+void EditorGlobalData::destroy_flag(unsigned int flag) {
+	flags_.erase(flag);
+}
+
+
+PlayingGlobalData::PlayingGlobalData() : GlobalData() {}
+
+PlayingGlobalData::~PlayingGlobalData() {}
+
+void PlayingGlobalData::load_flags(std::filesystem::path path) {
+	auto flag_file_path = path / "global.sav";
+	if (std::filesystem::exists(flag_file_path)) {
+		auto flag_file = MapFileI(flag_file_path);
+		unsigned int num_flags = flag_file.read_uint32();
+		for (unsigned int i = 0; i < num_flags; ++i) {
+			flags_.insert(flag_file.read_uint32());
+		}
+	}
+}
+
+void PlayingGlobalData::save_flags(std::filesystem::path path) {
+	auto flag_file = MapFileO(path / "global.sav");
+	flag_file.write_uint32((unsigned int)flags_.size());
+	for (unsigned int flag : flags_) {
+		flag_file.write_uint32(flag);
+	}
+}
+
+void PlayingGlobalData::add_flag(unsigned int flag) {
+	flags_.insert(flag);
+}
+
+bool PlayingGlobalData::has_flag(unsigned int flag) {
+	return flags_.count(flag);
+}
+
+
+SaveFile::SaveFile(std::string base) :
+	base_ {std::filesystem::path("saves") / base} {}
 
 SaveFile::~SaveFile() {}
 
@@ -38,13 +117,19 @@ void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>&
 	}
 	loaded_rooms[cur_room_name]->changed = true;
 	save_room_data(subsave_path, cur_room_name);
+	globals_->save_flags(subsave_path);
 	save_meta();
 }
 
-void SaveFile::load_most_recent_subsave(std::string* cur_room_name) {
-	load_room_data(base_ / std::to_string(cur_subsave_), cur_room_name);
+void SaveFile::load_subsave(unsigned int subsave_index, std::string* cur_room_name) {
+	auto subsave_path = base_ / std::to_string(subsave_index);
+	globals_->load_flags(subsave_path);
+	load_room_data(subsave_path, cur_room_name);
 }
 
+void SaveFile::load_most_recent_subsave(std::string* cur_room_name) {
+	load_subsave(cur_subsave_, cur_room_name);
+}
 
 bool SaveFile::load_meta() {
 	auto meta_path = base_ / "meta.sav";
@@ -66,7 +151,7 @@ void SaveFile::save_meta() {
 	meta_file.close();
 }
 
-void SaveFile::load_room_data(std::filesystem::path const& subsave_path, std::string* cur_room_name) {
+void SaveFile::load_room_data(std::filesystem::path subsave_path, std::string* cur_room_name) {
 	auto room_data_path = subsave_path / "rooms.sav";
 	std::ifstream room_data_file{};
 	room_data_file.open(room_data_path, std::ios::in);
@@ -82,7 +167,7 @@ void SaveFile::load_room_data(std::filesystem::path const& subsave_path, std::st
 	room_data_file.close();
 }
 
-void SaveFile::save_room_data(std::filesystem::path const& subsave_path, std::string const& cur_room_name) {
+void SaveFile::save_room_data(std::filesystem::path subsave_path, std::string cur_room_name) {
 	auto room_data_path = subsave_path / "rooms.sav";
 	std::ofstream room_data_file{};
 	room_data_file.open(room_data_path, std::ios::out);
@@ -94,7 +179,7 @@ void SaveFile::save_room_data(std::filesystem::path const& subsave_path, std::st
 	room_data_file.close();
 }
 
-std::filesystem::path SaveFile::get_path(std::string const& name, bool* from_main) {
+std::filesystem::path SaveFile::get_path(std::string name, bool* from_main) {
 	if (room_subsave_.count(name)) {
 		*from_main = false;
 		return (base_ / std::to_string(room_subsave_[name]) / name).concat(".map");

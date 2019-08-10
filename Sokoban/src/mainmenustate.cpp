@@ -26,7 +26,6 @@ void MainMenuState::main_loop() {
 		}
 		if (ImGui::Button("Load File##MAINMENU")) {
 			menu_type_ = Menu::Load;
-			//create_child(std::make_unique<RealPlayingState>("Default", {0,0,0}));
 		}
 		if (ImGui::Button("Delete File##MAINMENU")) {
 			menu_type_ = Menu::Delete;

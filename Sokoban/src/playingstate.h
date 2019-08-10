@@ -10,6 +10,7 @@ class RoomMap;
 class GameObject;
 class Player;
 class MoveProcessor;
+class GlobalData;
 
 class UndoStack;
 class DeltaFrame;
@@ -22,7 +23,7 @@ struct DoorTravellingObj;
 
 struct PlayingRoom {
 	std::unique_ptr<Room> room;
-	bool changed;
+	bool changed = true;
 	PlayingRoom(std::unique_ptr<Room>);
 };
 
@@ -44,15 +45,15 @@ public:
 	void snap_camera_to_player();
 
 protected:
-    std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_;
-    Room* room_;
-    Player* player_;
-	std::unique_ptr<GameObjectArray> objs_;
+	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
+	Room* room_{};
+	Player* player_{};
+	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 
 private:
-    std::unique_ptr<MoveProcessor> move_processor_;
+	std::unique_ptr<MoveProcessor> move_processor_{};
     std::unique_ptr<UndoStack> undo_stack_;
-    std::unique_ptr<DeltaFrame> delta_frame_;
+	std::unique_ptr<DeltaFrame> delta_frame_{};
 
     friend DoorMoveDelta;
 };
