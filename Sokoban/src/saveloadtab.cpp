@@ -11,16 +11,16 @@
 #include "editorstate.h"
 #include "player.h"
 
-SaveLoadTab::SaveLoadTab(EditorState* editor, GraphicsManager* gfx): EditorTab(editor, gfx) {}
+SaveLoadTab::SaveLoadTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx) {}
 
 SaveLoadTab::~SaveLoadTab() {}
 
 void SaveLoadTab::main_loop(EditorRoom* eroom) {
-    ImGui::Text("The Save/Load Tab");
-    
+	ImGui::Text("The Save/Load Tab");
+
 	map_load_and_create();
 
-    ImGui::Separator();
+	ImGui::Separator();
 
 	loaded_rooms_listbox();
 
@@ -41,76 +41,12 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 		editor_->commit_current_room();
 	}
 
-    if (ImGui::Button("Begin Test Session##SAVELOAD")) {
-        editor_->begin_test();
-    }
-
-    ImGui::Separator();
-
-    Point3 cur_room_dims { eroom->map()->width_, eroom->map()->height_, eroom->map()->depth_};
-    ImGui::Text("Current Room Dimensions: (%d,%d,%d)", cur_room_dims.x, cur_room_dims.y, cur_room_dims.z);
-
-	static int shift_width;
-	static int shift_height;
-	static int shift_depth;
-
-	ImGui::InputInt("Shift Width##SAVELOAD", &shift_width);
-	ImGui::InputInt("Shift Height##SAVELOAD", &shift_height);
-	ImGui::InputInt("Shift Depth##SAVELOAD", &shift_depth);
-
-	clamp(&shift_width, 1 - cur_room_dims.x, MAX_ROOM_DIMS - cur_room_dims.x);
-	clamp(&shift_height, 1 - cur_room_dims.y, MAX_ROOM_DIMS - cur_room_dims.y);
-	clamp(&shift_depth, 1 - cur_room_dims.z, MAX_ROOM_DIMS - cur_room_dims.z);
-
-	if (ImGui::Button("Shift room?##SAVELOAD")) {
-		Point3 dpos = { shift_width, shift_height, shift_depth };
-		eroom->room->shift_by(dpos);
-		shift_width = 0;
-		shift_height = 0;
-		shift_depth = 0;
-		eroom->start_pos += dpos;
-		eroom->room->offset_pos_ += dpos;
-		if (!eroom->map()->valid(eroom->start_pos)) {
-			eroom->start_pos = { 0,0,0 };
-		}
-		eroom = editor_->reload(eroom);
+	if (ImGui::Button("Begin Test Session##SAVELOAD")) {
+		editor_->begin_test();
 	}
-
-    static int extend_width;
-    static int extend_height;
-    static int extend_depth;
-
-    ImGui::InputInt("Extend Width##SAVELOAD", &extend_width);
-    ImGui::InputInt("Extend Height##SAVELOAD", &extend_height);
-    ImGui::InputInt("Extend Depth##SAVELOAD", &extend_depth);
-
-    clamp(&extend_width, 1 - cur_room_dims.x, MAX_ROOM_DIMS - cur_room_dims.x);
-    clamp(&extend_height, 1 - cur_room_dims.y, MAX_ROOM_DIMS - cur_room_dims.y);
-    clamp(&extend_depth, 1 - cur_room_dims.z, MAX_ROOM_DIMS - cur_room_dims.z);
-
-    if (ImGui::Button("Extend room?##SAVELOAD")) {
-        Point3 dpos = {extend_width, extend_height, extend_depth};
-        eroom->room->extend_by(dpos);
-        extend_width = 0;
-        extend_height = 0;
-        extend_depth = 0;
-        if (!eroom->map()->valid(eroom->start_pos)) {
-            eroom->start_pos = {0,0,0};
-        }
-        eroom = editor_->reload(eroom);
-    }
 }
 
-void SaveLoadTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
-    RoomMap* room_map = eroom->map();
-    if (!room_map->view(pos)) {
-        auto player = room_map->view(eroom->start_pos);
-        room_map->take(player);
-        player->pos_ = pos;
-        eroom->start_pos = pos;
-        room_map->put(player);
-    }
-}
+
 
 void SaveLoadTab::map_load_and_create() {
 	const int MAX_MAP_NAME_SIZE = 256;

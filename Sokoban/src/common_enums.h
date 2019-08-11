@@ -18,6 +18,7 @@ enum class ModCode {
     Gate = 4,
     AutoBlock = 5,
 	PuppetBlock = 6,
+	ClearFlag = 7,
 };
 
 enum class CameraCode {

@@ -20,11 +20,7 @@
 #include "fallstepprocessor.h"
 
 MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* room_map, DeltaFrame* delta_frame, Player* player, bool animated) :
-	fall_check_{}, moving_blocks_{},
-	playing_state_{ playing_state }, map_{ room_map }, delta_frame_{ delta_frame }, player_{ player },
-	entry_door_{}, door_travelling_objs_{}, dest_room_{},
-	frames_{ 0 }, state_{}, door_state_{},
-	animated_{ animated } {}
+	playing_state_{ playing_state }, map_{ room_map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
 
 MoveProcessor::~MoveProcessor() {}
 

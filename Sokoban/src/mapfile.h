@@ -5,6 +5,8 @@
 
 enum class MapCode {
 	Dimensions = 1, // The dimensions of the room as 1 byte integers
+	Zone = 2, // Indicates which of the 36 zones the map is in
+	ClearFlagRequirement = 3, // Indicates the number of clear flags to clear this room
 	WallRuns = 4, // A (relatively) efficient encoding of walls
 	OffsetPos = 5, // The position that (0,0) was at when the room was created
 	Objects = 6, // Read in all map objects

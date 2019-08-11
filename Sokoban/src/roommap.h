@@ -88,20 +88,20 @@ public:
     int height_;
     int depth_;
 
-    std::vector<AutoBlock*> autos_;
-	std::vector<PuppetBlock*> puppets_;
+	std::vector<AutoBlock*> autos_{};
+	std::vector<PuppetBlock*> puppets_{};
 
     GameObjectArray& obj_array_;
-	std::vector<MapLayer> layers_;
+	std::vector<MapLayer> layers_{};
 
 private:
-    std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_;
-    std::vector<std::unique_ptr<Signaler>> signalers_;
+	std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_{};
+	std::vector<std::unique_ptr<Signaler>> signalers_{};
 
-    std::unordered_set<ObjectModifier*> activated_listeners_;
+	std::unordered_set<ObjectModifier*> activated_listeners_{};
 
     // TODO: find more appropriate place for this
-    std::unique_ptr<Effects> effects_;
+    std::unique_ptr<Effects> effects_ = std::make_unique<Effects>();
 
     // For providing direct signaler access
     friend class SwitchTab;

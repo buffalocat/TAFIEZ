@@ -15,7 +15,7 @@ class Player;
 
 class Room {
 public:
-    Room(const std::string& name);
+    Room(std::string name);
     ~Room();
     std::string const name();
     void initialize(GameObjectArray& objs, int w, int h, int d);
@@ -36,13 +36,15 @@ public:
     void shift_by(Point3 d);
 
 private:
-    std::string name_;
-    std::unique_ptr<RoomMap> map_;
-    std::unique_ptr<Camera> camera_;
+	std::unique_ptr<RoomMap> map_{};
+	std::unique_ptr<Camera> camera_{};
+	std::string name_;
 
 public:
-    Point3_S16 offset_pos_;
+	int clear_flag_req_ = 0;
+	char zone_ = '!';
     // This is used exclusively for making sure doors between rooms stay accurate
+	Point3_S16 offset_pos_;
 
 private:
     void read_objects(MapFileI& file, Player** player_ptr);

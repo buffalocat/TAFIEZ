@@ -3295,9 +3295,6 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
                     if (InputTextFilterCharacter(&c, flags, callback, callback_user_data))
                         edit_state.OnKeyPressed((int)c);
                 }
-
-            // Consume characters
-            memset(g.IO.InputCharacters, 0, sizeof(g.IO.InputCharacters));
         }
     }
 
@@ -3553,6 +3550,9 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
         edit_state.UserCallback = NULL;
         edit_state.UserCallbackData = NULL;
     }
+
+	// Consume characters
+	memset(g.IO.InputCharacters, 0, sizeof(g.IO.InputCharacters));
 
     // Release active ID at the end of the function (so e.g. pressing Return still does a final application of the value)
     if (clear_active_id && g.ActiveId == id)

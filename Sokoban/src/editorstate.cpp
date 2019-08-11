@@ -15,6 +15,7 @@
 #include "camera.h"
 
 #include "saveloadtab.h"
+#include "roomtab.h"
 #include "objecttab.h"
 #include "doortab.h"
 #include "switchtab.h"
@@ -39,12 +40,13 @@ std::string EditorRoom::name() {
 
 EditorState::EditorState(GraphicsManager* gfx): EditorBaseState() {
     INIT_TAB(SaveLoad);
+	INIT_TAB(Room);
     INIT_TAB(Object);
 	INIT_TAB(Modifier);
 	INIT_TAB(Switch);
     INIT_TAB(Door);
-    INIT_TAB(Snake);
 	INIT_TAB(Camera);
+	INIT_TAB(Snake);
     active_tab_ = tabs_[0].second.get();
 	globals_->load_flags("maps");
 }
@@ -98,6 +100,7 @@ void EditorState::main_loop() {
 	ImGui::Text(""); //This consumes the stray SameLine from the loop
 
     if (active_room_) {
+		// Header Information
         ImGui::Text(("Current Room: " + active_room_->room->name()).c_str());
         ImGui::Text("Current Height: %d", active_room_->cam_pos.z);
         if (one_layer_) {
@@ -105,23 +108,23 @@ void EditorState::main_loop() {
         } else {
             ImGui::Text("Showing Neighboring Layers (F to toggle)");
         }
+		// Draw the active room
         active_room_->changed = true;
         active_room_->room->draw_at_pos(gfx_, active_room_->cam_pos, false, ortho_cam_, one_layer_);
-	}
-
-	if (active_room_) {
+		// Handle input
 		handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
 		if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
 			if (handle_keyboard_input(active_room_->cam_pos, active_room_->room.get())) {
 				keyboard_cooldown_ = MAX_COOLDOWN;
 			}
 		}
-	}
+	}	
 
-	// Draw the rest of the editor GUI
+	// Draw the EditorTab
 	ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
 	active_tab_->main_loop(active_room_);
 	ImGui::EndChildFrame();
+
 	ImGui::End();
 }
 

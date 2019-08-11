@@ -69,23 +69,21 @@ private:
     void move_bound(Point3);
     void move_general(Point3);
 
-    std::vector<GameObject*> moving_blocks_;
-    std::vector<GameObject*> fall_check_;
-
-    //std::vector<std::pair<GateBody*, bool>> gate_transitions_;
+	std::vector<GameObject*> moving_blocks_{};
+	std::vector<GameObject*> fall_check_{};
 
     PlayingState* playing_state_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
 	Player* player_;
 
-	Door* entry_door_;
-	std::vector<DoorTravellingObj> door_travelling_objs_;
-	Room* dest_room_;
+	Door* entry_door_{};
+	std::vector<DoorTravellingObj> door_travelling_objs_{};
+	Room* dest_room_{};
 
-    unsigned int frames_;
-    MoveStep state_;
-	DoorState door_state_;
+	unsigned int frames_{};
+	MoveStep state_{};
+	DoorState door_state_{};
 
     bool animated_;
 };

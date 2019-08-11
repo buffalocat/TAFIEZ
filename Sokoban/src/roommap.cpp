@@ -16,10 +16,8 @@
 #include "common_constants.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, int width, int height, int depth) :
-	autos_{}, puppets_{}, obj_array_{ obj_array },
-	width_{ width }, height_{ height }, depth_{ depth },
-	layers_{}, listeners_{}, signalers_{},
-	effects_{ std::make_unique<Effects>() } {
+	obj_array_{ obj_array },
+	width_{ width }, height_{ height }, depth_{ depth } {
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
 	}

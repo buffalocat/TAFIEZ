@@ -26,8 +26,7 @@
 #include "signaler.h"
 #include "mapfile.h"
 
-Room::Room(const std::string& name): name_ {name},
-map_ {}, camera_ {}, offset_pos_ {0,0,0} {}
+Room::Room(std::string name): name_ {name}, offset_pos_ {0,0,0} {}
 
 Room::~Room() {}
 
@@ -128,6 +127,12 @@ void Room::write_to_file(MapFileO& file) {
     file << map_->height_;
     file << map_->depth_;
 
+	file << MapCode::Zone;
+	file << zone_;
+
+	file << MapCode::ClearFlagRequirement;
+	file << clear_flag_req_;
+
     file << MapCode::OffsetPos;
     file << offset_pos_;
 
@@ -148,6 +153,12 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
             file.read(b, 3);
             initialize(objs, b[0], b[1], b[2]);
             break;
+		case MapCode::Zone:
+			zone_ = file.read_byte();
+			break;
+		case MapCode::ClearFlagRequirement:
+			clear_flag_req_ = file.read_byte();
+			break;
         case MapCode::OffsetPos:
             file >> offset_pos_;
             break;
