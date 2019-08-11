@@ -10,5 +10,5 @@ struct InstanceData {
 	glm::vec3 PosOffset;
 	glm::vec3 Scale;
 	glm::vec2 TexOffset;
-	glm::vec4 Color;
+	glm::vec3 Color;
 };

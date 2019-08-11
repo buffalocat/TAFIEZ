@@ -15,7 +15,7 @@ enum {
     DARK_RED = 7,
     BLACK = 8,
     LIGHT_GREY = 9,
-    ORANGE = 10,
+	GOLD = 10,
     YELLOW = 11,
     GREY = 12,
     DARK_GREY = 13,

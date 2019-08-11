@@ -25,6 +25,7 @@ public:
     virtual void serialize(MapFileO& file) = 0;
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
+	virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*) = 0;
 
 	virtual bool valid_parent(GameObject*);
 	GameObject* parent_;
@@ -44,8 +45,6 @@ public:
     virtual void cleanup_on_take(RoomMap* room_map);
     virtual void cleanup_on_destruction(RoomMap* room_map);
     virtual void setup_on_undestruction(RoomMap* room_map);
-
-    virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*) = 0;
 
     // Every type of Modifier can have at most one callback function for map listeners
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);

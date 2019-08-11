@@ -1,7 +1,7 @@
 #pragma once
 #include "editortab.h"
 
-class Room;
+class RoomMap;
 
 class RoomTab :	public EditorTab {
 public:
@@ -11,7 +11,6 @@ public:
 	void main_loop(EditorRoom*);
 	void handle_left_click(EditorRoom*, Point3);
 
-	void zone_options(Room*);
+	void zone_options(RoomMap*);
 	void shift_extend_options(EditorRoom*);
 };
-

@@ -78,6 +78,11 @@ void ObjectSerializationHandler::operator()(int id) {
 }
 
 void RoomMap::serialize(MapFileO& file) {
+	// Metadata
+	file << MapCode::Zone;
+	file << zone_;
+	file << MapCode::ClearFlagRequirement;
+	file << clear_flag_req_;
 	// Serialize layer types
 	std::vector<GameObject*> rel_check_objs{};
 	std::vector<ObjectModifier*> rel_check_mods{};

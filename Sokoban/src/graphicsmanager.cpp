@@ -18,10 +18,12 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	six_squares{ DynamicInstancer("resources/six_squares.obj") },
 	windshield{ SingleDrawer("resources/windshield.obj") },
 	windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") },
+	flag{ SingleDrawer("resources/flag.obj") },
 	wall{ WallInstancer("resources/uniform_cube.obj") }
 {
 	text_->init();
 	instanced_shader_.use();
+	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
 	instanced_shader_.setFloat("texScale", 1.0f / TEXTURE_ATLAS_SIZE);
 	glEnable(GL_DEPTH_TEST);
@@ -58,6 +60,10 @@ void GraphicsManager::set_PV(glm::mat4 PV) {
 		PV_ = PV;
 		instanced_shader_.setMat4("PV", PV);
 	}
+}
+
+void GraphicsManager::set_light_source(glm::vec3 dir) {
+	instanced_shader_.setVec3("lightSource", dir);
 }
 
 void GraphicsManager::draw_world() {

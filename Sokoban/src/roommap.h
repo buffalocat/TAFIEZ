@@ -18,6 +18,7 @@ class GameObject;
 class SnakeBlock;
 class AutoBlock;
 class PuppetBlock;
+class ClearFlag;
 
 typedef void(ObjectModifier::*MapCallback)(RoomMap*,DeltaFrame*);
 
@@ -88,8 +89,12 @@ public:
     int height_;
     int depth_;
 
+	int clear_flag_req_ = 0;
+	char zone_ = '!';
+
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
+	std::vector<ClearFlag*> clear_flags_{};
 
     GameObjectArray& obj_array_;
 	std::vector<MapLayer> layers_{};

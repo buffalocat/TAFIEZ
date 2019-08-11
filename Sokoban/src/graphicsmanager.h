@@ -17,6 +17,7 @@ public:
 
 	void prepare_object_rendering();
     void set_PV(glm::mat4);
+	void set_light_source(glm::vec3);
     void draw_world();
 	void draw_text();
 
@@ -30,6 +31,7 @@ public:
 	// Models which aren't common enough to be worth instancing
 	SingleDrawer windshield;
 	SingleDrawer windshield_diamond;
+	SingleDrawer flag;
 
 	std::unique_ptr<TextRenderer> text_;
 

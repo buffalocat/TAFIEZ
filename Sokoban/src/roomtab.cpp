@@ -19,10 +19,10 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 		return;
 	}
 
-	zone_options(eroom->room.get());
+	zone_options(eroom->map());
 	
-	ImGui::InputInt("Clear Flag Requirement", &eroom->room->clear_flag_req_);
-	clamp(&eroom->room->clear_flag_req_, 0, 255);
+	ImGui::InputInt("Clear Flag Requirement", &eroom->map()->clear_flag_req_);
+	clamp(&eroom->map()->clear_flag_req_, 0, 255);
 
 	ImGui::Separator();
 
@@ -54,7 +54,7 @@ int zone_input_callback(ImGuiInputTextCallbackData* data) {
 	return 0;
 }
 
-void RoomTab::zone_options(Room* room) {
+void RoomTab::zone_options(RoomMap* room) {
 	static char zone[3];
 	zone[0] = room->zone_;
 	zone[1] = ' ';

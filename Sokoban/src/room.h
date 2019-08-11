@@ -41,8 +41,6 @@ private:
 	std::string name_;
 
 public:
-	int clear_flag_req_ = 0;
-	char zone_ = '!';
     // This is used exclusively for making sure doors between rooms stay accurate
 	Point3_S16 offset_pos_;
 
