@@ -48,13 +48,13 @@ public:
 
 	EditorRoom* active_room_{};
 	EditorTab* active_tab_{};
+	std::unique_ptr<EditorGlobalData> global_ = std::make_unique<EditorGlobalData>();
 
 private:
 	std::map<std::string, std::unique_ptr<EditorRoom>> rooms_{};
 	std::vector<std::pair<std::string, std::unique_ptr<EditorTab>>> tabs_{};
 
     std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
-	std::unique_ptr<EditorGlobalData> globals_ = std::make_unique<EditorGlobalData>();
 
     void handle_left_click(Point3);
     void handle_right_click(Point3);

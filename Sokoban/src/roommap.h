@@ -13,6 +13,7 @@ class MoveProcessor;
 class ObjectModifier;
 class MapFileO;
 class RoomMap;
+class PlayingGlobalData;
 
 class GameObject;
 class SnakeBlock;
@@ -24,22 +25,22 @@ typedef void(ObjectModifier::*MapCallback)(RoomMap*,DeltaFrame*);
 
 class RoomMap {
 public:
-    RoomMap(GameObjectArray& objs, int width, int height, int depth);
+    RoomMap(GameObjectArray& objs, PlayingGlobalData* global, int width, int height, int depth);
     ~RoomMap();
     bool valid(Point3 pos);
-
-    //void print_listeners();
 
     int& at(Point3);
     GameObject* view(Point3);
 
 	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
-	void create_in_map(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
 	void put_in_map(GameObject*, bool real, DeltaFrame*);
     void take_from_map(GameObject*, bool real, DeltaFrame*);
+	void create_in_map(std::unique_ptr<GameObject>, DeltaFrame*);
+
 	void create_wall(Point3);
 	void clear(Point3);
+
     void shift(GameObject*, Point3, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, DeltaFrame*);
 
@@ -61,7 +62,9 @@ public:
     void check_signalers(DeltaFrame*, MoveProcessor*);
     void remove_signaler(Signaler*);
 
-	void set_clear_flag_activation(ClearFlag*, DeltaFrame*);
+	void check_clear_flag_collected(DeltaFrame*);
+	void collect_flag();
+	void uncollect_flag(int req);
 
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
@@ -79,22 +82,24 @@ public:
     int height_;
     int depth_;
 
+	std::map<ClearFlag*, bool> clear_flags_{};
 	int clear_flag_req_ = 0;
 	unsigned int clear_id_ = 0;
 	char zone_ = '!';
-	std::map<ClearFlag*, bool> clear_flags_{};
+	bool clear_flags_changed_ = false;
 
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
 
     GameObjectArray& obj_array_;
+	PlayingGlobalData* global_;
 	std::vector<MapLayer> layers_{};
 
 private:
 	std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_{};
 	std::vector<std::unique_ptr<Signaler>> signalers_{};
 
-	std::unordered_set<ObjectModifier*> activated_listeners_{};
+	std::set<ObjectModifier*> activated_listeners_{};
 
     // TODO: find more appropriate place for this
     std::unique_ptr<Effects> effects_ = std::make_unique<Effects>();

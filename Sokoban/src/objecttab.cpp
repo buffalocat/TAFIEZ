@@ -16,7 +16,7 @@
 
 ObjectTab::ObjectTab(EditorState* editor, GraphicsManager* gfx) :
 	EditorTab(editor, gfx),
-	room_map_{} {}
+	map_{} {}
 
 ObjectTab::~ObjectTab() {}
 
@@ -43,7 +43,7 @@ void ObjectTab::main_loop(EditorRoom* eroom) {
 		ImGui::Text("No room loaded.");
 		return;
 	}
-	room_map_ = eroom->map();
+	map_ = eroom->map();
 
 	ImGui::Checkbox("Inspect Mode##OBJECT_inspect", &inspect_mode_);
 	ImGui::Separator();
@@ -125,22 +125,22 @@ void ObjectTab::object_tab_options() {
 		if (ImGui::Button("Transmute##OBJECT")) {
 			if (auto new_obj = create_from_model(transmute_obj_code, selected_obj)) {
 				if (selected_obj->id_ == GLOBAL_WALL_ID) {
-					room_map_->clear(selected_pos);
+					map_->clear(selected_pos);
 				} else {
-					room_map_->take_from_map(selected_obj, true, nullptr);
-					room_map_->remove_from_object_array(selected_obj);
+					map_->take_from_map(selected_obj, true, nullptr);
+					map_->remove_from_object_array(selected_obj);
 				}
 				selected_obj = new_obj.get();
-				room_map_->create_in_map(std::move(new_obj), nullptr);
+				map_->create_in_map(std::move(new_obj), nullptr);
 			}
 			// If the new object was a generic Wall, we don't have a new pointer
 			else if (transmute_obj_code == ObjCode::Wall) {
 				// If the old object was also a generic Wall, do nothing
 				if (selected_obj->id_ != GLOBAL_WALL_ID) {
-					room_map_->take_from_map(selected_obj, true, nullptr);
-					room_map_->remove_from_object_array(selected_obj);
-					room_map_->create_wall(selected_pos);
-					selected_obj = room_map_->view(selected_pos);
+					map_->take_from_map(selected_obj, true, nullptr);
+					map_->remove_from_object_array(selected_obj);
+					map_->create_wall(selected_pos);
+					selected_obj = map_->view(selected_pos);
 				}
 			}
 		}
@@ -179,22 +179,22 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 }
 
 void ObjectTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
-	if (!room_map_->valid(pos)) {
+	if (!map_->valid(pos)) {
 		selected_obj = nullptr;
 		return;
 		// Even in create mode, let the user select an already-created object
 	}
 	selected_pos = pos;
-	if (inspect_mode_ || room_map_->view(pos)) {
-		selected_obj = room_map_->view(pos);
+	if (inspect_mode_ || map_->view(pos)) {
+		selected_obj = map_->view(pos);
 		return;
 	}
 	if (std::unique_ptr<GameObject> obj = create_from_model(obj_code, nullptr)) {
 		selected_obj = obj.get();
-		room_map_->create_in_map(std::move(obj), nullptr);
+		map_->create_in_map(std::move(obj), nullptr);
 	} else if (obj_code == ObjCode::Wall) {
-		room_map_->create_wall(pos);
-		selected_obj = room_map_->view(pos);
+		map_->create_wall(pos);
+		selected_obj = map_->view(pos);
 	}
 }
 
@@ -203,7 +203,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (inspect_mode_) {
 		return;
 	}
-	GameObject* obj = room_map_->view(pos);
+	GameObject* obj = map_->view(pos);
 	if (obj) {
 		if (obj->obj_code() == ObjCode::Player) {
 			return;
@@ -211,10 +211,10 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 		selected_obj = nullptr;
 		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object
 		if (obj->id_ == GLOBAL_WALL_ID) {
-			room_map_->at(pos) = 0;
+			map_->at(pos) = 0;
 		} else {
-			room_map_->take_from_map(obj, true, nullptr);
-			room_map_->remove_from_object_array(obj);
+			map_->take_from_map(obj, true, nullptr);
+			map_->remove_from_object_array(obj);
 		}
 	}
 }

@@ -25,7 +25,7 @@ GameObject::GameObject(Point3 pos, bool pushable, bool gravitable) :
 	modifier_{}, animation_ {},
 	pos_{ pos }, id_{ -1 },
 	pushable_{ pushable }, gravitable_{ gravitable },
-	tangible_{ false }, driven_{ false } {}
+	driven_{ false } {}
 
 GameObject::~GameObject() {}
 
@@ -34,7 +34,7 @@ GameObject::GameObject(const GameObject& obj) :
 	modifier_{}, animation_{},
 	pos_{ obj.pos_ }, id_{ -1 },
 	pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ },
-	tangible_{ false }, driven_{ false } {}
+	driven_{ false } {}
 
 std::string GameObject::to_str() {
 	std::string mod_str{ "" };

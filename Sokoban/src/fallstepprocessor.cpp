@@ -9,8 +9,7 @@
 
 // Move fall_check directly from MoveProcessor into FallStepProcessor
 FallStepProcessor::FallStepProcessor(RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
-fall_comps_unique_ {}, fall_check_ {fall_check}, snake_check_ {},
-map_ {map}, delta_frame_ {delta_frame}, layers_fallen_ {} {}
+fall_check_ {fall_check}, map_ {map}, delta_frame_ {delta_frame} {}
 
 FallStepProcessor::~FallStepProcessor() {}
 

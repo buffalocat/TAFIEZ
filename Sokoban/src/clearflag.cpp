@@ -33,6 +33,7 @@ void ClearFlag::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	file >> real >> active;
 	bool collected = map->clear_flag_req_ == 0;
 	auto cf = std::make_unique<ClearFlag>(parent, map->clear_flag_req_, real, active, collected, map->zone_);
+	map->clear_flags_[cf.get()] = active;
 	parent->set_modifier(std::move(cf));
 }
 
@@ -50,7 +51,13 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	active_ = false;
 	if (auto* above = map->view(pos_above())) {
 		if (real_) {
-			active_ = dynamic_cast<Player*>(above);
+			if (dynamic_cast<Player*>(above)) {
+				active_ = true;
+			} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{0, 0, 2}))) {
+				if (player->car_riding()) {
+					active_ = true;
+				}
+			}
 		} else {
 			active_ = false;
 			if (auto* mod = above->modifier()) {
@@ -66,11 +73,10 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	if (active_ != prev_active) {
 		map->clear_flags_[this] = active_;
 		delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this, map));
+		map->clear_flags_changed_ = true;
 	}
 }
 
-
-//TODO: fix
 void ClearFlag::setup_on_put(RoomMap* map, bool real) {
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
@@ -85,7 +91,13 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (collected_) {
 		color = DARK_RED;
 	} else if (active_) {
-		color = GREEN;
+		if (real_) {
+			color = GREEN;
+		} else {
+			color = DARK_PURPLE;
+		}
+	} else if (!real_) {
+		color = PURPLE;
 	}
 	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Blank, color);
 }

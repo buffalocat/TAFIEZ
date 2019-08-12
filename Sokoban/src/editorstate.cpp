@@ -48,13 +48,13 @@ EditorState::EditorState(GraphicsManager* gfx): EditorBaseState() {
 	INIT_TAB(Camera);
 	INIT_TAB(Snake);
     active_tab_ = tabs_[0].second.get();
-	globals_->load_flags("maps");
+	global_->load_flags("maps");
 }
 
 #undef INIT_TAB
 
 EditorState::~EditorState() {
-	globals_->save_flags("maps");
+	global_->save_flags("maps");
 }
 
 // These shortcuts are specific to EditorState, and *not* other classes
@@ -163,7 +163,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
         return;
     }
     auto room = std::make_unique<Room>(name);
-    room->initialize(*objs_, width, height, depth);
+    room->initialize(*objs_, nullptr, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
     room->map()->create_in_map(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
 	room->set_cam_pos(player_pos, player_pos);

@@ -43,7 +43,7 @@ unsigned int EditorGlobalData::generate_flag() {
 	unsigned int flag;
 	do {
 		flag = rand_engine_();
-	} while (flags_.count(flag));
+	} while (flags_.count(flag) || flag == 0);
 	return flag;
 }
 
@@ -82,6 +82,11 @@ void PlayingGlobalData::save_flags(std::filesystem::path path) {
 void PlayingGlobalData::add_flag(unsigned int flag) {
 	flags_.insert(flag);
 }
+
+void PlayingGlobalData::remove_flag(unsigned int flag) {
+	flags_.erase(flag);
+}
+
 
 bool PlayingGlobalData::has_flag(unsigned int flag) {
 	return flags_.count(flag);

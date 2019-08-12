@@ -5,6 +5,7 @@
 #include "room.h"
 #include "roommap.h"
 #include "gameobject.h"
+#include "savefile.h"
 
 RoomTab::RoomTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx) {}
 
@@ -21,8 +22,19 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 
 	zone_options(eroom->map());
 	
-	ImGui::InputInt("Clear Flag Requirement", &eroom->map()->clear_flag_req_);
-	clamp(&eroom->map()->clear_flag_req_, 0, 255);
+	int* req = &eroom->map()->clear_flag_req_;
+	unsigned int* id = &eroom->map()->clear_id_;
+	ImGui::InputInt("Clear Flag Requirement", req);
+	clamp(req, 0, 255);
+	if (*req > 0 && *id == 0) {
+		unsigned int flag = editor_->global_->generate_flag();
+		*id = flag;
+		editor_->global_->assign_flag(flag, eroom->name());
+	} else if (*req == 0 && *id > 0) {
+		editor_->global_->destroy_flag(*id);
+		*id = 0;
+	}
+	ImGui::Text("Current Global ID: %u", *id);
 
 	ImGui::Separator();
 

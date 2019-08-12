@@ -38,8 +38,8 @@ public:
 	bool changed();
 
 private:
-	std::vector<std::unique_ptr<Delta>> deltas_;
-	bool changed_;
+	std::vector<std::unique_ptr<Delta>> deltas_{};
+	bool changed_ = false;
 };
 
 
@@ -56,30 +56,6 @@ private:
 	std::deque<std::unique_ptr<DeltaFrame>> frames_;
 	unsigned int max_depth_;
 	unsigned int size_;
-};
-
-
-class CreationDelta : public Delta {
-public:
-	CreationDelta(GameObject* obj, RoomMap* map);
-	~CreationDelta();
-	void revert();
-
-private:
-	GameObject* obj_;
-	RoomMap* map_;
-};
-
-
-class DeletionDelta : public Delta {
-public:
-	DeletionDelta(GameObject* obj, RoomMap* map);
-	~DeletionDelta();
-	void revert();
-
-private:
-	GameObject* obj_;
-	RoomMap* map_;
 };
 
 
@@ -289,12 +265,13 @@ private:
 
 class ClearFlagCollectionDelta : public Delta {
 public:
-	ClearFlagCollectionDelta(std::vector<ClearFlag*>&& flags);
+	ClearFlagCollectionDelta(RoomMap* map, int req);
 	~ClearFlagCollectionDelta();
 	void revert();
 
 private:
-	std::vector<ClearFlag*> flags_;
+	RoomMap* map_;
+	int req_;
 };
 
 #endif // DELTA_H

@@ -136,6 +136,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	map_->alert_activated_listeners(delta_frame_, this);
 	map_->reset_local_state();
 	map_->check_signalers(delta_frame_, this);
+	map_->check_clear_flag_collected(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
 		frames_ = FALL_MOVEMENT_FRAMES;

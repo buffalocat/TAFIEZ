@@ -27,6 +27,8 @@
 #include "signaler.h"
 #include "mapfile.h"
 
+#include "savefile.h"
+
 Room::Room(std::string name) : name_{ name }, offset_pos_{ 0,0,0 } {}
 
 Room::~Room() {}
@@ -35,8 +37,8 @@ std::string const Room::name() {
 	return name_;
 }
 
-void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
-	map_ = std::make_unique<RoomMap>(objs, w, h, d);
+void Room::initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d) {
+	map_ = std::make_unique<RoomMap>(objs, global, w, h, d);
 	camera_ = std::make_unique<Camera>(w, h);
 }
 
@@ -149,13 +151,17 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 		switch (static_cast<MapCode>(b[0])) {
 		case MapCode::Dimensions:
 			file.read(b, 3);
-			initialize(objs, b[0], b[1], b[2]);
+			initialize(objs, global, b[0], b[1], b[2]);
 			break;
 		case MapCode::Zone:
 			map_->zone_ = file.read_byte();
 			break;
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();
+			map_->clear_id_ = file.read_uint32();
+			if (global && global->has_flag(map_->clear_id_)) {
+				map_->collect_flag();
+			}
 			break;
 		case MapCode::OffsetPos:
 			file >> offset_pos_;

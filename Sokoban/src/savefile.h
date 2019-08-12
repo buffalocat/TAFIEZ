@@ -38,6 +38,7 @@ public:
 	void load_flags(std::filesystem::path path);
 	void save_flags(std::filesystem::path path);
 	void add_flag(unsigned int flag);
+	void remove_flag(unsigned int flag);
 	bool has_flag(unsigned int flag);
 
 private:

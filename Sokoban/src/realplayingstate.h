@@ -3,6 +3,7 @@
 
 #include "playingstate.h"
 
+class PlayingGlobalData;
 class SaveFile;
 
 class RealPlayingState: public PlayingState {

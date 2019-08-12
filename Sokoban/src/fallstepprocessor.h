@@ -21,12 +21,12 @@ public:
     void settle(FallComponent* comp);
 
 private:
-    std::vector<std::unique_ptr<FallComponent>> fall_comps_unique_;
+	std::vector<std::unique_ptr<FallComponent>> fall_comps_unique_{};
     std::vector<GameObject*> fall_check_;
-    std::unordered_set<SnakeBlock*> snake_check_;
+	std::set<SnakeBlock*> snake_check_{};
     RoomMap* map_;
     DeltaFrame* delta_frame_;
-    int layers_fallen_;
+    int layers_fallen_ = 0;
 };
 
 #endif // FALLSTEPPROCESSOR_H

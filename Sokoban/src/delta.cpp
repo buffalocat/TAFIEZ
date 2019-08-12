@@ -17,7 +17,7 @@
 
 Delta::~Delta() {}
 
-DeltaFrame::DeltaFrame() : deltas_{}, changed_{ false } {}
+DeltaFrame::DeltaFrame() {}
 
 DeltaFrame::~DeltaFrame() {}
 
@@ -168,7 +168,6 @@ RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
 
 RoomChangeDelta::~RoomChangeDelta() {}
 
-//TODO: keep some local state in the DeltaFrame? If so, this also changes *that* Room
 void RoomChangeDelta::revert() {
 	state_->activate_room(room_);
 }
@@ -245,11 +244,11 @@ void ClearFlagToggleDelta::revert() {
 }
 
 
-ClearFlagCollectionDelta::ClearFlagCollectionDelta(std::vector<ClearFlag*>&& flags) :
-	flags_{ flags } {}
+ClearFlagCollectionDelta::ClearFlagCollectionDelta(RoomMap* map, int req) :
+	map_{ map }, req_{ req } {}
 
 ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
 
 void ClearFlagCollectionDelta::revert() {
-
+	map_->uncollect_flag(req_);
 }

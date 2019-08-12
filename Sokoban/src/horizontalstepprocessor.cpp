@@ -155,7 +155,7 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 			fall_check_.push_back(above);
 		}
 	}
-	std::unordered_set<SnakeBlock*> link_add_check{};
+	std::set<SnakeBlock*> link_add_check{};
 	link_add_check.insert(moving_snakes_.begin(), moving_snakes_.end());
 	for (auto sb : moving_snakes_) {
 		sb->break_blocked_links(fall_check_, map_, delta_frame_, dir_);

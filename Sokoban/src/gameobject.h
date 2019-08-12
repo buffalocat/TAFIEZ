@@ -69,8 +69,8 @@ public:
     int id_;
     bool pushable_;
     bool gravitable_;
-	// Does the object occupy its map position?
-    bool tangible_;
+	// Is the object physically in the map?
+	bool tangible_ = false;
 	// Temporary flag for active cars/autos/puppets
 	bool driven_;
 

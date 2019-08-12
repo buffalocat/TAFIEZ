@@ -37,7 +37,7 @@ public:
 
     bool available();
     bool confused(RoomMap*);
-    void collect_maybe_confused_neighbors(RoomMap*, std::unordered_set<SnakeBlock*>& check);
+    void collect_maybe_confused_neighbors(RoomMap*, std::set<SnakeBlock*>& check);
     void update_links_color(RoomMap*, DeltaFrame*);
     void check_add_local_links(RoomMap*, DeltaFrame*);
 	void break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);
@@ -66,7 +66,7 @@ class SnakePuller {
 public:
     SnakePuller(RoomMap*, DeltaFrame*,
                 std::vector<GameObject*>& moving_blocks,
-                std::unordered_set<SnakeBlock*>& link_add_check,
+                std::set<SnakeBlock*>& link_add_check,
                 std::vector<GameObject*>& fall_check);
     ~SnakePuller();
     void prepare_pull(SnakeBlock*);
@@ -75,9 +75,9 @@ public:
 private:
     RoomMap* map_;
     DeltaFrame* delta_frame_;
-    std::vector<SnakeBlock*> snakes_to_pull_;
+	std::vector<SnakeBlock*> snakes_to_pull_{};
     std::vector<GameObject*>& moving_blocks_;
-    std::unordered_set<SnakeBlock*>& link_add_check_;
+    std::set<SnakeBlock*>& link_add_check_;
     std::vector<GameObject*>& fall_check_;
 };
 

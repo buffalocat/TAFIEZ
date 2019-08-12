@@ -221,7 +221,7 @@ void SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
 	}
 }
 
-void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* map, std::unordered_set<SnakeBlock*>& check) {
+void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* map, std::set<SnakeBlock*>& check) {
 	if (available()) {
 		for (Point3 d : H_DIRECTIONS) {
 			auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
@@ -324,9 +324,9 @@ std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame
 
 SnakePuller::SnakePuller(RoomMap* map, DeltaFrame* delta_frame,
 	std::vector<GameObject*>& moving_blocks,
-	std::unordered_set<SnakeBlock*>& link_add_check,
+	std::set<SnakeBlock*>& link_add_check,
 	std::vector<GameObject*>& fall_check) :
-	map_{ map }, delta_frame_{ delta_frame }, snakes_to_pull_{},
+	map_{ map }, delta_frame_{ delta_frame },
 	moving_blocks_{ moving_blocks }, link_add_check_{ link_add_check }, fall_check_{ fall_check } {}
 
 SnakePuller::~SnakePuller() {}

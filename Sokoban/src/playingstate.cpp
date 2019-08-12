@@ -116,6 +116,12 @@ void PlayingState::handle_input() {
 		} else {
 			move_processor_.reset(nullptr);
 		}
+	} else if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+		if (auto* rps = dynamic_cast<RealPlayingState*>(this)) {
+			rps->make_subsave();
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
 	}
 	for (auto p : MOVEMENT_KEYS) {
 		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
@@ -152,6 +158,7 @@ bool PlayingState::activate_room(std::string name) {
 	return true;
 }
 
+// TODO: use a real deltaframe in set_initial_state here!
 void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();

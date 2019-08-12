@@ -22,7 +22,7 @@ private:
 	void object_tab_options();
 
 	std::unique_ptr<GameObject> create_from_model(ObjCode, GameObject* prev);
-	RoomMap* room_map_;
+	RoomMap* map_;
 };
 
 #endif // OBJECTTAB_H

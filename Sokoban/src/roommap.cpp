@@ -15,9 +15,10 @@
 #include "moveprocessor.h"
 #include "common_constants.h"
 #include "clearflag.h"
+#include "savefile.h"
 
-RoomMap::RoomMap(GameObjectArray& obj_array, int width, int height, int depth) :
-	obj_array_{ obj_array },
+RoomMap::RoomMap(GameObjectArray& obj_array, PlayingGlobalData* global, int width, int height, int depth) :
+	obj_array_{ obj_array }, global_{ global },
 	width_{ width }, height_{ height }, depth_{ depth } {
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
@@ -71,8 +72,11 @@ void RoomMap::serialize(MapFileO& file) {
 	// Metadata
 	file << MapCode::Zone;
 	file << zone_;
-	file << MapCode::ClearFlagRequirement;
-	file << clear_flag_req_;
+	if (clear_flag_req_ > 0) {
+		file << MapCode::ClearFlagRequirement;
+		file << clear_flag_req_;
+		file.write_uint32(clear_id_);
+	}
 	// Serialize layer types
 	std::vector<GameObject*> rel_check_objs{};
 	std::vector<ObjectModifier*> rel_check_mods{};
@@ -127,8 +131,8 @@ void RoomMap::push_to_object_array(std::unique_ptr<GameObject> obj_unique, Delta
 void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
 	GameObject* obj = obj_unique.get();
 	obj_array_.push_object(std::move(obj_unique));
-	obj->tangible_ = true;
 	at(obj->pos_) += obj->id_;
+	obj->tangible_ = true;
 	obj->setup_on_put(this, true);
 	activate_listeners_at(obj->pos_);
 	if (delta_frame) {
@@ -142,8 +146,8 @@ void RoomMap::remove_from_object_array(GameObject* obj) {
 }
 
 void RoomMap::put_in_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
-	obj->tangible_ = true;
 	at(obj->pos_) += obj->id_;
+	obj->tangible_ = true;
 	obj->setup_on_put(this, real);
 	activate_listeners_at(obj->pos_);
 	if (real && delta_frame) {
@@ -154,8 +158,8 @@ void RoomMap::put_in_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
 void RoomMap::take_from_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
 	activate_listeners_at(obj->pos_);
 	obj->cleanup_on_take(this, real);
-	at(obj->pos_) -= obj->id_;
 	obj->tangible_ = false;
+	at(obj->pos_) -= obj->id_;
 	if (real && delta_frame) {
 		delta_frame->push(std::make_unique<TakeDelta>(obj, this));
 	}
@@ -187,12 +191,6 @@ void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, DeltaFrame
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos, this));
 	}
-}
-
-
-void RoomMap::set_clear_flag_activation(ClearFlag* flag, DeltaFrame* delta_frame) {
-	clear_flags_[flag] = flag->active_;
-
 }
 
 
@@ -406,6 +404,7 @@ void RoomMap::set_initial_state(bool editor_mode) {
 	}
 	mp.perform_switch_checks(true);
 	mp.try_fall_step();
+	check_clear_flag_collected(&dummy_df);
 }
 
 struct SnakeInitializer {
@@ -432,7 +431,6 @@ void RoomMap::initialize_automatic_snake_links() {
 	}
 }
 
-// The room keeps track of some things which must be forgotten after a move or undo
 void RoomMap::reset_local_state() {
 	activated_listeners_ = {};
 }
@@ -453,6 +451,40 @@ void RoomMap::remove_signaler(Signaler* rem) {
 		[rem](std::unique_ptr<Signaler>& sig) {return sig.get() == rem; }), signalers_.end());
 }
 
+void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
+	if (clear_flag_req_ && clear_flags_changed_) {
+		int total = 0;
+		for (auto& pair : clear_flags_) {
+			total += pair.second;
+		}
+		if (total >= clear_flag_req_) {
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this, clear_flag_req_));
+			}
+			collect_flag();
+			if (global_) {
+				global_->add_flag(clear_id_);
+			}
+		}
+	}
+}
+
+void RoomMap::collect_flag() {
+	for (auto& pair : clear_flags_) {
+		pair.first->collected_ = true;
+	}
+	clear_flag_req_ = 0;
+}
+
+void RoomMap::uncollect_flag(int req) {
+	clear_flag_req_ = req;
+	for (auto& pair : clear_flags_) {
+		pair.first->collected_ = false;
+	}
+	if (global_) {
+		global_->remove_flag(clear_id_);
+	}
+}
 
 void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
 	effects_->push_trail(block, height, drop);
