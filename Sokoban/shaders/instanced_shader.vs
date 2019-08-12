@@ -5,11 +5,11 @@ layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 iPos;
 layout (location = 4) in vec3 iScale;
 layout (location = 5) in vec2 iTexOffset;
-layout (location = 6) in vec3 iColor;
+layout (location = 6) in vec4 iColor;
 
 out float LightIntensity;
 out vec2 TexCoord;
-out vec3 Color;
+out vec4 Color;
 
 uniform float texScale;
 uniform float lightMixFactor;

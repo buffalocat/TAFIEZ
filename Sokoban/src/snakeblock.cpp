@@ -424,7 +424,9 @@ void SnakePuller::perform_pulls() {
 		while (SnakeBlock* next = cur->target_) {
 			cur->reset_internal_state();
 			moving_blocks_.push_back(cur);
-			map_->shift(cur, (next->pos_ - cur->pos_), delta_frame_);
+			Point3 dir = next->pos_ - cur->pos_;
+			cur->set_linear_animation(dir);
+			map_->shift(cur, dir, delta_frame_);
 			cur = next;
 		}
 		cur->reset_internal_state();

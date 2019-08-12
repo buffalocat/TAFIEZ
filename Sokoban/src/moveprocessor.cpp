@@ -81,18 +81,19 @@ bool MoveProcessor::update() {
 			break;
 		}
 	}
+	// TODO: move this responsibility to a new class
+	for (GameObject* block : moving_blocks_) {
+		block->update_animation();
+	}
 	//update_gate_transitions();
 	return frames_ <= 0;
 }
 
 void MoveProcessor::abort() {
-	// TODO: Pute this in the new animation managing class
+	// TODO: Put this in the new animation managing class
 	for (GameObject* block : moving_blocks_) {
 		block->reset_animation();
 	}
-	/*for (auto& p : gate_transitions_) {
-		p.first->reset_state_animation();
-	}*/
 }
 
 // Returns whether a color change occured

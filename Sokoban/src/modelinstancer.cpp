@@ -40,7 +40,7 @@ void ModelInstancer::set_instance_attributes(int VAO) {
 	glVertexAttribDivisor(5, 1);
 	// color
 	glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, Color));
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)offsetof(InstanceData, Color));
 	glVertexAttribDivisor(6, 1);
 }
 
@@ -54,7 +54,7 @@ void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture 
 }
 
 void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color) {
-	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), glm::vec3(color) });
+	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
 }
 
 DynamicInstancer::DynamicInstancer(std::string path) : ModelInstancer(path) {}

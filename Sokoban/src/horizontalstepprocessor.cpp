@@ -168,6 +168,10 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	// MAP BECOMES INCONSISTENT HERE (potential ID overlap)
 	// In this section of code, the map can't be viewed
 	auto forward_moving_blocks = moving_blocks_;
+	// TODO: put animation code somewhere else, if possible?
+	for (auto* block : forward_moving_blocks) {
+		block->set_linear_animation(dir_);
+	}
 	snake_puller.perform_pulls();
 	map_->batch_shift(std::move(forward_moving_blocks), dir_, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE

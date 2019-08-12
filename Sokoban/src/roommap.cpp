@@ -159,7 +159,9 @@ void RoomMap::shift(GameObject* obj, Point3 dpos, DeltaFrame* delta_frame) {
 	take_from_map(obj, false, nullptr);
 	obj->pos_ += dpos;
 	put_in_map(obj, false, nullptr);
-	delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
+	}
 }
 
 void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, DeltaFrame* delta_frame) {

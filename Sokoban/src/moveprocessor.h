@@ -59,9 +59,6 @@ public:
 	void add_neighbors_to_fall_check(GameObject*);
     void add_to_moving_blocks(GameObject*);
 
-    void add_gate_transition(GateBody*, bool);
-    void update_gate_transitions();
-
     bool update();
     void abort();
 

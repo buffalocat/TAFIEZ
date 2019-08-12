@@ -7,6 +7,7 @@
 struct GLFWwindow;
 class TextRenderer;
 class StringDrawer;
+class Animation;
 
 class GraphicsManager {
 public:
@@ -37,6 +38,7 @@ public:
 
 private:
 	GLFWwindow* window_;
+	std::vector<Animation*> animations;
 	GLuint atlas_;
 	Shader instanced_shader_;
 

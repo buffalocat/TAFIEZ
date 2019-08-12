@@ -65,7 +65,7 @@ bool Gate::can_set_state(bool state, RoomMap* map) {
 
 void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
     if (body_) {
-        mp->add_gate_transition(body_, state());
+		// Add animation
         if (state()) {
             map->put_in_map(body_, true, delta_frame);
 		}
