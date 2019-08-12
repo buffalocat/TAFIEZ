@@ -74,11 +74,11 @@ void ThresholdSignaler::remove_switchable(Switchable* obj, int) {
 	switchables_.erase(std::remove(switchables_.begin(), switchables_.end(), obj), switchables_.end());
 }
 
-void ThresholdSignaler::check_send_signal(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void ThresholdSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	bool state = count_ >= threshold_;
 	if (state != (prev_count_ >= threshold_)) {
 		for (Switchable* obj : switchables_) {
-			obj->receive_signal(state, room_map, delta_frame, mp);
+			obj->receive_signal(state, map, delta_frame, mp);
 		}
 	}
 	update_count(delta_frame);
@@ -124,23 +124,23 @@ void ParitySignaler::remove_switchable(Switchable* obj, int index) {
 	cur.erase(std::remove(cur.begin(), cur.end(), obj), cur.end());
 }
 
-void ParitySignaler::check_send_signal(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void ParitySignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	int prev_state = prev_count_ % parity_level_;
 	int state = count_ % parity_level_;
 	if (state != prev_state) {
 		for (Switchable* obj : switchables_[prev_state]) {
-			obj->receive_signal(false, room_map, delta_frame, mp);
+			obj->receive_signal(false, map, delta_frame, mp);
 		}
 		for (Switchable* obj : switchables_[state]) {
-			obj->receive_signal(true, room_map, delta_frame, mp);
+			obj->receive_signal(true, map, delta_frame, mp);
 		}
 	}
 	update_count(delta_frame);
 }
 
 // Unlike ThresholdSignalers, these must (potentially) send a signal immediately
-void ParitySignaler::check_send_initial(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void ParitySignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	for (Switchable* obj : switchables_[count_ % parity_level_]) {
-		obj->receive_signal(true, room_map, delta_frame, mp);
+		obj->receive_signal(true, map, delta_frame, mp);
 	}
 }

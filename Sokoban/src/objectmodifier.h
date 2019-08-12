@@ -11,6 +11,7 @@ class MoveProcessor;
 class MapFileI;
 class MapFileO;
 class GraphicsManager;
+class PlayingGlobalData;
 
 enum class BlockTexture;
 
@@ -41,15 +42,12 @@ public:
 
 	virtual BlockTexture texture();
 
-    virtual void setup_on_put(RoomMap* room_map);
-    virtual void cleanup_on_take(RoomMap* room_map);
-    virtual void cleanup_on_destruction(RoomMap* room_map);
-    virtual void setup_on_undestruction(RoomMap* room_map);
+    virtual void setup_on_put(RoomMap*, bool real);
+    virtual void cleanup_on_take(RoomMap*, bool real);
 
     // Every type of Modifier can have at most one callback function for map listeners
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
     virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
-
 };
 
 #endif // OBJECTMODIFIER_H

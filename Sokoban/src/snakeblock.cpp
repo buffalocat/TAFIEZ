@@ -70,7 +70,7 @@ void SnakeBlock::relation_serialize(MapFileO& file) {
 }
 
 
-void SnakeBlock::collect_sticky_links(RoomMap* room_map, Sticky sticky_level, std::vector<GameObject*>& links) {
+void SnakeBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
 	if ((Sticky::Snake & sticky_level) == Sticky::None) {
 		return;
 	}
@@ -88,10 +88,10 @@ void SnakeBlock::reset_internal_state() {
 	dragged_ = false;
 }
 
-void SnakeBlock::collect_dragged_snake_links(RoomMap* room_map, Point3 dir, std::vector<GameObject*>& weak_links) {
+void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vector<GameObject*>& weak_links) {
 	// Were we pushed by the object behind us? If so, drag all links
 	// NOTE: this does no harm even if obj is a link
-	if (GameObject* obj = room_map->view(pos_ - dir)) {
+	if (GameObject* obj = map->view(pos_ - dir)) {
 		if (obj->comp_) {
 			for (SnakeBlock* link : links_) {
 				link->conditional_drag(weak_links);
@@ -209,22 +209,22 @@ bool SnakeBlock::can_link(SnakeBlock* snake) {
 		!in_links(snake);
 }
 
-void SnakeBlock::check_add_local_links(RoomMap* room_map, DeltaFrame* delta_frame) {
-	if (!available() || confused(room_map)) {
+void SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
+	if (!available() || confused(map)) {
 		return;
 	}
 	for (auto& d : H_DIRECTIONS) {
-		auto snake = dynamic_cast<SnakeBlock*>(room_map->view(shifted_pos(d)));
-		if (snake && color() == snake->color() && snake->available() && !in_links(snake) && !snake->confused(room_map)) {
+		auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
+		if (snake && color() == snake->color() && snake->available() && !in_links(snake) && !snake->confused(map)) {
 			add_link(snake, delta_frame);
 		}
 	}
 }
 
-void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* room_map, std::unordered_set<SnakeBlock*>& check) {
+void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* map, std::unordered_set<SnakeBlock*>& check) {
 	if (available()) {
 		for (Point3 d : H_DIRECTIONS) {
-			auto snake = dynamic_cast<SnakeBlock*>(room_map->view(shifted_pos(d)));
+			auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
 			// TODO: Make sure these conditions are reasonable
 			if (snake && (color_ == snake->color_) && snake->available()) {
 				check.insert(snake);
@@ -233,10 +233,10 @@ void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* room_map, std::unorde
 	}
 }
 
-void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* room_map, DeltaFrame* delta_frame, Point3 dir) {
+void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir) {
 	bool break_blocked = false;
 	// If there's something moving behind us, break all blocked links
-	if (GameObject* obj = room_map->view(pos_ - dir)) {
+	if (GameObject* obj = map->view(pos_ - dir)) {
 		if (obj->comp_) {
 			break_blocked = true;
 		}
@@ -264,24 +264,24 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomM
 	}
 }
 
-void SnakeBlock::update_links_color(RoomMap* room_map, DeltaFrame* delta_frame) {
+void SnakeBlock::update_links_color(RoomMap* map, DeltaFrame* delta_frame) {
 	auto links_copy = links_;
 	for (auto link : links_copy) {
 		if (color_ != link->color_) {
 			remove_link(link, delta_frame);
 		}
 	}
-	check_add_local_links(room_map, delta_frame);
+	check_add_local_links(map, delta_frame);
 }
 
 bool SnakeBlock::available() {
 	return links_.size() < ends_;
 }
 
-bool SnakeBlock::confused(RoomMap* room_map) {
+bool SnakeBlock::confused(RoomMap* map) {
 	int available_count = 0;
 	for (auto& d : H_DIRECTIONS) {
-		auto snake = dynamic_cast<SnakeBlock*>(room_map->view(shifted_pos(d)));
+		auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
 		if (snake && color_ == snake->color_ && (snake->available() || in_links(snake))) {
 			++available_count;
 		}
@@ -289,39 +289,44 @@ bool SnakeBlock::confused(RoomMap* room_map) {
 	return available_count > ends_;
 }
 
-void SnakeBlock::cleanup_on_destruction(RoomMap* room_map) {
+void SnakeBlock::cleanup_on_take(RoomMap* map, bool real) {
 	reset_internal_state();
-	for (SnakeBlock* link : links_) {
-		link->remove_link_one_way(this);
+	if (real) {
+		for (SnakeBlock* link : links_) {
+			link->remove_link_one_way(this);
+		}
 	}
 	if (modifier_) {
-		modifier_->cleanup_on_destruction(room_map);
+		modifier_->cleanup_on_take(map, real);
 	}
 }
 
-void SnakeBlock::setup_on_undestruction(RoomMap* room_map) {
-	for (SnakeBlock* link : links_) {
-		link->add_link_one_way(this);
+void SnakeBlock::setup_on_put(RoomMap* map, bool real) {
+	if (real) {
+		for (SnakeBlock* link : links_) {
+			link->add_link_one_way(this);
+		}
 	}
+	
 	if (modifier_) {
-		modifier_->setup_on_undestruction(room_map);
+		modifier_->setup_on_put(map, real);
 	}
 }
 
-std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* room_map, DeltaFrame* delta_frame) {
+std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame* delta_frame) {
 	auto split = std::make_unique<SnakeBlock>(pos_, color_, pushable_, gravitable_, 1);
 	if (modifier_) {
-		split->set_modifier(modifier_->duplicate(split.get(), room_map, delta_frame));
+		split->set_modifier(modifier_->duplicate(split.get(), map, delta_frame));
 	}
 	return std::move(split);
 }
 
 
-SnakePuller::SnakePuller(RoomMap* room_map, DeltaFrame* delta_frame,
+SnakePuller::SnakePuller(RoomMap* map, DeltaFrame* delta_frame,
 	std::vector<GameObject*>& moving_blocks,
 	std::unordered_set<SnakeBlock*>& link_add_check,
 	std::vector<GameObject*>& fall_check) :
-	map_{ room_map }, delta_frame_{ delta_frame }, snakes_to_pull_{},
+	map_{ map }, delta_frame_{ delta_frame }, snakes_to_pull_{},
 	moving_blocks_{ moving_blocks }, link_add_check_{ link_add_check }, fall_check_{ fall_check } {}
 
 SnakePuller::~SnakePuller() {}
@@ -360,11 +365,12 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 				// The split succeeded
 				if (sticky_comp.empty()) {
 					std::vector<SnakeBlock*> links = cur->links_;
-					map_->destroy(cur, delta_frame_);
+					map_->take_from_map(cur, true, delta_frame_);
 					for (SnakeBlock* link : links) {
 						auto split_copy_unique = cur->make_split_copy(map_, delta_frame_);
 						SnakeBlock* split_copy = split_copy_unique.get();
-						map_->create(std::move(split_copy_unique), delta_frame_);
+						map_->push_to_object_array(std::move(split_copy_unique), delta_frame_);
+						map_->put_in_map(split_copy, true, delta_frame_);
 						split_copy->add_link(link, delta_frame_);
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);

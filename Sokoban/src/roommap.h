@@ -33,25 +33,12 @@ public:
     int& at(Point3);
     GameObject* view(Point3);
 
-    void just_take(GameObject*);
-    void just_put(GameObject*);
-    void take(GameObject*);
-    void put(GameObject*);
-    void take_real(GameObject*, DeltaFrame*);
-    void put_real(GameObject*, DeltaFrame*);
-
-    void create(std::unique_ptr<GameObject>, DeltaFrame*);
-    void create_abstract(std::unique_ptr<GameObject>, DeltaFrame*);
-    void uncreate(GameObject*);
-    void uncreate_abstract(GameObject*);
-    void destroy(GameObject*, DeltaFrame*);
-    void undestroy(GameObject*);
-
+	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
+	void remove_from_object_array(GameObject*);
+	void put_in_map(GameObject*, bool real, DeltaFrame*);
+    void take_from_map(GameObject*, bool real, DeltaFrame*);
 	void create_wall(Point3);
 	void clear(Point3);
-
-    void just_shift(GameObject*, Point3);
-    void just_batch_shift(std::vector<GameObject*>, Point3);
     void shift(GameObject*, Point3, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, DeltaFrame*);
 
@@ -73,6 +60,8 @@ public:
     void check_signalers(DeltaFrame*, MoveProcessor*);
     void remove_signaler(Signaler*);
 
+	void set_clear_flag_activation(ClearFlag*, DeltaFrame*);
+
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
 
@@ -90,11 +79,12 @@ public:
     int depth_;
 
 	int clear_flag_req_ = 0;
+	unsigned int clear_id_ = 0;
 	char zone_ = '!';
+	std::map<ClearFlag*, bool> clear_flags_{};
 
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
-	std::vector<ClearFlag*> clear_flags_{};
 
     GameObjectArray& obj_array_;
 	std::vector<MapLayer> layers_{};

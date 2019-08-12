@@ -38,8 +38,8 @@ public:
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-    void setup_on_put(RoomMap* );
-    void cleanup_on_take(RoomMap*);
+	void setup_on_put(RoomMap*, bool real);
+	void cleanup_on_take(RoomMap*, bool real);
 
     void draw(GraphicsManager*, FPoint3);
 

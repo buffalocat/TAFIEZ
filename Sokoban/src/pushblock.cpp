@@ -34,11 +34,11 @@ std::unique_ptr<GameObject> PushBlock::deserialize(MapFileI& file) {
     return std::make_unique<PushBlock>(pos, b[0], b[1], b[2], static_cast<Sticky>(b[3]));
 }
 
-void PushBlock::collect_sticky_links(RoomMap* room_map, Sticky sticky_level, std::vector<GameObject*>& links) {
+void PushBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
     Sticky sticky_condition = sticky_ & sticky_level;
     if (sticky_condition != Sticky::None) {
         for (Point3 d : DIRECTIONS) {
-            PushBlock* adj = dynamic_cast<PushBlock*>(room_map->view(pos_ + d));
+            PushBlock* adj = dynamic_cast<PushBlock*>(map->view(pos_ + d));
             if (adj && adj->color() == color() && ((adj->sticky_ & sticky_condition) != Sticky::None)) {
                 links.push_back(adj);
             }

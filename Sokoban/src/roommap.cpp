@@ -14,6 +14,7 @@
 #include "effects.h"
 #include "moveprocessor.h"
 #include "common_constants.h"
+#include "clearflag.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, int width, int height, int depth) :
 	obj_array_{ obj_array },
@@ -22,17 +23,6 @@ RoomMap::RoomMap(GameObjectArray& obj_array, int width, int height, int depth) :
 		layers_.push_back(MapLayer(this, width_, height_, z));
 	}
 }
-
-/*
-void RoomMap::print_listeners() {
-	std::cout << "\nPrinting listeners post-move!" << std::endl;
-	for (auto& p : listeners_) {
-		for (ObjectModifier* mod : p.second) {
-			std::cout << mod->name() << " at " << p.first << std::endl;
-		}
-	}
-}
-*/
 
 RoomMap::~RoomMap() {}
 
@@ -125,90 +115,36 @@ GameObject* RoomMap::view(Point3 pos) {
 	}
 }
 
-void RoomMap::just_take(GameObject* obj) {
-	obj->cleanup_on_take(this);
-	obj->tangible_ = false;
-	at(obj->pos_) -= obj->id_;
-}
-
-void RoomMap::just_put(GameObject* obj) { 
-	at(obj->pos_) += obj->id_;
-	obj->setup_on_put(this);
-	obj->tangible_ = true;
-}
-
-void RoomMap::take(GameObject* obj) {
-	activate_listeners_at(obj->pos_);
-	just_take(obj);
-}
-
-void RoomMap::put(GameObject* obj) {
-	just_put(obj);
-	activate_listeners_at(obj->pos_);
-}
-
-void RoomMap::take_real(GameObject* obj, DeltaFrame* delta_frame) {
+void RoomMap::push_to_object_array(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
+	GameObject* obj = obj_unique.get();
+	obj_array_.push_object(std::move(obj_unique));
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<TakeDelta>(obj, this));
+		delta_frame->push(std::make_unique<ObjArrayPushDelta>(obj, this));
 	}
-	take(obj);
 }
 
-void RoomMap::put_real(GameObject* obj, DeltaFrame* delta_frame) {
-	if (delta_frame) {
+void RoomMap::remove_from_object_array(GameObject* obj) {
+	obj_array_.destroy(obj);
+}
+
+void RoomMap::put_in_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
+	obj->tangible_ = true;
+	at(obj->pos_) += obj->id_;
+	obj->setup_on_put(this, real);
+	activate_listeners_at(obj->pos_);
+	if (real && delta_frame) {
 		delta_frame->push(std::make_unique<PutDelta>(obj, this));
 	}
-	put(obj);
 }
 
-void RoomMap::shift(GameObject* obj, Point3 dpos, DeltaFrame* delta_frame) {
-	take(obj);
-	obj->pos_ += dpos;
-	put(obj);
-	obj->set_linear_animation(dpos);
-	delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
-}
-
-void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, DeltaFrame* delta_frame) {
-	for (auto obj : objs) {
-		obj->set_linear_animation(dpos);
-		take(obj);
-		obj->pos_ += dpos;
-		put(obj);
+void RoomMap::take_from_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
+	activate_listeners_at(obj->pos_);
+	obj->cleanup_on_take(this, real);
+	at(obj->pos_) -= obj->id_;
+	obj->tangible_ = false;
+	if (real && delta_frame) {
+		delta_frame->push(std::make_unique<TakeDelta>(obj, this));
 	}
-	delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos, this));
-}
-
-// "just" means "don't do any checks, animations, deltas"
-void RoomMap::just_shift(GameObject* obj, Point3 dpos) {
-	just_take(obj);
-	obj->pos_ += dpos;
-	just_put(obj);
-}
-
-void RoomMap::just_batch_shift(std::vector<GameObject*> objs, Point3 dpos) {
-	for (auto obj : objs) {
-		just_take(obj);
-		obj->pos_ += dpos;
-		just_put(obj);
-	}
-}
-
-void RoomMap::create(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
-	GameObject* obj = obj_unique.get();
-	// Need to push it into the GameObjectArray first to give it an ID
-	obj_array_.push_object(std::move(obj_unique));
-	put(obj);
-	if (delta_frame) {
-		delta_frame->push(std::make_unique<CreationDelta>(obj, this));
-	}
-}
-
-void RoomMap::create_abstract(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
-	if (delta_frame) {
-		delta_frame->push(std::make_unique<AbstractCreationDelta>(obj_unique.get(), this));
-	}
-	obj_array_.push_object(std::move(obj_unique));
 }
 
 void RoomMap::create_wall(Point3 pos) {
@@ -219,30 +155,32 @@ void RoomMap::clear(Point3 pos) {
 	at(pos) = 0;
 }
 
-void RoomMap::uncreate(GameObject* obj) {
-	just_take(obj);
-	obj->cleanup_on_destruction(this);
-	obj_array_.destroy(obj);
+void RoomMap::shift(GameObject* obj, Point3 dpos, DeltaFrame* delta_frame) {
+	take_from_map(obj, false, nullptr);
+	obj->pos_ += dpos;
+	put_in_map(obj, false, nullptr);
+	delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
 }
 
-void RoomMap::uncreate_abstract(GameObject* obj) {
-	obj->cleanup_on_destruction(this);
-	obj_array_.destroy(obj);
-}
-
-void RoomMap::destroy(GameObject* obj, DeltaFrame* delta_frame) {
-	obj->cleanup_on_destruction(this);
-	take(obj);
+void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, DeltaFrame* delta_frame) {
+	for (auto obj : objs) {
+		take_from_map(obj, false, nullptr);
+		obj->pos_ += dpos;
+		put_in_map(obj, false, nullptr);
+	}
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<DeletionDelta>(obj, this));
+		delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos, this));
 	}
 }
 
-void RoomMap::undestroy(GameObject* obj) {
-	just_put(obj);
-	obj->setup_on_undestruction(this);
+
+void RoomMap::set_clear_flag_activation(ClearFlag* flag, DeltaFrame* delta_frame) {
+	clear_flags_[flag] = flag->active_;
+
 }
 
+
+// TODO: consider making these sets instead of vectors
 void RoomMap::remove_auto(AutoBlock* obj) {
 	autos_.erase(std::remove(autos_.begin(), autos_.end(), obj), autos_.end());
 }
@@ -317,7 +255,7 @@ struct ObjectShifter {
 	void operator()(int);
 
 	GameObjectArray& obj_array;
-	RoomMap* room_map;
+	RoomMap* map;
 	Point3 dpos;
 };
 
@@ -338,12 +276,14 @@ struct ObjectDestroyer {
 	void operator()(int);
 
 	GameObjectArray& obj_array;
-	RoomMap* room_map;
+	RoomMap* map;
 };
 
 void ObjectDestroyer::operator()(int id) {
 	if (id > GLOBAL_WALL_ID) {
-		room_map->destroy(obj_array[id], nullptr);
+		auto* obj = obj_array[id];
+		map->take_from_map(obj, true, nullptr);
+		map->remove_from_object_array(obj);
 	}
 }
 
@@ -415,7 +355,7 @@ struct RoomStateInitializer {
 
 	GameObjectArray& obj_array;
 	MoveProcessor* mp;
-	RoomMap* room_map;
+	RoomMap* map;
 	DeltaFrame* delta_frame;
 };
 
@@ -425,10 +365,10 @@ void RoomStateInitializer::operator()(int id) {
 		mp->add_to_fall_check(obj);
 	}
 	if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(obj)) {
-		sb->check_add_local_links(room_map, delta_frame);
+		sb->check_add_local_links(map, delta_frame);
 	}
 	if (ObjectModifier* mod = obj->modifier()) {
-		room_map->activate_listener_of(mod);
+		map->activate_listener_of(mod);
 	}
 }
 
@@ -456,13 +396,13 @@ struct SnakeInitializer {
 	void operator()(int id);
 
 	GameObjectArray& obj_array;
-	RoomMap* room_map;
+	RoomMap* map;
 	DeltaFrame* delta_frame;
 };
 
 void SnakeInitializer::operator()(int id) {
 	if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(obj_array[id])) {
-		sb->check_add_local_links(room_map, delta_frame);
+		sb->check_add_local_links(map, delta_frame);
 	}
 }
 

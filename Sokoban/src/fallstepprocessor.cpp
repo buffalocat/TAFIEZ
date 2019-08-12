@@ -8,9 +8,9 @@
 #include "snakeblock.h"
 
 // Move fall_check directly from MoveProcessor into FallStepProcessor
-FallStepProcessor::FallStepProcessor(RoomMap* room_map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
+FallStepProcessor::FallStepProcessor(RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
 fall_comps_unique_ {}, fall_check_ {fall_check}, snake_check_ {},
-map_ {room_map}, delta_frame_ {delta_frame}, layers_fallen_ {} {}
+map_ {map}, delta_frame_ {delta_frame}, layers_fallen_ {} {}
 
 FallStepProcessor::~FallStepProcessor() {}
 
@@ -147,13 +147,13 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
             // TODO: put the responsibility of making fall trails in a better place
             map_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
-            map_->put(block);
+            map_->put_in_map(block, false, nullptr);
         } else {
             // NOTE: magic number for trail size
             map_->make_fall_trail(block, layers_fallen_, 10);
             block->pos_ += {0,0,layers_fallen_};
-            map_->just_put(block);
-            map_->destroy(block, delta_frame_);
+            map_->put_in_map(block, false, nullptr);
+            map_->take_from_map(block, true, delta_frame_);
             if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
                 snake_check_.erase(sb);
             }

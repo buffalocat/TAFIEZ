@@ -32,31 +32,33 @@ void PressSwitch::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
     parent->set_modifier(std::make_unique<PressSwitch>(parent, b[0], b[1], b[2]));
 }
 
-void PressSwitch::check_send_signal(RoomMap* room_map, DeltaFrame* delta_frame) {
+void PressSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
     if (active_ && persistent_) {
         return;
     }
-    if (should_toggle(room_map)) {
+    if (should_toggle(map)) {
         delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
         toggle(true);
     }
 }
 
-bool PressSwitch::should_toggle(RoomMap* room_map) {
-    return active_ ^ (room_map->view(pos_above()) != nullptr);
+bool PressSwitch::should_toggle(RoomMap* map) {
+    return active_ ^ (map->view(pos_above()) != nullptr);
 }
 
-void PressSwitch::map_callback(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-    check_send_signal(room_map, delta_frame);
+void PressSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+    check_send_signal(map, delta_frame);
 }
 
-void PressSwitch::setup_on_put(RoomMap* room_map) {
-    room_map->add_listener(this, pos_above());
-    room_map->activate_listener_of(this);
+void PressSwitch::setup_on_put(RoomMap* map, bool real) {
+	Switch::setup_on_put(map, real);
+    map->add_listener(this, pos_above());
+    map->activate_listener_of(this);
 }
 
-void PressSwitch::cleanup_on_take(RoomMap* room_map) {
-    room_map->remove_listener(this, pos_above());
+void PressSwitch::cleanup_on_take(RoomMap* map, bool real) {
+	Switch::cleanup_on_take(map, real);
+    map->remove_listener(this, pos_above());
 }
 
 void PressSwitch::draw(GraphicsManager* gfx, FPoint3 p) {

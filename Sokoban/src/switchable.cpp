@@ -36,7 +36,7 @@ bool Switchable::state() {
 }
 
 // TODO: put a wait between receiving signals and applying them, like with Signalers
-void Switchable::receive_signal(bool signal, RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 	if (signal) {
 		++count_;
@@ -47,30 +47,34 @@ void Switchable::receive_signal(bool signal, RoomMap* room_map, DeltaFrame* delt
 	if ((persistent_ && active_) || ((active_ ^ waiting_) == cur_signal)) {
 		return;
 	}
-	waiting_ = !can_set_state(default_ ^ cur_signal, room_map);
+	waiting_ = !can_set_state(default_ ^ cur_signal, map);
 	if (active_ != (waiting_ ^ cur_signal)) {
 		active_ = !active_;
-		apply_state_change(room_map, delta_frame, mp);
+		apply_state_change(map, delta_frame, mp);
 	}
 }
 
 void Switchable::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
-void Switchable::check_waiting(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (waiting_ && can_set_state(!(default_ ^ active_), room_map)) {
+void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (waiting_ && can_set_state(!(default_ ^ active_), map)) {
 		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 		waiting_ = false;
 		active_ = !active_;
-		apply_state_change(room_map, delta_frame, mp);
+		apply_state_change(map, delta_frame, mp);
 	}
 }
 
-void Switchable::cleanup_on_destruction(RoomMap* room_map) {
-	for (auto& p : signalers_) {
-		p.first->remove_switchable(this, p.second);
+void Switchable::cleanup_on_take(RoomMap* map, bool real) {
+	if (real) {
+		for (auto& p : signalers_) {
+			p.first->remove_switchable(this, p.second);
+		}
 	}
 }
 
-void Switchable::setup_on_undestruction(RoomMap* room_map) {
-	connect_to_signalers();
+void Switchable::setup_on_put(RoomMap* map, bool real) {
+	if (real) {
+		connect_to_signalers();
+	}
 }

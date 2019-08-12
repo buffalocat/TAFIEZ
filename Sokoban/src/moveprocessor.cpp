@@ -19,8 +19,8 @@
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
 
-MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* room_map, DeltaFrame* delta_frame, Player* player, bool animated) :
-	playing_state_{ playing_state }, map_{ room_map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
+MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFrame* delta_frame, Player* player, bool animated) :
+	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
 
 MoveProcessor::~MoveProcessor() {}
 
@@ -38,6 +38,7 @@ bool MoveProcessor::try_move(Point3 dir) {
 	return true;
 }
 
+// TODO: make bound motion more flexible (allow pushes!!)
 void MoveProcessor::move_bound(Point3 dir) {
 	// When Player is Bound, no other agents move
 	if (map_->view(player_->shifted_pos(dir))) {
@@ -47,12 +48,12 @@ void MoveProcessor::move_bound(Point3 dir) {
 	auto* car = dynamic_cast<ColoredBlock*>(map_->view(player_->shifted_pos({ 0,0,-1 })));
 	auto* adj = dynamic_cast<ColoredBlock*>(map_->view(car->shifted_pos(dir)));
 	if (adj && car->color() == adj->color()) {
-		map_->take(player_);
+		map_->take_from_map(player_, false, nullptr);
 		player_->set_linear_animation(dir);
 		delta_frame_->push(std::make_unique<MotionDelta>(player_, dir, map_));
 		moving_blocks_.push_back(player_);
 		player_->shift_pos_from_animation();
-		map_->put(player_);
+		map_->put_in_map(player_, false, nullptr);
 	}
 }
 
@@ -79,13 +80,6 @@ bool MoveProcessor::update() {
 		default:
 			break;
 		}
-	}
-	// TODO: move this responsibility to a new class
-	for (GameObject* block : moving_blocks_) {
-		block->update_animation();
-	}
-	if (state_ == MoveStep::Done) {
-
 	}
 	//update_gate_transitions();
 	return frames_ <= 0;
@@ -195,7 +189,7 @@ void MoveProcessor::try_door_entry() {
 			door_state_ = DoorState::AwaitingExtExit;
 		}
 		for (auto& obj : door_travelling_objs_) {
-			map_->take_real(obj.raw, delta_frame_);
+			map_->take_from_map(obj.raw, true, delta_frame_);
 			add_neighbors_to_fall_check(obj.raw);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
@@ -219,7 +213,7 @@ void MoveProcessor::try_int_door_exit() {
 		for (auto& obj : door_travelling_objs_) {
 			add_to_fall_check(obj.raw);
 			obj.raw->abstract_put(obj.dest, delta_frame_);
-			map_->put_real(obj.raw, delta_frame_);
+			map_->put_in_map(obj.raw, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::Succeeded;
@@ -242,7 +236,7 @@ void MoveProcessor::try_door_unentry() {
 	if (can_move) {
 		for (auto& obj : door_travelling_objs_) {
 			add_to_fall_check(obj.raw);
-			map_->put_real(obj.raw, delta_frame_);
+			map_->put_in_map(obj.raw, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::Succeeded;
@@ -260,7 +254,7 @@ void MoveProcessor::ext_door_exit() {
 	for (auto& obj : door_travelling_objs_) {
 		add_to_fall_check(obj.raw);
 		obj.raw->abstract_put(obj.dest, delta_frame_);
-		map_->put_real(obj.raw, delta_frame_);
+		map_->put_in_map(obj.raw, true, delta_frame_);
 	}
 	playing_state_->snap_camera_to_player();
 	frames_ = FALL_MOVEMENT_FRAMES;
@@ -276,26 +270,4 @@ void MoveProcessor::add_to_moving_blocks(GameObject* obj) {
 
 void MoveProcessor::add_to_fall_check(GameObject* obj) {
 	fall_check_.push_back(obj);
-}
-
-void MoveProcessor::add_gate_transition(GateBody* gate_body, bool state) {
-	if (animated_) {
-		//gate_body->set_gate_transition_animation(state, this);
-		//gate_transitions_.push_back(std::make_pair(gate_body, state));
-	}
-}
-
-//TODO: fix this broken animation hack
-void MoveProcessor::update_gate_transitions() {
-/*	
-	for (auto& p : gate_transitions_) {
-		// A retracting object disappears at this point
-		if (p.first->update_state_animation() && !p.second) {
-			//map_->take_loud(p.first, delta_frame_);
-		}
-	}
-	gate_transitions_.erase(std::remove_if(gate_transitions_.begin(), gate_transitions_.end(),
-		[](auto& p) {return !p.first->state_animation(); }),
-		gate_transitions_.end());
-*/
 }

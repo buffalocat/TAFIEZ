@@ -165,7 +165,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
     auto room = std::make_unique<Room>(name);
     room->initialize(*objs_, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
-    room->map()->create(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
+    room->map()->push_to_object_array(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
 	room->set_cam_pos(player_pos, player_pos);
     rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos);
     set_active_room(name);
@@ -191,7 +191,7 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 	std::unique_ptr<Room> room = std::make_unique<Room>(name);
 
 	Player* player = nullptr;
-	room->load_from_file(*objs_, file, &player);
+	room->load_from_file(*objs_, file, nullptr, &player);
 	player->set_free();
 	Point3 start_pos = player->pos_;
 	room->map()->set_initial_state(true);
@@ -207,9 +207,9 @@ void EditorState::save_room(EditorRoom* eroom, bool commit) {
 		path = (MAPS_TEMP / eroom->name()).concat(".map");
     }
     MapFileO file{path};
-	RoomMap* room_map = eroom->map();
-	Player* player = dynamic_cast<Player*>(room_map->view(eroom->start_pos));
-	player->set_strictest(room_map);
+	RoomMap* map = eroom->map();
+	Player* player = dynamic_cast<Player*>(map->view(eroom->start_pos));
+	player->set_strictest(map);
     eroom->room->write_to_file(file);
 	player->set_free();
 }

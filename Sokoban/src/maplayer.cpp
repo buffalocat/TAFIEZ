@@ -13,8 +13,8 @@ bool MapRect::contains(Point2 p) {
 }
 
 
-MapLayer::MapLayer(RoomMap* room_map, int width, int height, int z) :
-	parent_map_{ room_map }, map_{}, width_{ width }, height_{ height }, z_{ z } {
+MapLayer::MapLayer(RoomMap* map, int width, int height, int z) :
+	parent_map_{ map }, map_{}, width_{ width }, height_{ height }, z_{ z } {
 	for (int i = 0; i != width; ++i) {
 		map_.push_back(std::vector<int>(height, 0));
 	}

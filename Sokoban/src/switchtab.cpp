@@ -153,7 +153,7 @@ enum class Threshold {
 	Custom,
 };
 
-void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* room_map) {
+void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* map) {
 	static int* threshold = nullptr;
 	static int switch_count = 0;
 
@@ -203,7 +203,7 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ro
 			for (auto* s : t_sig->switchables_) {
 				s->remove_signaler(t_sig);
 			}
-			room_map->remove_signaler(t_sig);
+			map->remove_signaler(t_sig);
 			selected_sig = nullptr;
 		}
 	} else {
@@ -223,12 +223,12 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ro
 				new_sig->push_switchable(obj, true, 0);
 			}
 			model_switchables_.clear();
-			room_map->push_signaler(std::move(new_sig));
+			map->push_signaler(std::move(new_sig));
 		}
 	}
 }
 
-void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* room_map) {
+void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* map) {
 	static int* parity_level = nullptr;
 
 	if (inspect_mode_) {
@@ -289,7 +289,7 @@ void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* room_map
 					s->remove_signaler(p_sig);
 				}
 			}
-			room_map->remove_signaler(p_sig);
+			map->remove_signaler(p_sig);
 			selected_sig = nullptr;
 		}
 	} else {
@@ -311,7 +311,7 @@ void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* room_map
 				}
 				model_p_switchables_[i].clear();
 			}
-			room_map->push_signaler(std::move(new_sig));
+			map->push_signaler(std::move(new_sig));
 		}
 	}
 }

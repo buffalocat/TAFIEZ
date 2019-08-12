@@ -39,11 +39,8 @@ public:
 
     virtual void draw(GraphicsManager*) = 0;
 
-    virtual void setup_on_put(RoomMap*);
-    virtual void cleanup_on_take(RoomMap*);
-
-    virtual void setup_on_undestruction(RoomMap*);
-    virtual void cleanup_on_destruction(RoomMap*);
+    virtual void setup_on_put(RoomMap*, bool real);
+    virtual void cleanup_on_take(RoomMap*, bool real);
 
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
 

@@ -71,27 +71,15 @@ void GameObject::shift_internal_pos(Point3 d) {
 	}
 }
 
-void GameObject::setup_on_put(RoomMap* room_map) {
+void GameObject::setup_on_put(RoomMap* map, bool real) {
 	if (modifier_) {
-		modifier_->setup_on_put(room_map);
+		modifier_->setup_on_put(map, real);
 	}
 }
 
-void GameObject::cleanup_on_take(RoomMap* room_map) {
+void GameObject::cleanup_on_take(RoomMap* map, bool real) {
 	if (modifier_) {
-		modifier_->cleanup_on_take(room_map);
-	}
-}
-
-void GameObject::cleanup_on_destruction(RoomMap* room_map) {
-	if (modifier_) {
-		modifier_->cleanup_on_destruction(room_map);
-	}
-}
-
-void GameObject::setup_on_undestruction(RoomMap* room_map) {
-	if (modifier_) {
-		modifier_->setup_on_undestruction(room_map);
+		modifier_->cleanup_on_take(map, real);
 	}
 }
 
@@ -152,7 +140,7 @@ FallComponent* GameObject::fall_comp() {
 	return dynamic_cast<FallComponent*>(comp_);
 }
 
-void GameObject::collect_sticky_component(RoomMap* room_map, Sticky sticky_level, Component* comp) {
+void GameObject::collect_sticky_component(RoomMap* map, Sticky sticky_level, Component* comp) {
 	std::vector<GameObject*> to_check{ this };
 	while (!to_check.empty()) {
 		GameObject* cur = to_check.back();
@@ -162,10 +150,10 @@ void GameObject::collect_sticky_component(RoomMap* room_map, Sticky sticky_level
 		}
 		cur->comp_ = comp;
 		comp->blocks_.push_back(cur);
-		cur->collect_sticky_links(room_map, sticky_level, to_check);
-		cur->collect_special_links(room_map, sticky_level, to_check);
+		cur->collect_sticky_links(map, sticky_level, to_check);
+		cur->collect_special_links(map, sticky_level, to_check);
 		if (ObjectModifier* mod = cur->modifier()) {
-			mod->collect_sticky_links(room_map, sticky_level, to_check);
+			mod->collect_sticky_links(map, sticky_level, to_check);
 		}
 	}
 }
@@ -174,7 +162,7 @@ Sticky GameObject::sticky() {
 	return Sticky::None;
 }
 
-bool GameObject::has_sticky_neighbor(RoomMap* room_map) {
+bool GameObject::has_sticky_neighbor(RoomMap* map) {
 	return false;
 }
 
@@ -202,9 +190,9 @@ int ColoredBlock::color() {
 	return color_;
 }
 
-bool ColoredBlock::has_sticky_neighbor(RoomMap* room_map) {
+bool ColoredBlock::has_sticky_neighbor(RoomMap* map) {
 	for (Point3 d : H_DIRECTIONS) {
-		if (ColoredBlock* adj = dynamic_cast<ColoredBlock*>(room_map->view(pos_ + d))) {
+		if (ColoredBlock* adj = dynamic_cast<ColoredBlock*>(map->view(pos_ + d))) {
 			if ((adj->color() == color()) && static_cast<bool>(adj->sticky() & sticky())) {
 				return true;
 			}

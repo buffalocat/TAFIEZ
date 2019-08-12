@@ -29,8 +29,8 @@ void FallComponent::settle_first() {
     }
 }
 
-void FallComponent::take_falling(RoomMap* room_map) {
+void FallComponent::take_falling(RoomMap* map) {
     for (GameObject* block : blocks_) {
-        room_map->take(block);
+        map->take_from_map(block, false, nullptr);
     }
 }

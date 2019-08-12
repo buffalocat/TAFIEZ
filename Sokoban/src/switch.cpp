@@ -32,12 +32,16 @@ void Switch::toggle(bool propagate) {
 	}
 }
 
-void Switch::cleanup_on_destruction(RoomMap* room_map) {
-    for (Signaler* s : signalers_) {
-        s->remove_switch(this);
-    }
+void Switch::cleanup_on_take(RoomMap* map, bool real) {
+	if (real) {
+		for (Signaler* s : signalers_) {
+			s->remove_switch(this);
+		}
+	}
 }
 
-void Switch::setup_on_undestruction(RoomMap* room_map) {
-    connect_to_signalers();
+void Switch::setup_on_put(RoomMap* map, bool real) {
+	if (real) {
+		connect_to_signalers();
+	}
 }

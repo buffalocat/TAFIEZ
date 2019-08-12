@@ -10,12 +10,12 @@
 
 #include "snakeblock.h"
 
-HorizontalStepProcessor::HorizontalStepProcessor(RoomMap* room_map, DeltaFrame* delta_frame, Player* player, Point3 dir,
+HorizontalStepProcessor::HorizontalStepProcessor(RoomMap* map, DeltaFrame* delta_frame, Player* player, Point3 dir,
 	std::vector<GameObject*>& fall_check, std::vector<GameObject*>& moving_blocks) :
 	push_comps_unique_{},
 	moving_snakes_{}, snakes_to_recheck_{},
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
-	map_{ room_map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
+	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
 
 HorizontalStepProcessor::~HorizontalStepProcessor() {}
 

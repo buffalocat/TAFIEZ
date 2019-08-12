@@ -48,13 +48,9 @@ BlockTexture ObjectModifier::texture() {
 
 void ObjectModifier::draw(GraphicsManager* gfx, FPoint3 p) {}
 
-void ObjectModifier::setup_on_put(RoomMap* room_map) {}
+void ObjectModifier::setup_on_put(RoomMap*, bool real) {}
 
-void ObjectModifier::cleanup_on_take(RoomMap* room_map) {}
-
-void ObjectModifier::cleanup_on_destruction(RoomMap* room_map) {}
-
-void ObjectModifier::setup_on_undestruction(RoomMap* room_map) {}
+void ObjectModifier::cleanup_on_take(RoomMap*, bool real) {}
 
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 

@@ -25,8 +25,8 @@ public:
     virtual void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
     void check_waiting(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-    virtual void cleanup_on_destruction(RoomMap* room_map);
-    virtual void setup_on_undestruction(RoomMap* room_map);
+    void cleanup_on_take(RoomMap* map, bool real);
+    void setup_on_put(RoomMap* map, bool real);
 
 	bool persistent_;
 

@@ -32,7 +32,7 @@ void Gate::serialize(MapFileO& file) {
     }
 }
 
-void Gate::deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent) {
+void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
     unsigned char b[7];
     file.read(b, 7);
     auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -42,7 +42,7 @@ void Gate::deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent) {
         file >> body_pos;
         auto gate_body_unique = std::make_unique<GateBody>(gate.get(), Point3{body_pos} + parent->pos_);
         gate->body_ = gate_body_unique.get();
-        room_map->create_abstract(std::move(gate_body_unique), nullptr);
+        map->push_to_object_array(std::move(gate_body_unique), nullptr);
     }
     parent->set_modifier(std::move(gate));
 }
@@ -59,48 +59,50 @@ void Gate::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& to_c
     }
 }
 
-bool Gate::can_set_state(bool state, RoomMap* room_map) {
-    return body_ && (!state || (room_map->view(body_->pos_) == nullptr));
+bool Gate::can_set_state(bool state, RoomMap* map) {
+    return body_ && (!state || (map->view(body_->pos_) == nullptr));
 }
 
-void Gate::apply_state_change(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
     if (body_) {
         mp->add_gate_transition(body_, state());
         if (state()) {
-            room_map->put_real(body_, delta_frame);
+            map->put_in_map(body_, true, delta_frame);
 		}
 		else {
-			room_map->take_real(body_, delta_frame);
+			map->take_from_map(body_, true, delta_frame);
 		}
-        GameObject* above = room_map->view(body_->pos_ + Point3{0,0,1});
+        GameObject* above = map->view(body_->pos_ + Point3{0,0,1});
         if (above && above->gravitable_) {
             mp->add_to_fall_check(above);
         }
     }
 }
 
-void Gate::map_callback(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
     if (body_) {
         Point3 dpos = body_->update_gate_pos(delta_frame);
         if (!state()) {
             body_->abstract_shift(dpos, delta_frame);
         }
     }
-    check_waiting(room_map, delta_frame, mp);
+    check_waiting(map, delta_frame, mp);
 }
 
 // TODO: make sure Gate listeners are handled correctly in all cases
 // Could disable listener creation when the gate is retracted, too.
-void Gate::setup_on_put(RoomMap* room_map) {
+void Gate::setup_on_put(RoomMap* map, bool real) {
+	Switchable::setup_on_put(map, real);
     if (body_) {
-        room_map->add_listener(this, body_->pos_);
-        room_map->activate_listener_of(this);
+        map->add_listener(this, body_->pos_);
+        map->activate_listener_of(this);
     }
 }
 
-void Gate::cleanup_on_take(RoomMap* room_map) {
+void Gate::cleanup_on_take(RoomMap* map, bool real) {
+	Switchable::cleanup_on_take(map, real);
     if (body_) {
-        room_map->remove_listener(this, body_->pos_);
+        map->remove_listener(this, body_->pos_);
     }
 }
 
@@ -112,7 +114,8 @@ void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
 
 }
 
-std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* room_map, DeltaFrame* delta_frame) {
+// TODO: make sure GateBody creation is reasonable
+std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* map, DeltaFrame* delta_frame) {
     auto dup = std::make_unique<Gate>(*this);
     dup->parent_ = parent;
     if (body_) {
@@ -120,9 +123,7 @@ std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* roo
         body_dup->set_gate(dup.get());
         dup->body_ = body_dup.get();
         if (state()) {
-            room_map->create(std::move(body_dup), delta_frame);
-        } else {
-            room_map->create_abstract(std::move(body_dup), delta_frame);
+            map->push_to_object_array(std::move(body_dup), delta_frame);
         }
     }
     dup->connect_to_signalers();

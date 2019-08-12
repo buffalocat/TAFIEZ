@@ -33,7 +33,7 @@ static Car model_car{ nullptr, {} };
 static Door model_door{ nullptr, 0, false, true, false };
 static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false };
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
-static ClearFlag model_clear_flag{ nullptr, 1, true, 'A' };
+static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 
 static ColorCycle model_color_cycle{};
 
@@ -153,13 +153,13 @@ void ModifierTab::select_color_cycle(ColorCycle* cycle) {
 }
 
 void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
-	RoomMap* room_map = eroom->map();
+	RoomMap* map = eroom->map();
 	selected_obj = nullptr;
 	selected_pos = pos;
-	if (!room_map->valid(pos)) {
+	if (!map->valid(pos)) {
 		return;
 	}
-	GameObject* obj = room_map->view(pos);
+	GameObject* obj = map->view(pos);
 	if (!obj) {
 		return;
 	} else if (inspect_mode_ || obj->modifier()) {
@@ -180,7 +180,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		gate->parent_ = obj;
 		auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{ 0, 0, 1 });
 		gate->body_ = gate_body.get();
-		room_map->create_abstract(std::move(gate_body), nullptr);
+		map->push_to_object_array(std::move(gate_body), nullptr);
 		mod = std::move(gate);
 		break;
 	}
@@ -188,10 +188,10 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		mod = std::make_unique<PressSwitch>(model_press_switch);
 		break;
 	case ModCode::AutoBlock:
-		mod = std::make_unique<AutoBlock>(obj, eroom->map());
+		mod = std::make_unique<AutoBlock>(obj);
 		break;
 	case ModCode::PuppetBlock:
-		mod = std::make_unique<PuppetBlock>(obj, eroom->map());
+		mod = std::make_unique<PuppetBlock>(obj);
 		break;
 	case ModCode::ClearFlag:
 		mod = std::make_unique<ClearFlag>(model_clear_flag);
@@ -204,10 +204,11 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	}
 	// A Wall with a modifier can't be the global wall
 	if (obj->id_ == GLOBAL_WALL_ID) {
-		room_map->clear(pos);
+		map->clear(pos);
 		auto new_wall = std::make_unique<Wall>(pos);
 		obj = new_wall.get();
-		room_map->create(std::move(new_wall), nullptr);
+		map->push_to_object_array(std::move(new_wall), nullptr);
+		map->put_in_map(obj, true, nullptr);
 	}
 	mod->parent_ = obj;
 	selected_obj = obj;
@@ -220,15 +221,16 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (inspect_mode_) {
 		return;
 	}
-	RoomMap* room_map = eroom->map();
-	if (GameObject* obj = room_map->view(pos)) {
+	RoomMap* map = eroom->map();
+	if (GameObject* obj = map->view(pos)) {
 		if (ObjectModifier* mod = obj->modifier()) {
 			// Revert a modified wall to a generic wall!
 			if (auto* wall = dynamic_cast<Wall*>(obj)) {
-				room_map->destroy(obj, nullptr);
-				room_map->create_wall(pos);
+				map->take_from_map(obj, true, nullptr);
+				map->remove_from_object_array(obj);
+				map->create_wall(pos);
 			} else {
-				mod->cleanup_on_destruction(room_map);
+				mod->cleanup_on_take(map, true);
 				obj->set_modifier({});
 			}
 		}

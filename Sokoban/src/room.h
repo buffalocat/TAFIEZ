@@ -12,6 +12,7 @@ class MapFileI;
 class MapFileO;
 class GameObject;
 class Player;
+class PlayingGlobalData;
 
 class Room {
 public:
@@ -25,7 +26,7 @@ public:
 	Camera* camera();
 
     void write_to_file(MapFileO& file);
-    void load_from_file(GameObjectArray& objs, MapFileI& file, Player** player_ptr);
+    void load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalData* global, Player** player_ptr);
 
     void draw_at_pos(GraphicsManager*, Point3 cam_pos, bool display_labels, bool ortho, bool one_layer);
     void draw_at_player(GraphicsManager*, Player* target, bool display_labels, bool ortho, bool one_layer);

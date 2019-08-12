@@ -67,21 +67,23 @@ void Door::relation_serialize(MapFileO& file) {
 	}
 }
 
-bool Door::can_set_state(bool state, RoomMap* room_map) {
+bool Door::can_set_state(bool state, RoomMap* map) {
     return true;
 }
 
-void Door::map_callback(RoomMap* room_map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void Door::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
     mp->plan_door_move(this);
 }
 
-void Door::setup_on_put(RoomMap* room_map) {
-    room_map->add_listener(this, pos_above());
-    room_map->activate_listener_of(this);
+void Door::setup_on_put(RoomMap* map, bool real) {
+	Switchable::setup_on_put(map, real);
+    map->add_listener(this, pos_above());
+    map->activate_listener_of(this);
 }
 
-void Door::cleanup_on_take(RoomMap* room_map) {
-    room_map->remove_listener(this, pos_above());
+void Door::cleanup_on_take(RoomMap* map, bool real) {
+	Switchable::cleanup_on_take(map, real);
+    map->remove_listener(this, pos_above());
 }
 
 void Door::draw(GraphicsManager* gfx, FPoint3 p) {

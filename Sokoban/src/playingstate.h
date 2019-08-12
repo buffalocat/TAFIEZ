@@ -10,7 +10,7 @@ class RoomMap;
 class GameObject;
 class Player;
 class MoveProcessor;
-class GlobalData;
+class PlayingGlobalData;
 
 class UndoStack;
 class DeltaFrame;
@@ -49,6 +49,7 @@ protected:
 	Room* room_{};
 	Player* player_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
+	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
 
 private:
 	std::unique_ptr<MoveProcessor> move_processor_{};

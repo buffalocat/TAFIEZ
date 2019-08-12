@@ -98,18 +98,18 @@ void PlayingState::handle_input() {
 	if (ignore_input) {
 		return;
 	}
-	RoomMap* room_map = room_->map();
+	RoomMap* map = room_->map();
 	// TODO: Make a real "death" flag/state
 	// Don't allow other input if player is "dead"
-	if (!dynamic_cast<Player*>(room_map->view(player_->pos_))) {
+	if (!dynamic_cast<Player*>(map->view(player_->pos_))) {
 		return;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
-		player_->toggle_riding(room_map, delta_frame_.get());
+		player_->toggle_riding(map, delta_frame_.get());
 		input_cooldown = MAX_COOLDOWN;
 		return;
 	} else if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-		move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
+		move_processor_ = std::make_unique<MoveProcessor>(this, map, delta_frame_.get(), player_, true);
 		if (move_processor_->color_change()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -119,7 +119,7 @@ void PlayingState::handle_input() {
 	}
 	for (auto p : MOVEMENT_KEYS) {
 		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
-			move_processor_ = std::make_unique<MoveProcessor>(this, room_map, delta_frame_.get(), player_, true);
+			move_processor_ = std::make_unique<MoveProcessor>(this, map, delta_frame_.get(), player_, true);
 			// p.second == direction of movement
 			if (!move_processor_->try_move(p.second)) {
 				move_processor_.reset(nullptr);
@@ -157,10 +157,10 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	std::string name = path.stem().string();
 	auto room = std::make_unique<Room>(name);
 	if (use_default_player) {
-		room->load_from_file(*objs_, file, &player_);
+		room->load_from_file(*objs_, file, global_.get(), &player_);
 		player_->validate_state(room->map());
 	} else {
-		room->load_from_file(*objs_, file, nullptr);
+		room->load_from_file(*objs_, file, global_.get(), nullptr);
 	}
 	room->map()->set_initial_state(false);
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));

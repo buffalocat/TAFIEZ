@@ -117,13 +117,13 @@ void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>&
 	}
 	loaded_rooms[cur_room_name]->changed = true;
 	save_room_data(subsave_path, cur_room_name);
-	globals_->save_flags(subsave_path);
+	global_->save_flags(subsave_path);
 	save_meta();
 }
 
 void SaveFile::load_subsave(unsigned int subsave_index, std::string* cur_room_name) {
 	auto subsave_path = base_ / std::to_string(subsave_index);
-	globals_->load_flags(subsave_path);
+	global_->load_flags(subsave_path);
 	load_room_data(subsave_path, cur_room_name);
 }
 

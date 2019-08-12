@@ -39,8 +39,8 @@ BlockTexture Car::texture() {
 	return BlockTexture::Car;
 }
 
-void Car::collect_sticky_links(RoomMap* room_map, Sticky, std::vector<GameObject*>& to_check) {
-    Player* player = dynamic_cast<Player*>(room_map->view(pos_above()));
+void Car::collect_sticky_links(RoomMap* map, Sticky, std::vector<GameObject*>& to_check) {
+    Player* player = dynamic_cast<Player*>(map->view(pos_above()));
     if (player) {
         to_check.push_back(player);
     }

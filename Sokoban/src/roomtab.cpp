@@ -120,12 +120,12 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 }
 
 void RoomTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
-	RoomMap* room_map = eroom->map();
-	if (!room_map->view(pos)) {
-		auto player = room_map->view(eroom->start_pos);
-		room_map->take(player);
+	RoomMap* map = eroom->map();
+	if (!map->view(pos)) {
+		auto player = map->view(eroom->start_pos);
+		map->take_from_map(player, false, nullptr);
 		player->pos_ = pos;
 		eroom->start_pos = pos;
-		room_map->put(player);
+		map->put_in_map(player, false, nullptr);
 	}
 }

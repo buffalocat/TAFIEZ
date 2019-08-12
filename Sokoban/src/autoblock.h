@@ -5,7 +5,7 @@
 
 class AutoBlock: public ObjectModifier {
 public:
-    AutoBlock(GameObject* parent, RoomMap* room_map);
+    AutoBlock(GameObject* parent);
     virtual ~AutoBlock();
 
     std::string name();
@@ -17,8 +17,8 @@ public:
 
 	BlockTexture texture();
 
-	void setup_on_put(RoomMap* room_map);
-	void cleanup_on_take(RoomMap* room_map);
+	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap* map, bool real);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

@@ -62,8 +62,8 @@ void Player::set_free() {
 	car_ = nullptr;
 }
 
-void Player::set_strictest(RoomMap* room_map) {
-	if (auto* colored = dynamic_cast<ColoredBlock*>(room_map->view(shifted_pos({ 0,0,-1 })))) {
+void Player::set_strictest(RoomMap* map) {
+	if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 		if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
 			set_riding(car);
 		} else {
@@ -74,10 +74,10 @@ void Player::set_strictest(RoomMap* room_map) {
 	}
 }
 
-void Player::validate_state(RoomMap* room_map) {
+void Player::validate_state(RoomMap* map) {
 	switch (state_) {
 	case RidingState::Riding:
-		if (auto* colored = dynamic_cast<ColoredBlock*>(room_map->view(shifted_pos({ 0,0,-1 })))) {
+		if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 			if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
 				car_ = car;
 			} else {
@@ -88,7 +88,7 @@ void Player::validate_state(RoomMap* room_map) {
 		}
 		break;
 	case RidingState::Bound:
-		if (!dynamic_cast<ColoredBlock*>(room_map->view(shifted_pos({ 0,0,-1 })))) {
+		if (!dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 			set_free();
 		}
 		break;
@@ -106,14 +106,14 @@ void Player::set_riding(Car* car) {
 	car_ = car;
 }
 
-void Player::toggle_riding(RoomMap* room_map, DeltaFrame* delta_frame) {
+void Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame) {
     if (state_ == RidingState::Riding) {
 		if (delta_frame) {
 			delta_frame->push(std::make_unique<RidingStateDelta>(this, car_, state_));
 		}
 		set_bound();
     } else if (state_ == RidingState::Bound) {
-        if (auto* car = dynamic_cast<Car*>(room_map->view(shifted_pos({0,0,-1}))->modifier())) {
+        if (auto* car = dynamic_cast<Car*>(map->view(shifted_pos({0,0,-1}))->modifier())) {
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<RidingStateDelta>(this, nullptr, state_));
 			}
@@ -126,11 +126,11 @@ Car* Player::car_riding() {
 	return car_;
 }
 
-Car* Player::car_bound(RoomMap* room_map) {
+Car* Player::car_bound(RoomMap* map) {
     if (state_ == RidingState::Free) {
 		return nullptr;
     } else {
-        return dynamic_cast<Car*>(room_map->view(shifted_pos({0,0,-1}))->modifier());
+        return dynamic_cast<Car*>(map->view(shifted_pos({0,0,-1}))->modifier());
     }
 }
 
@@ -172,8 +172,8 @@ FPoint3 Player::cam_pos() {
 }
 
 // NOTE: if the Player becomes a subclass of a more general "Passenger" type, move this up to that class.
-void Player::collect_special_links(RoomMap* room_map, Sticky sticky_level, std::vector<GameObject*>& links) {
+void Player::collect_special_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
     if (state_ == RidingState::Riding) {
-        links.push_back(room_map->view(shifted_pos({0,0,-1})));
+        links.push_back(map->view(shifted_pos({0,0,-1})));
     }
 }

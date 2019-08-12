@@ -141,7 +141,7 @@ void Room::write_to_file(MapFileO& file) {
 	file << MapCode::End;
 }
 
-void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player_ptr) {
+void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalData* global, Player** player_ptr) {
 	unsigned char b[8];
 	bool reading_file = true;
 	while (reading_file) {
@@ -197,12 +197,12 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, Player** player
 #define CASE_OBJCODE(CLASS)\
 case ObjCode::CLASS:\
     obj = CLASS::deserialize(file);\
-    break;
+    break
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
     CLASS::deserialize(file, map_.get(), obj.get());\
-    break;
+    break
 
 
 void Room::read_objects(MapFileI& file, Player** player_ptr) {
@@ -212,10 +212,10 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 		obj = nullptr;
 		file.read(&b, 1);
 		switch (static_cast<ObjCode>(b)) {
-			CASE_OBJCODE(PushBlock)
-				CASE_OBJCODE(SnakeBlock)
-				CASE_OBJCODE(GateBody)
-				CASE_OBJCODE(Wall)
+			CASE_OBJCODE(PushBlock);
+			CASE_OBJCODE(SnakeBlock);
+			CASE_OBJCODE(GateBody);
+			CASE_OBJCODE(Wall);
 				// Some Object types should never actually be serialized (as "Objects")
 		case ObjCode::Player:
 			{
@@ -237,20 +237,22 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 		}
 		file.read(&b, 1);
 		switch (static_cast<ModCode>(b)) {
-			CASE_MODCODE(Car)
-				CASE_MODCODE(Door)
-				CASE_MODCODE(Gate)
-				CASE_MODCODE(PressSwitch)
-				CASE_MODCODE(AutoBlock)
-				CASE_MODCODE(PuppetBlock)
-				CASE_MODCODE(ClearFlag)
+			CASE_MODCODE(Car);
+			CASE_MODCODE(Door);
+			CASE_MODCODE(Gate);
+			CASE_MODCODE(PressSwitch);
+			CASE_MODCODE(AutoBlock);
+			CASE_MODCODE(PuppetBlock);
+			CASE_MODCODE(ClearFlag);
 		case ModCode::NONE:
 			break;
 		default:
 			throw std::runtime_error("Unknown Modifier code encountered in .map file (it's probably corrupt/an old version)");
 			break;
 		}
-		map_->create(std::move(obj), nullptr);
+		auto* obj_raw = obj.get();
+		map_->push_to_object_array(std::move(obj), nullptr);
+		map_->put_in_map(obj_raw, true, nullptr);
 	}
 }
 

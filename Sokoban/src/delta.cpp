@@ -13,146 +13,125 @@
 #include "signaler.h"
 #include "playingstate.h"
 #include "gatebody.h"
+#include "clearflag.h"
 
 Delta::~Delta() {}
 
-DeltaFrame::DeltaFrame(): deltas_ {}, changed_ {false} {}
+DeltaFrame::DeltaFrame() : deltas_{}, changed_{ false } {}
 
 DeltaFrame::~DeltaFrame() {}
 
 void DeltaFrame::revert() {
-    for (auto it = deltas_.rbegin(); it != deltas_.rend(); ++it) {
-        (**it).revert();
-    }
+	for (auto it = deltas_.rbegin(); it != deltas_.rend(); ++it) {
+		(**it).revert();
+	}
 }
 
 void DeltaFrame::push(std::unique_ptr<Delta> delta) {
-    deltas_.push_back(std::move(delta));
-    changed_ = true;
+	deltas_.push_back(std::move(delta));
+	changed_ = true;
 }
 
 bool DeltaFrame::trivial() {
-    return deltas_.empty();
+	return deltas_.empty();
 }
 
 void DeltaFrame::reset_changed() {
-    changed_ = false;
+	changed_ = false;
 }
 
 bool DeltaFrame::changed() {
-    return changed_;
+	return changed_;
 }
 
 
-UndoStack::UndoStack(unsigned int max_depth): frames_ {}, max_depth_ {max_depth}, size_ {0} {}
+UndoStack::UndoStack(unsigned int max_depth) : frames_{}, max_depth_{ max_depth }, size_{ 0 } {}
 
 UndoStack::~UndoStack() {}
 
 void UndoStack::push(std::unique_ptr<DeltaFrame> delta_frame) {
-    if (!delta_frame->trivial()) {
-        if (size_ == max_depth_) {
-            frames_.pop_front();
-        } else {
-            ++size_;
-        }
-        frames_.push_back(std::move(delta_frame));
-    }
+	if (!delta_frame->trivial()) {
+		if (size_ == max_depth_) {
+			frames_.pop_front();
+		} else {
+			++size_;
+		}
+		frames_.push_back(std::move(delta_frame));
+	}
 }
 
 bool UndoStack::non_empty() {
-    return size_ > 0;
+	return size_ > 0;
 }
 
 void UndoStack::pop() {
-    frames_.back()->revert();
-    frames_.pop_back();
-    --size_;
+	frames_.back()->revert();
+	frames_.pop_back();
+	--size_;
 }
 
 void UndoStack::reset() {
-    frames_.clear();
-    size_ = 0;
+	frames_.clear();
+	size_ = 0;
 }
 
 
-CreationDelta::CreationDelta(GameObject* obj, RoomMap* room_map): obj_ {obj}, map_ {room_map} {}
+ObjArrayPushDelta::ObjArrayPushDelta(GameObject* obj, RoomMap* map) : obj_{ obj }, map_{ map } {}
 
-CreationDelta::~CreationDelta() {}
+ObjArrayPushDelta::~ObjArrayPushDelta() {}
 
-void CreationDelta::revert() {
-    map_->uncreate(obj_);
+void ObjArrayPushDelta::revert() {
+	map_->remove_from_object_array(obj_);
 }
 
 
-DeletionDelta::DeletionDelta(GameObject* obj, RoomMap* room_map):
-obj_ {obj}, map_ {room_map} {}
-
-DeletionDelta::~DeletionDelta() {}
-
-void DeletionDelta::revert() {
-    map_->undestroy(obj_);
-}
-
-
-AbstractCreationDelta::AbstractCreationDelta(GameObject* obj, RoomMap* room_map): obj_ {obj}, map_ {room_map} {}
-
-AbstractCreationDelta::~AbstractCreationDelta() {}
-
-void AbstractCreationDelta::revert() {
-    map_->uncreate_abstract(obj_);
-}
-
-
-PutDelta::PutDelta(GameObject* obj, RoomMap* room_map):
-obj_ {obj}, map_ {room_map} {}
+PutDelta::PutDelta(GameObject* obj, RoomMap* map) :
+	obj_{ obj }, map_{ map } {}
 
 PutDelta::~PutDelta() {}
 
 void PutDelta::revert() {
-    map_->take_real(obj_, nullptr);
+	map_->take_from_map(obj_, true, nullptr);
 }
 
 
-// NOTE: A Taken (intangible) object won't have its position updated
-// until it has been Put back into the map, so there's no need
-// to record its old position in the delta.
-TakeDelta::TakeDelta(GameObject* obj, RoomMap* room_map):
-obj_ {obj}, map_ {room_map} {}
+TakeDelta::TakeDelta(GameObject* obj, RoomMap* map) :
+	obj_{ obj }, map_{ map } {}
 
 TakeDelta::~TakeDelta() {}
 
 void TakeDelta::revert() {
-    map_->put_real(obj_, nullptr);
+	map_->put_in_map(obj_, true, nullptr);
 }
 
 
-MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* room_map):
-obj_ {obj}, dpos_ {dpos}, map_ {room_map} {}
+MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
+	obj_{ obj }, dpos_{ dpos }, map_{ map } {}
 
 MotionDelta::~MotionDelta() {}
 
 void MotionDelta::revert() {
-    map_->just_shift(obj_, -dpos_);
+	map_->shift(obj_, -dpos_, nullptr);
 }
 
 
-BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* room_map):
-objs_ {objs}, dpos_ {dpos}, map_ {room_map} {}
+BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* map) :
+	objs_{ objs }, dpos_{ dpos }, map_{ map } {}
 
 BatchMotionDelta::~BatchMotionDelta() {}
 
 void BatchMotionDelta::revert() {
-    map_->just_batch_shift(objs_, -dpos_);
+	map_->batch_shift(objs_, -dpos_, nullptr);
 }
 
 
-AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos):
-obj_ {obj}, dpos_ {dpos} {}
+AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos) :
+	obj_{ obj }, dpos_{ dpos } {}
 
 AbstractShiftDelta::~AbstractShiftDelta() {}
 
 void AbstractShiftDelta::revert() {
-    obj_->pos_ -= dpos_;
+	obj_->pos_ -= dpos_;
 }
 
 
@@ -166,53 +145,53 @@ void AbstractPutDelta::revert() {
 }
 
 
-AddLinkDelta::AddLinkDelta(SnakeBlock* a, SnakeBlock* b): a_ {a}, b_ {b} {}
+AddLinkDelta::AddLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
 
 AddLinkDelta::~AddLinkDelta() {}
 
 void AddLinkDelta::revert() {
-    a_->remove_link_quiet(b_);
+	a_->remove_link_quiet(b_);
 }
 
 
-RemoveLinkDelta::RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b): a_ {a}, b_ {b} {}
+RemoveLinkDelta::RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
 
 RemoveLinkDelta::~RemoveLinkDelta() {}
 
 void RemoveLinkDelta::revert() {
-    a_->add_link_quiet(b_);
+	a_->add_link_quiet(b_);
 }
 
 
-RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room):
-state_ {state}, room_ {room} {}
+RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
+	state_{ state }, room_{ room } {}
 
 RoomChangeDelta::~RoomChangeDelta() {}
 
 //TODO: keep some local state in the DeltaFrame? If so, this also changes *that* Room
 void RoomChangeDelta::revert() {
-    state_->activate_room(room_);
+	state_->activate_room(room_);
 }
 
 
-SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool waiting):
+SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool waiting) :
 	obj_{ obj }, count_{ count }, active_{ active }, waiting_{ waiting } {}
 
 SwitchableDelta::~SwitchableDelta() {}
 
 void SwitchableDelta::revert() {
 	obj_->count_ = count_;
-    obj_->active_ = active_;
-    obj_->waiting_ = waiting_;
+	obj_->active_ = active_;
+	obj_->waiting_ = waiting_;
 }
 
 
-SwitchToggleDelta::SwitchToggleDelta(Switch* obj): obj_ {obj} {}
+SwitchToggleDelta::SwitchToggleDelta(Switch* obj) : obj_{ obj } {}
 
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
 void SwitchToggleDelta::revert() {
-    obj_->toggle(false);
+	obj_->toggle(false);
 }
 
 
@@ -221,35 +200,56 @@ SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) : sig_{ sig }, 
 SignalerCountDelta::~SignalerCountDelta() {}
 
 void SignalerCountDelta::revert() {
-    sig_->reset_count(count_);
+	sig_->reset_count(count_);
 }
 
 
-RidingStateDelta::RidingStateDelta(Player* player, Car* car, RidingState state):
+RidingStateDelta::RidingStateDelta(Player* player, Car* car, RidingState state) :
 	player_{ player }, car_{ car }, state_{ state } {}
 
 RidingStateDelta::~RidingStateDelta() {}
 
 void RidingStateDelta::revert() {
-    player_->state_ = state_;
+	player_->state_ = state_;
 	player_->car_ = car_;
 }
 
 
-ColorChangeDelta::ColorChangeDelta(Car* car, bool undo): car_ {car}, undo_ {undo} {}
+ColorChangeDelta::ColorChangeDelta(Car* car, bool undo) : car_{ car }, undo_{ undo } {}
 
 ColorChangeDelta::~ColorChangeDelta() {}
 
 void ColorChangeDelta::revert() {
-    car_->cycle_color(undo_);
+	car_->cycle_color(undo_);
 }
 
 
-GatePosDelta::GatePosDelta(GateBody* gate_body, Point3 dpos):
-gate_body_ {gate_body}, dpos_ {dpos} {}
+GatePosDelta::GatePosDelta(GateBody* gate_body, Point3 dpos) :
+	gate_body_{ gate_body }, dpos_{ dpos } {}
 
 GatePosDelta::~GatePosDelta() {}
 
 void GatePosDelta::revert() {
-    gate_body_->gate_pos_ -= dpos_;
+	gate_body_->gate_pos_ -= dpos_;
+}
+
+
+ClearFlagToggleDelta::ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map) :
+	flag_{ flag }, map_{ map } {}
+
+ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
+
+void ClearFlagToggleDelta::revert() {
+	flag_->active_ = !flag_->active_;
+	map_->clear_flags_[flag_] = flag_->active_;
+}
+
+
+ClearFlagCollectionDelta::ClearFlagCollectionDelta(std::vector<ClearFlag*>&& flags) :
+	flags_{ flags } {}
+
+ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
+
+void ClearFlagCollectionDelta::revert() {
+
 }

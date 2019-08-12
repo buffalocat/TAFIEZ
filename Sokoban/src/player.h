@@ -20,13 +20,13 @@ public:
 	FPoint3 cam_pos();
 
 	void set_free();
-	void set_strictest(RoomMap* room_map);
-	void validate_state(RoomMap* room_map);
-	void toggle_riding(RoomMap* room_map, DeltaFrame*);
+	void set_strictest(RoomMap* map);
+	void validate_state(RoomMap* map);
+	void toggle_riding(RoomMap* map, DeltaFrame*);
 
 	bool bound();
     Car* car_riding();
-	Car* car_bound(RoomMap* room_map);
+	Car* car_bound(RoomMap* map);
 
     virtual void collect_special_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 

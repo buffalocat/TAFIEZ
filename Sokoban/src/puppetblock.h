@@ -13,7 +13,7 @@ enum class BlockTexture;
 
 class PuppetBlock : public ObjectModifier {
 public:
-	PuppetBlock(GameObject* parent, RoomMap* room_map);
+	PuppetBlock(GameObject* parent);
 	virtual ~PuppetBlock();
 
 	std::string name();
@@ -25,8 +25,8 @@ public:
 
 	BlockTexture texture();
 
-	void setup_on_put(RoomMap* room_map);
-	void cleanup_on_take(RoomMap* room_map);
+	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap* map, bool real);
 
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

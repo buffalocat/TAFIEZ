@@ -58,6 +58,8 @@ public:
 	void load_subsave(unsigned int subsave_index, std::string* cur_room_name);
 	void load_most_recent_subsave(std::string* cur_room_name);
 
+	GlobalData* global_{};
+
 private:
 	void save_meta();
 	void load_room_data(std::filesystem::path subsave_path, std::string* cur_room_name);
@@ -66,7 +68,6 @@ private:
 
 	const std::filesystem::path base_;
 	std::map<std::string, unsigned int> room_subsave_{};
-	std::unique_ptr<GlobalData> globals_ = std::make_unique<PlayingGlobalData>();
 	unsigned int cur_subsave_ = 0;
 	unsigned int next_subsave_ = 1;
 };

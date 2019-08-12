@@ -24,7 +24,7 @@ struct FallComponent: Component {
     void add_above(Component* comp);
 
     void settle_first();
-    void take_falling(RoomMap* room_map);
+    void take_falling(RoomMap* map);
 
     std::vector<FallComponent*> above_;
     bool settled_;

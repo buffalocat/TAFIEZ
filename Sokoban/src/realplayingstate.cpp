@@ -8,7 +8,9 @@
 #include "mapfile.h"
 
 RealPlayingState::RealPlayingState(std::unique_ptr<SaveFile> save) :
-	PlayingState(), savefile_{ std::move(save) } {}
+	PlayingState(), savefile_{ std::move(save) } {
+	save->global_ = global_.get();
+}
 
 RealPlayingState::~RealPlayingState() {}
 

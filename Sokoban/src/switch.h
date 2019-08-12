@@ -21,8 +21,8 @@ public:
     virtual bool should_toggle(RoomMap*) = 0;
     void toggle(bool propagate);
 
-    virtual void cleanup_on_destruction(RoomMap* room_map);
-    virtual void setup_on_undestruction(RoomMap* room_map);
+	virtual void setup_on_put(RoomMap*, bool real);
+	virtual void cleanup_on_take(RoomMap*, bool real);
 
 protected:
     bool persistent_;

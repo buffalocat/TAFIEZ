@@ -40,12 +40,12 @@ public:
     void collect_maybe_confused_neighbors(RoomMap*, std::unordered_set<SnakeBlock*>& check);
     void update_links_color(RoomMap*, DeltaFrame*);
     void check_add_local_links(RoomMap*, DeltaFrame*);
-	void break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* room_map, DeltaFrame* delta_frame, Point3 dir);
+	void break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);
 
     void reset_internal_state();
 
-    virtual void cleanup_on_destruction(RoomMap*);
-    virtual void setup_on_undestruction(RoomMap*);
+	void setup_on_put(RoomMap*, bool real);
+    void cleanup_on_take(RoomMap*, bool real);
 
     std::unique_ptr<SnakeBlock> make_split_copy(RoomMap*, DeltaFrame*);
 

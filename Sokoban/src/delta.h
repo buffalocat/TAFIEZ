@@ -15,144 +15,145 @@ class Player;
 class PlayingState;
 class Car;
 class GateBody;
+class ClearFlag;
 
 enum class RidingState;
 
 class Delta {
 public:
-    virtual ~Delta();
-    virtual void revert() = 0;
+	virtual ~Delta();
+	virtual void revert() = 0;
 };
 
 
 class DeltaFrame {
 public:
-    DeltaFrame();
-    ~DeltaFrame();
-    void revert();
-    void push(std::unique_ptr<Delta>);
-    bool trivial();
+	DeltaFrame();
+	~DeltaFrame();
+	void revert();
+	void push(std::unique_ptr<Delta>);
+	bool trivial();
 
-    void reset_changed();
-    bool changed();
+	void reset_changed();
+	bool changed();
 
 private:
-    std::vector<std::unique_ptr<Delta>> deltas_;
-    bool changed_;
+	std::vector<std::unique_ptr<Delta>> deltas_;
+	bool changed_;
 };
 
 
 class UndoStack {
 public:
-    UndoStack(unsigned int max_depth);
-    ~UndoStack();
-    void push(std::unique_ptr<DeltaFrame>);
-    bool non_empty();
-    void pop();
-    void reset();
+	UndoStack(unsigned int max_depth);
+	~UndoStack();
+	void push(std::unique_ptr<DeltaFrame>);
+	bool non_empty();
+	void pop();
+	void reset();
 
 private:
-    std::deque<std::unique_ptr<DeltaFrame>> frames_;
-    unsigned int max_depth_;
-    unsigned int size_;
+	std::deque<std::unique_ptr<DeltaFrame>> frames_;
+	unsigned int max_depth_;
+	unsigned int size_;
 };
 
 
-class CreationDelta: public Delta {
+class CreationDelta : public Delta {
 public:
-    CreationDelta(GameObject* obj, RoomMap* room_map);
-    ~CreationDelta();
-    void revert();
+	CreationDelta(GameObject* obj, RoomMap* map);
+	~CreationDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    RoomMap* map_;
+	GameObject* obj_;
+	RoomMap* map_;
 };
 
 
-class DeletionDelta: public Delta {
+class DeletionDelta : public Delta {
 public:
-    DeletionDelta(GameObject* obj, RoomMap* room_map);
-    ~DeletionDelta();
-    void revert();
+	DeletionDelta(GameObject* obj, RoomMap* map);
+	~DeletionDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    RoomMap* map_;
+	GameObject* obj_;
+	RoomMap* map_;
 };
 
 
-class AbstractCreationDelta: public Delta {
+class ObjArrayPushDelta : public Delta {
 public:
-    AbstractCreationDelta(GameObject* obj, RoomMap* room_map);
-    ~AbstractCreationDelta();
-    void revert();
+	ObjArrayPushDelta(GameObject* obj, RoomMap* map);
+	~ObjArrayPushDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    RoomMap* map_;
+	GameObject* obj_;
+	RoomMap* map_;
 };
 
 
-class PutDelta: public Delta {
+class PutDelta : public Delta {
 public:
-    PutDelta(GameObject* obj, RoomMap* room_map);
-    ~PutDelta();
-    void revert();
+	PutDelta(GameObject* obj, RoomMap* map);
+	~PutDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    RoomMap* map_;
+	GameObject* obj_;
+	RoomMap* map_;
 };
 
 
-class TakeDelta: public Delta {
+class TakeDelta : public Delta {
 public:
-    TakeDelta(GameObject* obj, RoomMap* room_map);
-    ~TakeDelta();
-    void revert();
+	TakeDelta(GameObject* obj, RoomMap* map);
+	~TakeDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    RoomMap* map_;
+	GameObject* obj_;
+	RoomMap* map_;
 };
 
 
-class MotionDelta: public Delta {
+class MotionDelta : public Delta {
 public:
-    MotionDelta(GameObject* obj, Point3 dpos, RoomMap* room_map);
-    ~MotionDelta();
-    void revert();
+	MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map);
+	~MotionDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    Point3 dpos_;
-    RoomMap* map_;
+	GameObject* obj_;
+	Point3 dpos_;
+	RoomMap* map_;
 };
 
 
-class BatchMotionDelta: public Delta {
+class BatchMotionDelta : public Delta {
 public:
-    BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* room_map);
-    ~BatchMotionDelta();
-    void revert();
+	BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* map);
+	~BatchMotionDelta();
+	void revert();
 
 private:
-    std::vector<GameObject*> objs_;
-    Point3 dpos_;
-    RoomMap* map_;
+	std::vector<GameObject*> objs_;
+	Point3 dpos_;
+	RoomMap* map_;
 };
 
 // Object motion outside of the map
-class AbstractShiftDelta: public Delta {
+class AbstractShiftDelta : public Delta {
 public:
-    AbstractShiftDelta(GameObject* obj, Point3 dpos);
-    ~AbstractShiftDelta();
-    void revert();
+	AbstractShiftDelta(GameObject* obj, Point3 dpos);
+	~AbstractShiftDelta();
+	void revert();
 
 private:
-    GameObject* obj_;
-    Point3 dpos_;
+	GameObject* obj_;
+	Point3 dpos_;
 };
 
 
@@ -168,111 +169,132 @@ private:
 };
 
 
-class AddLinkDelta: public Delta {
+class AddLinkDelta : public Delta {
 public:
-    AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
-    ~AddLinkDelta();
-    void revert();
+	AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	~AddLinkDelta();
+	void revert();
 
 private:
-    SnakeBlock* a_;
-    SnakeBlock* b_;
+	SnakeBlock* a_;
+	SnakeBlock* b_;
 };
 
 
-class RemoveLinkDelta: public Delta {
+class RemoveLinkDelta : public Delta {
 public:
-    RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
-    ~RemoveLinkDelta();
-    void revert();
+	RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	~RemoveLinkDelta();
+	void revert();
 
 private:
-    SnakeBlock* a_;
-    SnakeBlock* b_;
+	SnakeBlock* a_;
+	SnakeBlock* b_;
 };
 
 
-class RoomChangeDelta: public Delta {
+class RoomChangeDelta : public Delta {
 public:
 	RoomChangeDelta(PlayingState* state, Room* room);
-    ~RoomChangeDelta();
-    void revert();
+	~RoomChangeDelta();
+	void revert();
 
 private:
-    PlayingState* state_;
-    Room* room_;
+	PlayingState* state_;
+	Room* room_;
 };
 
 
-class SwitchableDelta: public Delta {
+class SwitchableDelta : public Delta {
 public:
-    SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
-    ~SwitchableDelta();
-    void revert();
+	SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
+	~SwitchableDelta();
+	void revert();
 
 private:
-    Switchable* obj_;
+	Switchable* obj_;
 	int count_;
-    bool active_;
-    bool waiting_;
+	bool active_;
+	bool waiting_;
 };
 
 
-class SwitchToggleDelta: public Delta {
+class SwitchToggleDelta : public Delta {
 public:
-    SwitchToggleDelta(Switch* obj);
-    ~SwitchToggleDelta();
-    void revert();
+	SwitchToggleDelta(Switch* obj);
+	~SwitchToggleDelta();
+	void revert();
 
 private:
-    Switch* obj_;
+	Switch* obj_;
 };
 
 class SignalerCountDelta : public Delta {
 public:
 	SignalerCountDelta(Signaler*, int count);
-    ~SignalerCountDelta();
-    void revert();
+	~SignalerCountDelta();
+	void revert();
 
 private:
-    Signaler* sig_;
+	Signaler* sig_;
 	int count_;
 };
 
 
-class RidingStateDelta: public Delta {
+class RidingStateDelta : public Delta {
 public:
-    RidingStateDelta(Player* player, Car* car, RidingState state);
-    ~RidingStateDelta();
-    void revert();
+	RidingStateDelta(Player* player, Car* car, RidingState state);
+	~RidingStateDelta();
+	void revert();
 
 private:
-    Player* player_;
+	Player* player_;
 	Car* car_;
-    RidingState state_;
+	RidingState state_;
 };
 
 
-class ColorChangeDelta: public Delta {
+class ColorChangeDelta : public Delta {
 public:
-    ColorChangeDelta(Car* car, bool undo);
-    ~ColorChangeDelta();
-    void revert();
+	ColorChangeDelta(Car* car, bool undo);
+	~ColorChangeDelta();
+	void revert();
 
 private:
-    Car* car_;
-    bool undo_;
+	Car* car_;
+	bool undo_;
 };
 
-class GatePosDelta: public Delta {
+class GatePosDelta : public Delta {
 public:
-    GatePosDelta(GateBody* gate_body, Point3 dpos);
-    ~GatePosDelta();
-    void revert();
+	GatePosDelta(GateBody* gate_body, Point3 dpos);
+	~GatePosDelta();
+	void revert();
 
 private:
-    GateBody* gate_body_;
-    Point3 dpos_;
+	GateBody* gate_body_;
+	Point3 dpos_;
+};
+
+class ClearFlagToggleDelta : public Delta {
+public:
+	ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map);
+	~ClearFlagToggleDelta();
+	void revert();
+
+private:
+	ClearFlag* flag_;
+	RoomMap* map_;
+};
+
+class ClearFlagCollectionDelta : public Delta {
+public:
+	ClearFlagCollectionDelta(std::vector<ClearFlag*>&& flags);
+	~ClearFlagCollectionDelta();
+	void revert();
+
+private:
+	std::vector<ClearFlag*> flags_;
 };
 
 #endif // DELTA_H

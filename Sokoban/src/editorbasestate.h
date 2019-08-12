@@ -12,7 +12,7 @@ public:
     EditorBaseState();
     virtual ~EditorBaseState();
 
-    void display_hover_pos_object(Point3 cam_pos, RoomMap* room_map);
+    void display_hover_pos_object(Point3 cam_pos, RoomMap* map);
 
 protected:
     bool ortho_cam_;
