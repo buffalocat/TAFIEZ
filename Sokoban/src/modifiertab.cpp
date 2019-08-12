@@ -207,8 +207,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		map->clear(pos);
 		auto new_wall = std::make_unique<Wall>(pos);
 		obj = new_wall.get();
-		map->push_to_object_array(std::move(new_wall), nullptr);
-		map->put_in_map(obj, true, nullptr);
+		map->create_in_map(std::move(new_wall), nullptr);
 	}
 	mod->parent_ = obj;
 	selected_obj = obj;

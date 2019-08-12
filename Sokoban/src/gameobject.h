@@ -79,7 +79,6 @@ protected:
 };
 
 // TODO: add copy constructors?
-// Move pushable and gravitable here, maybe??
 class Block : public GameObject {
 public:
 	Block(Point3 pos, bool pushable, bool gravitable);

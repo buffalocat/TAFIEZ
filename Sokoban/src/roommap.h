@@ -34,6 +34,7 @@ public:
     GameObject* view(Point3);
 
 	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
+	void create_in_map(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
 	void put_in_map(GameObject*, bool real, DeltaFrame*);
     void take_from_map(GameObject*, bool real, DeltaFrame*);

@@ -123,6 +123,20 @@ void RoomMap::push_to_object_array(std::unique_ptr<GameObject> obj_unique, Delta
 	}
 }
 
+// This should be equivalent to calling push_to_object_array, then put_in_map
+void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
+	GameObject* obj = obj_unique.get();
+	obj_array_.push_object(std::move(obj_unique));
+	obj->tangible_ = true;
+	at(obj->pos_) += obj->id_;
+	obj->setup_on_put(this, true);
+	activate_listeners_at(obj->pos_);
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<ObjArrayPushDelta>(obj, this));
+		delta_frame->push(std::make_unique<PutDelta>(obj, this));
+	}
+}
+
 void RoomMap::remove_from_object_array(GameObject* obj) {
 	obj_array_.destroy(obj);
 }

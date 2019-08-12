@@ -251,8 +251,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			break;
 		}
 		auto* obj_raw = obj.get();
-		map_->push_to_object_array(std::move(obj), nullptr);
-		map_->put_in_map(obj_raw, true, nullptr);
+		map_->create_in_map(std::move(obj), nullptr);
 	}
 }
 

@@ -6,8 +6,6 @@
 #include "roommap.h"
 #include "door.h"
 
-// TODO: make sure the validity checks make sense
-
 DoorSelectState::DoorSelectState(Room* room, Point3 cam_pos, Point3* exit_pos):
 EditorBaseState(), room_ {room}, cam_pos_ {cam_pos}, exit_pos_ {exit_pos} {}
 

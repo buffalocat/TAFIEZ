@@ -131,8 +131,7 @@ void ObjectTab::object_tab_options() {
 					room_map_->remove_from_object_array(selected_obj);
 				}
 				selected_obj = new_obj.get();
-				room_map_->push_to_object_array(std::move(new_obj), nullptr);
-				room_map_->put_in_map(selected_obj, true, nullptr);
+				room_map_->create_in_map(std::move(new_obj), nullptr);
 			}
 			// If the new object was a generic Wall, we don't have a new pointer
 			else if (transmute_obj_code == ObjCode::Wall) {
@@ -192,8 +191,7 @@ void ObjectTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	}
 	if (std::unique_ptr<GameObject> obj = create_from_model(obj_code, nullptr)) {
 		selected_obj = obj.get();
-		room_map_->push_to_object_array(std::move(obj), nullptr);
-		room_map_->put_in_map(selected_obj, true, nullptr);
+		room_map_->create_in_map(std::move(obj), nullptr);
 	} else if (obj_code == ObjCode::Wall) {
 		room_map_->create_wall(pos);
 		selected_obj = room_map_->view(pos);

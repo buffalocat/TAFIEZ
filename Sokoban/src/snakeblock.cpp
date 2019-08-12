@@ -369,8 +369,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 					for (SnakeBlock* link : links) {
 						auto split_copy_unique = cur->make_split_copy(map_, delta_frame_);
 						SnakeBlock* split_copy = split_copy_unique.get();
-						map_->push_to_object_array(std::move(split_copy_unique), delta_frame_);
-						map_->put_in_map(split_copy, true, delta_frame_);
+						map_->create_in_map(std::move(split_copy_unique), delta_frame_);
 						split_copy->add_link(link, delta_frame_);
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);
