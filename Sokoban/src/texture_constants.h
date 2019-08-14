@@ -25,6 +25,8 @@ enum class BlockTexture {
 	GateBody = 37,
 	GateBasePersistent = 38,
 	GateBodyPersistent = 39,
+	PermSwitchUp = 50,
+	PermSwitchDown = 51,
 
 	// "Additive" textures
 	Default = 0,

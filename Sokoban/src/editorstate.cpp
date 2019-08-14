@@ -272,3 +272,14 @@ void EditorState::handle_left_click(Point3 pos) {
 void EditorState::handle_right_click(Point3 pos) {
     active_tab_->handle_right_click(active_room_, pos);
 }
+
+void EditorState::manage_flag(bool create, unsigned int* flag_ptr, EditorRoom* eroom) {
+	if (create && *flag_ptr == 0) {
+		unsigned int flag = global_->generate_flag();
+		*flag_ptr = flag;
+		global_->assign_flag(flag, eroom->name());
+	} else if (!create && *flag_ptr > 0) {
+		global_->destroy_flag(*flag_ptr);
+		*flag_ptr = 0;
+	}
+}

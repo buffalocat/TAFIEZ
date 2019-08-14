@@ -31,9 +31,7 @@ const std::unordered_map<int, Point3> MOVEMENT_KEYS{
 PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 	room{ std::move(arg_room) } {}
 
-PlayingState::PlayingState() :
-	GameState(),
-	undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) } {}
+PlayingState::PlayingState() : GameState() {}
 
 PlayingState::~PlayingState() {}
 

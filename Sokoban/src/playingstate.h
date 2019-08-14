@@ -2,6 +2,7 @@
 #define PLAYINGSTATE_H
 
 #include "gamestate.h"
+#include "common_constants.h"
 
 class GameObjectArray;
 class GraphicsManager;
@@ -59,10 +60,10 @@ protected:
 	Player* player_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
+	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
 
 private:
 	std::unique_ptr<MoveProcessor> move_processor_{};
-    std::unique_ptr<UndoStack> undo_stack_;
 	std::unique_ptr<DeltaFrame> delta_frame_{};
 
 	PSTask queued_task_ = PSTask::None;

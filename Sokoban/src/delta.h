@@ -276,16 +276,25 @@ private:
 	int req_;
 };
 
-class CollectibleDelta : public Delta {
+class GlobalFlagDelta : public Delta {
 public:
-	CollectibleDelta(WorldResetKey* key, PlayingGlobalData* global, unsigned int flag);
-	~CollectibleDelta();
+	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
+	~GlobalFlagDelta();
+	void revert();
+
+private:
+	PlayingGlobalData* global_;
+	unsigned int flag_;
+};
+
+class KeyCollectDelta : public Delta {
+public:
+	KeyCollectDelta(WorldResetKey* key);
+	~KeyCollectDelta();
 	void revert();
 
 private:
 	WorldResetKey* key_;
-	PlayingGlobalData* global_;
-	unsigned int flag_;
 };
 
 #endif // DELTA_H

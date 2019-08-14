@@ -50,7 +50,8 @@ void WorldResetKey::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProc
 	}
 	if (collected_) {
 		map->global_->add_flag(WORLD_RESET_GLOBAL_ID);
-		delta_frame->push(std::make_unique<CollectibleDelta>(this, map->global_, WORLD_RESET_GLOBAL_ID));
+		delta_frame->push(std::make_unique<KeyCollectDelta>(this));
+		delta_frame->push(std::make_unique<GlobalFlagDelta>(map->global_, WORLD_RESET_GLOBAL_ID));
 	}
 }
 

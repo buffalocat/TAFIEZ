@@ -197,6 +197,7 @@
     <Image Include="Sokoban.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\permanentswitch.h" />
     <ClInclude Include="src\pausestate.h" />
     <ClInclude Include="src\roomtab.h" />
     <ClInclude Include="src\clearflag.h" />
@@ -322,6 +323,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\permanentswitch.cpp" />
     <ClCompile Include="src\pausestate.cpp" />
     <ClCompile Include="src\roomtab.cpp" />
     <ClCompile Include="src\clearflag.cpp" />

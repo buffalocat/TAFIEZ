@@ -167,12 +167,15 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 	}
 	if (prev) {
 		if (auto* mod = prev->modifier()) {
+			// The old modifier can't live on the new object; destroy it
 			if (!mod->valid_parent(obj.get())) {
-				return nullptr;
+				prev->modifier_->cleanup_on_editor_destruction(editor_->global_.get());
+			// Move the old modifier to the new object
+			} else {
+				obj->modifier_ = std::move(prev->modifier_);
 			}
+			prev->modifier_.reset(nullptr);
 		}
-		obj->modifier_ = std::move(prev->modifier_);
-		prev->modifier_.reset(nullptr);
 	}
 	obj->pos_ = selected_pos;
 	return std::move(obj);
@@ -207,6 +210,9 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (obj) {
 		if (obj->obj_code() == ObjCode::Player) {
 			return;
+		}
+		if (auto* mod = obj->modifier()) {
+			mod->cleanup_on_editor_destruction(editor_->global_.get());
 		}
 		selected_obj = nullptr;
 		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object

@@ -54,6 +54,10 @@ void ObjectModifier::setup_on_put(RoomMap*, bool real) {}
 
 void ObjectModifier::cleanup_on_take(RoomMap*, bool real) {}
 
+void ObjectModifier::setup_on_editor_creation(EditorGlobalData* global, Room* room) {}
+
+void ObjectModifier::cleanup_on_editor_destruction(EditorGlobalData* global) {}
+
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
 void ObjectModifier::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}

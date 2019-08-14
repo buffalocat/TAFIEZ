@@ -19,6 +19,7 @@
 #include "puppetblock.h"
 #include "clearflag.h"
 #include "worldresetkey.h"
+#include "permanentswitch.h"
 
 #include "colorcycle.h"
 
@@ -35,6 +36,8 @@ static Door model_door{ nullptr, 0, false, true, false };
 static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false };
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
 static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
+static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
+
 
 static ColorCycle model_color_cycle{};
 
@@ -82,6 +85,7 @@ void ModifierTab::mod_tab_options() {
 		ImGui::RadioButton("PuppetBlock##MOD_object", &mod_code, ModCode::PuppetBlock);
 		ImGui::RadioButton("ClearFlag##MOD_object", &mod_code, ModCode::ClearFlag);
 		ImGui::RadioButton("WorldResetKey##MOD_object", &mod_code, ModCode::WorldResetKey);
+		ImGui::RadioButton("PermanentSwitch##MOD_object", &mod_code, ModCode::PermanentSwitch);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -119,6 +123,14 @@ void ModifierTab::mod_tab_options() {
 		PressSwitch* ps = mod ? static_cast<PressSwitch*>(mod) : &model_press_switch;
 		ImGui::Checkbox("Persistent?##PRESS_SWITCH_persistent", &ps->persistent_);
 		ImGui::InputInt("color##PRESS_SWITCH_modify_COLOR", &ps->color_);
+		color_button(ps->color_);
+		break;
+	}
+	case ModCode::PermanentSwitch:
+	{
+		ImGui::Text("PermanentSwitch");
+		PermanentSwitch* ps = mod ? static_cast<PermanentSwitch*>(mod) : &model_perm_switch;
+		ImGui::InputInt("color##PERMANENT_SWITCH_modify_COLOR", &ps->color_);
 		color_button(ps->color_);
 		break;
 	}
@@ -203,13 +215,16 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	case ModCode::WorldResetKey:
 		mod = std::make_unique<WorldResetKey>(obj);
 		break;
+	case ModCode::PermanentSwitch:
+		mod = std::make_unique<PermanentSwitch>(model_perm_switch);
+		break;
 	default:
 		return;
 	}
 	if (!mod->valid_parent(obj)) {
 		return;
 	}
-	// A Wall with a modifier can't be the global wall
+	// A Wall with a modifier can't be a generic wall
 	if (obj->id_ == GENERIC_WALL_ID) {
 		map->clear(pos);
 		auto new_wall = std::make_unique<Wall>(pos);
@@ -217,6 +232,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		map->create_in_map(std::move(new_wall), nullptr);
 	}
 	mod->parent_ = obj;
+	mod->setup_on_editor_creation(editor_->global_.get(), eroom->room.get());
 	selected_obj = obj;
 	obj->set_modifier(std::move(mod));
 }
@@ -230,6 +246,7 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	RoomMap* map = eroom->map();
 	if (GameObject* obj = map->view(pos)) {
 		if (ObjectModifier* mod = obj->modifier()) {
+			mod->cleanup_on_editor_destruction(editor_->global_.get());
 			// Revert a modified wall to a generic wall!
 			if (auto* wall = dynamic_cast<Wall*>(obj)) {
 				map->take_from_map(obj, true, nullptr);

@@ -22,6 +22,7 @@
 #include "puppetblock.h"
 #include "clearflag.h"
 #include "worldresetkey.h"
+#include "permanentswitch.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -252,6 +253,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_MODCODE(PuppetBlock);
 			CASE_MODCODE(ClearFlag);
 			CASE_MODCODE(WorldResetKey);
+			CASE_MODCODE(PermanentSwitch);
 		case ModCode::NONE:
 			break;
 		default:

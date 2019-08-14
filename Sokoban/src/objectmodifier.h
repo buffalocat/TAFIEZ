@@ -12,6 +12,8 @@ class MapFileI;
 class MapFileO;
 class GraphicsManager;
 class PlayingGlobalData;
+class EditorGlobalData;
+class Room;
 
 enum class BlockTexture;
 
@@ -44,6 +46,8 @@ public:
 
     virtual void setup_on_put(RoomMap*, bool real);
     virtual void cleanup_on_take(RoomMap*, bool real);
+	virtual void setup_on_editor_creation(EditorGlobalData* global, Room* room);
+	virtual void cleanup_on_editor_destruction(EditorGlobalData* global);
 
     // Every type of Modifier can have at most one callback function for map listeners
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);

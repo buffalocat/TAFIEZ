@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "savefile.h"
 
+#include "common_constants.h"
 #include "room.h"
 #include "playingstate.h"
 #include "mapfile.h"
@@ -43,7 +44,7 @@ unsigned int EditorGlobalData::generate_flag() {
 	unsigned int flag;
 	do {
 		flag = rand_engine_();
-	} while (flags_.count(flag) || flag == 0);
+	} while (flags_.count(flag));
 	return flag;
 }
 
@@ -54,7 +55,6 @@ void EditorGlobalData::assign_flag(unsigned int flag, std::string room_name) {
 void EditorGlobalData::destroy_flag(unsigned int flag) {
 	flags_.erase(flag);
 }
-
 
 PlayingGlobalData::PlayingGlobalData() : GlobalData() {}
 

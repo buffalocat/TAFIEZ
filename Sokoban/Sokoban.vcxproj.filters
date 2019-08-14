@@ -259,6 +259,9 @@
     <ClInclude Include="src\worldresetkey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\permanentswitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -366,9 +369,6 @@
     <ClCompile Include="src\switchable.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
-    <ClCompile Include="src\pressswitch.cpp">
-      <Filter>Source Files\Object Modifiers</Filter>
-    </ClCompile>
     <ClCompile Include="src\gate.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
@@ -470,6 +470,12 @@
     </ClCompile>
     <ClCompile Include="src\worldresetkey.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pressswitch.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\permanentswitch.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

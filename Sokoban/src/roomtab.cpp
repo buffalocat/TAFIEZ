@@ -26,14 +26,8 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 	unsigned int* id = &eroom->map()->clear_id_;
 	ImGui::InputInt("Clear Flag Requirement", req);
 	clamp(req, 0, 255);
-	if (*req > 0 && *id == 0) {
-		unsigned int flag = editor_->global_->generate_flag();
-		*id = flag;
-		editor_->global_->assign_flag(flag, eroom->name());
-	} else if (*req == 0 && *id > 0) {
-		editor_->global_->destroy_flag(*id);
-		*id = 0;
-	}
+	editor_->manage_flag(*req > 0, id, eroom);
+
 	ImGui::Text("Current Global ID: %u", *id);
 
 	ImGui::Separator();

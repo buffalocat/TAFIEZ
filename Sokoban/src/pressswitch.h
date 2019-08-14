@@ -33,7 +33,7 @@ public:
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
-private:
+protected:
     int color_;
 
     friend class ModifierTab;

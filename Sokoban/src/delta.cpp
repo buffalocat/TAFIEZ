@@ -256,13 +256,21 @@ void ClearFlagCollectionDelta::revert() {
 }
 
 
-// TODO: make this more general if necessary ("Collectible" intermediate class for ObjectModifier?)
-CollectibleDelta::CollectibleDelta(WorldResetKey* key, PlayingGlobalData* global, unsigned int flag) :
-	Delta(), key_{ key }, global_{ global }, flag_{ flag } {}
+KeyCollectDelta::KeyCollectDelta(WorldResetKey* key) :
+	Delta(), key_{ key } {}
 
-CollectibleDelta::~CollectibleDelta() {}
+KeyCollectDelta::~KeyCollectDelta() {}
 
-void CollectibleDelta::revert() {
+void KeyCollectDelta::revert() {
 	key_->collected_ = false;
+}
+
+
+GlobalFlagDelta::GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag):
+	Delta(), global_{ global }, flag_{ flag } {}
+
+GlobalFlagDelta::~GlobalFlagDelta() {}
+
+void GlobalFlagDelta::revert() {
 	global_->remove_flag(flag_);
 }

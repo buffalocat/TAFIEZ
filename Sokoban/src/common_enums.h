@@ -20,6 +20,7 @@ enum class ModCode {
 	PuppetBlock = 6,
 	ClearFlag = 7,
 	WorldResetKey = 8,
+	PermanentSwitch = 9,
 };
 
 enum class CameraCode {

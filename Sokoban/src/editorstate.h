@@ -46,6 +46,8 @@ public:
 	void set_active_tab_by_index(int i);
     void begin_test();
 
+	void manage_flag(bool create, unsigned int* flag_ptr, EditorRoom* eroom);
+
 	EditorRoom* active_room_{};
 	EditorTab* active_tab_{};
 	std::unique_ptr<EditorGlobalData> global_ = std::make_unique<EditorGlobalData>();

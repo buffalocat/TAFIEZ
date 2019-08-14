@@ -22,6 +22,6 @@ public:
 protected:
 	bool collected_;
 
-	friend class CollectibleDelta;
+	friend class KeyCollectDelta;
 };
 
