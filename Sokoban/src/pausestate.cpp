@@ -6,6 +6,8 @@
 #include "playingstate.h"
 #include "savefile.h"
 #include "common_constants.h"
+#include "realplayingstate.h"
+#include "testplayingstate.h"
 
 template <class State>
 Menu<State>::Menu(GLFWwindow* window, Font* font) : window_{ window }, font_{ font } {}
@@ -26,7 +28,7 @@ void Menu<State>::push_entry(std::string label, MenuCallback<State> callback) {
 	++num_entries_;
 }
 
-const int MAX_MENU_COOLDOWN = 10;
+const int MAX_MENU_COOLDOWN = 8;
 
 template <class State>
 void Menu<State>::handle_input(State* game_state) {
@@ -34,29 +36,35 @@ void Menu<State>::handle_input(State* game_state) {
 		return;
 	}
 	static int input_cooldown = 0;
-	if (input_cooldown > 0) {
-		--input_cooldown;
-		return;
-	}
 	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
-		entries_[current_].text->set_color(inactive_color_);
-		--current_;
-		if (current_ < 0) {
-			current_ += num_entries_;
+		if (input_cooldown == 0) {
+			entries_[current_].text->set_color(inactive_color_);
+			--current_;
+			if (current_ < 0) {
+				current_ += num_entries_;
+			}
+			entries_[current_].text->set_color(active_color_);
+			input_cooldown = MAX_MENU_COOLDOWN;
+		} else {
+			--input_cooldown;
 		}
-		entries_[current_].text->set_color(active_color_);
-		input_cooldown = MAX_MENU_COOLDOWN;
 	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		entries_[current_].text->set_color(inactive_color_);
-		++current_;
-		if (current_ >= num_entries_) {
-			current_ -= num_entries_;
+		if (input_cooldown == 0) {
+			entries_[current_].text->set_color(inactive_color_);
+			++current_;
+			if (current_ >= num_entries_) {
+				current_ -= num_entries_;
+			}
+			entries_[current_].text->set_color(active_color_);
+			input_cooldown = MAX_MENU_COOLDOWN;
+		} else {
+			--input_cooldown;
 		}
-		entries_[current_].text->set_color(active_color_);
-		input_cooldown = MAX_MENU_COOLDOWN;
 	} else if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
 		input_cooldown = MAX_MENU_COOLDOWN;
 		(game_state->*entries_[current_].callback)();
+	} else {
+		input_cooldown = 0;
 	}
 }
 
@@ -73,11 +81,15 @@ PauseState::PauseState(GraphicsManager* gfx, PlayingState* parent, PlayingGlobal
 playing_state_{ parent },
 menu_{ gfx->window(), gfx->text_->kalam_.get() } {
 	menu_.push_entry("Unpause", &PauseState::unpause);
-	menu_.push_entry("Save Game", &PauseState::save);
-	if (global->has_flag(WORLD_RESET_GLOBAL_ID)) {
-		menu_.push_entry("World Reset", &PauseState::world_reset);
+	if (dynamic_cast<RealPlayingState*>(parent)) {
+		menu_.push_entry("Save Game", &PauseState::save);
+		if (global->has_flag(WORLD_RESET_GLOBAL_ID)) {
+			menu_.push_entry("World Reset", &PauseState::world_reset);
+		}
+		menu_.push_entry("Quit Game", &PauseState::quit);
+	} else if (dynamic_cast<TestPlayingState*>(parent)) {
+		menu_.push_entry("Quit Test Session", &PauseState::quit);
 	}
-	menu_.push_entry("Quit Game", &PauseState::quit);
 }
 
 PauseState::~PauseState() {}

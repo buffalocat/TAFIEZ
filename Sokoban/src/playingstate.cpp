@@ -177,8 +177,12 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 
 bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
 	DoorData* data = door->data();
+	// If you can't load the room, give up
+	// A door to a nonexistent room is indistinguishable from a blocked door
 	if (!loaded_rooms_.count(data->dest)) {
-		load_room(data->dest, false);
+		if (!load_room(data->dest, false)) {
+			return false;
+		}
 	}
 	Room* dest_room = loaded_rooms_[data->dest]->room.get();
 	*dest_room_ptr = dest_room;
