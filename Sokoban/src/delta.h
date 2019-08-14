@@ -5,6 +5,7 @@
 
 class Room;
 class RoomMap;
+class PlayingGlobalData;
 class GameObject;
 class PushBlock;
 class SnakeBlock;
@@ -16,6 +17,7 @@ class PlayingState;
 class Car;
 class GateBody;
 class ClearFlag;
+class WorldResetKey;
 
 enum class RidingState;
 
@@ -272,6 +274,18 @@ public:
 private:
 	RoomMap* map_;
 	int req_;
+};
+
+class CollectibleDelta : public Delta {
+public:
+	CollectibleDelta(WorldResetKey* key, PlayingGlobalData* global, unsigned int flag);
+	~CollectibleDelta();
+	void revert();
+
+private:
+	WorldResetKey* key_;
+	PlayingGlobalData* global_;
+	unsigned int flag_;
 };
 
 #endif // DELTA_H

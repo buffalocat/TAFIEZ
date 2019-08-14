@@ -58,9 +58,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Sokoban-3D\include\effects.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -256,6 +253,12 @@
     <ClInclude Include="src\roomtab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\pausestate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\worldresetkey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -293,27 +296,6 @@
     </ClCompile>
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui_demo.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui_draw.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui_impl_glfw.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui_impl_opengl3.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\dear\imgui_widgets.cpp">
-      <Filter>External Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\glad.c">
-      <Filter>External Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\texture_constants.cpp">
       <Filter>Source Files</Filter>
@@ -461,6 +443,33 @@
     </ClCompile>
     <ClCompile Include="src\roomtab.cpp">
       <Filter>Source Files\Editor Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pausestate.cpp">
+      <Filter>Source Files\Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_demo.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_draw.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_glfw.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_impl_opengl3.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\dear\imgui_widgets.cpp">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\glad\glad.c">
+      <Filter>External Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\worldresetkey.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

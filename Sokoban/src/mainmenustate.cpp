@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mainmenustate.h"
 
+#include "common_constants.h"
 #include "editorstate.h"
 #include "realplayingstate.h"
 #include "savefile.h"
@@ -37,7 +38,7 @@ void MainMenuState::main_loop() {
 			auto savefile = std::make_unique<SaveFile>(savefile_dir);
 			if (savefile->create()) {
 				auto playing_state = std::make_unique<RealPlayingState>(std::move(savefile));
-				playing_state->start_from_map("story1");
+				playing_state->start_from_map(NEW_FILE_START_MAP);
 				create_child(std::move(playing_state));
 			} else {
 				std::cout << "That file already exists! Load it or delete it!" << std::endl;

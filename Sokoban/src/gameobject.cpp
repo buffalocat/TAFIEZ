@@ -22,19 +22,15 @@ Sticky operator &(Sticky a, Sticky b) {
 
 // id_ begins in an "inconsistent" state - it *must* be set by the GameObjectArray
 GameObject::GameObject(Point3 pos, bool pushable, bool gravitable) :
-	modifier_{}, animation_ {},
-	pos_{ pos }, id_{ -1 },
-	pushable_{ pushable }, gravitable_{ gravitable },
-	driven_{ false } {}
+	pos_{ pos },
+	pushable_{ pushable }, gravitable_{ gravitable } {}
 
 GameObject::~GameObject() {}
 
 // Copy Constructor creates trivial unique_ptr members
 GameObject::GameObject(const GameObject& obj) :
-	modifier_{}, animation_{},
-	pos_{ obj.pos_ }, id_{ -1 },
-	pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ },
-	driven_{ false } {}
+	pos_{ obj.pos_ },
+	pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ } {}
 
 std::string GameObject::to_str() {
 	std::string mod_str{ "" };

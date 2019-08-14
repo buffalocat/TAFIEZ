@@ -21,8 +21,6 @@ class AutoBlock;
 class PuppetBlock;
 class ClearFlag;
 
-typedef void(ObjectModifier::*MapCallback)(RoomMap*,DeltaFrame*);
-
 class RoomMap {
 public:
     RoomMap(GameObjectArray& objs, PlayingGlobalData* global, int width, int height, int depth);

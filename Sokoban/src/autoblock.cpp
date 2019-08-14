@@ -17,8 +17,6 @@ ModCode AutoBlock::mod_code() {
     return ModCode::AutoBlock;
 }
 
-void AutoBlock::serialize(MapFileO&) {}
-
 void AutoBlock::deserialize(MapFileI&, RoomMap*, GameObject* parent) {
     parent->set_modifier(std::make_unique<AutoBlock>(parent));
 }

@@ -21,6 +21,13 @@ struct Point3;
 class Door;
 struct DoorTravellingObj;
 
+enum class PSTask {
+	None,
+	Save,
+	WorldReset,
+	Quit,
+};
+
 struct PlayingRoom {
 	std::unique_ptr<Room> room;
 	bool changed = true;
@@ -38,11 +45,13 @@ public:
     bool activate_room(std::string);
     void load_room_from_path(std::filesystem::path path, bool use_default_player);
 	virtual bool load_room(std::string name, bool use_default_player) = 0;
-	virtual void make_subsave();
 
     bool can_use_door(Door*, std::vector<DoorTravellingObj>&, Room**);
 
 	void snap_camera_to_player();
+
+	virtual void make_subsave();
+	virtual void world_reset();
 
 protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
@@ -55,6 +64,8 @@ private:
 	std::unique_ptr<MoveProcessor> move_processor_{};
     std::unique_ptr<UndoStack> undo_stack_;
 	std::unique_ptr<DeltaFrame> delta_frame_{};
+
+	PSTask queued_task_ = PSTask::None;
 
     friend DoorMoveDelta;
 };

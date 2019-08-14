@@ -227,7 +227,7 @@ void EditorState::load_save_cycle() {
 		load_room_from_path(path);
 	}
 	commit_all();
-	defer_to_parent();
+	queue_quit();
 }
 
 void EditorState::unload_current_room() {

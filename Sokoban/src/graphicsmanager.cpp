@@ -9,7 +9,6 @@
 #include <stb_image.h>
 
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
-	text_{ std::make_unique<TextRenderer>() },
 	window_{ window },
 	instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") },
 	cube{ DynamicInstancer("resources/uniform_cube.obj") },

@@ -12,8 +12,8 @@ public:
     GameObjectArray();
     ~GameObjectArray();
     void push_object(std::unique_ptr<GameObject> obj);
-    GameObject* operator[](int id) const;
-    GameObject* safe_get(int id) const;
+    GameObject* operator[](unsigned int id) const;
+    GameObject* safe_get(unsigned int id) const;
     void destroy(GameObject* obj);
 
 private:

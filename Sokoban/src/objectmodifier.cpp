@@ -8,6 +8,8 @@ ObjectModifier::ObjectModifier(GameObject* parent): parent_ {parent} {}
 
 ObjectModifier::~ObjectModifier() {}
 
+void ObjectModifier::serialize(MapFileO&) {}
+
 bool ObjectModifier::relation_check() {
     return false;
 }

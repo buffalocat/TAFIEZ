@@ -4,8 +4,6 @@
 #include "color_constants.h"
 
 TextRenderer::TextRenderer() :
-	drawers_{},
-	room_label_{},
 	text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") } {}
 
 TextRenderer::~TextRenderer() {}
@@ -33,7 +31,7 @@ void TextRenderer::render_text() {
 
 void TextRenderer::make_room_label(std::string label) {
 	room_label_ = std::make_unique<RoomLabelDrawer>(
-		kalam_.get(), text_shader_, COLOR_VECTORS[CYAN], label);
+		kalam_.get(), COLOR_VECTORS[CYAN], label);
 }
 
 std::unique_ptr<Font> TextRenderer::make_font(std::string path, unsigned int font_size) {
@@ -41,10 +39,10 @@ std::unique_ptr<Font> TextRenderer::make_font(std::string path, unsigned int fon
 }
 
 
-StringDrawer::StringDrawer(Font* font, Shader shader, glm::vec4 color,
+StringDrawer::StringDrawer(Font* font, glm::vec4 color,
 	std::string label, float x, float y, float sx, float sy) :
-	vertices_{ font->generate_string_verts(label.c_str(), x, y, sx, sy) },
-	color_{ color }, shader_{ shader }, tex_{ font->tex_ }, destroy_{ false } {
+	color_{ color }, shader_{ font->shader_ }, tex_{ font->tex_ } {
+	font->generate_string_verts(label.c_str(), x, y, sx, sy, vertices_, &width_);
 	glGenVertexArrays(1, &VAO_);
 	glBindVertexArray(VAO_);
 	glGenBuffers(1, &VBO_);
@@ -61,6 +59,15 @@ StringDrawer::~StringDrawer() {
 	glDeleteBuffers(1, &VBO_);
 }
 
+void StringDrawer::set_color(int color) {
+	color_ = COLOR_VECTORS[color];
+}
+
+void StringDrawer::set_color(glm::vec4 color) {
+	color_ = color;
+}
+
+
 void StringDrawer::render() {
 	shader_.setVec4("color", color_);
 	glBindVertexArray(VAO_);
@@ -69,8 +76,8 @@ void StringDrawer::render() {
 }
 
 
-RoomLabelDrawer::RoomLabelDrawer(Font* font, Shader shader, glm::vec4 color, std::string label) :
-	StringDrawer(font, shader, color, label, 0, 0.8f, 1, 1),
+RoomLabelDrawer::RoomLabelDrawer(Font* font, glm::vec4 color, std::string label) :
+	StringDrawer(font, color, label, 0, 0.8f, 1, 1),
 	cooldown_{ AREA_NAME_DISPLAY_FRAMES } {}
 
 RoomLabelDrawer::~RoomLabelDrawer() {}
@@ -90,7 +97,7 @@ void RoomLabelDrawer::update() {
 
 
 Font::Font(FT_Library ft, Shader text_shader, std::string path, unsigned int font_size) :
-	text_shader_{ text_shader },
+	shader_{ text_shader },
 	tex_width_{ 1 << 9 }, tex_height_{ 1 << 9 } {
 	if (FT_New_Face(ft, path.c_str(), 0, &face_)) {
 		std::cout << "Failed to load the font" << std::endl;
@@ -158,7 +165,7 @@ void Font::init_glyphs(int font_size) {
 
 void Font::render_glyphs() {}
 
-std::vector<TextVertex> Font::generate_string_verts(const char* text, float x, float y, float sx, float sy) {
+void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy, std::vector<TextVertex>& text_verts, float* width) {
 	sx *= 2.0f / SCREEN_WIDTH;
 	sy *= 2.0f / SCREEN_HEIGHT;
 
@@ -171,13 +178,13 @@ std::vector<TextVertex> Font::generate_string_verts(const char* text, float x, f
 	for (p = text; *p; p++) {
 		text_width += glyphs_[*p].advance_x;
 	}
-	x -= text_width * sx / 2;
+	*width = text_width * sx;
+	x -= *width / 2;
 
 	float su = 1.0f / tex_width_;
 	float sv = 1.0f / tex_height_;
 
 	// Every character takes 6 vertices
-	std::vector<TextVertex> text_verts{};
 	text_verts.reserve(6 * strlen(text));
 	for (p = text; *p; p++) {
 		GlyphPos glyph = glyphs_[*p];
@@ -204,5 +211,4 @@ std::vector<TextVertex> Font::generate_string_verts(const char* text, float x, f
 		x += glyph.advance_x * sx;
 		y += glyph.advance_y * sy;
 	}
-	return std::move(text_verts);
 }

@@ -59,7 +59,6 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 				}
 			}
 		} else {
-			active_ = false;
 			if (auto* mod = above->modifier()) {
 				switch (mod->mod_code()) {
 				case ModCode::AutoBlock:

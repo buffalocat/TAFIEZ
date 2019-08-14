@@ -90,7 +90,7 @@ void MapLayer::serialize_wall_runs(MapFileO& file) {
 		int count = 0;
 		bool wall = false;
 		for (int id : col) {
-			if ((id == GLOBAL_WALL_ID) != wall) {
+			if ((id == GENERIC_WALL_ID) != wall) {
 				wall = !wall;
 				file << count;
 				count = 0;
@@ -110,7 +110,7 @@ void MapLayer::deserialize_wall_runs(MapFileI& file) {
 				break;
 			}
 			for (int i = file.read_byte(); i > 0; --i) {
-				col[y] = GLOBAL_WALL_ID;
+				col[y] = GENERIC_WALL_ID;
 				++y;
 			}
 		}

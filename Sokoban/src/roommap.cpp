@@ -41,7 +41,7 @@ struct ObjectSerializationHandler {
 };
 
 void ObjectSerializationHandler::operator()(int id) {
-	if (id == GLOBAL_WALL_ID) {
+	if (id == GENERIC_WALL_ID) {
 		return;
 	}
 	GameObject* obj = obj_array[id];
@@ -115,7 +115,7 @@ GameObject* RoomMap::view(Point3 pos) {
 	} else if (valid(pos)) {
 		return obj_array_[layers_[pos.z].at(pos.h())];
 	} else {
-		return obj_array_[GLOBAL_WALL_ID];
+		return obj_array_[GENERIC_WALL_ID];
 	}
 }
 
@@ -166,7 +166,7 @@ void RoomMap::take_from_map(GameObject* obj, bool real, DeltaFrame* delta_frame)
 }
 
 void RoomMap::create_wall(Point3 pos) {
-	at(pos) = GLOBAL_WALL_ID;
+	at(pos) = GENERIC_WALL_ID;
 }
 
 void RoomMap::clear(Point3 pos) {
@@ -234,14 +234,14 @@ void RoomMap::alert_activated_listeners(DeltaFrame* delta_frame, MoveProcessor* 
 }
 
 struct ObjectDrawer {
-	void operator()(int, Point3);
+	void operator()(unsigned int, Point3);
 
 	GameObjectArray& obj_array;
 	GraphicsManager* gfx;
 };
 
-void ObjectDrawer::operator()(int id, Point3 pos) {
-	if (id > GLOBAL_WALL_ID) {
+void ObjectDrawer::operator()(unsigned int id, Point3 pos) {
+	if (id > GENERIC_WALL_ID) {
 		obj_array[id]->draw(gfx);
 	} else {
 		Wall::draw(gfx, pos);
@@ -266,15 +266,15 @@ void RoomMap::draw_layer(GraphicsManager* gfx, int z) {
 }
 
 struct ObjectShifter {
-	void operator()(int);
+	void operator()(unsigned int);
 
 	GameObjectArray& obj_array;
 	RoomMap* map;
 	Point3 dpos;
 };
 
-void ObjectShifter::operator()(int id) {
-	if (id > GLOBAL_WALL_ID) {
+void ObjectShifter::operator()(unsigned int id) {
+	if (id > GENERIC_WALL_ID) {
 		obj_array[id]->shift_internal_pos(dpos);
 	}
 }
@@ -287,14 +287,14 @@ void RoomMap::shift_all_objects(Point3 d) {
 }
 
 struct ObjectDestroyer {
-	void operator()(int);
+	void operator()(unsigned int);
 
 	GameObjectArray& obj_array;
 	RoomMap* map;
 };
 
-void ObjectDestroyer::operator()(int id) {
-	if (id > GLOBAL_WALL_ID) {
+void ObjectDestroyer::operator()(unsigned int id) {
+	if (id > GENERIC_WALL_ID) {
 		auto* obj = obj_array[id];
 		map->take_from_map(obj, true, nullptr);
 		map->remove_from_object_array(obj);

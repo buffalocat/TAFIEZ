@@ -18,11 +18,11 @@ void GameObjectArray::push_object(std::unique_ptr<GameObject> obj) {
     array_.push_back(std::move(obj));
 }
 
-GameObject* GameObjectArray::operator[](int id) const {
+GameObject* GameObjectArray::operator[](unsigned int id) const {
     return array_[id].get();
 }
 
-GameObject* GameObjectArray::safe_get(int id) const {
+GameObject* GameObjectArray::safe_get(unsigned int id) const {
     if (id >= array_.size()) {
         return nullptr;
     } else {

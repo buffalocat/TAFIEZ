@@ -40,4 +40,13 @@ void RealPlayingState::load_most_recent_subsave() {
 	savefile_->load_most_recent_subsave(&cur_room_name);
 	load_room(cur_room_name, false);
 	activate_room(cur_room_name);
+	snap_camera_to_player();
+}
+
+void RealPlayingState::world_reset() {
+	// Forget all the maps we know
+	loaded_rooms_.clear();
+	savefile_->world_reset();
+	// Start anew in the world reset start room (not necessarily the same as the "new file start room"!)
+	start_from_map(WORLD_RESET_START_MAP);
 }

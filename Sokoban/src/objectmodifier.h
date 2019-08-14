@@ -23,7 +23,7 @@ public:
 
     virtual std::string name() = 0;
     virtual ModCode mod_code() = 0;
-    virtual void serialize(MapFileO& file) = 0;
+	virtual void serialize(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
 	virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*) = 0;

@@ -127,6 +127,7 @@ void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>&
 }
 
 void SaveFile::load_subsave(unsigned int subsave_index, std::string* cur_room_name) {
+	cur_subsave_ = subsave_index;
 	auto subsave_path = base_ / std::to_string(subsave_index);
 	global_->load_flags(subsave_path);
 	load_room_data(subsave_path, cur_room_name);
@@ -197,4 +198,9 @@ std::filesystem::path SaveFile::get_path(std::string name, bool* from_main) {
 void SaveFile::save_room(Room* room, std::filesystem::path path) {
 	MapFileO file{ (path / room->name()).concat(".map") };
 	room->write_to_file(file);
+}
+
+void SaveFile::world_reset() {
+	// "Forget" the locations of all room maps
+	room_subsave_.clear();
 }

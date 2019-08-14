@@ -124,7 +124,7 @@ void ObjectTab::object_tab_options() {
 		object_type_choice(&transmute_obj_code);
 		if (ImGui::Button("Transmute##OBJECT")) {
 			if (auto new_obj = create_from_model(transmute_obj_code, selected_obj)) {
-				if (selected_obj->id_ == GLOBAL_WALL_ID) {
+				if (selected_obj->id_ == GENERIC_WALL_ID) {
 					map_->clear(selected_pos);
 				} else {
 					map_->take_from_map(selected_obj, true, nullptr);
@@ -136,7 +136,7 @@ void ObjectTab::object_tab_options() {
 			// If the new object was a generic Wall, we don't have a new pointer
 			else if (transmute_obj_code == ObjCode::Wall) {
 				// If the old object was also a generic Wall, do nothing
-				if (selected_obj->id_ != GLOBAL_WALL_ID) {
+				if (selected_obj->id_ != GENERIC_WALL_ID) {
 					map_->take_from_map(selected_obj, true, nullptr);
 					map_->remove_from_object_array(selected_obj);
 					map_->create_wall(selected_pos);
@@ -210,7 +210,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 		}
 		selected_obj = nullptr;
 		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object
-		if (obj->id_ == GLOBAL_WALL_ID) {
+		if (obj->id_ == GENERIC_WALL_ID) {
 			map_->at(pos) = 0;
 		} else {
 			map_->take_from_map(obj, true, nullptr);

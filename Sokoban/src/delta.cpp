@@ -4,6 +4,7 @@
 #include "gameobject.h"
 #include "room.h"
 #include "roommap.h"
+#include "savefile.h"
 
 #include "car.h"
 #include "snakeblock.h"
@@ -14,6 +15,7 @@
 #include "playingstate.h"
 #include "gatebody.h"
 #include "clearflag.h"
+#include "worldresetkey.h"
 
 Delta::~Delta() {}
 
@@ -251,4 +253,16 @@ ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
 
 void ClearFlagCollectionDelta::revert() {
 	map_->uncollect_flag(req_);
+}
+
+
+// TODO: make this more general if necessary ("Collectible" intermediate class for ObjectModifier?)
+CollectibleDelta::CollectibleDelta(WorldResetKey* key, PlayingGlobalData* global, unsigned int flag) :
+	Delta(), key_{ key }, global_{ global }, flag_{ flag } {}
+
+CollectibleDelta::~CollectibleDelta() {}
+
+void CollectibleDelta::revert() {
+	key_->collected_ = false;
+	global_->remove_flag(flag_);
 }

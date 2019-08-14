@@ -62,17 +62,17 @@ public:
     void shift_pos_from_animation();
     FPoint3 real_pos();
 
-	std::unique_ptr<ObjectModifier> modifier_;
-    std::unique_ptr<PositionalAnimation> animation_;
+	std::unique_ptr<ObjectModifier> modifier_{};
+	std::unique_ptr<PositionalAnimation> animation_{};
 	Component* comp_;
     Point3 pos_;
-    int id_;
+	unsigned int id_ = 0;
     bool pushable_;
     bool gravitable_;
 	// Is the object physically in the map?
 	bool tangible_ = false;
 	// Temporary flag for active cars/autos/puppets
-	bool driven_;
+	bool driven_ = false;
 
 protected:
     GameObject(Point3 pos, bool pushable, bool gravitable);
@@ -95,7 +95,7 @@ public:
 	int color();
 	bool has_sticky_neighbor(RoomMap*);
 
-	int color_;
+	int color_ = 0;
 };
 
 #endif // GAMEOBJECT_H

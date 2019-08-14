@@ -18,6 +18,7 @@
 #include "autoblock.h"
 #include "puppetblock.h"
 #include "clearflag.h"
+#include "worldresetkey.h"
 
 #include "colorcycle.h"
 
@@ -80,6 +81,7 @@ void ModifierTab::mod_tab_options() {
 		ImGui::RadioButton("AutoBlock##MOD_object", &mod_code, ModCode::AutoBlock);
 		ImGui::RadioButton("PuppetBlock##MOD_object", &mod_code, ModCode::PuppetBlock);
 		ImGui::RadioButton("ClearFlag##MOD_object", &mod_code, ModCode::ClearFlag);
+		ImGui::RadioButton("WorldResetKey##MOD_object", &mod_code, ModCode::WorldResetKey);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -120,9 +122,6 @@ void ModifierTab::mod_tab_options() {
 		color_button(ps->color_);
 		break;
 	}
-	case ModCode::AutoBlock:
-	case ModCode::PuppetBlock:
-		break;
 	case ModCode::ClearFlag:
 	{
 		ImGui::Text("ClearFlag");
@@ -130,6 +129,11 @@ void ModifierTab::mod_tab_options() {
 		ImGui::Checkbox("Real?##CLEAR_FLAG_real", &cf->real_);
 		break;
 	}
+	// Trivial objects
+	case ModCode::AutoBlock:
+	case ModCode::PuppetBlock:
+	case ModCode::WorldResetKey:
+		break;
 	default:
 		break;
 	}
@@ -196,6 +200,9 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	case ModCode::ClearFlag:
 		mod = std::make_unique<ClearFlag>(model_clear_flag);
 		break;
+	case ModCode::WorldResetKey:
+		mod = std::make_unique<WorldResetKey>(obj);
+		break;
 	default:
 		return;
 	}
@@ -203,7 +210,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		return;
 	}
 	// A Wall with a modifier can't be the global wall
-	if (obj->id_ == GLOBAL_WALL_ID) {
+	if (obj->id_ == GENERIC_WALL_ID) {
 		map->clear(pos);
 		auto new_wall = std::make_unique<Wall>(pos);
 		obj = new_wall.get();

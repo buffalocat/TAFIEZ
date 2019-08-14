@@ -21,7 +21,7 @@ struct MapRect {
 };
 
 using GameObjIDFunc = std::function<void(int)>;
-using GameObjIDPosFunc = std::function<void(int, Point3)>;
+using GameObjIDPosFunc = std::function<void(unsigned int, Point3)>;
 
 class MapLayer {
 public:

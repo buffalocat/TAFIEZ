@@ -19,13 +19,14 @@ public:
 
 	void make_room_label(std::string label);
 
-private:
-	std::unique_ptr<Font> make_font(std::string path, unsigned int font_size);
 	// Loaded Fonts
 	std::unique_ptr<Font> kalam_;
 
-	std::vector<std::unique_ptr<StringDrawer>> drawers_;
-	std::unique_ptr<RoomLabelDrawer> room_label_;
+private:
+	std::unique_ptr<Font> make_font(std::string path, unsigned int font_size);
+
+	std::vector<std::unique_ptr<StringDrawer>> drawers_{};
+	std::unique_ptr<RoomLabelDrawer> room_label_{};
 
 	FT_Library ft_;
 	Shader text_shader_;
@@ -33,23 +34,25 @@ private:
 
 class StringDrawer {
 public:
-	StringDrawer(Font* font, Shader shader, glm::vec4 color,
+	StringDrawer(Font* font, glm::vec4 color,
 		std::string label, float x, float y, float sx, float sy);
 	virtual ~StringDrawer();
 
+	void set_color(int color);
+	void set_color(glm::vec4 color);
 	void render();
 
 protected:
-	std::vector<TextVertex> vertices_;
+	std::vector<TextVertex> vertices_{};
 	glm::vec4 color_;
 	Shader shader_;
 	GLuint VAO_, VBO_, tex_;
-	bool destroy_;
+	float width_;
 };
 
 class RoomLabelDrawer : public StringDrawer {
 public:
-	RoomLabelDrawer(Font* font, Shader shader, glm::vec4 color, std::string label);
+	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label);
 	~RoomLabelDrawer();
 
 	void update();
@@ -72,13 +75,13 @@ public:
 
 	void init_glyphs(int font_size);
 	void render_glyphs();
-	std::vector<TextVertex> generate_string_verts(const char* text, float x, float y, float sx, float sy);
+	void generate_string_verts(const char* text, float x, float y, float sx, float sy, std::vector<TextVertex>& text_verts, float* width);
 
 	GLuint tex_;
+	Shader shader_;
 
 private:
 	GlyphPos glyphs_[128];
 	FT_Face face_;
-	Shader text_shader_;
 	unsigned int tex_width_, tex_height_;
 };

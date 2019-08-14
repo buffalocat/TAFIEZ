@@ -16,6 +16,8 @@ public:
 	void make_subsave();
 	void load_most_recent_subsave();
 
+	void world_reset();
+
 private:
 	std::unique_ptr<SaveFile> savefile_;
 };

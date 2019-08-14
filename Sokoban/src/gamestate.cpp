@@ -3,10 +3,7 @@
 
 #include "graphicsmanager.h"
 
-GameState::GameState():
-gfx_ {}, window_ {},
-parent_ {}, current_state_ptr_ {},
-can_quit_ {true} {}
+GameState::GameState() {}
 
 GameState::~GameState() {}
 
@@ -31,13 +28,25 @@ void GameState::set_csp(std::unique_ptr<GameState>* csp) {
     current_state_ptr_ = csp;
 }
 
-void GameState::check_for_quit() {
-    if (can_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+void GameState::check_for_escape_quit() {
+    if (can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         if (parent_) {
-            parent_->can_quit_ = false;
+            parent_->can_escape_quit_ = false;
         }
         defer_to_parent();
-    } else if (!can_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
-        can_quit_ = true;
+    } else if (!can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+        can_escape_quit_ = true;
     }
+}
+
+bool GameState::check_for_queued_quit() {
+	if (queued_quit_) {
+		defer_to_parent();
+		return true;
+	}
+	return false;
+}
+
+void GameState::queue_quit() {
+	queued_quit_ = true;
 }

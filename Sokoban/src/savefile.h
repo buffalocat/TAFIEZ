@@ -59,6 +59,8 @@ public:
 	void load_subsave(unsigned int subsave_index, std::string* cur_room_name);
 	void load_most_recent_subsave(std::string* cur_room_name);
 
+	void world_reset();
+
 	GlobalData* global_{};
 
 private:

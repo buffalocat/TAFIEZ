@@ -34,7 +34,7 @@ public:
 	SingleDrawer windshield_diamond;
 	SingleDrawer flag;
 
-	std::unique_ptr<TextRenderer> text_;
+	std::unique_ptr<TextRenderer> text_{ std::make_unique<TextRenderer>() };
 
 private:
 	GLFWwindow* window_;
