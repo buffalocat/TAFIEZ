@@ -33,6 +33,7 @@ public:
 	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y);
 	~RoomLabelDrawer();
 
+	void init();
 	void update();
 
 private:

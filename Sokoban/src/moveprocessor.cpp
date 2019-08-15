@@ -162,6 +162,10 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 }
 
 void MoveProcessor::plan_door_move(Door* door) {
+	// Hack to avoid door checking in initialization
+	if (!player_) {
+		return;
+	}
 	if (door_state_ == DoorState::None && door->usable()) {
 		// Also, it should probably be the responsibility of the objects/door, not the MoveProcessor
 		// TODO: rethink these checks to be SAFE

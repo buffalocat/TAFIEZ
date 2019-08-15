@@ -62,6 +62,10 @@ RoomLabelDrawer::RoomLabelDrawer(Font* font, glm::vec4 color, std::string label,
 
 RoomLabelDrawer::~RoomLabelDrawer() {}
 
+void RoomLabelDrawer::init() {
+	cooldown_ = AREA_NAME_DISPLAY_FRAMES;
+}
+
 void RoomLabelDrawer::update() {
 	if (cooldown_) {
 		--cooldown_;

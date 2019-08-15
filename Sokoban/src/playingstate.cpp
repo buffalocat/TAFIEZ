@@ -153,8 +153,19 @@ bool PlayingState::activate_room(std::string name) {
 	}
 	auto* proom = loaded_rooms_[name].get();
 	proom->changed = true;
-	room_ = proom->room.get();
-	gfx_->toggle_string_drawer(room_->zone_label_.get(), true);
+	Room* new_room = proom->room.get();
+	if (room_ != new_room) {
+		new_room->zone_label_->init();
+		gfx_->toggle_string_drawer(new_room->zone_label_.get(), true);
+		// Remove the old labels (if there's more cleanup than this, it should be its own method)
+		if (room_) {
+			gfx_->toggle_string_drawer(room_->zone_label_.get(), false);
+			if (auto* context_label = room_->context_label_.get()) {
+				gfx_->toggle_string_drawer(context_label, false);
+			}
+		}
+		room_ = new_room;
+	}
 	return true;
 }
 
