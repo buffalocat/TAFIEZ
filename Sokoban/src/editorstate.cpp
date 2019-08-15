@@ -110,7 +110,7 @@ void EditorState::main_loop() {
         }
 		// Draw the active room
         active_room_->changed = true;
-        active_room_->room->draw_at_pos(gfx_, active_room_->cam_pos, false, ortho_cam_, one_layer_);
+        active_room_->room->draw_at_pos(active_room_->cam_pos, false, ortho_cam_, one_layer_);
 		// Handle input
 		handle_mouse_input(active_room_->cam_pos, active_room_->room.get());
 		if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
@@ -162,7 +162,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
         std::cout << "A room with that name is already loaded!" << std::endl;
         return;
     }
-    auto room = std::make_unique<Room>(name);
+    auto room = std::make_unique<Room>(gfx_, name);
     room->initialize(*objs_, nullptr, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
     room->map()->create_in_map(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
@@ -188,7 +188,7 @@ bool EditorState::load_room(std::string name, bool from_main) {
 void EditorState::load_room_from_path(std::filesystem::path path) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();
-	std::unique_ptr<Room> room = std::make_unique<Room>(name);
+	std::unique_ptr<Room> room = std::make_unique<Room>(gfx_, name);
 
 	Player* player = nullptr;
 	room->load_from_file(*objs_, file, nullptr, &player);
@@ -261,8 +261,10 @@ void EditorState::begin_test() {
             save_room(p.second.get(), false);
         }
     }
-    auto playing_state = std::make_unique<TestPlayingState>(active_room_->room->name());
-    create_child(std::move(playing_state));
+    auto playing_state_unique = std::make_unique<TestPlayingState>();
+	auto playing_state = playing_state_unique.get();
+    create_child(std::move(playing_state_unique));
+	playing_state->init(active_room_->room->name());
 }
 
 void EditorState::handle_left_click(Point3 pos) {

@@ -23,7 +23,7 @@ class ClearFlag;
 
 class RoomMap {
 public:
-    RoomMap(GameObjectArray& objs, PlayingGlobalData* global, int width, int height, int depth);
+    RoomMap(GameObjectArray& objs, PlayingGlobalData* global, GraphicsManager* gfx, int width, int height, int depth);
     ~RoomMap();
     bool valid(Point3 pos);
 
@@ -91,6 +91,7 @@ public:
 
     GameObjectArray& obj_array_;
 	PlayingGlobalData* global_;
+	GraphicsManager* gfx_;
 	std::vector<MapLayer> layers_{};
 
 private:

@@ -6,6 +6,9 @@
 #include "camera.h"
 
 #include "graphicsmanager.h"
+#include "fontmanager.h"
+#include "stringdrawer.h"
+
 #include "gameobject.h"
 
 #include "pushblock.h"
@@ -23,6 +26,7 @@
 #include "clearflag.h"
 #include "worldresetkey.h"
 #include "permanentswitch.h"
+#include "floorsign.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -31,7 +35,7 @@
 
 #include "savefile.h"
 
-Room::Room(std::string name) : name_{ name }, offset_pos_{ 0,0,0 } {}
+Room::Room(GraphicsManager* gfx, std::string name) : gfx_{ gfx }, name_ { name } {}
 
 Room::~Room() {}
 
@@ -40,7 +44,7 @@ std::string const Room::name() {
 }
 
 void Room::initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d) {
-	map_ = std::make_unique<RoomMap>(objs, global, w, h, d);
+	map_ = std::make_unique<RoomMap>(objs, global, gfx_, w, h, d);
 	camera_ = std::make_unique<Camera>(w, h);
 }
 
@@ -62,35 +66,40 @@ Camera* Room::camera() {
 	return camera_.get();
 }
 
-void Room::draw_at_pos(GraphicsManager* gfx, Point3 pos, bool display_labels, bool ortho, bool one_layer) {
-	draw(gfx, pos, pos, display_labels, ortho, one_layer);
+void Room::draw_at_pos(Point3 pos, bool display_labels, bool ortho, bool one_layer) {
+	draw(pos, pos, display_labels, ortho, one_layer);
 }
 
-void Room::draw_at_player(GraphicsManager* gfx, Player* player, bool display_labels, bool ortho, bool one_layer) {
-	draw(gfx, player->pos_, player->cam_pos(), display_labels, ortho, one_layer);
+void Room::draw_at_player(Player* player, bool display_labels, bool ortho, bool one_layer) {
+	draw(player->pos_, player->cam_pos(), display_labels, ortho, one_layer);
 }
 
-void Room::draw(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer) {
-	gfx->prepare_object_rendering();
-	update_view(gfx, vpos, rpos, display_labels, ortho);
+void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer) {
+	gfx_->prepare_object_rendering();
+	update_view(vpos, rpos, display_labels, ortho);
 	if (one_layer) {
-		map_->draw_layer(gfx, vpos.z);
+		map_->draw_layer(gfx_, vpos.z);
 	} else {
-		map_->draw(gfx, camera_->get_rotation());
+		map_->draw(gfx_, camera_->get_rotation());
 	}
-	gfx->draw_world();
-	gfx->draw_text();
+	gfx_->draw_world();
+	gfx_->draw_text();
 }
 
-void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {
+void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {
 	glm::mat4 model, view, projection;
 	if (camera_->update_context(vpos) && display_labels) {
-		camera_->update_label(gfx);
+		if (camera_->update_label()) {
+			context_label_ = std::make_unique<RoomLabelDrawer>(
+				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72), COLOR_VECTORS[DARK_BLUE],
+				camera_->active_label_, 0.65f);
+			gfx_->toggle_string_drawer(context_label_.get(), true);
+		}
 	}
 	if (ortho) {
 		camera_->set_target(vpos);
 		camera_->set_current_to_target();
-		gfx->set_light_source(glm::vec3(rpos.x, rpos.y, rpos.z + 100));
+		gfx_->set_light_source(glm::vec3(rpos.x, rpos.y, rpos.z + 100));
 		view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
 			glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0),
 			glm::vec3(0.0, -1.0, 0.0));
@@ -108,7 +117,7 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool dis
 		double cam_y = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
 		double cam_z = cos(cam_tilt) * cam_radius;
 
-		gfx->set_light_source(glm::vec3(cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
+		gfx_->set_light_source(glm::vec3(cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
 
 		view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
 			glm::vec3(-target_pos.x, target_pos.y, target_pos.z),
@@ -116,7 +125,7 @@ void Room::update_view(GraphicsManager* gfx, Point3 vpos, FPoint3 rpos, bool dis
 		projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
 	}
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
-	gfx->set_PV(projection * view);
+	gfx_->set_PV(projection * view);
 }
 
 void Room::shift_by(Point3 d) {
@@ -157,6 +166,9 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 			break;
 		case MapCode::Zone:
 			map_->zone_ = file.read_byte();
+			zone_label_ = std::make_unique<RoomLabelDrawer>(
+				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 108), COLOR_VECTORS[BRIGHT_PURPLE],
+				std::string("Zone ") + map_->zone_, 0.8f);
 			break;
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();
@@ -254,6 +266,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_MODCODE(ClearFlag);
 			CASE_MODCODE(WorldResetKey);
 			CASE_MODCODE(PermanentSwitch);
+			CASE_MODCODE(FloorSign);
 		case ModCode::NONE:
 			break;
 		default:

@@ -25,6 +25,8 @@ enum class BlockTexture {
 	GateBody = 37,
 	GateBasePersistent = 38,
 	GateBodyPersistent = 39,
+	Sign = 48,
+	// Next double-size texture = 49,
 	PermSwitchUp = 50,
 	PermSwitchDown = 51,
 

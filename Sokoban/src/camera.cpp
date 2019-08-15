@@ -3,12 +3,11 @@
 #include "camera.h"
 
 #include "delta.h"
-#include "graphicsmanager.h"
 #include "common_constants.h"
 #include "common_enums.h"
 #include "roommap.h"
 #include "mapfile.h"
-#include "textrenderer.h"
+#include "fontmanager.h"
 
 
 CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child) :
@@ -220,14 +219,15 @@ void Camera::set_target(FPoint3 rpos) {
 	target_rot_ = context_->rotation(rpos);
 }
 
-void Camera::update_label(GraphicsManager* gfx) {
+bool Camera::update_label() {
 	if (context_->named_area_) {
 		std::string label = context_->label_;
 		if (!label.empty() && active_label_ != label) {
 			active_label_ = label;
-			gfx->text_->make_room_label(label);
+			return true;
 		}
 	}
+	return false;
 }
 
 void Camera::set_current_to_target() {

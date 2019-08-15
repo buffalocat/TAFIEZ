@@ -42,6 +42,15 @@ std::string MapFileI::read_str() {
     return std::string(b, n);
 }
 
+std::string MapFileI::read_long_str() {
+	unsigned char n[2];
+	read(n, 2);
+	unsigned int len = n[0] + (n[1] << 8);
+	char b[MAX_LONG_STRING_SIZE] = "";
+	file_.read(b, len);
+	return std::string(b, len);
+}
+
 MapFileI& operator>>(MapFileI& f, int& v) {
     unsigned char b;
     f.read(&b, 1);
@@ -120,6 +129,11 @@ MapFileO::~MapFileO() {
 
 void MapFileO::write_uint32(unsigned int n) {
 	file_ << (unsigned char)n << (unsigned char)(n >> 8) << (unsigned char)(n >> 16) << (unsigned char)(n >> 24);
+}
+
+void MapFileO::write_long_str(const char* str, unsigned int len) {
+	file_ << (unsigned char)(len) << (unsigned char)(len >> 8);
+	file_.write(str, len);
 }
 
 MapFileO& MapFileO::operator<<(unsigned char n) {

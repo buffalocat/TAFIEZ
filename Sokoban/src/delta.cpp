@@ -2,6 +2,7 @@
 #include "delta.h"
 
 #include "gameobject.h"
+#include "graphicsmanager.h"
 #include "room.h"
 #include "roommap.h"
 #include "savefile.h"
@@ -16,6 +17,8 @@
 #include "gatebody.h"
 #include "clearflag.h"
 #include "worldresetkey.h"
+#include "floorsign.h"
+
 
 Delta::~Delta() {}
 
@@ -273,4 +276,15 @@ GlobalFlagDelta::~GlobalFlagDelta() {}
 
 void GlobalFlagDelta::revert() {
 	global_->remove_flag(flag_);
+}
+
+
+SignToggleDelta::SignToggleDelta(FloorSign* sign, GraphicsManager* gfx, bool state) :
+	Delta(), sign_{ sign }, gfx_{ gfx }, state_{ state } {}
+
+SignToggleDelta::~SignToggleDelta() {}
+
+void SignToggleDelta::revert() {
+	sign_->showing_text_ = state_;
+	gfx_->toggle_string_drawer(sign_->drawer_.get(), state_);
 }

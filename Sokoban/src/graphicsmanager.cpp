@@ -2,25 +2,34 @@
 #include "graphicsmanager.h"
 #include "common_constants.h"
 #include "texture_constants.h"
-#include "textrenderer.h"
+#include "fontmanager.h"
+#include "stringdrawer.h"
 #include "model.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+ProtectedStringDrawer::ProtectedStringDrawer(StringDrawer* drawer) : drawer_{ drawer }, alive_{ true } {
+	drawer_->set_alive_ptr(&alive_);
+}
+
+ProtectedStringDrawer::~ProtectedStringDrawer() {
+	if (alive_) {
+		drawer_->set_alive_ptr(nullptr);
+	}
+}
+
+ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer_{ p.drawer_ }, alive_{ p.alive_ } {
+	p.alive_ = false;
+	p.drawer_ = nullptr;
+	if (alive_) {
+		drawer_->set_alive_ptr(&alive_);
+	}
+}
+
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
-	window_{ window },
-	instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") },
-	cube{ DynamicInstancer("resources/uniform_cube.obj") },
-	top_cube{ DynamicInstancer("resources/top_cube.obj") },
-	diamond{ DynamicInstancer("resources/diamond.obj") },
-	six_squares{ DynamicInstancer("resources/six_squares.obj") },
-	windshield{ SingleDrawer("resources/windshield.obj") },
-	windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") },
-	flag{ SingleDrawer("resources/flag.obj") },
-	wall{ WallInstancer("resources/uniform_cube.obj") }
-{
-	text_->init();
+	window_{ window } {
+	fonts_ = std::make_unique<FontManager>(text_shader_);
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
@@ -74,5 +83,22 @@ void GraphicsManager::draw_world() {
 }
 
 void GraphicsManager::draw_text() {
-	text_->render_text();
+	text_shader_.use();
+	std::vector<ProtectedStringDrawer> new_drawers{};
+	for (auto& p : string_drawers_) {
+		if (p.alive_ && p.drawer_->active_) {
+			p.drawer_->update();
+			p.drawer_->render();
+			new_drawers.push_back(std::move(p));
+		}
+	}
+	string_drawers_ = std::move(new_drawers);
+}
+
+void GraphicsManager::toggle_string_drawer(StringDrawer* drawer, bool active) {
+	if (active) {
+		string_drawers_.push_back(ProtectedStringDrawer(drawer));
+	} else {
+		drawer->kill_instance();
+	}
 }

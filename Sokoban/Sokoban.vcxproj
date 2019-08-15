@@ -197,6 +197,8 @@
     <Image Include="Sokoban.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\floorsign.h" />
+    <ClInclude Include="src\stringdrawer.h" />
     <ClInclude Include="src\permanentswitch.h" />
     <ClInclude Include="src\pausestate.h" />
     <ClInclude Include="src\roomtab.h" />
@@ -260,7 +262,7 @@
     <ClInclude Include="src\switchtab.h" />
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\testplayingstate.h" />
-    <ClInclude Include="src\textrenderer.h" />
+    <ClInclude Include="src\fontmanager.h" />
     <ClInclude Include="src\texture_constants.h" />
     <ClInclude Include="src\vertexlayout.h" />
     <ClInclude Include="src\wall.h" />
@@ -323,6 +325,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\floorsign.cpp" />
     <ClCompile Include="src\permanentswitch.cpp" />
     <ClCompile Include="src\pausestate.cpp" />
     <ClCompile Include="src\roomtab.cpp" />
@@ -378,6 +381,7 @@
     <ClCompile Include="src\snaketab.cpp" />
     <ClCompile Include="src\Sokoban.cpp" />
     <ClCompile Include="src\color_constants.cpp" />
+    <ClCompile Include="src\stringdrawer.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -388,7 +392,7 @@
     <ClCompile Include="src\switchable.cpp" />
     <ClCompile Include="src\switchtab.cpp" />
     <ClCompile Include="src\testplayingstate.cpp" />
-    <ClCompile Include="src\textrenderer.cpp" />
+    <ClCompile Include="src\fontmanager.cpp" />
     <ClCompile Include="src\texture_constants.cpp" />
     <ClCompile Include="src\wall.cpp" />
     <ClCompile Include="src\worldresetkey.cpp" />

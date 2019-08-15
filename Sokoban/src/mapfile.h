@@ -38,6 +38,7 @@ public:
 	unsigned int read_uint32();
     Point3 read_point3();
     std::string read_str();
+	std::string read_long_str();
 
 private:
     std::ifstream file_;
@@ -64,6 +65,7 @@ public:
     ~MapFileO();
 
 	void write_uint32(unsigned int);
+	void write_long_str(const char* str, unsigned int len);
 
     MapFileO& operator<<(unsigned char);
     MapFileO& operator<<(int);

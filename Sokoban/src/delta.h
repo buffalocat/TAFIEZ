@@ -18,6 +18,8 @@ class Car;
 class GateBody;
 class ClearFlag;
 class WorldResetKey;
+class FloorSign;
+class GraphicsManager;
 
 enum class RidingState;
 
@@ -276,6 +278,16 @@ private:
 	int req_;
 };
 
+class KeyCollectDelta : public Delta {
+public:
+	KeyCollectDelta(WorldResetKey* key);
+	~KeyCollectDelta();
+	void revert();
+
+private:
+	WorldResetKey* key_;
+};
+
 class GlobalFlagDelta : public Delta {
 public:
 	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
@@ -287,14 +299,16 @@ private:
 	unsigned int flag_;
 };
 
-class KeyCollectDelta : public Delta {
+class SignToggleDelta : public Delta {
 public:
-	KeyCollectDelta(WorldResetKey* key);
-	~KeyCollectDelta();
+	SignToggleDelta(FloorSign* sign, GraphicsManager* gfx, bool state);
+	~SignToggleDelta();
 	void revert();
 
 private:
-	WorldResetKey* key_;
+	FloorSign* sign_;
+	GraphicsManager* gfx_;
+	bool state_;
 };
 
 #endif // DELTA_H

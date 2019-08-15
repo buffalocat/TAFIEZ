@@ -21,6 +21,7 @@ enum class ModCode {
 	ClearFlag = 7,
 	WorldResetKey = 8,
 	PermanentSwitch = 9,
+	FloorSign = 10,
 };
 
 enum class CameraCode {

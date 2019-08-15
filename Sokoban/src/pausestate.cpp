@@ -2,7 +2,8 @@
 #include "pausestate.h"
 
 #include "graphicsmanager.h"
-#include "textrenderer.h"
+#include "fontmanager.h"
+#include "stringdrawer.h"
 #include "playingstate.h"
 #include "savefile.h"
 #include "common_constants.h"
@@ -79,7 +80,7 @@ void Menu<State>::draw() {
 
 PauseState::PauseState(GraphicsManager* gfx, PlayingState* parent, PlayingGlobalData* global) : GameState(),
 playing_state_{ parent },
-menu_{ gfx->window(), gfx->text_->kalam_.get() } {
+menu_{ gfx->window(), gfx->fonts_->get_font(Fonts::KALAM_BOLD, 72) } {
 	menu_.push_entry("Unpause", &PauseState::unpause);
 	if (dynamic_cast<RealPlayingState*>(parent)) {
 		menu_.push_entry("Save Game", &PauseState::save);

@@ -3,7 +3,9 @@
 
 #include "point.h"
 
-const int MAX_COLOR_CYCLE = 5; // Must be defined here because it's an array length
+// Array lengths
+const int MAX_COLOR_CYCLE = 5;
+const unsigned int MAX_LONG_STRING_SIZE = 4096;
 
 extern const unsigned int GENERIC_WALL_ID;
 extern const unsigned int WORLD_RESET_GLOBAL_ID;
@@ -57,5 +59,9 @@ extern const std::filesystem::path MAPS_TEMP;
 
 extern const std::string NEW_FILE_START_MAP;
 extern const std::string WORLD_RESET_START_MAP;
+
+namespace Fonts {
+	extern const std::string KALAM_BOLD;
+}
 
 #endif // COMMON_CONSTANTS_H

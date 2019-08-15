@@ -20,6 +20,7 @@
 #include "clearflag.h"
 #include "worldresetkey.h"
 #include "permanentswitch.h"
+#include "floorsign.h"
 
 #include "colorcycle.h"
 
@@ -37,6 +38,7 @@ static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false }
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
 static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
+static FloorSign model_floor_sign{ nullptr, "", false };
 
 
 static ColorCycle model_color_cycle{};
@@ -86,6 +88,7 @@ void ModifierTab::mod_tab_options() {
 		ImGui::RadioButton("ClearFlag##MOD_object", &mod_code, ModCode::ClearFlag);
 		ImGui::RadioButton("WorldResetKey##MOD_object", &mod_code, ModCode::WorldResetKey);
 		ImGui::RadioButton("PermanentSwitch##MOD_object", &mod_code, ModCode::PermanentSwitch);
+		ImGui::RadioButton("FloorSign##MOD_object", &mod_code, ModCode::FloorSign);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -139,6 +142,16 @@ void ModifierTab::mod_tab_options() {
 		ImGui::Text("ClearFlag");
 		ClearFlag* cf = mod ? static_cast<ClearFlag*>(mod) : &model_clear_flag;
 		ImGui::Checkbox("Real?##CLEAR_FLAG_real", &cf->real_);
+		break;
+	}
+	case ModCode::FloorSign:
+	{
+		ImGui::Text("FloorSign");
+		FloorSign* sign = mod ? static_cast<FloorSign*>(mod) : &model_floor_sign;
+		static char buf[256];
+		snprintf(buf, 256, sign->content_.c_str());
+		ImGui::InputTextMultiline("Sign Text:##FLOOR_SIGN_text", buf, 256);
+		sign->content_ = std::string(buf);
 		break;
 	}
 	// Trivial objects
@@ -217,6 +230,9 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	case ModCode::PermanentSwitch:
 		mod = std::make_unique<PermanentSwitch>(model_perm_switch);
+		break;
+	case ModCode::FloorSign:
+		mod = std::make_unique<FloorSign>(obj, model_floor_sign.content_, false);
 		break;
 	default:
 		return;

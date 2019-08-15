@@ -7,7 +7,6 @@ class DeltaFrame;
 class RoomMap;
 class MapFileI;
 class MapFileO;
-class GraphicsManager;
 
 class CameraContext {
 public:
@@ -73,7 +72,7 @@ public:
     double get_tilt();
     double get_rotation();
 
-	void update_label(GraphicsManager* gfx);
+	bool update_label();
 
     void push_context(std::unique_ptr<CameraContext>);
 	void remove_context(CameraContext*);
@@ -82,8 +81,9 @@ public:
 	void shift_by(Point3 d);
 	void extend_by(Point3 d);
 
-private:
 	std::string active_label_;
+
+private:
 	int label_display_cooldown_;
 	int width_;
 	int height_;

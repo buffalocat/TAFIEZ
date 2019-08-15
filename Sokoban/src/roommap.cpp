@@ -3,6 +3,7 @@
 
 #include "gameobjectarray.h"
 #include "gameobject.h"
+#include "graphicsmanager.h"
 #include "wall.h"
 #include "delta.h"
 #include "snakeblock.h"
@@ -17,8 +18,9 @@
 #include "clearflag.h"
 #include "savefile.h"
 
-RoomMap::RoomMap(GameObjectArray& obj_array, PlayingGlobalData* global, int width, int height, int depth) :
-	obj_array_{ obj_array }, global_{ global },
+RoomMap::RoomMap(GameObjectArray& obj_array, PlayingGlobalData* global, GraphicsManager* gfx,
+	int width, int height, int depth) :
+	obj_array_{ obj_array }, global_{ global }, gfx_{ gfx },
 	width_{ width }, height_{ height }, depth_{ depth } {
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));

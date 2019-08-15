@@ -6,14 +6,16 @@
 #include "player.h"
 #include "car.h"
 
-TestPlayingState::TestPlayingState(std::string map_name): PlayingState() {
-    load_room_from_temp(map_name, true);
-	activate_room(map_name);
-	snap_camera_to_player();
-    room_->map()->set_initial_state(false);
-}
+TestPlayingState::TestPlayingState() : PlayingState() {}
 
 TestPlayingState::~TestPlayingState() {}
+
+void TestPlayingState::init(std::string map_name) {
+	load_room_from_temp(map_name, true);
+	activate_room(map_name);
+	snap_camera_to_player();
+	room_->map()->set_initial_state(false);
+}
 
 bool TestPlayingState::load_room_from_temp(std::string name, bool use_default_player) {
 	std::filesystem::path path = (MAPS_TEMP / name).concat(".map");

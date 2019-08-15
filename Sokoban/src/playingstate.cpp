@@ -2,6 +2,7 @@
 #include "playingstate.h"
 
 #include "graphicsmanager.h"
+#include "stringdrawer.h"
 
 #include "gameobject.h"
 #include "savefile.h"
@@ -40,7 +41,7 @@ void PlayingState::main_loop() {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
 	handle_input();
-	room_->draw_at_player(gfx_, player_, true, false, false);
+	room_->draw_at_player(player_, true, false, false);
 	if (!move_processor_) {
 		undo_stack_->push(std::move(delta_frame_));
 	}
@@ -153,6 +154,7 @@ bool PlayingState::activate_room(std::string name) {
 	auto* proom = loaded_rooms_[name].get();
 	proom->changed = true;
 	room_ = proom->room.get();
+	gfx_->toggle_string_drawer(room_->zone_label_.get(), true);
 	return true;
 }
 
@@ -160,7 +162,7 @@ bool PlayingState::activate_room(std::string name) {
 void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();
-	auto room = std::make_unique<Room>(name);
+	auto room = std::make_unique<Room>(gfx_, name);
 	if (use_default_player) {
 		Player* loaded_player{};
 		room->load_from_file(*objs_, file, global_.get(), &loaded_player);

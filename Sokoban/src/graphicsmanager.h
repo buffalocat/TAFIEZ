@@ -5,9 +5,22 @@
 #include "modelinstancer.h"
 
 struct GLFWwindow;
-class TextRenderer;
-class StringDrawer;
+class FontManager;
 class Animation;
+class StringDrawer;
+
+class ProtectedStringDrawer {
+public:
+	ProtectedStringDrawer(StringDrawer* drawer);
+	~ProtectedStringDrawer();
+	ProtectedStringDrawer(ProtectedStringDrawer&) = delete;
+	ProtectedStringDrawer& operator=(ProtectedStringDrawer&) = delete;
+	ProtectedStringDrawer(ProtectedStringDrawer&&);
+	ProtectedStringDrawer& operator=(ProtectedStringDrawer&&) = delete;
+
+	StringDrawer* drawer_;
+	bool alive_;
+};
 
 class GraphicsManager {
 public:
@@ -22,25 +35,30 @@ public:
     void draw_world();
 	void draw_text();
 
+	void toggle_string_drawer(StringDrawer* drawer, bool active);
+
 	// These must be drawn (in a batch) in draw_world()
-	DynamicInstancer cube;
-	DynamicInstancer top_cube;
-	DynamicInstancer diamond;
-	DynamicInstancer six_squares;
-	WallInstancer wall;
+	DynamicInstancer cube{ DynamicInstancer("resources/uniform_cube.obj") };
+	DynamicInstancer top_cube{ DynamicInstancer("resources/top_cube.obj") };
+	DynamicInstancer diamond{ DynamicInstancer("resources/diamond.obj") };
+	DynamicInstancer six_squares{ DynamicInstancer("resources/six_squares.obj") };
+	WallInstancer wall{ WallInstancer("resources/uniform_cube.obj") };
 
 	// Models which aren't common enough to be worth instancing
-	SingleDrawer windshield;
-	SingleDrawer windshield_diamond;
-	SingleDrawer flag;
+	SingleDrawer windshield{ SingleDrawer("resources/windshield.obj") };
+	SingleDrawer windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") };
+	SingleDrawer flag{ SingleDrawer("resources/flag.obj") };
 
-	std::unique_ptr<TextRenderer> text_{ std::make_unique<TextRenderer>() };
+	std::vector<ProtectedStringDrawer> string_drawers_{};
+
+	std::unique_ptr<FontManager> fonts_{};
 
 private:
 	GLFWwindow* window_;
 	std::vector<Animation*> animations;
 	GLuint atlas_;
-	Shader instanced_shader_;
+	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };
+	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
 
 	glm::mat4 PV_;
 
