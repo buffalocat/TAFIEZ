@@ -48,10 +48,21 @@ void Room::initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, i
 	camera_ = std::make_unique<Camera>(w, h);
 }
 
-void Room::set_cam_pos(Point3 vpos, FPoint3 rpos) {
-	camera_->update_context(vpos);
+void Room::set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap) {
+	if (camera_->update_context(vpos) && display_labels) {
+		if (camera_->update_label()) {
+			context_label_ = std::make_unique<RoomLabelDrawer>(
+				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72), COLOR_VECTORS[DARK_BLUE],
+				camera_->active_label_, 0.65f);
+			gfx_->toggle_string_drawer(context_label_.get(), true);
+		}
+	}
 	camera_->set_target(rpos);
-	camera_->set_current_to_target();
+	if (snap) {
+		camera_->set_current_to_target();
+	} else {
+		camera_->update();
+	}
 }
 
 bool Room::valid(Point3 pos) {
@@ -88,25 +99,15 @@ void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool
 
 void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {
 	glm::mat4 model, view, projection;
-	if (camera_->update_context(vpos) && display_labels) {
-		if (camera_->update_label()) {
-			context_label_ = std::make_unique<RoomLabelDrawer>(
-				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72), COLOR_VECTORS[DARK_BLUE],
-				camera_->active_label_, 0.65f);
-			gfx_->toggle_string_drawer(context_label_.get(), true);
-		}
-	}
 	if (ortho) {
-		camera_->set_target(vpos);
-		camera_->set_current_to_target();
+		set_cam_pos(vpos, vpos, display_labels, true);
 		gfx_->set_light_source(glm::vec3(rpos.x, rpos.y, rpos.z + 100));
 		view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
 			glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0),
 			glm::vec3(0.0, -1.0, 0.0));
 		projection = glm::ortho(-ORTHO_WIDTH / 2.0, ORTHO_WIDTH / 2.0, -ORTHO_HEIGHT / 2.0, ORTHO_HEIGHT / 2.0, -2.5, 2.5);
 	} else {
-		camera_->set_target(rpos);
-		camera_->update();
+		set_cam_pos(vpos, rpos, display_labels, false);
 
 		double cam_radius = camera_->get_radius();
 		FPoint3 target_pos = camera_->get_pos() + FPoint3{ 0, 0, 0.5 };

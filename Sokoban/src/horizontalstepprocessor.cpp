@@ -12,8 +12,6 @@
 
 HorizontalStepProcessor::HorizontalStepProcessor(RoomMap* map, DeltaFrame* delta_frame, Player* player, Point3 dir,
 	std::vector<GameObject*>& fall_check, std::vector<GameObject*>& moving_blocks) :
-	push_comps_unique_{},
-	moving_snakes_{}, snakes_to_recheck_{},
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
 	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
 
@@ -83,6 +81,8 @@ bool HorizontalStepProcessor::compute_push_component_tree(GameObject* block) {
 		if (!compute_push_component_tree(link)) {
 			if (auto sb = dynamic_cast<SnakeBlock*>(link)) {
 				sb->dragged_ = false;
+			} else {
+				broken_weak_links_.push_back(link);
 			}
 		}
 	}
@@ -155,6 +155,7 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 			fall_check_.push_back(above);
 		}
 	}
+	fall_check_.insert(fall_check_.end(), broken_weak_links_.begin(), broken_weak_links_.end());
 	std::set<SnakeBlock*> link_add_check{};
 	link_add_check.insert(moving_snakes_.begin(), moving_snakes_.end());
 	for (auto sb : moving_snakes_) {

@@ -67,12 +67,12 @@ void PlayingState::handle_input() {
 				delta_frame_ = std::make_unique<DeltaFrame>();
 				room_->map()->reset_local_state();
 				if (player_) {
-					room_->set_cam_pos(player_->pos_, player_->cam_pos());
+					snap_camera_to_player();
 				}
 			} else if (undo_stack_->non_empty()) {
 				undo_stack_->pop();
 				if (player_) {
-					room_->set_cam_pos(player_->pos_, player_->cam_pos());
+					snap_camera_to_player();
 				}
 			}
 			return;
@@ -211,10 +211,10 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 	return true;
 }
 
-void PlayingState::snap_camera_to_player() {
-	room_->set_cam_pos(player_->pos_, player_->cam_pos());
-}
-
 void PlayingState::make_subsave() {}
 
 void PlayingState::world_reset() {}
+
+void PlayingState::snap_camera_to_player() {
+	room_->set_cam_pos(player_->pos_, player_->cam_pos(), true, true);
+}

@@ -21,7 +21,7 @@ public:
     ~Room();
     std::string const name();
     void initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d);
-    void set_cam_pos(Point3 vpos, FPoint3 rpos);
+    void set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap);
     bool valid(Point3);
     RoomMap* map();
 	Camera* camera();

@@ -30,10 +30,11 @@ private:
 
     void collect_moving_and_weak_links(PushComponent* comp, std::vector<GameObject*>& weak_links);
 
-    std::vector<std::unique_ptr<PushComponent>> push_comps_unique_;
+	std::vector<std::unique_ptr<PushComponent>> push_comps_unique_{};
 
-    std::vector<SnakeBlock*> moving_snakes_;
-    std::vector<SnakeBlock*> snakes_to_recheck_;
+	std::vector<SnakeBlock*> moving_snakes_{};
+	std::vector<SnakeBlock*> snakes_to_recheck_{};
+	std::vector<GameObject*> broken_weak_links_{};
     std::vector<GameObject*>& moving_blocks_;
     std::vector<GameObject*>& fall_check_;
 

@@ -166,7 +166,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
     room->initialize(*objs_, nullptr, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
     room->map()->create_in_map(std::make_unique<Player>(player_pos, RidingState::Free), nullptr);
-	room->set_cam_pos(player_pos, player_pos);
+	room->set_cam_pos(player_pos, player_pos, false, true);
     rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos);
     set_active_room(name);
 }
@@ -195,7 +195,7 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 	player->set_free();
 	Point3 start_pos = player->pos_;
 	room->map()->set_initial_state(true);
-	room->set_cam_pos(start_pos, start_pos);
+	room->set_cam_pos(start_pos, start_pos, false, true);
 	rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
 }
 
