@@ -82,9 +82,9 @@ void ObjectTab::object_tab_options() {
 		color_button(pb->color_);
 		ImGui::Text("Stickiness");
 		ImGui::RadioButton("NonStick##PB_modify_sticky", &pb->sticky_, Sticky::None);
-		ImGui::RadioButton("Weakly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::Weak);
-		ImGui::RadioButton("Strongly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::Strong);
-		ImGui::RadioButton("Weak+Strong Sticky##PB_modify_sticky", &pb->sticky_, Sticky::AllStick);
+		ImGui::RadioButton("Weakly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::WeakBlock);
+		ImGui::RadioButton("Strongly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::StrongBlock);
+		ImGui::RadioButton("SemiWeak Sticky##PB_modify_sticky", &pb->sticky_, Sticky::SemiBlock);
 	}
 	break;
 	case ObjCode::SnakeBlock:

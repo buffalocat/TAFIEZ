@@ -57,13 +57,13 @@ void PushBlock::draw(GraphicsManager* gfx) {
     case Sticky::None:
         tex = BlockTexture::Edges;
         break;
-    case Sticky::Weak:
+    case Sticky::WeakBlock:
         tex = BlockTexture::BrokenEdges;
         break;
-    case Sticky::Strong:
+    case Sticky::StrongBlock:
         tex = BlockTexture::LightEdges;
         break;
-    case Sticky::AllStick:
+    case Sticky::SemiBlock:
         tex = BlockTexture::Corners;
         break;
     }

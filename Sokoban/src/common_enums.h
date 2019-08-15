@@ -34,12 +34,18 @@ enum class CameraCode {
 
 enum class Sticky {
     None = 0,
-    Weak = 1,
-    Strong = 2,
-    AllStick = 3,
-    Snake = 4,
-    SnakeWeak = 5,
-    All = 7,
+	// Stickiness checks
+	WeakStick = 3,
+	StrongStick = 4,
+	AllStick = 7,
+	// Block levels
+    WeakBlock = 1,
+	SemiBlock = 3,
+    StrongBlock = 6,
+	// Snakes
+    Snake = 8,
+
+    All = 15,
 };
 
 Sticky operator &(Sticky a, Sticky b);

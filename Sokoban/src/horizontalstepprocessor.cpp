@@ -98,7 +98,7 @@ bool HorizontalStepProcessor::compute_push_component(GameObject* start_block) {
 	auto comp_unique = std::make_unique<PushComponent>();
 	PushComponent* comp = comp_unique.get();
 	push_comps_unique_.push_back(std::move(comp_unique));
-	start_block->collect_sticky_component(map_, Sticky::Strong, comp);
+	start_block->collect_sticky_component(map_, Sticky::StrongStick, comp);
 	for (auto block : comp->blocks_) {
 		if (!block->pushable_ && !block->driven_) {
 			comp->blocked_ = true;
@@ -140,7 +140,7 @@ void HorizontalStepProcessor::collect_moving_and_weak_links(PushComponent* comp,
 				sb->collect_dragged_snake_links(map_, dir_, weak_links);
 			}
 		}
-		block->collect_sticky_links(map_, Sticky::Weak, weak_links);
+		block->collect_sticky_links(map_, Sticky::WeakStick, weak_links);
 	}
 	for (PushComponent* in_front : comp->pushing_) {
 		collect_moving_and_weak_links(in_front, weak_links);

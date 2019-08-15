@@ -357,10 +357,10 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 				// For now, a snake which is linked to anything else
 				//(at level Sticky::AllStick) will not be split.
 				std::vector<GameObject*> sticky_comp{};
-				cur->collect_special_links(map_, Sticky::AllStick, sticky_comp);
+				cur->collect_special_links(map_, Sticky::All, sticky_comp);
 				cur->reset_internal_state();
 				if (ObjectModifier* mod = cur->modifier()) {
-					mod->collect_sticky_links(map_, Sticky::AllStick, sticky_comp);
+					mod->collect_sticky_links(map_, Sticky::All, sticky_comp);
 				}
 				// The split succeeded
 				if (sticky_comp.empty()) {
