@@ -86,12 +86,14 @@ void GraphicsManager::draw_text() {
 	text_shader_.use();
 	std::vector<ProtectedStringDrawer> new_drawers{};
 	for (auto& p : string_drawers_) {
-		if (p.alive_ && p.drawer_->active_) {
-			p.drawer_->update();
-			p.drawer_->render();
-			new_drawers.push_back(std::move(p));
-		} else {
-			p.drawer_->cleanup();
+		if (p.alive_) {
+			if (p.drawer_->active_) {
+				p.drawer_->update();
+				p.drawer_->render();
+				new_drawers.push_back(std::move(p));
+			} else {
+				p.drawer_->cleanup();
+			}
 		}
 	}
 	string_drawers_ = std::move(new_drawers);
