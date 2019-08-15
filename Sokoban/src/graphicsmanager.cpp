@@ -90,6 +90,8 @@ void GraphicsManager::draw_text() {
 			p.drawer_->update();
 			p.drawer_->render();
 			new_drawers.push_back(std::move(p));
+		} else {
+			p.drawer_->cleanup();
 		}
 	}
 	string_drawers_ = std::move(new_drawers);

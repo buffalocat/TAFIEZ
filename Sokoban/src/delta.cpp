@@ -285,6 +285,5 @@ SignToggleDelta::SignToggleDelta(FloorSign* sign, GraphicsManager* gfx, bool sta
 SignToggleDelta::~SignToggleDelta() {}
 
 void SignToggleDelta::revert() {
-	sign_->showing_text_ = state_;
-	gfx_->toggle_string_drawer(sign_->drawer_.get(), state_);
+	sign_->toggle_displaying_text(state_, gfx_, nullptr);
 }

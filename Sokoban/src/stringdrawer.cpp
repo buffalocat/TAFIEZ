@@ -45,6 +45,8 @@ void StringDrawer::render() {
 
 void StringDrawer::update() {}
 
+void StringDrawer::cleanup() {}
+
 void StringDrawer::set_alive_ptr(bool* b_ptr) {
 	alive_ptr_ = b_ptr;
 }
@@ -56,23 +58,59 @@ void StringDrawer::kill_instance() {
 	alive_ptr_ = nullptr;
 }
 
+
+const unsigned int SIGN_FADE_FRAMES = 4;
+
+SignTextDrawer::SignTextDrawer(Font* font, glm::vec4 color, std::string label, float y) :
+	StringDrawer(font, color, label, 0, y, 1, 1) {}
+
+SignTextDrawer::~SignTextDrawer() {}
+
+void SignTextDrawer::own_self(std::unique_ptr<StringDrawer> self) {
+	self_ = std::move(self);
+}
+
+void SignTextDrawer::update() {
+	if (prepare_to_kill_) {
+		if (--fade_counter_ == 0) {
+			active_ = false;
+		}
+	} else {
+		if (fade_counter_ < SIGN_FADE_FRAMES) {
+			++fade_counter_;
+		}
+	}
+	color_.w = (float)fade_counter_ / (float)SIGN_FADE_FRAMES;
+}
+
+void SignTextDrawer::kill_instance() {
+	prepare_to_kill_ = true;
+}
+
+void SignTextDrawer::cleanup() {
+	self_ = {};
+}
+
+const unsigned int ROOM_LABEL_DISPLAY_FRAMES = 180;
+const unsigned int ROOM_LABEL_FADE_FRAMES = 20;
+
 RoomLabelDrawer::RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y) :
 	StringDrawer(font, color, label, 0, y, 1, 1),
-	cooldown_{ AREA_NAME_DISPLAY_FRAMES } {}
+	lifetime_{ ROOM_LABEL_DISPLAY_FRAMES } {}
 
 RoomLabelDrawer::~RoomLabelDrawer() {}
 
 void RoomLabelDrawer::init() {
-	cooldown_ = AREA_NAME_DISPLAY_FRAMES;
+	lifetime_ = ROOM_LABEL_DISPLAY_FRAMES;
 }
 
 void RoomLabelDrawer::update() {
-	if (cooldown_) {
-		--cooldown_;
-		if (cooldown_ > AREA_NAME_DISPLAY_FRAMES - AREA_NAME_FADE_FRAMES) {
-			color_.w = (float)(AREA_NAME_DISPLAY_FRAMES - cooldown_) / (float)AREA_NAME_FADE_FRAMES;
-		} else if (cooldown_ < AREA_NAME_FADE_FRAMES) {
-			color_.w = (float)cooldown_ / (float)AREA_NAME_FADE_FRAMES;
+	if (lifetime_) {
+		--lifetime_;
+		if (lifetime_ > ROOM_LABEL_DISPLAY_FRAMES - ROOM_LABEL_FADE_FRAMES) {
+			color_.w = (float)(ROOM_LABEL_DISPLAY_FRAMES - lifetime_) / (float)ROOM_LABEL_FADE_FRAMES;
+		} else if (lifetime_ < ROOM_LABEL_FADE_FRAMES) {
+			color_.w = (float)lifetime_ / (float)ROOM_LABEL_FADE_FRAMES;
 		} else {
 			color_.w = 1;
 		}

@@ -33,9 +33,6 @@ void FloorSign::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	std::string content = file.read_long_str();
 	bool showing_text = file.read_byte();
 	auto sign = std::make_unique<FloorSign>(parent, content, showing_text);
-	sign->drawer_ = std::make_unique<StringDrawer>(
-		map->gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 36),
-		glm::vec4(0.9, 0.7, 0.8, 1.0), content, 0.0f, 0.5f, 1.0f, 1.0f);
 	parent->set_modifier(std::move(sign));
 }
 
@@ -55,9 +52,22 @@ void FloorSign::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 		}
 	}
 	if (showing_text_ != should_display_text) {
-		showing_text_ = should_display_text;
-		delta_frame->push(std::make_unique<SignToggleDelta>(this, map->gfx_, should_display_text));
-		map->gfx_->toggle_string_drawer(drawer_.get(), should_display_text);
+		toggle_displaying_text(should_display_text, map->gfx_, delta_frame);
+	}
+}
+
+void FloorSign::toggle_displaying_text(bool should_display_text, GraphicsManager* gfx, DeltaFrame* delta_frame) {
+	showing_text_ = should_display_text;
+	if (should_display_text) {
+		auto drawer = std::make_unique<SignTextDrawer>(
+			gfx->fonts_->get_font(Fonts::KALAM_BOLD, 36),
+			glm::vec4(0.9, 0.7, 0.8, 1.0), content_, 0.5f);
+		drawer_instance_ = drawer.get();
+		drawer_instance_->own_self(std::move(drawer));
+	}
+	gfx->toggle_string_drawer(drawer_instance_, should_display_text);
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<SignToggleDelta>(this, gfx, !should_display_text));
 	}
 }
 

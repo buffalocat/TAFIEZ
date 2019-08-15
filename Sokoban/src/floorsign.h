@@ -1,7 +1,7 @@
 #pragma once
 #include "objectmodifier.h"
 
-class StringDrawer;
+class SignTextDrawer;
 
 class FloorSign : public ObjectModifier {
 public:
@@ -21,11 +21,13 @@ public:
 	void setup_on_put(RoomMap*, bool real);
 	void cleanup_on_take(RoomMap*, bool real);
 
+	void toggle_displaying_text(bool should_display_text, GraphicsManager* gfx, DeltaFrame* delta_frame);
+
 	void draw(GraphicsManager* gfx, FPoint3 pos);
 
 private:
 	std::string content_;
-	std::unique_ptr<StringDrawer> drawer_{};
+	SignTextDrawer* drawer_instance_{};
 	bool showing_text_;
 
 	friend class SignToggleDelta;

@@ -14,8 +14,10 @@ public:
 	void render();
 
 	virtual void update();
+	virtual void kill_instance();
+	virtual void cleanup();
+
 	void set_alive_ptr(bool*);
-	void kill_instance();
 
 	bool active_ = true;
 
@@ -28,6 +30,23 @@ protected:
 	bool* alive_ptr_{};
 };
 
+class SignTextDrawer : public StringDrawer {
+public:
+	SignTextDrawer(Font* font, glm::vec4 color, std::string label, float y);
+	~SignTextDrawer();
+
+	void own_self(std::unique_ptr<StringDrawer> self);
+
+	void update();
+	void kill_instance();
+	void cleanup();
+
+private:
+	std::unique_ptr<StringDrawer> self_{};
+	unsigned int fade_counter_ = 0;
+	bool prepare_to_kill_ = false;
+};
+
 class RoomLabelDrawer : public StringDrawer {
 public:
 	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y);
@@ -37,5 +56,5 @@ public:
 	void update();
 
 private:
-	unsigned int cooldown_;
+	unsigned int lifetime_;
 };
