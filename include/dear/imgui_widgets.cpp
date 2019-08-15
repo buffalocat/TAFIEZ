@@ -3552,7 +3552,9 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
     }
 
 	// Consume characters
-	memset(g.IO.InputCharacters, 0, sizeof(g.IO.InputCharacters));
+	if (g.ActiveId == id && !is_editable && !g.ActiveIdIsJustActivated && io.InputCharacters[0]) {
+		memset(g.IO.InputCharacters, 0, sizeof(g.IO.InputCharacters));
+	}
 
     // Release active ID at the end of the function (so e.g. pressing Return still does a final application of the value)
     if (clear_active_id && g.ActiveId == id)

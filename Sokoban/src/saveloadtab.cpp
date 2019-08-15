@@ -47,7 +47,6 @@ void SaveLoadTab::main_loop(EditorRoom* eroom) {
 }
 
 
-
 void SaveLoadTab::map_load_and_create() {
 	const int MAX_MAP_NAME_SIZE = 256;
 	static char map_name_input[MAX_MAP_NAME_SIZE] = "";
