@@ -15,6 +15,7 @@ enum class MapCode {
 	DoorDest = 9, // Give a door a destination Map + Pos
 	ThresholdSignaler = 10,
 	ParitySignaler = 11,
+	InitFlag = 12, // Indicates that the room has been initialized before
 	GateBodyLocation = 13, // Indicates that a GateBody needs to be paired with its parent
 	WallPositions = 14, // Initiates list of Wall Positions
 	End = 255,

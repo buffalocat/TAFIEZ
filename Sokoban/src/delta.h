@@ -311,4 +311,14 @@ private:
 	bool state_;
 };
 
+class MapInitDelta : public Delta {
+public:
+	MapInitDelta(RoomMap* map);
+	~MapInitDelta();
+
+	void revert();
+private:
+	RoomMap* map_;
+};
+
 #endif // DELTA_H

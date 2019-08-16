@@ -14,13 +14,14 @@ class Door;
 class GateBody;
 
 enum class MoveStep {
-	UNINITIALIZED = 0,
+	Default = 0,
 	Horizontal = 1,
 	PreFallSwitch = 2,
 	ColorChange = 3,
 	Done = 4,
 	DoorMove = 5,
-	PostDoorFallCheck = 6,
+	PostDoorInit = 6,
+	FirstLoadInit = 7,
 };
 
 enum class DoorState {
@@ -29,8 +30,9 @@ enum class DoorState {
 	AwaitingIntExit = 2,
 	AwaitingExtExit = 3,
 	AwaitingUnentry = 4,
-	Succeeded = 5,
-	Voided = 6,
+	IntSucceeded = 5,
+	ExtSucceeded = 6,
+	Voided = 7,
 };
 
 struct DoorTravellingObj {
@@ -62,6 +64,8 @@ public:
     bool update();
     void abort();
 
+	void set_initializer_state();
+
 private:
     void move_bound(Point3);
     void move_general(Point3);
@@ -79,8 +83,8 @@ private:
 	Room* dest_room_{};
 
 	unsigned int frames_{};
-	MoveStep state_{};
-	DoorState door_state_{};
+	MoveStep state_ = MoveStep::Default;
+	DoorState door_state_ = DoorState::None;
 
     bool animated_;
 };

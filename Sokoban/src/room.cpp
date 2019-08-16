@@ -165,6 +165,9 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 			file.read(b, 3);
 			initialize(objs, global, b[0], b[1], b[2]);
 			break;
+		case MapCode::InitFlag:
+			map_->inited_ = true;
+			break;
 		case MapCode::Zone:
 			map_->zone_ = file.read_byte();
 			zone_label_ = std::make_unique<RoomLabelDrawer>(

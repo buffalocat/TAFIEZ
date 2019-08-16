@@ -69,10 +69,13 @@ bool MoveProcessor::update() {
 			// cannot be skipped - horizontal animation must finish.
 			perform_switch_checks(false);
 			break;
+		case MoveStep::PostDoorInit:
+			map_->set_initial_state_after_door(delta_frame_, this);
+			// fallthrough
+		case MoveStep::FirstLoadInit:
 		case MoveStep::PreFallSwitch:
 		case MoveStep::ColorChange:
 		case MoveStep::DoorMove:
-		case MoveStep::PostDoorFallCheck:
 			try_fall_step();
 			// If nothing happens, skip the next forced wait.
 			perform_switch_checks(true);
@@ -157,13 +160,15 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 		case DoorState::AwaitingUnentry:
 			try_door_unentry();
 			break;
+		default:
+			break;
 		}
 	}
 }
 
 void MoveProcessor::plan_door_move(Door* door) {
-	// Hack to avoid door checking in initialization
-	if (!player_) {
+	// Don't plan a door move if we loaded in on the door, or if we just used a door
+	if (!player_ || door_state_ != DoorState::None) {
 		return;
 	}
 	if (door_state_ == DoorState::None && door->usable()) {
@@ -222,8 +227,8 @@ void MoveProcessor::try_int_door_exit() {
 			map_->put_in_map(obj.raw, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
-		door_state_ = DoorState::Succeeded;
-		state_ = MoveStep::PostDoorFallCheck;
+		door_state_ = DoorState::IntSucceeded;
+		state_ = MoveStep::PostDoorInit;
 	} else {
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::AwaitingUnentry;
@@ -245,8 +250,8 @@ void MoveProcessor::try_door_unentry() {
 			map_->put_in_map(obj.raw, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
-		door_state_ = DoorState::Succeeded;
-		state_ = MoveStep::PostDoorFallCheck;
+		door_state_ = DoorState::IntSucceeded;
+		state_ = MoveStep::PostDoorInit;
 	} else {
 		std::cout << "TERRIBLE THINGS HAPPENED! (we're in the void!)" << std::endl;
 		door_state_ = DoorState::Voided;
@@ -264,8 +269,8 @@ void MoveProcessor::ext_door_exit() {
 	}
 	playing_state_->snap_camera_to_player();
 	frames_ = FALL_MOVEMENT_FRAMES;
-	door_state_ = DoorState::Succeeded;
-	state_ = MoveStep::PostDoorFallCheck;
+	door_state_ = DoorState::ExtSucceeded;
+	state_ = MoveStep::PostDoorInit;
 }
 
 // NOTE: could be dangerous if repeated calls are made
@@ -276,4 +281,9 @@ void MoveProcessor::add_to_moving_blocks(GameObject* obj) {
 
 void MoveProcessor::add_to_fall_check(GameObject* obj) {
 	fall_check_.push_back(obj);
+}
+
+void MoveProcessor::set_initializer_state() {
+	frames_ = 1;
+	state_ = MoveStep::FirstLoadInit;
 }

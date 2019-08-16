@@ -14,7 +14,7 @@ void TestPlayingState::init(std::string map_name) {
 	load_room_from_temp(map_name, true);
 	activate_room(map_name);
 	snap_camera_to_player();
-	room_->map()->set_initial_state(false);
+	room_->map()->set_initial_state_on_start();
 }
 
 bool TestPlayingState::load_room_from_temp(std::string name, bool use_default_player) {

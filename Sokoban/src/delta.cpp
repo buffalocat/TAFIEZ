@@ -287,3 +287,12 @@ SignToggleDelta::~SignToggleDelta() {}
 void SignToggleDelta::revert() {
 	sign_->toggle_displaying_text(state_, gfx_, nullptr);
 }
+
+
+MapInitDelta::MapInitDelta(RoomMap* map) : Delta(), map_{ map } {}
+
+MapInitDelta::~MapInitDelta() {}
+
+void MapInitDelta::revert() {
+	map_->inited_ = false;
+}

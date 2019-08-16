@@ -194,7 +194,7 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 	room->load_from_file(*objs_, file, nullptr, &player);
 	player->set_free();
 	Point3 start_pos = player->pos_;
-	room->map()->set_initial_state(true);
+	room->map()->set_initial_state_in_editor();
 	room->set_cam_pos(start_pos, start_pos, false, true);
 	rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
 }

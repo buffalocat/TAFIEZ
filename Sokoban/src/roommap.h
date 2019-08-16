@@ -51,7 +51,10 @@ public:
     void extend_by(Point3 d);
     void shift_by(Point3 d);
 
-    void set_initial_state(bool editor_mode);
+	void set_initial_state_on_start();
+	void set_initial_state_after_door(DeltaFrame* delta_frame, MoveProcessor* mp);
+	void set_initial_state_in_editor();
+    void set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveProcessor* mp);
     void reset_local_state();
 
     void initialize_automatic_snake_links();
@@ -86,6 +89,8 @@ public:
 	char zone_ = '!';
 	bool clear_flags_changed_ = false;
 
+	bool inited_ = false;
+
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
 
@@ -102,6 +107,7 @@ private:
 
     // TODO: find more appropriate place for this
     std::unique_ptr<Effects> effects_ = std::make_unique<Effects>();
+
 
     // For providing direct signaler access
     friend class SwitchTab;

@@ -184,7 +184,6 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	} else {
 		room->load_from_file(*objs_, file, global_.get(), nullptr);
 	}
-	room->map()->set_initial_state(false);
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }
 

@@ -72,6 +72,10 @@ void ObjectSerializationHandler::operator()(int id) {
 
 void RoomMap::serialize(MapFileO& file) {
 	// Metadata
+	if (inited_) {
+		file << MapCode::InitFlag;
+	}
+
 	file << MapCode::Zone;
 	file << zone_;
 	if (clear_flag_req_ > 0) {
@@ -388,10 +392,30 @@ void RoomStateInitializer::operator()(int id) {
 	}
 }
 
-void RoomMap::set_initial_state(bool editor_mode) {
-	DeltaFrame dummy_df{};
-	MoveProcessor mp = MoveProcessor(nullptr, this, &dummy_df, nullptr, false);
-	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, &mp, this, &dummy_df };
+void RoomMap::set_initial_state_on_start() {
+	if (!inited_) {
+		DeltaFrame df{};
+		MoveProcessor mp = MoveProcessor(nullptr, this, &df, nullptr, false);
+		set_initial_state(false, &df, &mp);
+		// Ensures that at least one loop happens
+		while (!mp.update()) {}
+	}
+}
+
+void RoomMap::set_initial_state_after_door(DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (!inited_) {
+		set_initial_state(false, delta_frame, mp);
+	}
+}
+
+void RoomMap::set_initial_state_in_editor() {
+	DeltaFrame df{};
+	MoveProcessor mp = MoveProcessor(nullptr, this, &df, nullptr, false);
+	set_initial_state(true, &df, &mp);
+}
+
+void RoomMap::set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, mp, this, delta_frame };
 	for (auto& layer : layers_) {
 		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
 	}
@@ -401,12 +425,12 @@ void RoomMap::set_initial_state(bool editor_mode) {
 	}
 	for (auto& sig : signalers_) {
 		if (auto* p_sig = dynamic_cast<ParitySignaler*>(sig.get())) {
-			p_sig->check_send_initial(this, &dummy_df, &mp);
+			p_sig->check_send_initial(this, delta_frame, mp);
 		}
 	}
-	mp.perform_switch_checks(true);
-	mp.try_fall_step();
-	check_clear_flag_collected(&dummy_df);
+	mp->perform_switch_checks(false);
+	inited_ = true;
+	delta_frame->push(std::make_unique<MapInitDelta>(this));
 }
 
 struct SnakeInitializer {
