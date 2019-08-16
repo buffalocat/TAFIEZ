@@ -173,6 +173,26 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ma
 	ImGui::Text("Activation Threshold:");
 
 	static Threshold threshold_mode = Threshold::All;
+	static ThresholdSignaler* prev_sig = nullptr;
+	static bool fresh_sig = false;
+
+	if (prev_sig != t_sig) {
+		fresh_sig = true;
+		prev_sig = t_sig;
+	}
+
+	// Reset the mode whenever we switch signalers
+	if (fresh_sig) {
+		if (*threshold == switch_count) {
+			threshold_mode = Threshold::All;
+		} else if (*threshold == 1) {
+			threshold_mode = Threshold::Any;
+		} else {
+			threshold_mode = Threshold::Custom;
+		}
+	}
+
+	fresh_sig = false;
 
 	ImGui::RadioButton("All##SWITCH_threshold", &threshold_mode, Threshold::All);
 	ImGui::RadioButton("Any##SWITCH_threshold", &threshold_mode, Threshold::Any);
