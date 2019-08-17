@@ -36,7 +36,7 @@
 
 #include "savefile.h"
 
-Room::Room(GameState* state, std::string name) : state_{ state }, gfx_ { state->gfx_ }, name_{ name } {}
+Room::Room(GameState* state, std::string name) : state_{ state }, gfx_{ state->gfx_ }, name_{ name } {}
 
 Room::~Room() {}
 
@@ -203,11 +203,15 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 		case MapCode::ParitySignaler:
 			read_parity_signaler(file);
 			break;
+		case MapCode::GateBaseLocation:
+		{
+			auto* body = dynamic_cast<GateBody*>(map_->view(file.read_point3()));
+			auto* gate = dynamic_cast<Gate*>(map_->view(file.read_point3())->modifier());
+			body->set_gate(gate);
+			break;
+		}
 		case MapCode::WallRuns:
 			read_wall_runs(file);
-			break;
-		case MapCode::WallPositions:
-			read_wall_positions(file);
 			break;
 		case MapCode::End:
 			reading_file = false;
@@ -241,19 +245,19 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_OBJCODE(SnakeBlock);
 			CASE_OBJCODE(GateBody);
 			CASE_OBJCODE(Wall);
-				// Some Object types should never actually be serialized (as "Objects")
+			// Some Object types should never actually be serialized (as "Objects")
 		case ObjCode::Player:
-			{
-				obj = Player::deserialize(file);
-				if (player_ptr) {
-					*player_ptr = static_cast<Player*>(obj.get());
-				} else {
-					// TODO: make this less fragile?
-					file.read(&b, 1);
-					continue;
-				}
-				break;
+		{
+			obj = Player::deserialize(file);
+			if (player_ptr) {
+				*player_ptr = static_cast<Player*>(obj.get());
+			} else {
+				// TODO: make this less fragile?
+				file.read(&b, 1);
+				continue;
 			}
+			break;
+		}
 		case ObjCode::NONE:
 			return;
 		default:
@@ -377,15 +381,6 @@ void Room::read_parity_signaler(MapFileI& file) {
 		}
 	}
 	map_->push_signaler(std::move(signaler));
-}
-
-void Room::read_wall_positions(MapFileI& file) {
-	unsigned int wall_count = file.read_uint32();
-	Point3 pos;
-	for (unsigned int i = 0; i < wall_count; ++i) {
-		file >> pos;
-		map_->create_wall(pos);
-	}
 }
 
 void Room::read_wall_runs(MapFileI& file) {

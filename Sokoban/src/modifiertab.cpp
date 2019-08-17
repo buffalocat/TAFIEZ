@@ -207,9 +207,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	{
 		auto gate = std::make_unique<Gate>(model_gate);
 		gate->parent_ = obj;
-		auto gate_body = std::make_unique<GateBody>(gate.get(), pos + Point3{ 0, 0, 1 });
-		gate->body_ = gate_body.get();
-		map->push_to_object_array(std::move(gate_body), nullptr);
+		map->push_to_object_array(std::make_unique<GateBody>(gate.get(), pos + Point3{ 0, 0, 1 }), nullptr);
 		mod = std::move(gate);
 		break;
 	}

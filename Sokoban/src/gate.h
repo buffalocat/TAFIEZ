@@ -34,11 +34,7 @@ public:
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
     int color_;
-
-private:
     GateBody* body_;
-
-    friend class ModifierTab;
 };
 
 #endif // GATE_H
