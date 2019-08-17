@@ -37,6 +37,16 @@ void PermanentSwitch::deserialize(MapFileI& file, RoomMap* map, GameObject* pare
 	parent->set_modifier(std::make_unique<PermanentSwitch>(parent, color, active, global_id));
 }
 
+bool PermanentSwitch::relation_check() {
+	return true;
+}
+
+// This lets the editor keep global flags and room names up to date
+void PermanentSwitch::relation_serialize(MapFileO& file) {
+	file << MapCode::GlobalFlag;
+	file.write_uint32(global_id_);
+}
+
 void PermanentSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
 	if (active_) {
 		return;

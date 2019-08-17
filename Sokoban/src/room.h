@@ -13,7 +13,7 @@ class MapFileI;
 class MapFileO;
 class GameObject;
 class Player;
-class PlayingGlobalData;
+class GlobalData;
 class RoomLabelDrawer;
 
 class Room {
@@ -21,14 +21,14 @@ public:
     Room(GameState* state, std::string name);
     ~Room();
     std::string const name();
-    void initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d);
+    void initialize(GameObjectArray& objs, int w, int h, int d);
     void set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap);
     bool valid(Point3);
     RoomMap* map();
 	Camera* camera();
 
     void write_to_file(MapFileO& file);
-    void load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalData* global, Player** player_ptr);
+    void load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, Player** player_ptr);
 
     void draw_at_pos(Point3 cam_pos, bool display_labels, bool ortho, bool one_layer);
     void draw_at_player(Player* target, bool display_labels, bool ortho, bool one_layer);

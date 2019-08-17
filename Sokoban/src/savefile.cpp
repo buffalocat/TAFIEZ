@@ -28,6 +28,11 @@ void EditorGlobalData::load_flags(std::filesystem::path path) {
 			unsigned int flag = flag_file.read_uint32();
 			flags_[flag] = flag_file.read_str();
 		}
+	} else {
+		// We have no file to read; start off with the *truly* global flags
+		// These aren't bound to any particular room, and never change (this list should not get very long)
+		flags_[0] = "";
+		flags_[WORLD_RESET_GLOBAL_ID] = "";
 	}
 }
 
@@ -55,6 +60,7 @@ void EditorGlobalData::assign_flag(unsigned int flag, std::string room_name) {
 void EditorGlobalData::destroy_flag(unsigned int flag) {
 	flags_.erase(flag);
 }
+
 
 PlayingGlobalData::PlayingGlobalData() : GlobalData() {}
 
@@ -86,7 +92,6 @@ void PlayingGlobalData::add_flag(unsigned int flag) {
 void PlayingGlobalData::remove_flag(unsigned int flag) {
 	flags_.erase(flag);
 }
-
 
 bool PlayingGlobalData::has_flag(unsigned int flag) {
 	return flags_.count(flag);

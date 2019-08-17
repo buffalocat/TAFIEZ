@@ -44,7 +44,7 @@ std::string const Room::name() {
 	return name_;
 }
 
-void Room::initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d) {
+void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
 	map_ = std::make_unique<RoomMap>(objs, state_, w, h, d);
 	camera_ = std::make_unique<Camera>(w, h);
 }
@@ -156,15 +156,17 @@ void Room::write_to_file(MapFileO& file) {
 	file << MapCode::End;
 }
 
-void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalData* global, Player** player_ptr) {
+void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, Player** player_ptr) {
 	unsigned char b[8];
 	bool reading_file = true;
+	auto* p_global = dynamic_cast<PlayingGlobalData*>(global);
+	auto* e_global = dynamic_cast<EditorGlobalData*>(global);
 	while (reading_file) {
 		file.read(b, 1);
 		switch (static_cast<MapCode>(b[0])) {
 		case MapCode::Dimensions:
 			file.read(b, 3);
-			initialize(objs, global, b[0], b[1], b[2]);
+			initialize(objs, b[0], b[1], b[2]);
 			break;
 		case MapCode::InitFlag:
 			map_->inited_ = true;
@@ -178,8 +180,10 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();
 			map_->clear_id_ = file.read_uint32();
-			if (global && global->has_flag(map_->clear_id_)) {
+			if (p_global && p_global->has_flag(map_->clear_id_)) {
 				map_->collect_flag();
+			} else if (e_global) {
+				e_global->assign_flag(map_->clear_id_, name_);
 			}
 			break;
 		case MapCode::OffsetPos:
@@ -213,6 +217,14 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, PlayingGlobalDa
 		case MapCode::WallRuns:
 			read_wall_runs(file);
 			break;
+		case MapCode::GlobalFlag:
+		{
+			unsigned int flag = file.read_uint32();
+			if (e_global) {
+				e_global->assign_flag(flag, name_);
+			}
+			break;
+		}
 		case MapCode::End:
 			reading_file = false;
 			break;

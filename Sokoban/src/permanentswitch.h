@@ -12,6 +12,8 @@ public:
 	ModCode mod_code();
 	void serialize(MapFileO& file);
 	static void deserialize(MapFileI&, RoomMap*, GameObject*);
+	bool relation_check();
+	void relation_serialize(MapFileO& file);
 
 	void check_send_signal(RoomMap* map, DeltaFrame* delta_frame);
 
