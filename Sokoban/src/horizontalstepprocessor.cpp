@@ -174,7 +174,7 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 		block->set_linear_animation(dir_);
 	}
 	snake_puller.perform_pulls();
-	map_->batch_shift(std::move(forward_moving_blocks), dir_, delta_frame_);
+	map_->batch_shift(std::move(forward_moving_blocks), dir_, true, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE
 	for (auto sb : moving_snakes_) {
 		sb->reset_internal_state();

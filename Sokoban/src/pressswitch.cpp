@@ -38,7 +38,7 @@ void PressSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
     }
     if (should_toggle(map)) {
         delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
-        toggle(true);
+        toggle();
     }
 }
 
@@ -47,7 +47,9 @@ bool PressSwitch::should_toggle(RoomMap* map) {
 }
 
 void PressSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-    check_send_signal(map, delta_frame);
+	if (parent_->tangible_) {
+		check_send_signal(map, delta_frame);
+	}
 }
 
 void PressSwitch::setup_on_put(RoomMap* map, bool real) {

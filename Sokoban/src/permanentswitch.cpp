@@ -42,7 +42,7 @@ void PermanentSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
 		return;
 	}
 	if (should_toggle(map) || map->global_->has_flag(global_id_)) {
-		toggle(true);
+		toggle();
 		delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
 		map->global_->add_flag(global_id_);
 		delta_frame->push(std::make_unique<GlobalFlagDelta>(map->global_, global_id_));

@@ -39,19 +39,21 @@ void WorldResetKey::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProc
 	if (collected_) {
 		return;
 	}
-	if (auto* above = map->view(pos_above())) {
-		if (dynamic_cast<Player*>(above)) {
-			collected_ = true;
-		} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0, 0, 2 }))) {
-			if (player->car_riding()) {
+	if (parent_->tangible_) {
+		if (auto* above = map->view(pos_above())) {
+			if (dynamic_cast<Player*>(above)) {
 				collected_ = true;
+			} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0, 0, 2 }))) {
+				if (player->car_riding()) {
+					collected_ = true;
+				}
 			}
 		}
-	}
-	if (collected_) {
-		map->global_->add_flag(WORLD_RESET_GLOBAL_ID);
-		delta_frame->push(std::make_unique<KeyCollectDelta>(this));
-		delta_frame->push(std::make_unique<GlobalFlagDelta>(map->global_, WORLD_RESET_GLOBAL_ID));
+		if (collected_) {
+			map->global_->add_flag(WORLD_RESET_GLOBAL_ID);
+			delta_frame->push(std::make_unique<KeyCollectDelta>(this));
+			delta_frame->push(std::make_unique<GlobalFlagDelta>(map->global_, WORLD_RESET_GLOBAL_ID));
+		}
 	}
 }
 

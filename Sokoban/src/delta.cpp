@@ -96,7 +96,7 @@ PutDelta::PutDelta(GameObject* obj, RoomMap* map) :
 PutDelta::~PutDelta() {}
 
 void PutDelta::revert() {
-	map_->take_from_map(obj_, true, nullptr);
+	map_->take_from_map(obj_, true, false, nullptr);
 }
 
 
@@ -106,7 +106,7 @@ TakeDelta::TakeDelta(GameObject* obj, RoomMap* map) :
 TakeDelta::~TakeDelta() {}
 
 void TakeDelta::revert() {
-	map_->put_in_map(obj_, true, nullptr);
+	map_->put_in_map(obj_, true, false, nullptr);
 }
 
 
@@ -116,7 +116,7 @@ MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
 MotionDelta::~MotionDelta() {}
 
 void MotionDelta::revert() {
-	map_->shift(obj_, -dpos_, nullptr);
+	map_->shift(obj_, -dpos_, false, nullptr);
 }
 
 
@@ -126,7 +126,7 @@ BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, R
 BatchMotionDelta::~BatchMotionDelta() {}
 
 void BatchMotionDelta::revert() {
-	map_->batch_shift(objs_, -dpos_, nullptr);
+	map_->batch_shift(objs_, -dpos_, false, nullptr);
 }
 
 
@@ -195,7 +195,7 @@ SwitchToggleDelta::SwitchToggleDelta(Switch* obj) : obj_{ obj } {}
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
 void SwitchToggleDelta::revert() {
-	obj_->toggle(false);
+	obj_->toggle();
 }
 
 
@@ -204,7 +204,7 @@ SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) : sig_{ sig }, 
 SignalerCountDelta::~SignalerCountDelta() {}
 
 void SignalerCountDelta::revert() {
-	sig_->reset_count(count_);
+	sig_->reset_prev_count(count_);
 }
 
 

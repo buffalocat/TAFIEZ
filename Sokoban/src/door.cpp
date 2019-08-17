@@ -72,7 +72,9 @@ bool Door::can_set_state(bool state, RoomMap* map) {
 }
 
 void Door::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-    mp->plan_door_move(this);
+	if (parent_->tangible_) {
+		mp->plan_door_move(this);
+	}
 }
 
 void Door::setup_on_put(RoomMap* map, bool real) {

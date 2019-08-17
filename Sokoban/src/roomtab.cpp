@@ -129,9 +129,9 @@ void RoomTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	RoomMap* map = eroom->map();
 	if (!map->view(pos)) {
 		auto player = map->view(eroom->start_pos);
-		map->take_from_map(player, false, nullptr);
+		map->take_from_map(player, false, false, nullptr);
 		player->pos_ = pos;
 		eroom->start_pos = pos;
-		map->put_in_map(player, false, nullptr);
+		map->put_in_map(player, false, false, nullptr);
 	}
 }

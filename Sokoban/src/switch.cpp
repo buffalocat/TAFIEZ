@@ -23,19 +23,28 @@ void Switch::connect_to_signalers() {
     }
 }
 
-void Switch::toggle(bool propagate) {
+void Switch::remove_from_signalers() {
+	for (Signaler* s : signalers_) {
+		s->remove_switch(this);
+	}
+}
+
+void Switch::toggle() {
     active_ = !active_;
-	if (propagate) {
-		for (auto& signaler : signalers_) {
-			signaler->receive_signal(active_);
-		}
+	send_signal(active_);
+}
+
+void Switch::send_signal(bool signal) {
+	for (auto& signaler : signalers_) {
+		signaler->receive_signal(signal);
 	}
 }
 
 void Switch::cleanup_on_take(RoomMap* map, bool real) {
 	if (real) {
-		for (Signaler* s : signalers_) {
-			s->remove_switch(this);
+		remove_from_signalers();
+		if (active_) {
+			send_signal(false);
 		}
 	}
 }
@@ -43,5 +52,8 @@ void Switch::cleanup_on_take(RoomMap* map, bool real) {
 void Switch::setup_on_put(RoomMap* map, bool real) {
 	if (real) {
 		connect_to_signalers();
+		if (active_) {
+			send_signal(true);
+		}
 	}
 }

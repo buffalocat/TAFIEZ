@@ -245,7 +245,7 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		map->clear(pos);
 		auto new_wall = std::make_unique<Wall>(pos);
 		obj = new_wall.get();
-		map->create_in_map(std::move(new_wall), nullptr);
+		map->create_in_map(std::move(new_wall), false, nullptr);
 	}
 	mod->parent_ = obj;
 	mod->setup_on_editor_creation(editor_->global_.get(), eroom->room.get());
@@ -265,7 +265,7 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 			mod->cleanup_on_editor_destruction(editor_->global_.get());
 			// Revert a modified wall to a generic wall!
 			if (auto* wall = dynamic_cast<Wall*>(obj)) {
-				map->take_from_map(obj, true, nullptr);
+				map->take_from_map(obj, true, false, nullptr);
 				map->remove_from_object_array(obj);
 				map->create_wall(pos);
 			} else {

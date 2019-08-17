@@ -37,17 +37,19 @@ void FloorSign::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 }
 
 std::unique_ptr<ObjectModifier> FloorSign::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {
-	return std::make_unique<FloorSign>(parent, content_, showing_text_);
+	return std::make_unique<FloorSign>(parent, content_, false);
 }
 
 void FloorSign::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	bool should_display_text = false;
-	if (auto* above = map->view(pos_above())) {
-		if (dynamic_cast<Player*>(above)) {
-			should_display_text = true;
-		} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0,0,2 }))) {
-			if (player->car_riding()) {
+	if (parent_->tangible_) {
+		if (auto* above = map->view(pos_above())) {
+			if (dynamic_cast<Player*>(above)) {
 				should_display_text = true;
+			} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0,0,2 }))) {
+				if (player->car_riding()) {
+					should_display_text = true;
+				}
 			}
 		}
 	}

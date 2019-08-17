@@ -133,36 +133,32 @@ void RoomMap::push_to_object_array(std::unique_ptr<GameObject> obj_unique, Delta
 	}
 }
 
-// This should be equivalent to calling push_to_object_array, then put_in_map
-void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, DeltaFrame* delta_frame) {
+void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, bool activate_listeners, DeltaFrame* delta_frame) {
 	GameObject* obj = obj_unique.get();
-	obj_array_.push_object(std::move(obj_unique));
-	at(obj->pos_) += obj->id_;
-	obj->tangible_ = true;
-	obj->setup_on_put(this, true);
-	activate_listeners_at(obj->pos_);
-	if (delta_frame) {
-		delta_frame->push(std::make_unique<ObjArrayPushDelta>(obj, this));
-		delta_frame->push(std::make_unique<PutDelta>(obj, this));
-	}
+	push_to_object_array(std::move(obj_unique), delta_frame);
+	put_in_map(obj, true, activate_listeners, delta_frame);
 }
 
 void RoomMap::remove_from_object_array(GameObject* obj) {
 	obj_array_.destroy(obj);
 }
 
-void RoomMap::put_in_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
+void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {
 	at(obj->pos_) += obj->id_;
 	obj->tangible_ = true;
 	obj->setup_on_put(this, real);
-	activate_listeners_at(obj->pos_);
+	if (activate_listeners) {
+		activate_listeners_at(obj->pos_);
+	}
 	if (real && delta_frame) {
 		delta_frame->push(std::make_unique<PutDelta>(obj, this));
 	}
 }
 
-void RoomMap::take_from_map(GameObject* obj, bool real, DeltaFrame* delta_frame) {
-	activate_listeners_at(obj->pos_);
+void RoomMap::take_from_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {
+	if (activate_listeners) {
+		activate_listeners_at(obj->pos_);
+	}
 	obj->cleanup_on_take(this, real);
 	obj->tangible_ = false;
 	at(obj->pos_) -= obj->id_;
@@ -179,20 +175,20 @@ void RoomMap::clear(Point3 pos) {
 	at(pos) = 0;
 }
 
-void RoomMap::shift(GameObject* obj, Point3 dpos, DeltaFrame* delta_frame) {
-	take_from_map(obj, false, nullptr);
+void RoomMap::shift(GameObject* obj, Point3 dpos, bool activate_listeners, DeltaFrame* delta_frame) {
+	take_from_map(obj, false, activate_listeners, nullptr);
 	obj->pos_ += dpos;
-	put_in_map(obj, false, nullptr);
+	put_in_map(obj, false, activate_listeners, nullptr);
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
 	}
 }
 
-void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, DeltaFrame* delta_frame) {
+void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, bool activate_listeners, DeltaFrame* delta_frame) {
 	for (auto obj : objs) {
-		take_from_map(obj, false, nullptr);
+		take_from_map(obj, false, activate_listeners, nullptr);
 		obj->pos_ += dpos;
-		put_in_map(obj, false, nullptr);
+		put_in_map(obj, false, activate_listeners, nullptr);
 	}
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos, this));
@@ -302,7 +298,7 @@ struct ObjectDestroyer {
 void ObjectDestroyer::operator()(unsigned int id) {
 	if (id > GENERIC_WALL_ID) {
 		auto* obj = obj_array[id];
-		map->take_from_map(obj, true, nullptr);
+		map->take_from_map(obj, true, false, nullptr);
 		map->remove_from_object_array(obj);
 	}
 }
@@ -458,7 +454,7 @@ void RoomMap::initialize_automatic_snake_links() {
 }
 
 void RoomMap::reset_local_state() {
-	activated_listeners_ = {};
+	activated_listeners_.clear();
 }
 
 void RoomMap::push_signaler(std::unique_ptr<Signaler> signaler) {

@@ -39,9 +39,8 @@ void Signaler::update_count(DeltaFrame* delta_frame) {
 	}
 }
 
-void Signaler::reset_count(int count) {
+void Signaler::reset_prev_count(int count) {
 	prev_count_ = count;
-	count_ = count;
 }
 
 ThresholdSignaler::ThresholdSignaler(std::string label, int count, int threshold) :

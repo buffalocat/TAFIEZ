@@ -67,10 +67,10 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
     if (body_) {
 		// Add animation
         if (state()) {
-            map->put_in_map(body_, true, delta_frame);
+            map->put_in_map(body_, true, true, delta_frame);
 		}
 		else {
-			map->take_from_map(body_, true, delta_frame);
+			map->take_from_map(body_, true, true, delta_frame);
 		}
         GameObject* above = map->view(body_->pos_ + Point3{0,0,1});
         if (above && above->gravitable_) {

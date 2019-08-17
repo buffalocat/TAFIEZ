@@ -146,13 +146,14 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
             // TODO: put the responsibility of making fall trails in a better place
             map_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
-            map_->put_in_map(block, false, nullptr);
+            map_->put_in_map(block, false, true, nullptr);
         } else {
             // NOTE: magic number for trail size
             map_->make_fall_trail(block, layers_fallen_, 10);
             block->pos_ += {0,0,layers_fallen_};
-            map_->put_in_map(block, false, nullptr);
-            map_->take_from_map(block, true, delta_frame_);
+			// Listeners only have to get activated once
+            map_->put_in_map(block, false, true, nullptr);
+            map_->take_from_map(block, true, false, delta_frame_);
             if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
                 snake_check_.erase(sb);
             }

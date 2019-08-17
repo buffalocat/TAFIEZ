@@ -48,12 +48,12 @@ void MoveProcessor::move_bound(Point3 dir) {
 	auto* car = dynamic_cast<ColoredBlock*>(map_->view(player_->shifted_pos({ 0,0,-1 })));
 	auto* adj = dynamic_cast<ColoredBlock*>(map_->view(car->shifted_pos(dir)));
 	if (adj && car->color() == adj->color()) {
-		map_->take_from_map(player_, false, nullptr);
+		map_->take_from_map(player_, false, true, nullptr);
 		player_->set_linear_animation(dir);
 		delta_frame_->push(std::make_unique<MotionDelta>(player_, dir, map_));
 		moving_blocks_.push_back(player_);
 		player_->shift_pos_from_animation();
-		map_->put_in_map(player_, false, nullptr);
+		map_->put_in_map(player_, false, true, nullptr);
 	}
 }
 
@@ -200,7 +200,7 @@ void MoveProcessor::try_door_entry() {
 			door_state_ = DoorState::AwaitingExtExit;
 		}
 		for (auto& obj : door_travelling_objs_) {
-			map_->take_from_map(obj.raw, true, delta_frame_);
+			map_->take_from_map(obj.raw, true, true, delta_frame_);
 			add_neighbors_to_fall_check(obj.raw);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
@@ -224,7 +224,7 @@ void MoveProcessor::try_int_door_exit() {
 		for (auto& obj : door_travelling_objs_) {
 			add_to_fall_check(obj.raw);
 			obj.raw->abstract_put(obj.dest, delta_frame_);
-			map_->put_in_map(obj.raw, true, delta_frame_);
+			map_->put_in_map(obj.raw, true, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;
@@ -247,7 +247,7 @@ void MoveProcessor::try_door_unentry() {
 	if (can_move) {
 		for (auto& obj : door_travelling_objs_) {
 			add_to_fall_check(obj.raw);
-			map_->put_in_map(obj.raw, true, delta_frame_);
+			map_->put_in_map(obj.raw, true, true, delta_frame_);
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;
@@ -265,7 +265,7 @@ void MoveProcessor::ext_door_exit() {
 	for (auto& obj : door_travelling_objs_) {
 		add_to_fall_check(obj.raw);
 		obj.raw->abstract_put(obj.dest, delta_frame_);
-		map_->put_in_map(obj.raw, true, delta_frame_);
+		map_->put_in_map(obj.raw, true, true, delta_frame_);
 	}
 	playing_state_->snap_camera_to_player();
 	frames_ = FALL_MOVEMENT_FRAMES;

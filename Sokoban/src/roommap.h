@@ -32,15 +32,15 @@ public:
 
 	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
-	void put_in_map(GameObject*, bool real, DeltaFrame*);
-    void take_from_map(GameObject*, bool real, DeltaFrame*);
-	void create_in_map(std::unique_ptr<GameObject>, DeltaFrame*);
+	void put_in_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
+    void take_from_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
+	void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
 
 	void create_wall(Point3);
 	void clear(Point3);
 
-    void shift(GameObject*, Point3, DeltaFrame*);
-    void batch_shift(std::vector<GameObject*>, Point3, DeltaFrame*);
+    void shift(GameObject*, Point3, bool activate_listeners, DeltaFrame*);
+    void batch_shift(std::vector<GameObject*>, Point3, bool activate_listeners, DeltaFrame*);
 
     void serialize(MapFileO& file);
 

@@ -365,11 +365,12 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 				// The split succeeded
 				if (sticky_comp.empty()) {
 					std::vector<SnakeBlock*> links = cur->links_;
-					map_->take_from_map(cur, true, delta_frame_);
+					// Listeners will get alerted during snake pulling anyway
+					map_->take_from_map(cur, true, false, delta_frame_);
 					for (SnakeBlock* link : links) {
 						auto split_copy_unique = cur->make_split_copy(map_, delta_frame_);
 						SnakeBlock* split_copy = split_copy_unique.get();
-						map_->create_in_map(std::move(split_copy_unique), delta_frame_);
+						map_->create_in_map(std::move(split_copy_unique), false, delta_frame_);
 						split_copy->add_link(link, delta_frame_);
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);
@@ -425,7 +426,7 @@ void SnakePuller::perform_pulls() {
 			moving_blocks_.push_back(cur);
 			Point3 dir = next->pos_ - cur->pos_;
 			cur->set_linear_animation(dir);
-			map_->shift(cur, dir, delta_frame_);
+			map_->shift(cur, dir, true, delta_frame_);
 			cur = next;
 		}
 		cur->reset_internal_state();

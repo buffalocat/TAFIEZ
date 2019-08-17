@@ -47,32 +47,34 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	if (collected_) {
 		return;
 	}
-	bool prev_active = active_;
-	active_ = false;
-	if (auto* above = map->view(pos_above())) {
-		if (real_) {
-			if (dynamic_cast<Player*>(above)) {
-				active_ = true;
-			} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{0, 0, 2}))) {
-				if (player->car_riding()) {
+	if (parent_->tangible_) {
+		bool prev_active = active_;
+		active_ = false;
+		if (auto* above = map->view(pos_above())) {
+			if (real_) {
+				if (dynamic_cast<Player*>(above)) {
 					active_ = true;
+				} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0, 0, 2 }))) {
+					if (player->car_riding()) {
+						active_ = true;
+					}
 				}
-			}
-		} else {
-			if (auto* mod = above->modifier()) {
-				switch (mod->mod_code()) {
-				case ModCode::AutoBlock:
-				case ModCode::PuppetBlock:
-					active_ = true;
-					break;
+			} else {
+				if (auto* mod = above->modifier()) {
+					switch (mod->mod_code()) {
+					case ModCode::AutoBlock:
+					case ModCode::PuppetBlock:
+						active_ = true;
+						break;
+					}
 				}
 			}
 		}
-	}
-	if (active_ != prev_active) {
-		map->clear_flags_[this] = active_;
-		delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this, map));
-		map->clear_flags_changed_ = true;
+		if (active_ != prev_active) {
+			map->clear_flags_[this] = active_;
+			delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this, map));
+			map->clear_flags_changed_ = true;
+		}
 	}
 }
 

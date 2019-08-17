@@ -65,7 +65,6 @@ void PlayingState::handle_input() {
 				move_processor_.reset(nullptr);
 				delta_frame_->revert();
 				delta_frame_ = std::make_unique<DeltaFrame>();
-				room_->map()->reset_local_state();
 				if (player_) {
 					snap_camera_to_player();
 				}
@@ -75,6 +74,7 @@ void PlayingState::handle_input() {
 					snap_camera_to_player();
 				}
 			}
+			room_->map()->reset_local_state();
 			return;
 		}
 	} else {

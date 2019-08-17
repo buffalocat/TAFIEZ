@@ -17,9 +17,11 @@ public:
     void push_signaler(Signaler*);
 	void remove_signaler(Signaler*);
     void connect_to_signalers();
+	void remove_from_signalers();
     virtual void check_send_signal(RoomMap*, DeltaFrame*) = 0;
     virtual bool should_toggle(RoomMap*) = 0;
-    void toggle(bool propagate);
+    void toggle();
+	void send_signal(bool signal);
 
 	virtual void setup_on_put(RoomMap*, bool real);
 	virtual void cleanup_on_take(RoomMap*, bool real);

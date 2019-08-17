@@ -20,12 +20,11 @@ public:
 	void remove_switch(Switch*);
 	virtual void push_switchable(Switchable*, bool mutual, int index) = 0;
 	virtual void remove_switchable(Switchable*, int index) = 0;
-	//void remove_object(ObjectModifier*);
 
     void receive_signal(bool signal);
     virtual void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*) = 0;
 	void update_count(DeltaFrame*);
-	void reset_count(int count);
+	void reset_prev_count(int count);
 
 protected:
 	std::vector<Switch*> switches_;

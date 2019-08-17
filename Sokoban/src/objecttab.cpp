@@ -127,17 +127,17 @@ void ObjectTab::object_tab_options() {
 				if (selected_obj->id_ == GENERIC_WALL_ID) {
 					map_->clear(selected_pos);
 				} else {
-					map_->take_from_map(selected_obj, true, nullptr);
+					map_->take_from_map(selected_obj, true, false, nullptr);
 					map_->remove_from_object_array(selected_obj);
 				}
 				selected_obj = new_obj.get();
-				map_->create_in_map(std::move(new_obj), nullptr);
+				map_->create_in_map(std::move(new_obj), false, nullptr);
 			}
 			// If the new object was a generic Wall, we don't have a new pointer
 			else if (transmute_obj_code == ObjCode::Wall) {
 				// If the old object was also a generic Wall, do nothing
 				if (selected_obj->id_ != GENERIC_WALL_ID) {
-					map_->take_from_map(selected_obj, true, nullptr);
+					map_->take_from_map(selected_obj, true, false, nullptr);
 					map_->remove_from_object_array(selected_obj);
 					map_->create_wall(selected_pos);
 					selected_obj = map_->view(selected_pos);
@@ -194,7 +194,7 @@ void ObjectTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	}
 	if (std::unique_ptr<GameObject> obj = create_from_model(obj_code, nullptr)) {
 		selected_obj = obj.get();
-		map_->create_in_map(std::move(obj), nullptr);
+		map_->create_in_map(std::move(obj), false, nullptr);
 	} else if (obj_code == ObjCode::Wall) {
 		map_->create_wall(pos);
 		selected_obj = map_->view(pos);
@@ -219,7 +219,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 		if (obj->id_ == GENERIC_WALL_ID) {
 			map_->at(pos) = 0;
 		} else {
-			map_->take_from_map(obj, true, nullptr);
+			map_->take_from_map(obj, true, false, nullptr);
 			map_->remove_from_object_array(obj);
 		}
 	}
