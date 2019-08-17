@@ -8,7 +8,7 @@ public:
     AutoBlock(GameObject* parent);
     virtual ~AutoBlock();
 
-    std::string name();
+	void make_str(std::string&);
     ModCode mod_code();
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 

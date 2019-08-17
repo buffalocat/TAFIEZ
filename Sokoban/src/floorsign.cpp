@@ -16,8 +16,10 @@ FloorSign::FloorSign(GameObject* parent, std::string content, bool showing) :
 
 FloorSign::~FloorSign() {}
 
-std::string FloorSign::name() {
-	return "FloorSign";
+void FloorSign::make_str(std::string& str) {
+	char buf[256];
+	snprintf(buf, 256, "FloorSign:\"%s\"", content_.c_str());
+	str += buf;
 }
 
 ModCode FloorSign::mod_code() {

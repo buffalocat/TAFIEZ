@@ -23,7 +23,7 @@ public:
     ObjectModifier(GameObject* parent);
     virtual ~ObjectModifier();
 
-    virtual std::string name() = 0;
+    virtual void make_str(std::string&) = 0;
     virtual ModCode mod_code() = 0;
 	virtual void serialize(MapFileO& file);
     virtual bool relation_check();

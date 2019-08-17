@@ -16,8 +16,9 @@ PermanentSwitch::PermanentSwitch(GameObject* parent, int color, bool active, uns
 
 PermanentSwitch::~PermanentSwitch() {}
 
-std::string PermanentSwitch::name() {
-	return "PermanentSwitch";
+void PermanentSwitch::make_str(std::string& str) {
+	str += "PermanentSwitch";
+	Switch::make_str(str);
 }
 
 ModCode PermanentSwitch::mod_code() {

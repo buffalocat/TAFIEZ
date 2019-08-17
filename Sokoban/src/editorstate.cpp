@@ -109,12 +109,13 @@ void EditorState::main_loop() {
     if (active_room_) {
 		// Header Information
         ImGui::Text(("Current Room: " + active_room_->room->name()).c_str());
-        ImGui::Text("Current Height: %d", active_room_->cam_pos.z);
-        if (one_layer_) {
-            ImGui::Text("Only Showing This Layer (F to toggle)");
-        } else {
-            ImGui::Text("Showing Neighboring Layers (F to toggle)");
-        }
+		unsigned int layer = active_room_->cam_pos.z;
+		if (one_layer_) {
+			ImGui::Text("Just Layer %d", layer);
+		} else {
+			ImGui::Text("Multiple Layers (%d)", layer);
+		}
+		display_hover_pos_object(active_room_->cam_pos, active_room_->map());
 		// Draw the active room
         active_room_->changed = true;
         active_room_->room->draw_at_pos(active_room_->cam_pos, false, ortho_cam_, one_layer_);

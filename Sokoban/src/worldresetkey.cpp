@@ -23,8 +23,8 @@ void WorldResetKey::deserialize(MapFileI& file, RoomMap* map, GameObject* parent
 	parent->set_modifier(std::make_unique<WorldResetKey>(parent, collected));
 }
 
-std::string WorldResetKey::name() {
-	return "WorldResetKey";
+void WorldResetKey::make_str(std::string& str) {
+	str += "WorldResetKey";
 }
 
 ModCode WorldResetKey::mod_code() {

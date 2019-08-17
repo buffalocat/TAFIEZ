@@ -15,8 +15,10 @@ ClearFlag::ClearFlag(GameObject* parent, int count, bool real, bool active, bool
 
 ClearFlag::~ClearFlag() {}
 
-std::string ClearFlag::name() {
-	return "ClearFlag";
+void ClearFlag::make_str(std::string& str) {
+	char buf[32];
+	snprintf(buf, 32, "ClearFlag:%s:%d", real_ ? "Real" : "Fake", count_);
+	str += buf;
 }
 
 ModCode ClearFlag::mod_code() {

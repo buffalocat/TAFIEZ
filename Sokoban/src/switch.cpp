@@ -9,6 +9,17 @@ persistent_ {persistent}, active_ {active}, signalers_ {} {}
 
 Switch::~Switch() {}
 
+void Switch::make_str(std::string& str) {
+	if (signalers_.size()) {
+		std::string sig_list{ "(" };
+		for (auto* sig : signalers_) {
+			sig_list += sig->label_;
+		}
+		sig_list += ")";
+		str += sig_list;
+	}
+}
+
 void Switch::push_signaler(Signaler* signaler) {
     signalers_.push_back(signaler);
 }

@@ -8,8 +8,9 @@ public:
 	PermanentSwitch(GameObject* parent, int color, bool active, unsigned int global_id);
 	~PermanentSwitch();
 
-	std::string name();
+	void make_str(std::string&);
 	ModCode mod_code();
+
 	void serialize(MapFileO& file);
 	static void deserialize(MapFileI&, RoomMap*, GameObject*);
 	bool relation_check();

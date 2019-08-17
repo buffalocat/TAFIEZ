@@ -15,6 +15,17 @@ signalers_{} {}
 
 Switchable::~Switchable() {}
 
+void Switchable::make_str(std::string& str) {
+	if (signalers_.size()) {
+		std::string sig_list{ "(" };
+		for (auto& p : signalers_) {
+			sig_list += p.first->label_;
+		}
+		sig_list += ")";
+		str += sig_list;
+	}
+}
+
 void Switchable::push_signaler(Signaler* signaler, int index) {
 	signalers_.push_back(std::make_pair(signaler, index));
 }

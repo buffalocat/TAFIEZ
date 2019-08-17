@@ -14,6 +14,8 @@ public:
     Switch(GameObject* parent, bool persistent, bool active);
     virtual ~Switch();
 
+	void make_str(std::string&);
+
     void push_signaler(Signaler*);
 	void remove_signaler(Signaler*);
     void connect_to_signalers();

@@ -7,7 +7,7 @@ public:
 	ClearFlag(GameObject* parent, int count, bool real, bool active, bool collected, char zone);
 	~ClearFlag();
 
-	std::string name();
+	void make_str(std::string&);
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);

@@ -16,8 +16,9 @@ Gate::Gate(GameObject* parent, GateBody* body, int color, int count, bool persis
 
 Gate::~Gate() {}
 
-std::string Gate::name() {
-	return "Gate";
+void Gate::make_str(std::string& str) {
+	str += "Gate";
+	Switchable::make_str(str);
 }
 
 ModCode Gate::mod_code() {

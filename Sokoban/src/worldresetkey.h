@@ -6,7 +6,7 @@ public:
 	WorldResetKey(GameObject* parent, bool collected = false);
 	~WorldResetKey();
 
-	std::string name();
+	void make_str(std::string&);
 	ModCode mod_code();
 
 	static void deserialize(MapFileI& file, RoomMap*, GameObject* parent);

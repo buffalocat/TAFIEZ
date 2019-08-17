@@ -16,7 +16,7 @@ public:
     PressSwitch(GameObject* parent, int color, bool persistent, bool active);
     virtual ~PressSwitch();
 
-    std::string name();
+	void make_str(std::string&);
     ModCode mod_code();
     void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);

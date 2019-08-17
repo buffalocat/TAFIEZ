@@ -15,6 +15,8 @@ public:
     Switchable(GameObject* parent, int count, bool persistent, bool default_state, bool active, bool waiting);
     virtual ~Switchable();
 
+	void make_str(std::string&);
+
     void push_signaler(Signaler*, int index);
 	void remove_signaler(Signaler*);
     void connect_to_signalers();

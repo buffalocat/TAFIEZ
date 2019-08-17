@@ -35,12 +35,13 @@ GameObject::GameObject(const GameObject& obj) :
 std::string GameObject::to_str() {
 	std::string mod_str{ "" };
 	if (modifier_) {
-		mod_str = "-" + modifier_->name();
+		mod_str = "-";
+		modifier_->make_str(mod_str);
 	}
-	char buf[64] = "";
+	char buf[256] = "";
 	// TODO: Make this less ugly
 	// This is only used to make the editor more user friendly, so it's not a huge deal.
-	sprintf_s(buf, "%s:%s:%s%s", pushable_ ? "P" : "NP", gravitable_ ? "G" : "NG", name().c_str(), mod_str.c_str());
+	snprintf(buf, 256, "%s:%s:%s%s", name().c_str(), pushable_ ? "P" : "NP", gravitable_ ? "G" : "NG", mod_str.c_str());
 	return std::string{ buf };
 }
 

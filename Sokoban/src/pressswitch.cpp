@@ -14,8 +14,9 @@ Switch(parent, persistent, active), color_ {color} {}
 
 PressSwitch::~PressSwitch() {}
 
-std::string PressSwitch::name() {
-    return "PressSwitch";
+void PressSwitch::make_str(std::string& str) {
+	str += "PressSwitch";
+	Switch::make_str(str);
 }
 
 ModCode PressSwitch::mod_code() {

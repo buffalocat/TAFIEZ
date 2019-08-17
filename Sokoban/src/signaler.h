@@ -26,9 +26,10 @@ public:
 	void update_count(DeltaFrame*);
 	void reset_prev_count(int count);
 
+	std::string label_;
+
 protected:
-	std::vector<Switch*> switches_;
-    std::string label_;
+	std::vector<Switch*> switches_{};
 	int prev_count_;
     int count_;
 
@@ -48,7 +49,7 @@ public:
 	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
 
 private:
-	std::vector<Switchable*> switchables_;
+	std::vector<Switchable*> switchables_{};
 	int threshold_;
 
 	friend class SwitchTab;
@@ -68,7 +69,7 @@ public:
 	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
 private:
-	std::vector<std::vector<Switchable*>> switchables_;
+	std::vector<std::vector<Switchable*>> switchables_{};
 	int parity_level_;
 	bool initialized_;
 

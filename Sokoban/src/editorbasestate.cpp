@@ -44,11 +44,16 @@ Point3 EditorBaseState::get_pos_from_mouse(Point3 cam_pos) {
 void EditorBaseState::display_hover_pos_object(Point3 cam_pos, RoomMap* map) {
     Point3 mouse_pos = get_pos_from_mouse(cam_pos);
     ImGui::Text("Hover Pos: (%d,%d,%d)", mouse_pos.x, mouse_pos.y, mouse_pos.z);
-    if (GameObject* obj = map->view(mouse_pos)) {
-        ImGui::Text(obj->to_str().c_str());
-    } else {
-        ImGui::Text("Empty");
-    }
+	if (map->valid(mouse_pos)) {
+		if (GameObject* obj = map->view(mouse_pos)) {
+			ImGui::Text(obj->to_str().c_str());
+		} else {
+			ImGui::Text("Empty");
+		}
+	} else {
+		ImGui::Text("Out of Bounds");
+	}
+    
 }
 
 void EditorBaseState::clamp_to_room(Point3& pos, Room* room) {

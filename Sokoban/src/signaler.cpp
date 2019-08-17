@@ -7,7 +7,7 @@
 #include "mapfile.h"
 
 Signaler::Signaler(const std::string& label, int count) :
-	switches_{}, label_{ label }, prev_count_{ count }, count_{ count } {}
+	label_{ label }, prev_count_{ count }, count_{ count } {}
 
 Signaler::~Signaler() {}
 
@@ -44,7 +44,7 @@ void Signaler::reset_prev_count(int count) {
 }
 
 ThresholdSignaler::ThresholdSignaler(std::string label, int count, int threshold) :
-	Signaler(label, count), switchables_{}, threshold_{ threshold } {}
+	Signaler(label, count), threshold_{ threshold } {}
 
 ThresholdSignaler::~ThresholdSignaler() {}
 
@@ -85,7 +85,7 @@ void ThresholdSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame,
 
 
 ParitySignaler::ParitySignaler(std::string label, int count, int parity_level, bool initialized) :
-	Signaler(label, count), switchables_{}, parity_level_{ parity_level }, initialized_{ initialized } {
+	Signaler(label, count), parity_level_{ parity_level }, initialized_{ initialized } {
 	for (int i = 0; i < parity_level; ++i) {
 		switchables_.push_back({});
 	}

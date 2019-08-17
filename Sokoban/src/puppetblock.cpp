@@ -9,8 +9,8 @@ PuppetBlock::PuppetBlock(GameObject* parent) : ObjectModifier(parent) {}
 
 PuppetBlock::~PuppetBlock() {}
 
-std::string PuppetBlock::name() {
-	return "PuppetBlock";
+void PuppetBlock::make_str(std::string& str) {
+	str += "PuppetBlock";
 }
 
 ModCode PuppetBlock::mod_code() {

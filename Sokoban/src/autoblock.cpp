@@ -9,8 +9,8 @@ AutoBlock::AutoBlock(GameObject* parent): ObjectModifier(parent) {}
 
 AutoBlock::~AutoBlock() {}
 
-std::string AutoBlock::name() {
-    return "AutoBlock";
+void AutoBlock::make_str(std::string& str) {
+	str += "AutoBlock";
 }
 
 ModCode AutoBlock::mod_code() {

@@ -18,8 +18,16 @@ Door::~Door() {}
 
 Door::Door(const Door& d): Switchable(d.parent_, d.count_, d.persistent_, d.default_, d.active_, d.waiting_), data_{} {}
 
-std::string Door::name() {
-    return "Door";
+void Door::make_str(std::string& str) {
+	char buf[64];
+	if (data_) {
+		Point3_S16 p = data_->pos;
+		snprintf(buf, 64, "Door:(%d,%d,%d):\"%s\"", p.x, p.y, p.z, data_->dest.c_str());
+	} else {
+		snprintf(buf, 64, "Door:NO DEST");
+	}
+	str += buf;
+	Switchable::make_str(str);
 }
 
 ModCode Door::mod_code() {

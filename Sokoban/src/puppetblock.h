@@ -16,8 +16,9 @@ public:
 	PuppetBlock(GameObject* parent);
 	virtual ~PuppetBlock();
 
-	std::string name();
+	void make_str(std::string&);
 	ModCode mod_code();
+
 	static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
 	bool valid_parent(GameObject*);

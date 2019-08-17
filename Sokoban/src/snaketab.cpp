@@ -39,9 +39,6 @@ void SnakeTab::main_loop(EditorRoom* eroom) {
     if (ImGui::Button("Form Automatic Links##SNAKE")) {
         eroom->map()->initialize_automatic_snake_links();
     }
-    ImGui::Separator();
-
-    editor_->display_hover_pos_object(eroom->cam_pos, eroom->map());
 
     ImGui::Separator();
 
