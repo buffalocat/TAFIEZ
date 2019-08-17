@@ -70,6 +70,15 @@ bool EditorState::handle_keyboard_input_main_state() {
 		begin_test();
 		return true;
 	}
+	if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS &&
+		glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			commit_all();
+		} else {
+			commit_current_room();
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -80,9 +89,7 @@ void EditorState::main_loop() {
         return;
     }
 
-	if (keyboard_cooldown_ > 0) {
-		--keyboard_cooldown_;
-	} else if (!want_capture_keyboard()) {
+	if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
 		if (handle_keyboard_input_main_state()) {
 			keyboard_cooldown_ = MAX_COOLDOWN;
 		} else if (active_tab_->handle_keyboard_input()) {
@@ -126,6 +133,10 @@ void EditorState::main_loop() {
 	ImGui::EndChildFrame();
 
 	ImGui::End();
+
+	if (keyboard_cooldown_ > 0) {
+		--keyboard_cooldown_;
+	}
 }
 
 void EditorState::set_active_tab_by_index(int i) {
@@ -247,20 +258,19 @@ void EditorState::commit_current_room() {
 
 void EditorState::commit_all() {
     for (auto& p : rooms_) {
-        save_room(p.second.get(), true);
+		if (p.second->changed) {
+			p.second->changed = false;
+			save_room(p.second.get(), true);
+		}
     }
+	active_room_->changed = true;
 }
 
 void EditorState::begin_test() {
     if (!active_room_) {
         return;
     }
-    for (auto& p : rooms_) {
-        if (p.second->changed) {
-            p.second->changed = false;
-            save_room(p.second.get(), false);
-        }
-    }
+	save_room(active_room_, false);
     auto playing_state_unique = std::make_unique<TestPlayingState>(this);
 	auto playing_state = playing_state_unique.get();
     create_child(std::move(playing_state_unique));

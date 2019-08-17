@@ -15,7 +15,7 @@ struct EditorRoom {
     std::unique_ptr<Room> room;
     Point3 start_pos;
     Point3 cam_pos;
-    bool changed;
+    bool changed = true;
     EditorRoom(std::unique_ptr<Room>, Point3);
 
     RoomMap* map();
