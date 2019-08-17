@@ -9,7 +9,7 @@
 #include "signaler.h"
 #include "switchable.h"
 
-SwitchTab::SwitchTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx),
+SwitchTab::SwitchTab(EditorState* editor) : EditorTab(editor),
 model_switches_{}, model_switchables_{}, model_p_switchables_{},
 switches_ptr_{}, switchables_ptr_{}, p_switchables_ptr_{},
 model_label_{}, model_threshold_{ 1 }, model_parity_level_{ 2 },

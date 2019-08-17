@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "realplayingstate.h"
 
+#include "graphicsmanager.h"
 #include "common_constants.h"
 #include "room.h"
 #include "roommap.h"
@@ -8,8 +9,8 @@
 #include "mapfile.h"
 #include "delta.h"
 
-RealPlayingState::RealPlayingState(std::unique_ptr<SaveFile> save) :
-	PlayingState(), savefile_{ std::move(save) } {
+RealPlayingState::RealPlayingState(std::unique_ptr<SaveFile> save, GameState* parent) :
+	PlayingState(parent), savefile_{ std::move(save) } {
 	savefile_->global_ = global_.get();
 }
 

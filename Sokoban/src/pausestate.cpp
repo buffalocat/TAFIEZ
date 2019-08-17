@@ -71,20 +71,20 @@ void Menu<State>::handle_input(State* game_state) {
 
 template <class State>
 void Menu<State>::draw() {
-	font_->shader_.use();
+	font_->shader_->use();
 	for (auto& entry : entries_) {
 		entry.text->render();
 	}
 }
 
 
-PauseState::PauseState(GraphicsManager* gfx, PlayingState* parent, PlayingGlobalData* global) : GameState(),
-playing_state_{ parent },
-menu_{ gfx->window(), gfx->fonts_->get_font(Fonts::KALAM_BOLD, 72) } {
+PauseState::PauseState(GameState* parent) : GameState(parent),
+playing_state_{ static_cast<PlayingState*>(parent) },
+menu_{ window_, gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72) } {
 	menu_.push_entry("Unpause", &PauseState::unpause);
 	if (dynamic_cast<RealPlayingState*>(parent)) {
 		menu_.push_entry("Save Game", &PauseState::save);
-		if (global->has_flag(WORLD_RESET_GLOBAL_ID)) {
+		if (playing_state_->global_->has_flag(WORLD_RESET_GLOBAL_ID)) {
 			menu_.push_entry("World Reset", &PauseState::world_reset);
 		}
 		menu_.push_entry("Quit Game", &PauseState::quit);
@@ -128,5 +128,5 @@ void PauseState::world_reset() {
 // Won't do quite the right thing, because some objects aren't in draw_world()
 void PauseState::draw_paused_game() {
 	gfx_->prepare_object_rendering();
-	gfx_->draw_world();
+	gfx_->draw();
 }

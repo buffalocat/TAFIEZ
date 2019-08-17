@@ -32,10 +32,7 @@ public:
 	void prepare_object_rendering();
     void set_PV(glm::mat4);
 	void set_light_source(glm::vec3);
-    void draw_world();
-	void draw_text();
-
-	void toggle_string_drawer(StringDrawer* drawer, bool active);
+    void draw();
 
 	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube{ DynamicInstancer("resources/uniform_cube.obj") };
@@ -49,8 +46,6 @@ public:
 	SingleDrawer windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") };
 	SingleDrawer flag{ SingleDrawer("resources/flag.obj") };
 
-	std::vector<ProtectedStringDrawer> string_drawers_{};
-
 	std::unique_ptr<FontManager> fonts_{};
 
 private:
@@ -63,6 +58,22 @@ private:
 	glm::mat4 PV_;
 
     void load_texture_atlas();
+};
+
+class TextRenderer {
+public:
+	TextRenderer(FontManager* fonts);
+	~TextRenderer();
+
+	void draw();
+
+	void toggle_string_drawer(StringDrawer* drawer, bool active);
+
+	FontManager* fonts_;
+	std::vector<ProtectedStringDrawer> string_drawers_{};
+
+private:
+	Shader* text_shader_{};
 };
 
 #endif // GRAPHICSMANAGER_H

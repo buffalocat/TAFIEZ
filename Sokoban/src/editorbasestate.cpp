@@ -17,7 +17,7 @@ const std::unordered_map<int, Point3> EDITOR_MOVEMENT_KEYS {
 };
 
 
-EditorBaseState::EditorBaseState(): GameState(),
+EditorBaseState::EditorBaseState(GameState* parent): GameState(parent),
 ortho_cam_ {true}, one_layer_ {false}, keyboard_cooldown_ {0} {}
 
 EditorBaseState::~EditorBaseState() {}

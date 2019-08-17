@@ -3,11 +3,13 @@
 
 #include "point.h"
 
+class GameState;
 class GameObjectArray;
 class Signaler;
 class Effects;
 class MapLayer;
 class GraphicsManager;
+class TextRenderer;
 class DeltaFrame;
 class MoveProcessor;
 class ObjectModifier;
@@ -23,7 +25,7 @@ class ClearFlag;
 
 class RoomMap {
 public:
-    RoomMap(GameObjectArray& objs, PlayingGlobalData* global, GraphicsManager* gfx, int width, int height, int depth);
+    RoomMap(GameObjectArray& objs, GameState* state, int width, int height, int depth);
     ~RoomMap();
     bool valid(Point3 pos);
 
@@ -95,9 +97,11 @@ public:
 	std::vector<PuppetBlock*> puppets_{};
 
     GameObjectArray& obj_array_;
-	PlayingGlobalData* global_;
-	GraphicsManager* gfx_;
+	PlayingGlobalData* global_{};
 	std::vector<MapLayer> layers_{};
+	GameState* state_;
+
+	TextRenderer* text_renderer();
 
 private:
 	std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_{};

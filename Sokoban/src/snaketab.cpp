@@ -10,7 +10,7 @@
 #include "gameobject.h"
 #include "snakeblock.h"
 
-SnakeTab::SnakeTab(EditorState* editor, GraphicsManager* gfx): EditorTab(editor, gfx) {}
+SnakeTab::SnakeTab(EditorState* editor): EditorTab(editor) {}
 
 SnakeTab::~SnakeTab() {}
 

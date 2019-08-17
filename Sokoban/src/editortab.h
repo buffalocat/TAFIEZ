@@ -9,7 +9,7 @@ struct Point3;
 
 class EditorTab {
 public:
-    EditorTab(EditorState*, GraphicsManager*);
+    EditorTab(EditorState*);
     virtual ~EditorTab();
     virtual void init();
     virtual void main_loop(EditorRoom*) = 0;

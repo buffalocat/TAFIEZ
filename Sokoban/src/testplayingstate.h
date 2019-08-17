@@ -4,9 +4,11 @@
 #include "playingstate.h"
 #include "point.h"
 
+class FontManager;
+
 class TestPlayingState: public PlayingState {
 public:
-    TestPlayingState();
+    TestPlayingState(GameState* parent);
     virtual ~TestPlayingState();
 
 	void init(std::string map_name);

@@ -6,6 +6,7 @@
 
 class GameObjectArray;
 class GraphicsManager;
+class FontManager;
 class Room;
 class RoomMap;
 class GameObject;
@@ -37,7 +38,7 @@ struct PlayingRoom {
 
 class PlayingState: public GameState {
 public:
-    PlayingState();
+    PlayingState(GameState* parent);
     virtual ~PlayingState();
     void main_loop();
     void handle_input();
@@ -54,12 +55,13 @@ public:
 	virtual void make_subsave();
 	virtual void world_reset();
 
+	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
+
 protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
 	Room* room_{};
 	Player* player_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
-	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
 
 private:

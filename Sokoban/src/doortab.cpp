@@ -8,7 +8,7 @@
 #include "editorstate.h"
 #include "doorselectstate.h"
 
-DoorTab::DoorTab(EditorState* editor, GraphicsManager* gfx): EditorTab(editor, gfx),
+DoorTab::DoorTab(EditorState* editor): EditorTab(editor),
 entrance_ {}, exit_room_ {}, exit_pos_ {-1,-1,-1} {}
 
 DoorTab::~DoorTab() {}
@@ -69,7 +69,7 @@ void DoorTab::main_loop(EditorRoom* eroom) {
     ImGui::Text(("Destination room: " + exit_room_->name()).c_str());
 
     if (ImGui::Button("Select Destination Position##DOOR")) {
-        auto select_state = std::make_unique<DoorSelectState>(exit_room_->room.get(), exit_room_->start_pos, &exit_pos_);
+        auto select_state = std::make_unique<DoorSelectState>(editor_, exit_room_->room.get(), exit_room_->start_pos, &exit_pos_);
         editor_->create_child(std::move(select_state));
     }
 

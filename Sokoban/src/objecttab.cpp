@@ -14,8 +14,8 @@
 #include "gatebody.h"
 #include "gate.h"
 
-ObjectTab::ObjectTab(EditorState* editor, GraphicsManager* gfx) :
-	EditorTab(editor, gfx),
+ObjectTab::ObjectTab(EditorState* editor) :
+	EditorTab(editor),
 	map_{} {}
 
 ObjectTab::~ObjectTab() {}

@@ -9,7 +9,7 @@ class Door;
 
 class DoorSelectState: public EditorBaseState {
 public:
-    DoorSelectState(Room*, Point3 cam_pos, Point3* exit_pos);
+    DoorSelectState(GameState* parent, Room*, Point3 cam_pos, Point3* exit_pos);
     ~DoorSelectState();
     void main_loop();
 

@@ -32,7 +32,7 @@ const std::unordered_map<int, Point3> MOVEMENT_KEYS{
 PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 	room{ std::move(arg_room) } {}
 
-PlayingState::PlayingState() : GameState() {}
+PlayingState::PlayingState(GameState* parent) : GameState(parent) {}
 
 PlayingState::~PlayingState() {}
 
@@ -95,7 +95,7 @@ void PlayingState::handle_input() {
 	}
 	// You can pause with any cooldown, but not in a move
 	if (glfwGetKey(window_, GLFW_KEY_P) == GLFW_PRESS) {
-		create_child(std::make_unique<PauseState>(gfx_, this, global_.get()));
+		create_child(std::make_unique<PauseState>(this));
 		return;
 	}
 	if (input_cooldown > 0) {
@@ -156,12 +156,12 @@ bool PlayingState::activate_room(std::string name) {
 	Room* new_room = proom->room.get();
 	if (room_ != new_room) {
 		new_room->zone_label_->init();
-		gfx_->toggle_string_drawer(new_room->zone_label_.get(), true);
+		text_->toggle_string_drawer(new_room->zone_label_.get(), true);
 		// Remove the old labels (if there's more cleanup than this, it should be its own method)
 		if (room_) {
-			gfx_->toggle_string_drawer(room_->zone_label_.get(), false);
+			text_->toggle_string_drawer(room_->zone_label_.get(), false);
 			if (auto* context_label = room_->context_label_.get()) {
-				gfx_->toggle_string_drawer(context_label, false);
+				text_->toggle_string_drawer(context_label, false);
 			}
 		}
 		room_ = new_room;
@@ -173,7 +173,7 @@ bool PlayingState::activate_room(std::string name) {
 void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();
-	auto room = std::make_unique<Room>(gfx_, name);
+	auto room = std::make_unique<Room>(this, name);
 	if (use_default_player) {
 		Player* loaded_player{};
 		room->load_from_file(*objs_, file, global_.get(), &loaded_player);

@@ -12,7 +12,7 @@ static double VERT_ANGLE;
 // 2*width_factor*radius = width of visible rectangle
 static double WIDTH_FACTOR;
 
-CameraTab::CameraTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx),
+CameraTab::CameraTab(EditorState* editor) : EditorTab(editor),
 label_{}, rect_{}, vis_{}, priority_{10},
 rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT } {
 	VERT_ANGLE = FOV_VERTICAL / 2.0;

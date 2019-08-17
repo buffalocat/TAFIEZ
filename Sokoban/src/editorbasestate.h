@@ -9,7 +9,7 @@ class RoomMap;
 
 class EditorBaseState: public GameState {
 public:
-    EditorBaseState();
+    EditorBaseState(GameState* parent);
     virtual ~EditorBaseState();
 
     void display_hover_pos_object(Point3 cam_pos, RoomMap* map);

@@ -29,7 +29,7 @@ ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer
 
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	window_{ window } {
-	fonts_ = std::make_unique<FontManager>(text_shader_);
+	fonts_ = std::make_unique<FontManager>(&text_shader_);
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
@@ -74,7 +74,7 @@ void GraphicsManager::set_light_source(glm::vec3 dir) {
 	instanced_shader_.setVec3("lightSource", dir);
 }
 
-void GraphicsManager::draw_world() {
+void GraphicsManager::draw() {
 	cube.draw();
 	top_cube.draw();
 	diamond.draw();
@@ -82,8 +82,20 @@ void GraphicsManager::draw_world() {
 	wall.draw();
 }
 
-void GraphicsManager::draw_text() {
-	text_shader_.use();
+TextRenderer::TextRenderer(FontManager* fonts) :
+	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {}
+
+// These StringDrawers are self-owning, so we have to kill them here
+TextRenderer::~TextRenderer() {
+	for (auto& p : string_drawers_) {
+		if (p.alive_) {
+			p.drawer_->cleanup();
+		}
+	}
+}
+
+void TextRenderer::draw() {
+	text_shader_->use();
 	std::vector<ProtectedStringDrawer> new_drawers{};
 	for (auto& p : string_drawers_) {
 		if (p.alive_) {
@@ -99,7 +111,7 @@ void GraphicsManager::draw_text() {
 	string_drawers_ = std::move(new_drawers);
 }
 
-void GraphicsManager::toggle_string_drawer(StringDrawer* drawer, bool active) {
+void TextRenderer::toggle_string_drawer(StringDrawer* drawer, bool active) {
 	if (active) {
 		string_drawers_.push_back(ProtectedStringDrawer(drawer));
 	} else {

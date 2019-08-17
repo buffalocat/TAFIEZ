@@ -24,7 +24,7 @@
 
 #include "colorcycle.h"
 
-ModifierTab::ModifierTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx) {}
+ModifierTab::ModifierTab(EditorState* editor) : EditorTab(editor) {}
 
 ModifierTab::~ModifierTab() {}
 

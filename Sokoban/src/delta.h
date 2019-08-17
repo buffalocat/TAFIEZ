@@ -19,7 +19,7 @@ class GateBody;
 class ClearFlag;
 class WorldResetKey;
 class FloorSign;
-class GraphicsManager;
+class TextRenderer;
 
 enum class RidingState;
 
@@ -301,14 +301,13 @@ private:
 
 class SignToggleDelta : public Delta {
 public:
-	SignToggleDelta(FloorSign* sign, GraphicsManager* gfx, bool state);
+	SignToggleDelta(FloorSign* sign, TextRenderer* text);
 	~SignToggleDelta();
 	void revert();
 
 private:
 	FloorSign* sign_;
-	GraphicsManager* gfx_;
-	bool state_;
+	TextRenderer* text_;
 };
 
 class MapInitDelta : public Delta {

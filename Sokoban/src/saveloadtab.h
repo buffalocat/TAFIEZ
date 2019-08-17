@@ -6,7 +6,7 @@
 
 class SaveLoadTab: public EditorTab {
 public:
-    SaveLoadTab(EditorState*, GraphicsManager*);
+    SaveLoadTab(EditorState*);
     ~SaveLoadTab();
 
     void main_loop(EditorRoom*);

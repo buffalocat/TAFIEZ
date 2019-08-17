@@ -5,7 +5,7 @@ class RoomMap;
 
 class RoomTab :	public EditorTab {
 public:
-	RoomTab(EditorState* editor, GraphicsManager* gfx);
+	RoomTab(EditorState* editor);
 	~RoomTab();
 
 	void main_loop(EditorRoom*);

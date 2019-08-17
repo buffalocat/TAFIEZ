@@ -279,13 +279,13 @@ void GlobalFlagDelta::revert() {
 }
 
 
-SignToggleDelta::SignToggleDelta(FloorSign* sign, GraphicsManager* gfx, bool state) :
-	Delta(), sign_{ sign }, gfx_{ gfx }, state_{ state } {}
+SignToggleDelta::SignToggleDelta(FloorSign* sign, TextRenderer* text) :
+	Delta(), sign_{ sign }, text_{ text } {}
 
 SignToggleDelta::~SignToggleDelta() {}
 
 void SignToggleDelta::revert() {
-	sign_->toggle_displaying_text(state_, gfx_, nullptr);
+	sign_->toggle_active(text_, nullptr);
 }
 
 

@@ -25,7 +25,7 @@
 
 
 #define INIT_TAB(NAME)\
-tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this, gfx)));
+tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this)));
 
 EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos):
 room {std::move(arg_room)}, start_pos {pos}, cam_pos {pos} {}
@@ -38,7 +38,7 @@ std::string EditorRoom::name() {
     return room->name();
 }
 
-EditorState::EditorState(GraphicsManager* gfx): EditorBaseState() {
+EditorState::EditorState(GameState* parent): EditorBaseState(parent) {
     INIT_TAB(SaveLoad);
 	INIT_TAB(Room);
     INIT_TAB(Object);
@@ -162,7 +162,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
         std::cout << "A room with that name is already loaded!" << std::endl;
         return;
     }
-    auto room = std::make_unique<Room>(gfx_, name);
+    auto room = std::make_unique<Room>(this, name);
     room->initialize(*objs_, nullptr, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
     room->map()->create_in_map(std::make_unique<Player>(player_pos, RidingState::Free), false, nullptr);
@@ -188,7 +188,7 @@ bool EditorState::load_room(std::string name, bool from_main) {
 void EditorState::load_room_from_path(std::filesystem::path path) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();
-	std::unique_ptr<Room> room = std::make_unique<Room>(gfx_, name);
+	std::unique_ptr<Room> room = std::make_unique<Room>(this, name);
 
 	Player* player = nullptr;
 	room->load_from_file(*objs_, file, nullptr, &player);
@@ -261,7 +261,7 @@ void EditorState::begin_test() {
             save_room(p.second.get(), false);
         }
     }
-    auto playing_state_unique = std::make_unique<TestPlayingState>();
+    auto playing_state_unique = std::make_unique<TestPlayingState>(this);
 	auto playing_state = playing_state_unique.get();
     create_child(std::move(playing_state_unique));
 	playing_state->init(active_room_->room->name());

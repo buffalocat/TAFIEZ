@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "roommap.h"
 
+#include "playingstate.h"
 #include "gameobjectarray.h"
 #include "gameobject.h"
 #include "graphicsmanager.h"
@@ -18,10 +19,13 @@
 #include "clearflag.h"
 #include "savefile.h"
 
-RoomMap::RoomMap(GameObjectArray& obj_array, PlayingGlobalData* global, GraphicsManager* gfx,
+RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	int width, int height, int depth) :
-	obj_array_{ obj_array }, global_{ global }, gfx_{ gfx },
+	obj_array_{ obj_array }, state_{ state },
 	width_{ width }, height_{ height }, depth_{ depth } {
+	if (auto* ps = dynamic_cast<PlayingState*>(state)) {
+		global_ = ps->global_.get();
+	}
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
 	}
@@ -510,4 +514,8 @@ void RoomMap::uncollect_flag(int req) {
 
 void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
 	effects_->push_trail(block, height, drop);
+}
+
+TextRenderer* RoomMap::text_renderer() {
+	return state_->text_.get();
 }

@@ -4,7 +4,6 @@
 class StringDrawer;
 class Font;
 class PlayingState;
-class PlayingGlobalData;
 
 template <class State>
 using MenuCallback = void(State::*)();
@@ -43,7 +42,7 @@ private:
 
 class PauseState : public GameState {
 public:
-	PauseState(GraphicsManager* gfx, PlayingState* parent, PlayingGlobalData* global);
+	PauseState(GameState* parent);
 	~PauseState();
 
 	void main_loop();

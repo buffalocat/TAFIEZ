@@ -9,7 +9,7 @@ class RoomMap;
 
 class ObjectTab: public EditorTab {
 public:
-    ObjectTab(EditorState*, GraphicsManager*);
+    ObjectTab(EditorState*);
     ~ObjectTab();
 
     void init();

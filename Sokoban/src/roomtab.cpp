@@ -7,7 +7,7 @@
 #include "gameobject.h"
 #include "savefile.h"
 
-RoomTab::RoomTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx) {}
+RoomTab::RoomTab(EditorState* editor) : EditorTab(editor) {}
 
 RoomTab::~RoomTab() {}
 

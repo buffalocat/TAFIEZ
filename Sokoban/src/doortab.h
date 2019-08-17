@@ -11,7 +11,7 @@ class Door;
 
 class DoorTab: public EditorTab {
 public:
-    DoorTab(EditorState*, GraphicsManager*);
+    DoorTab(EditorState*);
     ~DoorTab();
 
     void init();

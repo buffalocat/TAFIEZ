@@ -24,7 +24,7 @@ public:
 protected:
 	std::vector<TextVertex> vertices_{};
 	glm::vec4 color_;
-	Shader shader_;
+	Shader* shader_;
 	GLuint VAO_, VBO_, tex_;
 	float width_;
 	bool* alive_ptr_{};

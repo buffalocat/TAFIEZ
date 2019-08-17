@@ -11,7 +11,7 @@
 #include "editorstate.h"
 #include "player.h"
 
-SaveLoadTab::SaveLoadTab(EditorState* editor, GraphicsManager* gfx) : EditorTab(editor, gfx) {}
+SaveLoadTab::SaveLoadTab(EditorState* editor) : EditorTab(editor) {}
 
 SaveLoadTab::~SaveLoadTab() {}
 

@@ -5,10 +5,11 @@
 
 class PlayingGlobalData;
 class SaveFile;
+class FontManager;
 
 class RealPlayingState: public PlayingState {
 public:
-    RealPlayingState(std::unique_ptr<SaveFile> save);
+    RealPlayingState(std::unique_ptr<SaveFile> save, GameState* parent);
     virtual ~RealPlayingState();
 
 	void start_from_map(std::string starting_map);

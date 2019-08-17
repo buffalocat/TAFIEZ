@@ -8,7 +8,7 @@ enum class CameraCode;
 
 class CameraTab : public EditorTab {
 public:
-	CameraTab(EditorState*, GraphicsManager*);
+	CameraTab(EditorState*);
 	~CameraTab();
 	void init();
 	void main_loop(EditorRoom*);

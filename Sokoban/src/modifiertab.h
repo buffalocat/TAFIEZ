@@ -7,7 +7,7 @@ class ColorCycle;
 
 class ModifierTab: public EditorTab {
 public:
-    ModifierTab(EditorState*, GraphicsManager*);
+    ModifierTab(EditorState*);
     ~ModifierTab();
     void init();
     void main_loop(EditorRoom*);

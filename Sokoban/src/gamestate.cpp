@@ -5,23 +5,22 @@
 
 GameState::GameState() {}
 
+GameState::GameState(GameState* parent) :
+	parent_{},
+	gfx_{ parent->gfx_ },
+	text_{ std::make_unique<TextRenderer>(parent->gfx_->fonts_.get()) },
+	window_{ parent->window_ },	
+	current_state_ptr_{ parent->current_state_ptr_ } {}
+
 GameState::~GameState() {}
 
 void GameState::create_child(std::unique_ptr<GameState> child) {
-    child->parent_ = std::move(*current_state_ptr_);
-    child->gfx_ = gfx_;
-    child->window_ = window_;
-    child->current_state_ptr_ = current_state_ptr_;
-    *current_state_ptr_ = std::move(child);
+	child->parent_ = std::move(*current_state_ptr_);
+	*current_state_ptr_ = std::move(child);
 }
 
 void GameState::defer_to_parent() {
     *current_state_ptr_ = std::move(parent_);
-}
-
-void GameState::set_graphics(GraphicsManager* gfx) {
-    gfx_ = gfx;
-    window_ = gfx->window();
 }
 
 void GameState::set_csp(std::unique_ptr<GameState>* csp) {

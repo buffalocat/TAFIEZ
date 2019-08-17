@@ -5,6 +5,7 @@
 #include "maplayer.h"
 #include "camera.h"
 
+#include "gamestate.h"
 #include "graphicsmanager.h"
 #include "fontmanager.h"
 #include "stringdrawer.h"
@@ -35,7 +36,7 @@
 
 #include "savefile.h"
 
-Room::Room(GraphicsManager* gfx, std::string name) : gfx_{ gfx }, name_ { name } {}
+Room::Room(GameState* state, std::string name) : state_{ state }, gfx_ { state->gfx_ }, name_{ name } {}
 
 Room::~Room() {}
 
@@ -44,7 +45,7 @@ std::string const Room::name() {
 }
 
 void Room::initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d) {
-	map_ = std::make_unique<RoomMap>(objs, global, gfx_, w, h, d);
+	map_ = std::make_unique<RoomMap>(objs, state_, w, h, d);
 	camera_ = std::make_unique<Camera>(w, h);
 }
 
@@ -54,7 +55,7 @@ void Room::set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap
 			context_label_ = std::make_unique<RoomLabelDrawer>(
 				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72), COLOR_VECTORS[DARK_BLUE],
 				camera_->active_label_, 0.65f);
-			gfx_->toggle_string_drawer(context_label_.get(), true);
+			state_->text_->toggle_string_drawer(context_label_.get(), true);
 		}
 	}
 	camera_->set_target(rpos);
@@ -93,8 +94,8 @@ void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool
 	} else {
 		map_->draw(gfx_, camera_->get_rotation());
 	}
-	gfx_->draw_world();
-	gfx_->draw_text();
+	gfx_->draw();
+	state_->text_->draw();
 }
 
 void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {

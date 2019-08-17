@@ -17,7 +17,7 @@ enum class SignalerType {
 
 class SwitchTab: public EditorTab {
 public:
-    SwitchTab(EditorState*, GraphicsManager*);
+    SwitchTab(EditorState*);
     ~SwitchTab();
 
     void init();

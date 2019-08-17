@@ -24,7 +24,7 @@ struct EditorRoom {
 
 class EditorState: public EditorBaseState {
 public:
-    EditorState(GraphicsManager* gfx);
+    EditorState(GameState* parent);
     virtual ~EditorState();
     void main_loop();
 

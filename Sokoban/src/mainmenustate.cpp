@@ -8,6 +8,8 @@
 
 MainMenuState::MainMenuState() : GameState(), menu_type_{ Menu::Top } {}
 
+MainMenuState::MainMenuState(GameState* parent) : GameState(parent), menu_type_{ Menu::Top } {}
+
 MainMenuState::~MainMenuState() {}
 
 void MainMenuState::main_loop() {
@@ -20,7 +22,7 @@ void MainMenuState::main_loop() {
 	switch (menu_type_) {
 	case Menu::Top:
 		if (ImGui::Button("Open Editor##MAINMENU")) {
-			create_child(std::make_unique<EditorState>(gfx_));
+			create_child(std::make_unique<EditorState>(this));
 		}
 		if (ImGui::Button("Start New File##MAINMENU")) {
 			menu_type_ = Menu::New;
@@ -37,7 +39,7 @@ void MainMenuState::main_loop() {
 			auto savefile_dir = "1";
 			auto savefile = std::make_unique<SaveFile>(savefile_dir);
 			if (savefile->create()) {
-				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile));
+				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile), this);
 				auto playing_state = playing_state_unique.get();
 				create_child(std::move(playing_state_unique));
 				playing_state->start_from_map(NEW_FILE_START_MAP);
@@ -54,7 +56,7 @@ void MainMenuState::main_loop() {
 			auto savefile_dir = "1";
 			auto savefile = std::make_unique<SaveFile>(savefile_dir);
 			if (savefile->load_meta()) {
-				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile));
+				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile), this);
 				auto playing_state = playing_state_unique.get();
 				create_child(std::move(playing_state_unique));
 				playing_state->load_most_recent_subsave();

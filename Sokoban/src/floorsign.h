@@ -2,6 +2,7 @@
 #include "objectmodifier.h"
 
 class SignTextDrawer;
+class TextRenderer;
 
 class FloorSign : public ObjectModifier {
 public:
@@ -21,14 +22,15 @@ public:
 	void setup_on_put(RoomMap*, bool real);
 	void cleanup_on_take(RoomMap*, bool real);
 
-	void toggle_displaying_text(bool should_display_text, GraphicsManager* gfx, DeltaFrame* delta_frame);
+	void set_text_state(bool state, TextRenderer* text);
+	void toggle_active(TextRenderer* text, DeltaFrame* delta_frame);
 
 	void draw(GraphicsManager* gfx, FPoint3 pos);
 
 private:
 	std::string content_;
 	SignTextDrawer* drawer_instance_{};
-	bool showing_text_;
+	bool active_;
 
 	friend class SignToggleDelta;
 	friend class ModifierTab;

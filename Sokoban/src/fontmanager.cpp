@@ -3,7 +3,7 @@
 #include "common_constants.h"
 #include "color_constants.h"
 
-FontManager::FontManager(Shader text_shader) :
+FontManager::FontManager(Shader* text_shader) :
 	text_shader_{ text_shader } {
 	if (FT_Init_FreeType(&ft_)) {
 		std::cout << "Failed to initialize FreeType" << std::endl;
@@ -16,7 +16,7 @@ Font* FontManager::get_font(std::string path, unsigned int size) {
 	auto key = std::make_pair(path, size);
 	auto& font = fonts_[key];
 	if (!font) {
-		text_shader_.use();
+		text_shader_->use();
 		font = make_font(path, size);
 	}
 	return font.get();
@@ -26,7 +26,7 @@ std::unique_ptr<Font> FontManager::make_font(std::string path, unsigned int font
 	return std::make_unique<Font>(ft_, text_shader_, path, font_size);
 }
 
-Font::Font(FT_Library ft, Shader text_shader, std::string path, unsigned int font_size) :
+Font::Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size) :
 	shader_{ text_shader },
 	tex_width_{ 1 << 9 }, tex_height_{ 1 << 9 }, font_size_{ font_size } {
 	if (FT_New_Face(ft, path.c_str(), 0, &face_)) {

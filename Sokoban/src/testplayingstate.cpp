@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "testplayingstate.h"
 
+#include "graphicsmanager.h"
 #include "room.h"
 #include "roommap.h"
 #include "player.h"
 #include "car.h"
 
-TestPlayingState::TestPlayingState() : PlayingState() {}
+TestPlayingState::TestPlayingState(GameState* parent) : PlayingState(parent) {}
 
 TestPlayingState::~TestPlayingState() {}
 

@@ -37,7 +37,7 @@ void StringDrawer::set_color(glm::vec4 color) {
 
 
 void StringDrawer::render() {
-	shader_.setVec4("color", color_);
+	shader_->setVec4("color", color_);
 	glBindVertexArray(VAO_);
 	glBindTexture(GL_TEXTURE_2D, tex_);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices_.size());

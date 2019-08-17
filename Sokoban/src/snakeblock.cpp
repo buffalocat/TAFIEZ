@@ -307,7 +307,6 @@ void SnakeBlock::setup_on_put(RoomMap* map, bool real) {
 			link->add_link_one_way(this);
 		}
 	}
-	
 	if (modifier_) {
 		modifier_->setup_on_put(map, real);
 	}

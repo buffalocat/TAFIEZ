@@ -3,6 +3,7 @@
 
 #include "point.h"
 
+class GameState;
 class DeltaFrame;
 class GameObjectArray;
 class GraphicsManager;
@@ -17,7 +18,7 @@ class RoomLabelDrawer;
 
 class Room {
 public:
-    Room(GraphicsManager* gfx, std::string name);
+    Room(GameState* state, std::string name);
     ~Room();
     std::string const name();
     void initialize(GameObjectArray& objs, PlayingGlobalData* global, int w, int h, int d);
@@ -48,6 +49,7 @@ private:
 	std::unique_ptr<Camera> camera_{};
 	std::string name_;
 
+	GameState* state_;
 	GraphicsManager* gfx_;
 
     void read_objects(MapFileI& file, Player** player_ptr);

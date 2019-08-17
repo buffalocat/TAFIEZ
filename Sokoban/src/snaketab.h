@@ -5,7 +5,7 @@
 
 class SnakeTab: public EditorTab {
 public:
-    SnakeTab(EditorState*, GraphicsManager*);
+    SnakeTab(EditorState*);
     ~SnakeTab();
 
     void init();
