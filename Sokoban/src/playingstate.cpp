@@ -102,9 +102,7 @@ void PlayingState::handle_input() {
 		return;
 	}
 	RoomMap* map = room_->map();
-	// TODO: Make a real "death" flag/state
-	// Don't allow other input if player is "dead"
-	if (!dynamic_cast<Player*>(map->view(player_->pos_))) {
+	if (player_->state() == PlayerState::Dead) {
 		return;
 	}
 	// Process normal gameplay input

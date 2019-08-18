@@ -30,11 +30,12 @@ public:
 	FPoint3 cam_pos();
 	
 	void set_free(DeltaFrame* delta_frame);
-	void set_strictest(RoomMap* map);
 	void validate_state(RoomMap* map);
-	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
 
-	bool bound();
+	void set_strictest(RoomMap* map, DeltaFrame*);
+	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
+	void destroy(DeltaFrame*);
+
     Car* car_riding();
 	Car* car_bound(RoomMap* map);
 
@@ -46,6 +47,7 @@ public:
 
 private:
 	void set_bound();
+	void set_car(Car* car);
 
 	Car* car_;
 	PlayerState state_;

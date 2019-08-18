@@ -80,6 +80,12 @@ void GameObject::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
+void GameObject::destroy(DeltaFrame* delta_frame) {
+	if (modifier_) {
+		modifier_->destroy(delta_frame);
+	}
+}
+
 void GameObject::set_modifier(std::unique_ptr<ObjectModifier> mod) {
 	modifier_ = std::move(mod);
 }

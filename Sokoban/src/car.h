@@ -4,6 +4,8 @@
 #include "objectmodifier.h"
 #include "colorcycle.h"
 
+class Player;
+
 enum class CarType {
 	Normal = 0,
 	Locked = 1,
@@ -24,10 +26,17 @@ public:
 
 	virtual BlockTexture texture();
 
-    void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
+	void shift_internal_pos(Point3 d);
 
     bool cycle_color(bool undo);
 	int next_color();
+
+	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
+
+	void cleanup_on_take(RoomMap* map, bool real);
+	void setup_on_put(RoomMap* map, bool real);
+	void destroy(DeltaFrame*);
 
 	void draw(GraphicsManager* gfx, FPoint3 p);
 
@@ -35,6 +44,8 @@ public:
 	
 	CarType type_;
     ColorCycle color_cycle_;
+
+	Player* player_{};
 };
 
 #endif // CAR_H

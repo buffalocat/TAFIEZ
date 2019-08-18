@@ -215,7 +215,7 @@ PlayerStateDelta::~PlayerStateDelta() {}
 
 void PlayerStateDelta::revert() {
 	player_->state_ = state_;
-	player_->car_ = car_;
+	player_->set_car(car_);
 }
 
 

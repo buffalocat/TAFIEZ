@@ -377,7 +377,8 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);
 					}
-					// The middle block couldn't be split; split around instead
+					cur->destroy(delta_frame_);
+				// The middle block couldn't be split; split around instead
 				} else {
 					std::vector<SnakeBlock*> links = cur->links_;
 					link_add_check_.insert(cur);

@@ -41,6 +41,7 @@ public:
 
     virtual void setup_on_put(RoomMap*, bool real);
     virtual void cleanup_on_take(RoomMap*, bool real);
+	virtual void destroy(DeltaFrame*);
 
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
 

@@ -221,7 +221,7 @@ void EditorState::save_room(EditorRoom* eroom, bool commit) {
     MapFileO file{path};
 	RoomMap* map = eroom->map();
 	Player* player = dynamic_cast<Player*>(map->view(eroom->start_pos));
-	player->set_strictest(map);
+	player->set_strictest(map, nullptr);
     eroom->room->write_to_file(file);
 	player->set_free(nullptr);
 }

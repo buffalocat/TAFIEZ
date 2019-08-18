@@ -47,7 +47,7 @@ void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 }
 
 void Gate::shift_internal_pos(Point3 d) {
-	if ((body_ != nullptr) && !state()) {
+	if (body_ && !state()) {
 		body_->shift_internal_pos(d);
 	}
 }
@@ -83,7 +83,6 @@ void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp
 		if (!state()) {
 			body_->abstract_shift(dpos, delta_frame);
 		}
-		// Is there a need to do this if the body is destroyed?
 		check_waiting(map, delta_frame, mp);
 	}
 }
