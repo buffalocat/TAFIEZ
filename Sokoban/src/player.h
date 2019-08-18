@@ -3,11 +3,21 @@
 
 #include "gameobject.h"
 
+class MoveProcessor;
+
+enum class PlayerState {
+    Free = 1,
+    Bound = 2,
+    RidingNormal = 3,
+	RidingHidden = 4,
+	Dead = 5,
+};
+
 class Car;
 
 class Player: public GameObject {
 public:
-    Player(Point3 pos, RidingState state);
+    Player(Point3 pos, PlayerState state);
     virtual ~Player();
 
 	void serialize(MapFileO& file);
@@ -22,7 +32,7 @@ public:
 	void set_free();
 	void set_strictest(RoomMap* map);
 	void validate_state(RoomMap* map);
-	void toggle_riding(RoomMap* map, DeltaFrame*);
+	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
 
 	bool bound();
     Car* car_riding();
@@ -32,14 +42,16 @@ public:
 
     void draw(GraphicsManager*);
 
+	PlayerState state();
+
 private:
 	void set_bound();
 	void set_riding(Car*);
 
 	Car* car_;
-    RidingState state_;
+	PlayerState state_;
 
-	friend class RidingStateDelta;
+	friend class PlayerStateDelta;
 };
 
 #endif // PLAYER_H

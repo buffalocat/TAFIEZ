@@ -28,7 +28,8 @@ enum class ObjCode;
 enum class ModCode;
 enum class CameraCode;
 enum class Sticky;
-enum class RidingState;
+enum class PlayerState;
+enum class CarType;
 
 class MapFileI {
 public:
@@ -60,7 +61,6 @@ MapFileI& operator>>(MapFileI& f, FloatRect& v);
 MapFileI& operator>>(MapFileI& f, ColorCycle& v);
 
 
-
 class MapFileO {
 public:
     MapFileO(const std::filesystem::path& path);
@@ -90,7 +90,8 @@ public:
     MapFileO& operator<<(ModCode);
     MapFileO& operator<<(CameraCode);
     MapFileO& operator<<(Sticky);
-    MapFileO& operator<<(RidingState);
+    MapFileO& operator<<(PlayerState);
+	MapFileO& operator<<(CarType);
 
 private:
     std::ofstream file_;

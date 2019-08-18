@@ -109,13 +109,17 @@ void PlayingState::handle_input() {
 	}
 	// Process normal gameplay input
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
-		player_->toggle_riding(map, delta_frame_.get());
-		input_cooldown = MAX_COOLDOWN;
-		return;
+		create_move_processor();
+		if (move_processor_->try_toggle_riding()) {
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		} else {
+			move_processor_.reset(nullptr);
+		}
 	}
 	if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-		move_processor_ = std::make_unique<MoveProcessor>(this, map, delta_frame_.get(), player_, true);
-		if (move_processor_->color_change()) {
+		create_move_processor();
+		if (move_processor_->try_color_change()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
 		} else {
@@ -124,7 +128,7 @@ void PlayingState::handle_input() {
 	}
 	for (auto p : MOVEMENT_KEYS) {
 		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
-			move_processor_ = std::make_unique<MoveProcessor>(this, map, delta_frame_.get(), player_, true);
+			create_move_processor();
 			// p.second is direction of movement
 			if (!move_processor_->try_move(p.second)) {
 				move_processor_.reset(nullptr);
@@ -135,6 +139,10 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
+}
+
+void PlayingState::create_move_processor() {
+	move_processor_ = std::make_unique<MoveProcessor>(this, room_->map(), delta_frame_.get(), player_, true);
 }
 
 Room* PlayingState::active_room() {
@@ -169,7 +177,6 @@ bool PlayingState::activate_room(std::string name) {
 	return true;
 }
 
-// TODO: use a real deltaframe in set_initial_state here!
 void PlayingState::load_room_from_path(std::filesystem::path path, bool use_default_player) {
 	MapFileI file{ path };
 	std::string name = path.stem().string();

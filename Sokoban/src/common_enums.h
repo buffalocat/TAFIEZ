@@ -50,10 +50,4 @@ enum class Sticky {
 
 Sticky operator &(Sticky a, Sticky b);
 
-enum class RidingState {
-    Free = 1,
-    Bound = 2,
-    Riding = 3,
-};
-
 #endif // COMMON_ENUMS_H

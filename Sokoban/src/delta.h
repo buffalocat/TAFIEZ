@@ -21,7 +21,7 @@ class WorldResetKey;
 class FloorSign;
 class TextRenderer;
 
-enum class RidingState;
+enum class PlayerState;
 
 class Delta {
 public:
@@ -221,16 +221,16 @@ private:
 };
 
 
-class RidingStateDelta : public Delta {
+class PlayerStateDelta : public Delta {
 public:
-	RidingStateDelta(Player* player, Car* car, RidingState state);
-	~RidingStateDelta();
+	PlayerStateDelta(Player* player, Car* car, PlayerState state);
+	~PlayerStateDelta();
 	void revert();
 
 private:
 	Player* player_;
 	Car* car_;
-	RidingState state_;
+	PlayerState state_;
 };
 
 

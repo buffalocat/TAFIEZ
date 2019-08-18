@@ -9,7 +9,7 @@
 #include "graphicsmanager.h"
 
 
-Car::Car(GameObject* parent, ColorCycle color_cycle): ObjectModifier(parent), color_cycle_ {color_cycle} {}
+Car::Car(GameObject* parent, CarType type, ColorCycle color_cycle) : ObjectModifier(parent), type_{ type }, color_cycle_{ color_cycle } {}
 
 Car::~Car() {}
 
@@ -22,13 +22,14 @@ ModCode Car::mod_code() {
 }
 
 void Car::serialize(MapFileO& file) {
-    file << color_cycle_;
+    file << type_ << color_cycle_;
 }
 
 void Car::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+	CarType type = static_cast<CarType>(file.read_byte());
     ColorCycle color_cycle;
     file >> color_cycle;
-    parent->set_modifier(std::make_unique<Car>(parent, color_cycle));
+    parent->set_modifier(std::make_unique<Car>(parent, type, color_cycle));
 }
 
 bool Car::valid_parent(GameObject* obj) {
@@ -36,7 +37,16 @@ bool Car::valid_parent(GameObject* obj) {
 }
 
 BlockTexture Car::texture() {
-	return BlockTexture::Car;
+	switch (type_) {
+	case CarType::Locked:
+		return BlockTexture::LockedCar;
+	case CarType::Normal:
+		return BlockTexture::NormalCar;
+	case CarType::Convertible:
+		return BlockTexture::ConvertibleCar;
+	default:
+		return BlockTexture::Default;
+	}
 }
 
 void Car::collect_sticky_links(RoomMap* map, Sticky, std::vector<GameObject*>& to_check) {

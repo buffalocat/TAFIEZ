@@ -177,7 +177,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
     auto room = std::make_unique<Room>(this, name);
     room->initialize(*objs_, width, height, depth);
 	Point3 player_pos{ 0,0,2 };
-    room->map()->create_in_map(std::make_unique<Player>(player_pos, RidingState::Free), false, nullptr);
+    room->map()->create_in_map(std::make_unique<Player>(player_pos, PlayerState::Free), false, nullptr);
 	room->set_cam_pos(player_pos, player_pos, false, true);
     rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos);
     set_active_room(name);

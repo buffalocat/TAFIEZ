@@ -236,9 +236,14 @@ MapFileO& MapFileO::operator<<(Sticky sticky) {
     return *this;
 }
 
-MapFileO& MapFileO::operator<<(RidingState state) {
+MapFileO& MapFileO::operator<<(PlayerState state) {
     file_ << (unsigned char) state;
     return *this;
+}
+
+MapFileO& MapFileO::operator<<(CarType state) {
+	file_ << (unsigned char)state;
+	return *this;
 }
 
 MapFileO& MapFileO::operator<<(const ColorCycle& color) {

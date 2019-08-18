@@ -32,7 +32,7 @@ ModifierTab::~ModifierTab() {}
 static ModCode mod_code = ModCode::NONE;
 
 // Model objects that new objects are created from
-static Car model_car{ nullptr, {} };
+static Car model_car{ nullptr, CarType::Normal, {} };
 static Door model_door{ nullptr, 0, false, true, false };
 static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false };
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
@@ -97,6 +97,9 @@ void ModifierTab::mod_tab_options() {
 		ImGui::Text("Car");
 		Car* car = mod ? static_cast<Car*>(mod) : &model_car;
 		ColorCycle* color_cycle = car ? &car->color_cycle_ : &model_color_cycle;
+		ImGui::RadioButton("Normal Car##MOD_CAR_type", &car->type_, CarType::Normal);
+		ImGui::RadioButton("Locked Car##MOD_CAR_type", &car->type_, CarType::Locked);
+		ImGui::RadioButton("Convertible##MOD_CAR_type", &car->type_, CarType::Convertible);
 		select_color_cycle(color_cycle);
 		break;
 	}
@@ -104,19 +107,19 @@ void ModifierTab::mod_tab_options() {
 	{
 		ImGui::Text("Door");
 		Door* door = mod ? static_cast<Door*>(mod) : &model_door;
-		ImGui::Checkbox("Persistent?##DOOR_persistent", &door->persistent_);
-		ImGui::Checkbox("Active by Default?##DOOR_default", &door->default_);
+		ImGui::Checkbox("Persistent?##MOD_DOOR_persistent", &door->persistent_);
+		ImGui::Checkbox("Active by Default?##MOD_DOOR_default", &door->default_);
 		break;
 	}
 	case ModCode::Gate:
 	{
 		ImGui::Text("Gate");
 		Gate* gate = mod ? static_cast<Gate*>(mod) : &model_gate;
-		ImGui::Checkbox("Persistent?##GATE_persistent", &gate->persistent_);
+		ImGui::Checkbox("Persistent?##MOD_GATE_persistent", &gate->persistent_);
 		ImGui::Checkbox("Active by Default?##GATE_default", &gate->default_);
 		gate->active_ = gate->default_;
 		gate->waiting_ = gate->default_;
-		ImGui::InputInt("color##PRESS_SWITCH_modify_COLOR", &gate->color_);
+		ImGui::InputInt("color##MOD_PRESS_SWITCH_modify_COLOR", &gate->color_);
 		color_button(gate->color_);
 		break;
 	}
@@ -124,8 +127,8 @@ void ModifierTab::mod_tab_options() {
 	{
 		ImGui::Text("PressSwitch");
 		PressSwitch* ps = mod ? static_cast<PressSwitch*>(mod) : &model_press_switch;
-		ImGui::Checkbox("Persistent?##PRESS_SWITCH_persistent", &ps->persistent_);
-		ImGui::InputInt("color##PRESS_SWITCH_modify_COLOR", &ps->color_);
+		ImGui::Checkbox("Persistent?##MOD_PRESS_SWITCH_persistent", &ps->persistent_);
+		ImGui::InputInt("color##MOD_PRESS_SWITCH_modify_COLOR", &ps->color_);
 		color_button(ps->color_);
 		break;
 	}
@@ -133,7 +136,7 @@ void ModifierTab::mod_tab_options() {
 	{
 		ImGui::Text("PermanentSwitch");
 		PermanentSwitch* ps = mod ? static_cast<PermanentSwitch*>(mod) : &model_perm_switch;
-		ImGui::InputInt("color##PERMANENT_SWITCH_modify_COLOR", &ps->color_);
+		ImGui::InputInt("color##MOD_PERMANENT_SWITCH_modify_COLOR", &ps->color_);
 		color_button(ps->color_);
 		break;
 	}
@@ -141,7 +144,7 @@ void ModifierTab::mod_tab_options() {
 	{
 		ImGui::Text("ClearFlag");
 		ClearFlag* cf = mod ? static_cast<ClearFlag*>(mod) : &model_clear_flag;
-		ImGui::Checkbox("Real?##CLEAR_FLAG_real", &cf->real_);
+		ImGui::Checkbox("Real?##MOD_CLEAR_FLAG_real", &cf->real_);
 		break;
 	}
 	case ModCode::FloorSign:
@@ -150,7 +153,7 @@ void ModifierTab::mod_tab_options() {
 		FloorSign* sign = mod ? static_cast<FloorSign*>(mod) : &model_floor_sign;
 		static char buf[256];
 		snprintf(buf, 256, sign->content_.c_str());
-		ImGui::InputTextMultiline("Sign Text:##FLOOR_SIGN_text", buf, 256);
+		ImGui::InputTextMultiline("Sign Text:##MOD_FLOOR_SIGN_text", buf, 256);
 		sign->content_ = std::string(buf);
 		break;
 	}

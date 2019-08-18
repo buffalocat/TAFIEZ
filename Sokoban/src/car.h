@@ -4,9 +4,15 @@
 #include "objectmodifier.h"
 #include "colorcycle.h"
 
+enum class CarType {
+	Normal = 0,
+	Locked = 1,
+	Convertible = 2,
+};
+
 class Car: public ObjectModifier {
 public:
-    Car(GameObject* parent, ColorCycle color_cycle);
+    Car(GameObject* parent, CarType type, ColorCycle color_cycle);
     virtual ~Car();
 
 	void make_str(std::string&);
@@ -26,7 +32,8 @@ public:
 	void draw(GraphicsManager* gfx, FPoint3 p);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
-
+	
+	CarType type_;
     ColorCycle color_cycle_;
 };
 

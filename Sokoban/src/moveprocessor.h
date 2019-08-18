@@ -22,6 +22,7 @@ enum class MoveStep {
 	DoorMove = 5,
 	PostDoorInit = 6,
 	FirstLoadInit = 7,
+	ToggleRiding = 8,
 };
 
 enum class DoorState {
@@ -46,7 +47,8 @@ public:
     ~MoveProcessor();
 
     bool try_move(Point3);
-    bool color_change();
+    bool try_color_change();
+	bool try_toggle_riding();
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);

@@ -24,11 +24,19 @@ MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFra
 
 MoveProcessor::~MoveProcessor() {}
 
+// TODO: remove the switch, put all logic in HSP
 bool MoveProcessor::try_move(Point3 dir) {
-	if (player_->bound()) {
+	switch (player_->state()) {
+	case PlayerState::Bound:
 		move_bound(dir);
-	} else {
+		break;
+	case PlayerState::Free:
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
 		move_general(dir);
+		break;
+	case PlayerState::Dead:
+		break;
 	}
 	if (moving_blocks_.empty()) {
 		return false;
@@ -72,6 +80,7 @@ bool MoveProcessor::update() {
 		case MoveStep::PostDoorInit:
 			map_->set_initial_state_after_door(delta_frame_, this);
 			// fallthrough
+		case MoveStep::ToggleRiding:
 		case MoveStep::FirstLoadInit:
 		case MoveStep::PreFallSwitch:
 		case MoveStep::ColorChange:
@@ -100,8 +109,7 @@ void MoveProcessor::abort() {
 }
 
 // Returns whether a color change occured
-bool MoveProcessor::color_change() {
-	// TODO: make this more general (in particular, be careful with the fall check!)
+bool MoveProcessor::try_color_change() {
 	Car* car = player_->car_bound(map_);
 	if (!(car && car->cycle_color(false))) {
 		return false;
@@ -110,10 +118,19 @@ bool MoveProcessor::color_change() {
 		snake->update_links_color(map_, delta_frame_);
 	}
 	state_ = MoveStep::ColorChange;
-	frames_ = 4;
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;
 	delta_frame_->push(std::make_unique<ColorChangeDelta>(car, true));
 	add_neighbors_to_fall_check(car->parent_);
+	return true;
+}
+
+// Returns whether the toggle was successful
+bool MoveProcessor::try_toggle_riding() {
+	if (!player_->toggle_riding(map_, delta_frame_, this)) {
+		return false;
+	}
+	state_ = MoveStep::ToggleRiding;
+	frames_ = TOGGLE_RIDING_MOVEMENT_FRAMES;
 	return true;
 }
 

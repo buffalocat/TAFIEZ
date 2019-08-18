@@ -40,8 +40,11 @@ class PlayingState: public GameState {
 public:
     PlayingState(GameState* parent);
     virtual ~PlayingState();
+
     void main_loop();
     void handle_input();
+	void create_move_processor();
+	
 	Room* active_room();
 	bool activate_room(Room*);
     bool activate_room(std::string);

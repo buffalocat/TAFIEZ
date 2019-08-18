@@ -5,6 +5,7 @@
 #include "snakeblock.h"
 
 #include "delta.h"
+#include "moveprocessor.h"
 #include "roommap.h"
 #include "graphicsmanager.h"
 #include "texture_constants.h"
@@ -12,7 +13,7 @@
 #include "mapfile.h"
 #include "car.h"
 
-Player::Player(Point3 pos, RidingState state) : GameObject(pos, true, true), car_{}, state_{ state } {
+Player::Player(Point3 pos, PlayerState state) : GameObject(pos, true, true), car_{}, state_{ state } {
 	driven_ = true;
 }
 
@@ -24,7 +25,7 @@ void Player::serialize(MapFileO& file) {
 
 std::unique_ptr<GameObject> Player::deserialize(MapFileI& file) {
 	Point3 pos{ file.read_point3() };
-	RidingState state = static_cast<RidingState>(file.read_byte());
+	PlayerState state = static_cast<PlayerState>(file.read_byte());
 	return std::make_unique<Player>(pos, state);
 }
 
@@ -38,13 +39,14 @@ ObjCode Player::obj_code() {
 
 int Player::color() {
 	switch (state_) {
-	case RidingState::Free:
+	case PlayerState::Free:
 		return BLUE;
 		break;
-	case RidingState::Bound:
+	case PlayerState::Bound:
 		return PINK;
 		break;
-	case RidingState::Riding:
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
 		return RED;
 		break;
 	default:
@@ -54,18 +56,29 @@ int Player::color() {
 }
 
 bool Player::bound() {
-	return state_ == RidingState::Bound;
+	return state_ == PlayerState::Bound;
 }
 
 void Player::set_free() {
-	state_ = RidingState::Free;
+	state_ = PlayerState::Free;
 	car_ = nullptr;
 }
 
 void Player::set_strictest(RoomMap* map) {
 	if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 		if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
-			set_riding(car);
+			switch (car->type_) {
+			case CarType::Normal:
+				state_ = PlayerState::RidingNormal;
+				car_ = car;
+				break;
+			case CarType::Locked:
+				set_bound();
+				break;
+			case CarType::Convertible:
+				set_bound();
+				break;
+			}
 		} else {
 			set_bound();
 		}
@@ -74,52 +87,75 @@ void Player::set_strictest(RoomMap* map) {
 	}
 }
 
+// If we load in the player from the map, make sure it is allowed to be in the state it thinks it's in
 void Player::validate_state(RoomMap* map) {
 	switch (state_) {
-	case RidingState::Riding:
-		if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
-			if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
-				car_ = car;
-			} else {
-				set_bound();
-			}
+	case PlayerState::RidingNormal:
+		set_strictest(map);
+		break;
+	case PlayerState::RidingHidden:
+	case PlayerState::Bound:
+		if (dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
+			set_bound();
 		} else {
 			set_free();
 		}
 		break;
-	case RidingState::Bound:
-		if (!dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
-			set_free();
-		}
+	case PlayerState::Free:
+		set_free();
+		break;
+	default:
 		break;
 	}
 }
 
-
 void Player::set_bound() {
-	state_ = RidingState::Bound;
+	state_ = PlayerState::Bound;
 	car_ = nullptr;
 }
 
-void Player::set_riding(Car* car) {
-	state_ = RidingState::Riding;
-	car_ = car;
-}
-
-void Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame) {
-    if (state_ == RidingState::Riding) {
-		if (delta_frame) {
-			delta_frame->push(std::make_unique<RidingStateDelta>(this, car_, state_));
-		}
-		set_bound();
-    } else if (state_ == RidingState::Bound) {
-        if (auto* car = dynamic_cast<Car*>(map->view(shifted_pos({0,0,-1}))->modifier())) {
-			if (delta_frame) {
-				delta_frame->push(std::make_unique<RidingStateDelta>(this, nullptr, state_));
+bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	auto delta = std::make_unique<PlayerStateDelta>(this, car_, state_);
+	switch (state_) {
+	case PlayerState::Free:
+	case PlayerState::Dead:
+		return false;
+		break;
+	case PlayerState::Bound:
+		if (auto* car = car_bound(map)) {
+			switch (car->type_) {
+			case CarType::Locked:
+				return false;
+			case CarType::Normal:
+				state_ = PlayerState::RidingNormal;
+				car_ = car;
+				break;
+			case CarType::Convertible:
+				if (auto* above = map->view(pos_ + Point3{ 0,0,1 })) {
+					mp->add_to_fall_check(above);
+				}
+				map->take_from_map(this, true, true, delta_frame);
+				state_ = PlayerState::RidingHidden;
+				car_ = car;
+				break;
 			}
-			set_riding(car);
-        }
-    }
+		} else {
+			return false;
+		}
+		break;
+	case PlayerState::RidingHidden:
+		if (map->view(pos_)) {
+			return false;
+		} else {
+			map->put_in_map(this, true, true, delta_frame);
+		}
+		// Fallthrough
+	case PlayerState::RidingNormal:
+		set_bound();
+		break;	
+	}
+	delta_frame->push(std::move(delta));
+	return true;
 }
 
 Car* Player::car_riding() {
@@ -127,17 +163,28 @@ Car* Player::car_riding() {
 }
 
 Car* Player::car_bound(RoomMap* map) {
-    if (state_ == RidingState::Free) {
+    switch (state_) {
+	case PlayerState::Free:
+	case PlayerState::Dead:
 		return nullptr;
-    } else {
-        return dynamic_cast<Car*>(map->view(shifted_pos({0,0,-1}))->modifier());
+	case PlayerState::Bound:
+		return dynamic_cast<Car*>(map->view(shifted_pos({ 0,0,-1 }))->modifier());
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
+		return car_;
+	default:
+		return nullptr;
     }
+}
+
+PlayerState Player::state() {
+	return state_;
 }
 
 void Player::draw(GraphicsManager* gfx) {
     FPoint3 p = real_pos();
 	switch (state_) {
-	case RidingState::Riding:
+	case PlayerState::RidingNormal:
 	{
 		auto* player_model = &gfx->cube;
 		auto* windshield_model = &gfx->windshield;
@@ -149,11 +196,15 @@ void Player::draw(GraphicsManager* gfx) {
 		windshield_model->push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Darker, car_->parent_->color());
 		break;
 	}
-	case RidingState::Bound:
+	case PlayerState::Bound:
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
 		break;
-	case RidingState::Free:
+	case PlayerState::Free:
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
+		break;
+	case PlayerState::Dead:
+	case PlayerState::RidingHidden:
+	default:
 		break;
 	}
 	
@@ -164,16 +215,18 @@ void Player::draw(GraphicsManager* gfx) {
 }
 
 FPoint3 Player::cam_pos() {
-	if (state_ == RidingState::Riding) {
-		return real_pos() + FPoint3{ 0, 0, -2 };
-	} else {
+	switch (state_) {
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
 		return real_pos() + FPoint3{ 0, 0, -1 };
+	default:
+		return real_pos();
 	}
 }
 
 // NOTE: if the Player becomes a subclass of a more general "Passenger" type, move this up to that class.
 void Player::collect_special_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
-    if (state_ == RidingState::Riding) {
+    if (state_ == PlayerState::RidingNormal) {
         links.push_back(map->view(shifted_pos({0,0,-1})));
     }
 }
