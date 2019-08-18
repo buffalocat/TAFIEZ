@@ -93,8 +93,12 @@ void ObjectTab::object_tab_options() {
 		SnakeBlock* sb = obj ? static_cast<SnakeBlock*>(obj) : &model_sb;
 		ImGui::Checkbox("Pushable?##SB_modify_push", &sb->pushable_);
 		ImGui::Checkbox("Gravitable?##SB_modify_grav", &sb->gravitable_);
+		int prev_color = sb->color_;
 		ImGui::InputInt("Color##SB_modify_COLOR", &sb->color_);
 		color_button(sb->color_);
+		if (obj && sb->color_ != prev_color) {
+			sb->remove_wrong_color_links(map_, nullptr);
+		}
 		ImGui::Text("Number of Ends");
 		ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);
 		ImGui::RadioButton("Two Ended##SB_modify_snake_ends", &sb->ends_, 2);

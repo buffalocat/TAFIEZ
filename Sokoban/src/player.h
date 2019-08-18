@@ -28,8 +28,8 @@ public:
 	int color();
 
 	FPoint3 cam_pos();
-
-	void set_free();
+	
+	void set_free(DeltaFrame* delta_frame);
 	void set_strictest(RoomMap* map);
 	void validate_state(RoomMap* map);
 	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
@@ -46,7 +46,6 @@ public:
 
 private:
 	void set_bound();
-	void set_riding(Car*);
 
 	Car* car_;
 	PlayerState state_;

@@ -1,11 +1,7 @@
 #ifndef HORIZONTALSTEPPROCESSOR_H
 #define HORIZONTALSTEPPROCESSOR_H
 
-
-
-
 #include "point.h"
-
 #include "component.h"
 
 class GameObject;
@@ -23,6 +19,10 @@ public:
     void run();
 
 private:
+	void move_free();
+	void move_bound();
+	void move_riding();
+
     void perform_horizontal_step();
 
     bool compute_push_component_tree(GameObject* block);

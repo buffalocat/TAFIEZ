@@ -264,14 +264,17 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomM
 	}
 }
 
-void SnakeBlock::update_links_color(RoomMap* map, DeltaFrame* delta_frame) {
+void SnakeBlock::remove_wrong_color_links(RoomMap* map, DeltaFrame* delta_frame) {
 	auto links_copy = links_;
 	for (auto link : links_copy) {
 		if (color_ != link->color_) {
-			remove_link(link, delta_frame);
+			if (delta_frame) {
+				remove_link(link, delta_frame);
+			} else {
+				remove_link_quiet(link);
+			}
 		}
 	}
-	check_add_local_links(map, delta_frame);
 }
 
 bool SnakeBlock::available() {

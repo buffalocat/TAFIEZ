@@ -59,7 +59,10 @@ bool Player::bound() {
 	return state_ == PlayerState::Bound;
 }
 
-void Player::set_free() {
+void Player::set_free(DeltaFrame* delta_frame) {
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<PlayerStateDelta>(this, car_, state_));
+	}
 	state_ = PlayerState::Free;
 	car_ = nullptr;
 }
@@ -83,7 +86,7 @@ void Player::set_strictest(RoomMap* map) {
 			set_bound();
 		}
 	} else {
-		set_free();
+		set_free(nullptr);
 	}
 }
 
@@ -98,11 +101,11 @@ void Player::validate_state(RoomMap* map) {
 		if (dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 			set_bound();
 		} else {
-			set_free();
+			set_free(nullptr);
 		}
 		break;
 	case PlayerState::Free:
-		set_free();
+		set_free(nullptr);
 		break;
 	default:
 		break;

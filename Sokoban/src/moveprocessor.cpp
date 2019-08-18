@@ -26,47 +26,13 @@ MoveProcessor::~MoveProcessor() {}
 
 // TODO: remove the switch, put all logic in HSP
 bool MoveProcessor::try_move(Point3 dir) {
-	switch (player_->state()) {
-	case PlayerState::Bound:
-		move_bound(dir);
-		break;
-	case PlayerState::Free:
-	case PlayerState::RidingNormal:
-	case PlayerState::RidingHidden:
-		move_general(dir);
-		break;
-	case PlayerState::Dead:
-		break;
-	}
+	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
 	if (moving_blocks_.empty()) {
 		return false;
 	}
 	state_ = MoveStep::Horizontal;
 	frames_ = HORIZONTAL_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
 	return true;
-}
-
-// TODO: make bound motion more flexible (allow pushes!!)
-void MoveProcessor::move_bound(Point3 dir) {
-	// When Player is Bound, no other agents move
-	if (map_->view(player_->shifted_pos(dir))) {
-		return;
-	}
-	// If the player is bound, it's on top of a block!
-	auto* car = dynamic_cast<ColoredBlock*>(map_->view(player_->shifted_pos({ 0,0,-1 })));
-	auto* adj = dynamic_cast<ColoredBlock*>(map_->view(car->shifted_pos(dir)));
-	if (adj && car->color() == adj->color()) {
-		map_->take_from_map(player_, false, true, nullptr);
-		player_->set_linear_animation(dir);
-		delta_frame_->push(std::make_unique<MotionDelta>(player_, dir, map_));
-		moving_blocks_.push_back(player_);
-		player_->shift_pos_from_animation();
-		map_->put_in_map(player_, false, true, nullptr);
-	}
-}
-
-void MoveProcessor::move_general(Point3 dir) {
-	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
 }
 
 bool MoveProcessor::update() {
@@ -115,7 +81,8 @@ bool MoveProcessor::try_color_change() {
 		return false;
 	}
 	if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
-		snake->update_links_color(map_, delta_frame_);
+		snake->remove_wrong_color_links(map_, delta_frame_);
+		snake->check_add_local_links(map_, delta_frame_);
 	}
 	state_ = MoveStep::ColorChange;
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;

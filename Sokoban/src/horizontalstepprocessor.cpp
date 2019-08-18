@@ -15,15 +15,72 @@ HorizontalStepProcessor::HorizontalStepProcessor(RoomMap* map, DeltaFrame* delta
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
 	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
 
-HorizontalStepProcessor::~HorizontalStepProcessor() {}
-
+HorizontalStepProcessor::~HorizontalStepProcessor() {
+	for (auto sb : moving_snakes_) {
+		sb->reset_internal_state();
+	}
+}
 
 void HorizontalStepProcessor::run() {
+	switch (player_->state()) {
+	case PlayerState::Free:
+		move_free();
+		break;
+	case PlayerState::Bound:
+		move_bound();
+		break;
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
+		move_riding();
+		break;
+	default:
+		break;
+	}
+}
+
+void HorizontalStepProcessor::move_free() {
+	if (compute_push_component_tree(player_)) {
+		perform_horizontal_step();
+	}
+}
+
+void HorizontalStepProcessor::move_bound() {
+	if (!compute_push_component_tree(player_)) {
+		return;
+	}
+	bool valid_move = false;
+	// We can move if the block beneath us was pushed OR the one in front of us WASN'T
+	auto* below = dynamic_cast<ColoredBlock*>(map_->view(player_->pos_ + Point3{ 0, 0, -1 }));
+	if (auto* comp_below = below->push_comp()) {
+		if (comp_below->moving_) {
+			valid_move = true;
+		}
+	}
+	if (auto* forward_below = dynamic_cast<ColoredBlock*>(map_->view(player_->pos_ + dir_ + Point3{ 0, 0, -1 }))) {
+		if (forward_below->color_ == below->color_) {
+			if (auto* comp_forward_below = forward_below->push_comp()) {
+				if (!comp_forward_below->moving_) {
+					valid_move = true;
+				}
+			} else {
+				valid_move = true;
+			}
+		}
+	}
+	if (!valid_move) {
+		moving_blocks_.clear();
+		return;
+	}
+	perform_horizontal_step();
+	if (!map_->view(player_->pos_ + Point3{ 0, 0, -1 })) {
+		player_->set_free(delta_frame_);
+	}
+}
+
+void HorizontalStepProcessor::move_riding() {
 	// Initialize all agents, mark as driven
 	Car* car = player_->car_riding();
-	if (car) {
-		car->parent_->driven_ = true;
-	}
+	car->parent_->driven_ = true;
 	for (AutoBlock* ab : map_->autos_) {
 		ab->parent_->driven_ = true;
 	}
@@ -31,7 +88,12 @@ void HorizontalStepProcessor::run() {
 		pb->parent_->driven_ = true;
 	}
 	// If the player can move, then PuppetBlocks will move; otherwise, set driven_ to false
-	bool player_moved = compute_push_component_tree(player_);
+	bool player_moved;
+	if (player_->state() == PlayerState::RidingNormal) {
+		player_moved = compute_push_component_tree(player_);
+	} else { // When RidingHidden, the car represents the player
+		player_moved = compute_push_component_tree(car->parent_);
+	}
 	if (player_moved) {
 		for (PuppetBlock* pb : map_->puppets_) {
 			compute_push_component_tree(pb->parent_);
@@ -49,9 +111,7 @@ void HorizontalStepProcessor::run() {
 		perform_horizontal_step();
 	}
 	// Reset driven flags
-	if (car) {
-		car->parent_->driven_ = false;
-	}
+	car->parent_->driven_ = false;
 	for (AutoBlock* ab : map_->autos_) {
 		ab->parent_->driven_ = false;
 	}
@@ -176,9 +236,6 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	snake_puller.perform_pulls();
 	map_->batch_shift(std::move(forward_moving_blocks), dir_, true, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE
-	for (auto sb : moving_snakes_) {
-		sb->reset_internal_state();
-	}
 	for (auto sb : link_add_check) {
 		sb->check_add_local_links(map_, delta_frame_);
 	}

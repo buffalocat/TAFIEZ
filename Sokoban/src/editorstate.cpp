@@ -204,7 +204,7 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 
 	Player* player = nullptr;
 	room->load_from_file(*objs_, file, global_.get(), &player);
-	player->set_free();
+	player->set_free(nullptr);
 	Point3 start_pos = player->pos_;
 	room->map()->set_initial_state_in_editor();
 	room->set_cam_pos(start_pos, start_pos, false, true);
@@ -223,7 +223,7 @@ void EditorState::save_room(EditorRoom* eroom, bool commit) {
 	Player* player = dynamic_cast<Player*>(map->view(eroom->start_pos));
 	player->set_strictest(map);
     eroom->room->write_to_file(file);
-	player->set_free();
+	player->set_free(nullptr);
 }
 
 EditorRoom* EditorState::reload(EditorRoom* eroom) {
