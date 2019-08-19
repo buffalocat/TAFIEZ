@@ -19,7 +19,9 @@ void Switchable::make_str(std::string& str) {
 	if (signalers_.size()) {
 		std::string sig_list{ "(" };
 		for (auto& p : signalers_) {
-			sig_list += p.first->label_;
+			if (p.first) {
+				sig_list += p.first->label_;
+			}
 		}
 		sig_list += ")";
 		str += sig_list;
