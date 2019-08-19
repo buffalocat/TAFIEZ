@@ -13,7 +13,9 @@ void Switch::make_str(std::string& str) {
 	if (signalers_.size()) {
 		std::string sig_list{ "(" };
 		for (auto* sig : signalers_) {
-			sig_list += sig->label_;
+			if (sig) {
+				sig_list += sig->label_;
+			}
 		}
 		sig_list += ")";
 		str += sig_list;
