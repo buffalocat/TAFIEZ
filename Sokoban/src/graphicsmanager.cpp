@@ -77,8 +77,12 @@ void GraphicsManager::set_light_source(glm::vec3 dir) {
 void GraphicsManager::draw() {
 	cube.draw();
 	top_cube.draw();
-	diamond.draw();
 	six_squares.draw();
+
+	diamond.draw();
+	top_diamond.draw();
+	six_squares_diamond.draw();
+
 	wall.draw();
 }
 

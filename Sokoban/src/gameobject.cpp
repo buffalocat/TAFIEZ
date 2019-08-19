@@ -165,6 +165,10 @@ Sticky GameObject::sticky() {
 	return Sticky::None;
 }
 
+bool GameObject::is_snake() {
+	return false;
+}
+
 bool GameObject::has_sticky_neighbor(RoomMap* map) {
 	return false;
 }

@@ -51,5 +51,8 @@ Sokoban/maps/global.sav
 Sokoban/saves/*
 !Sokoban/saves/.keep
 
+# Object generating scripts
+Sokoban/resources/*.py
+
 # ImGui ini
 *.ini

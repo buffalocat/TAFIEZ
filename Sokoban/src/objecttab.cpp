@@ -177,6 +177,7 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 			// Move the old modifier to the new object
 			} else {
 				obj->modifier_ = std::move(prev->modifier_);
+				obj->modifier_->parent_ = obj.get();
 			}
 			prev->modifier_.reset(nullptr);
 		}

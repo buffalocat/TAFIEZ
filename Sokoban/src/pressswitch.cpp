@@ -77,7 +77,8 @@ void PressSwitch::draw(GraphicsManager* gfx, FPoint3 p) {
 	else {
 		tex = BlockTexture::Cross;
 	}
-	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
+	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
+	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
 }
 
 std::unique_ptr<ObjectModifier> PressSwitch::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

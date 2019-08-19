@@ -37,8 +37,12 @@ public:
 	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube{ DynamicInstancer("resources/uniform_cube.obj") };
 	DynamicInstancer top_cube{ DynamicInstancer("resources/top_cube.obj") };
-	DynamicInstancer diamond{ DynamicInstancer("resources/diamond.obj") };
 	DynamicInstancer six_squares{ DynamicInstancer("resources/six_squares.obj") };
+
+	DynamicInstancer diamond{ DynamicInstancer("resources/diamond.obj") };
+	DynamicInstancer top_diamond{ DynamicInstancer("resources/top_diamond.obj") };
+	DynamicInstancer six_squares_diamond{ DynamicInstancer("resources/six_squares_diamond.obj") };
+
 	WallInstancer wall{ WallInstancer("resources/uniform_cube.obj") };
 
 	// Models which aren't common enough to be worth instancing

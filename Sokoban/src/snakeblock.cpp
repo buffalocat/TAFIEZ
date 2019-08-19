@@ -69,6 +69,9 @@ void SnakeBlock::relation_serialize(MapFileO& file) {
 	}
 }
 
+bool SnakeBlock::is_snake() {
+	return true;
+}
 
 void SnakeBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
 	if ((Sticky::Snake & sticky_level) == Sticky::None) {

@@ -113,8 +113,10 @@ void Car::destroy(DeltaFrame* delta_frame) {
 }
 
 void Car::draw(GraphicsManager* gfx, FPoint3 p) {
+	// TODO: Add rotated six_squares!!!
 	if (int color = next_color()) {
-		gfx->six_squares.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::Blank, color);
+		ModelInstancer& model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
+		model.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::Blank, color);
 	}
 }
 

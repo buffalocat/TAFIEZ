@@ -105,7 +105,8 @@ void Gate::cleanup_on_take(RoomMap* map, bool real) {
 // Consider making the Gate(base) visually different when the gate is active (only visible if the GateBody has been separated)
 void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
 	BlockTexture tex = persistent_ ? BlockTexture::GateBasePersistent : BlockTexture::GateBase;
-	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
+	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
+	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.8f, 0.8f, 0.1f), tex, color_);
 }
 
 std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* map, DeltaFrame* delta_frame) {

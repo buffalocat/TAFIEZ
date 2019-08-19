@@ -50,6 +50,7 @@ public:
 
 	void collect_sticky_component(RoomMap*, Sticky, Component*);
 	virtual Sticky sticky();
+	virtual bool is_snake();
 	virtual bool has_sticky_neighbor(RoomMap*);
 	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 	virtual void collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& links);

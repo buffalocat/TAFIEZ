@@ -15,6 +15,8 @@ public:
     bool relation_check();
     void relation_serialize(MapFileO& file);
 
+	bool is_snake();
+
     void collect_sticky_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 
     void conditional_drag(std::vector<GameObject*>&);

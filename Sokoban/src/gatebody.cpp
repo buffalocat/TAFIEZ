@@ -12,12 +12,13 @@
 #include "delta.h"
 
 GateBody::GateBody(Gate* gate, Point3 pos) :
-	PushBlock(pos, gate->color_, gate->pushable(), gate->gravitable(), Sticky::None) {
+	PushBlock(pos, gate->color_, gate->pushable(), gate->gravitable(), Sticky::None),
+	snake_{ gate->parent_->obj_code() == ObjCode::SnakeBlock } {
 	set_gate(gate);
 }
 
-GateBody::GateBody(Point3 pos, int color, bool pushable, bool gravitable) :
-	PushBlock(pos, color, pushable, gravitable, Sticky::None) {}
+GateBody::GateBody(Point3 pos, int color, bool pushable, bool gravitable, bool snake) :
+	PushBlock(pos, color, pushable, gravitable, Sticky::None), snake_{ snake } {}
 
 GateBody::~GateBody() {}
 
@@ -30,14 +31,14 @@ ObjCode GateBody::obj_code() {
 }
 
 void GateBody::serialize(MapFileO& file) {
-	file << color_ << pushable_ << gravitable_;
+	file << color_ << pushable_ << gravitable_ << snake_;
 }
 
 std::unique_ptr<GameObject> GateBody::deserialize(MapFileI& file) {
 	Point3 pos{ file.read_point3() };
-	unsigned char b[3];
-	file.read(b, 3);
-	auto gate_body = std::make_unique<GateBody>(pos, b[0], b[1], b[2]);
+	unsigned char b[4];
+	file.read(b, 4);
+	auto gate_body = std::make_unique<GateBody>(pos, b[0], b[1], b[2], b[3]);
 	return std::move(gate_body);
 }
 
@@ -83,6 +84,7 @@ void GateBody::draw(GraphicsManager* gfx) {
 	// TODO: make this depend on the state animation
 	double height = 1.0f;
 	BlockTexture tex = gate_->persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody;
-	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
+	ModelInstancer& model = snake_ ? gfx->top_diamond : gfx->top_cube;
+	model.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
 		glm::vec3(0.7f, 0.7f, height), tex, color_);
 }

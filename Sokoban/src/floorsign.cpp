@@ -98,5 +98,6 @@ void FloorSign::cleanup_on_take(RoomMap* map, bool real) {
 }
 
 void FloorSign::draw(GraphicsManager* gfx, FPoint3 p) {
-	gfx->top_cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Sign, glm::vec4(0.6, 0.3, 0.4, 1.0));
+	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
+	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Sign, glm::vec4(0.6, 0.3, 0.4, 1.0));
 }

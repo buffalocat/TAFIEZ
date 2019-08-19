@@ -11,7 +11,7 @@ class MoveProcessor;
 class GateBody: public PushBlock {
 public:
     GateBody(Gate* gate, Point3 pos);
-    GateBody(Point3 pos, int color, bool pushable, bool gravitable);
+    GateBody(Point3 pos, int color, bool pushable, bool gravitable, bool snake);
     ~GateBody();
 
     std::string name();
@@ -32,6 +32,7 @@ public:
 private:
 	Gate* gate_;
 	Point3 gate_pos_;
+	bool snake_;
 
     friend class GatePosDelta;
 };
