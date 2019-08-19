@@ -38,9 +38,10 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 const int NUM_ZONES = 36;
 
 int zone_input_callback(ImGuiInputTextCallbackData* data) {
-	data->CursorPos = 2;
-	data->SelectionStart = 2;
-	data->SelectionEnd = 2;
+	data->CursorPos = 0;
+	data->SelectionStart = 0;
+	data->SelectionEnd = 1;
+	data->BufTextLen = 1;
 	unsigned short* input_chars = ImGui::GetIO().InputCharacters;
 	for (int i = 0; (i <= 16) && input_chars[i]; ++i) {
 		if (input_chars[i] > 127) {
@@ -57,15 +58,19 @@ int zone_input_callback(ImGuiInputTextCallbackData* data) {
 			return 1;
 		}
 	}
+	if (!data->Buf[0]) {
+		data->Buf[0] = '!';
+		data->BufDirty = true;
+		return 1;
+	}
 	return 0;
 }
 
 void RoomTab::zone_options(RoomMap* room) {
-	static char zone[3];
+	static char zone[2];
 	zone[0] = room->zone_;
-	zone[1] = ' ';
-	ImGui::InputText("Zone##ROOM", zone, 3,
-		ImGuiInputTextFlags_CallbackAlways,
+	ImGui::InputText("Zone##ROOM", zone, 2,
+		ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_HideCursor,
 		&zone_input_callback);
 	room->zone_ = zone[0];
 }
