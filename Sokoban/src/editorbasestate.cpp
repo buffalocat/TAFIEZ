@@ -34,11 +34,14 @@ Point3 EditorBaseState::get_pos_from_mouse(Point3 cam_pos) {
     double xpos, ypos;
     glfwGetCursorPos(window_, &xpos, &ypos);
     if (xpos >= 0 && xpos < SCREEN_WIDTH && ypos >= 0 && ypos < SCREEN_HEIGHT) {
-        int x = ((int)xpos + MESH_SIZE*cam_pos.x - (SCREEN_WIDTH - MESH_SIZE) / 2) / MESH_SIZE;
-        int y = ((int)ypos + MESH_SIZE*cam_pos.y - (SCREEN_HEIGHT - MESH_SIZE) / 2) / MESH_SIZE;
+        int x_raw = (int)xpos + MESH_SIZE * cam_pos.x - (SCREEN_WIDTH - MESH_SIZE) / 2;
+		int y_raw = (int)ypos + MESH_SIZE * cam_pos.y - (SCREEN_HEIGHT - MESH_SIZE) / 2;
+		// Adjust for truncate-toward-zero division
+		int x = (x_raw / MESH_SIZE) - (x_raw < 0);
+		int y = (y_raw / MESH_SIZE) - (y_raw < 0);
         return {x, y, cam_pos.z};
     }
-    return {-1,-1,-1};
+    return {};
 }
 
 void EditorBaseState::display_hover_pos_object(Point3 cam_pos, RoomMap* map) {
