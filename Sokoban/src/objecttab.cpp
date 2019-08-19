@@ -25,7 +25,7 @@ static ObjCode obj_code = ObjCode::NONE;
 
 // Model objects that new objects are created from
 static PushBlock model_pb{ Point3{0,0,0}, GREEN, true, true, Sticky::None };
-static SnakeBlock model_sb{ Point3{0,0,0}, PURPLE, true, true, 2 };
+static SnakeBlock model_sb{ Point3{0,0,0}, PURPLE, true, true, 2, true };
 
 // Object Inspection
 static GameObject* selected_obj = nullptr;
@@ -102,6 +102,7 @@ void ObjectTab::object_tab_options() {
 		ImGui::Text("Number of Ends");
 		ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);
 		ImGui::RadioButton("Two Ended##SB_modify_snake_ends", &sb->ends_, 2);
+		ImGui::Checkbox("Weak?##SB_modify_weak", &sb->weak_);
 	}
 	break;
 	case ObjCode::GateBody:

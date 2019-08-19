@@ -5,7 +5,7 @@
 
 class SnakeBlock: public ColoredBlock {
 public:
-    SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends);
+	SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends, bool weak);
     virtual ~SnakeBlock();
 
     virtual std::string name();
@@ -19,8 +19,8 @@ public:
 
     void collect_sticky_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 
-    void conditional_drag(std::vector<GameObject*>&);
-    void collect_dragged_snake_links(RoomMap*, Point3 dir, std::vector<GameObject*>&);
+    void conditional_drag(std::vector<GameObject*>& links, bool strong);
+    void collect_dragged_snake_links(RoomMap*, Point3 dir, std::vector<GameObject*>& links, bool strong);
 
     bool moving_push_comp();
 
@@ -51,17 +51,15 @@ public:
 
     std::unique_ptr<SnakeBlock> make_split_copy(RoomMap*, DeltaFrame*);
 
-    Sticky sticky();
-
-    std::vector<SnakeBlock*> links_;
-    SnakeBlock* target_;
+	std::vector<SnakeBlock*> links_{};
 
     int ends_;
-    unsigned int distance_;
-    bool dragged_;
-};
+	bool weak_;
 
-SnakeBlock* snake_cast(GameObject* obj);
+	SnakeBlock* target_{};
+    unsigned int distance_ = 0;
+    bool dragged_ = false;
+};
 
 
 class SnakePuller {

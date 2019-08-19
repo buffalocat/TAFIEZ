@@ -13,17 +13,8 @@
 #include "car.h"
 
 
-SnakeBlock* snake_cast(GameObject* obj) {
-	if ((obj->sticky() & Sticky::Snake) != Sticky::None) {
-		return static_cast<SnakeBlock*>(obj);
-	} else {
-		return nullptr;
-	}
-}
-
-
-SnakeBlock::SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends) :
-	ColoredBlock(pos, color, pushable, gravitable), links_{}, target_{}, ends_{ ends }, distance_{ 0 }, dragged_{ false }  {}
+SnakeBlock::SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends, bool weak) :
+	ColoredBlock(pos, color, pushable, gravitable), ends_{ ends }, weak_{ weak }  {}
 
 SnakeBlock::~SnakeBlock() {}
 
@@ -36,14 +27,14 @@ ObjCode SnakeBlock::obj_code() {
 }
 
 void SnakeBlock::serialize(MapFileO& file) {
-	file << color_ << pushable_ << gravitable_ << ends_;
+	file << color_ << pushable_ << gravitable_ << ends_ << weak_;
 }
 
 std::unique_ptr<GameObject> SnakeBlock::deserialize(MapFileI& file) {
 	Point3 pos{ file.read_point3() };
-	unsigned char b[4];
-	file.read(b, 4);
-	return std::make_unique<SnakeBlock>(pos, b[0], b[1], b[2], b[3]);
+	unsigned char b[5];
+	file.read(b, 5);
+	return std::make_unique<SnakeBlock>(pos, b[0], b[1], b[2], b[3], b[4]);
 }
 
 bool SnakeBlock::relation_check() {
@@ -81,23 +72,23 @@ void SnakeBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::ve
 	links.insert(links.end(), links_.begin(), links_.end());
 }
 
-Sticky SnakeBlock::sticky() {
-	return Sticky::Snake;
-}
-
 void SnakeBlock::reset_internal_state() {
 	distance_ = 0;
 	target_ = nullptr;
 	dragged_ = false;
 }
 
-void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vector<GameObject*>& weak_links) {
+void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vector<GameObject*>& links, bool strong) {
+	// If this block is weak, it can't drag strongly
+	if (strong && weak_) {
+		return;
+	}
 	// Were we pushed by the object behind us? If so, drag all links
 	// NOTE: this does no harm even if obj is a link
 	if (GameObject* obj = map->view(pos_ - dir)) {
 		if (obj->comp_) {
 			for (SnakeBlock* link : links_) {
-				link->conditional_drag(weak_links);
+				link->conditional_drag(links, strong);
 			}
 			return;
 		}
@@ -110,7 +101,7 @@ void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vect
 		Point3 link_pos{ links_[i]->pos_ };
 		// If there's a link behind us, drag the other
 		if (link_pos + dir == pos_) {
-			links_[1 - i]->conditional_drag(weak_links);
+			links_[1 - i]->conditional_drag(links, strong);
 			return;
 		}
 		// If there's a link in front of us, don't drag anything
@@ -120,14 +111,14 @@ void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vect
 	}
 	// At this point, we have 2 links, both of which are to the side
 	for (SnakeBlock* link : links_) {
-		link->conditional_drag(weak_links);
+		link->conditional_drag(links, strong);
 	}
 }
 
-void SnakeBlock::conditional_drag(std::vector<GameObject*>& weak_links) {
-	if (!comp_) {
+void SnakeBlock::conditional_drag(std::vector<GameObject*>& links, bool strong) {
+	if (!(strong && weak_) && !comp_) {
 		dragged_ = true;
-		weak_links.push_back(this);
+		links.push_back(this);
 	}
 }
 
@@ -142,10 +133,18 @@ bool SnakeBlock::moving_push_comp() {
 void SnakeBlock::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
 	BlockTexture tex;
-	if (ends_ == 1) {
-		tex = BlockTexture::BrokenEdges;
+	if (weak_) {
+		if (ends_ == 1) {
+			tex = BlockTexture::BrokenEdges;
+		} else {
+			tex = BlockTexture::Edges;
+		}
 	} else {
-		tex = BlockTexture::LightEdges;
+		if (ends_ == 1) {
+			tex = BlockTexture::Corners;
+		} else {
+			tex = BlockTexture::LightEdges;
+		}
 	}
 	if (modifier_) {
 		tex = tex | modifier_->texture();
@@ -258,7 +257,8 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomM
 		auto links_copy = links_;
 		for (SnakeBlock* link : links_copy) {
 			if (PushComponent* comp = link->push_comp()) {
-				if (comp->blocked_) {
+				// If both blocks are strong, don't break the link!!
+				if (comp->blocked_ && (weak_ || link->weak_)) {
 					remove_link(link, delta_frame);
 					fall_check.push_back(link);
 				}
@@ -319,7 +319,7 @@ void SnakeBlock::setup_on_put(RoomMap* map, bool real) {
 }
 
 std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame* delta_frame) {
-	auto split = std::make_unique<SnakeBlock>(pos_, color_, pushable_, gravitable_, 1);
+	auto split = std::make_unique<SnakeBlock>(pos_, color_, pushable_, gravitable_, 1, weak_);
 	if (modifier_) {
 		split->set_modifier(modifier_->duplicate(split.get(), map, delta_frame));
 	}
@@ -339,6 +339,7 @@ SnakePuller::~SnakePuller() {}
 void SnakePuller::prepare_pull(SnakeBlock* cur) {
 	SnakeBlock* prev{};
 	// A moving snake can have at most one link which isn't moving already
+	// That's the one we want to pull.
 	for (SnakeBlock* link : cur->links_) {
 		if (!link->moving_push_comp()) {
 			prev = cur;

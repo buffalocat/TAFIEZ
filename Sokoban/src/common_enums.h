@@ -37,15 +37,13 @@ enum class Sticky {
 	// Stickiness checks
 	WeakStick = 3,
 	StrongStick = 4,
-	AllStick = 7,
+	All = 15,
 	// Block levels
     WeakBlock = 1,
 	SemiBlock = 3,
     StrongBlock = 6,
 	// Snakes
-    Snake = 8,
-
-    All = 15,
+	Snake = 8,
 };
 
 Sticky operator &(Sticky a, Sticky b);

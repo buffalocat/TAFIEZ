@@ -27,6 +27,7 @@ private:
 
     bool compute_push_component_tree(GameObject* block);
     bool compute_push_component(GameObject* block);
+	void snake_strong_drag_check(SnakeBlock* block);
 
     void collect_moving_and_weak_links(PushComponent* comp, std::vector<GameObject*>& weak_links);
 
@@ -34,6 +35,7 @@ private:
 
 	std::vector<SnakeBlock*> moving_snakes_{};
 	std::vector<SnakeBlock*> snakes_to_recheck_{};
+	std::vector<SnakeBlock*> strong_drags_{};
 	std::vector<GameObject*> broken_weak_links_{};
     std::vector<GameObject*>& moving_blocks_;
     std::vector<GameObject*>& fall_check_;
