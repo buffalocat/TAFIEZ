@@ -315,7 +315,7 @@ void Room::read_camera_rects(MapFileI& file) {
 		CameraCode code = static_cast<CameraCode>(b[0]);
 		switch (code) {
 			CASE_CAMCODE(Clamped)
-				CASE_CAMCODE(Null)
+			CASE_CAMCODE(Null)
 		case CameraCode::NONE:
 			return;
 		default:

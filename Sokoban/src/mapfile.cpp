@@ -66,10 +66,12 @@ MapFileI& operator>>(MapFileI& f, bool& v) {
 }
 
 MapFileI& operator>>(MapFileI& f, double& v) {
-    unsigned char b[2];
-    f.read(b, 2);
-    v = (double)b[0] + (double)b[1]/256.0f;
-    return f;
+	unsigned char b[3];
+	f.read(b, 3);
+	v = (b[0] * (1 << 4) - (1 << 11)) +
+		(b[1] / (double)(1 << 4)) +
+		(b[2] / (double)(1 << 12));
+	return f;
 }
 
 MapFileI& operator>>(MapFileI& f, Point2& v) {
@@ -151,9 +153,11 @@ MapFileO& MapFileO::operator<<(unsigned int n) {
     return *this;
 }
 
+// Serializes floats in the range [2^-11, 2^11) with 24 bits of precision
 MapFileO& MapFileO::operator<<(double f) {
-    file_ << (unsigned char)f;
-    file_ << (unsigned char)(256.0*f);
+	file_ << (unsigned char)(unsigned int)((f + (1 << 11)) / (1 << 4));
+    file_ << (unsigned char)(unsigned int)((1 << 4) * f);
+    file_ << (unsigned char)(unsigned int)((1 << 12) * f);
     return *this;
 }
 

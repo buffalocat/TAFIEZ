@@ -54,7 +54,7 @@ void CameraContext::extend_by(Point3 d, int width, int height) {
 }
 
 ClampedCameraContext::ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
-	double radius, double tilt, FloatRect center) :
+	unsigned int flags, double radius, double tilt, FloatRect center) :
 	CameraContext(label, rect, priority, named_area, null_child),
 	rad_{ radius }, tilt_{ tilt }, center_{ center } {}
 
@@ -76,10 +76,28 @@ double ClampedCameraContext::tilt(FPoint3 pos) {
 	return tilt_;
 }
 
+enum CLAMPED_CAM {
+	// Individual Flags
+	UNIFORM_PAD = 1 << 1,
+	XY_PAD = 1 << 2,
+	ALL_PAD = 1 << 3,
+	RAD_SMALLER = 1 << 4,
+	RAD_LARGER = 1 << 5,
+	RAD_CLAMP_X = 1 << 6,
+	RAD_CLAMP_Y = 1 << 7,
+	// Is the visible rect determined from other information?
+	VIS_AUTO = UNIFORM_PAD | XY_PAD | ALL_PAD,
+	// Is the radius determined from other information?
+	RAD_AUTO = RAD_SMALLER | RAD_LARGER | RAD_CLAMP_X | RAD_CLAMP_Y,
+};
+
 void ClampedCameraContext::serialize(MapFileO& file) {
 	file << CameraCode::Clamped;
 	file << label_ << rect_ << priority_ << named_area_ << null_child_;
-	file << rad_ << tilt_ << center_;
+	file.write_uint32(flags_);
+	// Choose serialization based on flags
+	file << center_;
+	file << rad_ << tilt_;
 }
 
 CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
@@ -87,10 +105,13 @@ CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
 	IntRect rect;
 	int priority;
 	bool named_area, null_child;
+	file >> rect >> priority >> named_area >> null_child;
+	unsigned int flags = file.read_uint32();
+	// USE FLAGS
+	FloatRect center;
 	double rad, tilt;
-	FloatRect vis;
-	file >> rect >> priority >> named_area >> null_child >> rad >> tilt >> vis;
-	return new ClampedCameraContext(label, rect, priority, named_area, null_child, rad, tilt, vis);
+	file >> center >> rad >> tilt;
+	return new ClampedCameraContext(label, rect, priority, named_area, null_child, flags, rad, tilt, center);
 }
 
 void ClampedCameraContext::shift_by(Point3 d, int width, int height) {
@@ -132,7 +153,7 @@ Camera::Camera(int w, int h) :
 	active_label_{}, label_display_cooldown_{},
 	width_{ w }, height_{ h },
 	default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, false,
-		DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
+		0, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
 	context_{}, loaded_contexts_{},
 	context_map_{},
 	target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },

@@ -184,7 +184,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	} else {
 		if (ImGui::Button("Make CameraContext##CAMERA")) {
 			compute_center_from_vis(vis_);
-			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, named_area_, null_child_, rad_, tilt_, compute_center_from_vis(vis_)));
+			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, named_area_, null_child_, 0, rad_, tilt_, compute_center_from_vis(vis_)));
 		}	
 	}
 }

@@ -33,7 +33,7 @@ public:
 class ClampedCameraContext: public CameraContext {
 public:
     ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
-		double radius, double tilt, FloatRect center);
+		unsigned int flags, double radius, double tilt, FloatRect center);
     ~ClampedCameraContext();
     FPoint3 center(FPoint3);
     double radius(FPoint3);
@@ -42,6 +42,8 @@ public:
     static CameraContext* deserialize(MapFileI& file);
 
 	void shift_by(Point3 d, int width, int height);
+
+	unsigned int flags_;
 
     double rad_;
     double tilt_;
