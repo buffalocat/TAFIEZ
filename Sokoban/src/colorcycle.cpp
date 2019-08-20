@@ -23,20 +23,21 @@ int ColorCycle::next_color() {
 // Swap parent_color with the next color in the cycle
 bool ColorCycle::cycle(int* parent_color, bool undo) {
 	if (size_) {
-		int new_color = colors_[index_];
-		colors_[index_] = *parent_color;
-		if (!undo) {
-			++index_;
-			if (index_ == size_) {
-				index_ = 0;
-			}
-		}
-		else {
+		if (undo) {
 			if (index_ == 0) {
 				index_ = size_ - 1;
-			}
-			else {
+			} else {
 				--index_;
+			}
+		}
+		int new_color = colors_[index_];
+		colors_[index_] = *parent_color;
+		*parent_color = new_color;
+		if (!undo) {
+			if (index_ == size_ - 1) {
+				index_ = 0;
+			} else {
+				++index_;
 			}
 		}
 		*parent_color = new_color;
