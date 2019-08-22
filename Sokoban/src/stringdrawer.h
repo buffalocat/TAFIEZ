@@ -30,10 +30,10 @@ protected:
 	bool* alive_ptr_{};
 };
 
-class SignTextDrawer : public StringDrawer {
+class IndependentStringDrawer : public StringDrawer {
 public:
-	SignTextDrawer(Font* font, glm::vec4 color, std::string label, float y);
-	~SignTextDrawer();
+	IndependentStringDrawer(Font* font, glm::vec4 color, std::string label, float y, int fade_frames);
+	~IndependentStringDrawer();
 
 	void own_self(std::unique_ptr<StringDrawer> self);
 
@@ -43,7 +43,8 @@ public:
 
 private:
 	std::unique_ptr<StringDrawer> self_{};
-	unsigned int fade_counter_ = 0;
+	int fade_counter_ = 0;
+	int fade_frames_;
 	bool prepare_to_kill_ = false;
 };
 

@@ -53,7 +53,7 @@ void Room::set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap
 	if (camera_->update_context(vpos) && display_labels) {
 		if (camera_->update_label()) {
 			context_label_ = std::make_unique<RoomLabelDrawer>(
-				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72), COLOR_VECTORS[DARK_BLUE],
+				gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
 				camera_->active_label_, 0.65f);
 			state_->text_->toggle_string_drawer(context_label_.get(), true);
 		}
@@ -174,7 +174,7 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 		case MapCode::Zone:
 			map_->zone_ = file.read_byte();
 			zone_label_ = std::make_unique<RoomLabelDrawer>(
-				gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 108), COLOR_VECTORS[BRIGHT_PURPLE],
+				gfx_->fonts_->get_font(Fonts::ABEEZEE, 108), COLOR_VECTORS[BRIGHT_PURPLE],
 				std::string("Zone ") + map_->zone_, 0.8f);
 			break;
 		case MapCode::ClearFlagRequirement:

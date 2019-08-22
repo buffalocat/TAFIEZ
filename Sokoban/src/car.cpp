@@ -98,14 +98,14 @@ void Car::setup_on_put(RoomMap* map, bool real) {
 
 void Car::cleanup_on_take(RoomMap* map, bool real) {}
 
-void Car::destroy(DeltaFrame* delta_frame) {
+void Car::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
 	if (player_) {
 		switch (type_) {
 		case CarType::Normal:
 			player_->set_free(delta_frame);
 			break;
 		case CarType::Convertible:
-			player_->destroy(delta_frame);
+			player_->destroy(delta_frame, death);
 		default:
 			break;
 		}

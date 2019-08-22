@@ -1,7 +1,7 @@
 #pragma once
 #include "objectmodifier.h"
 
-class SignTextDrawer;
+class IndependentStringDrawer;
 class TextRenderer;
 
 class FloorSign : public ObjectModifier {
@@ -29,7 +29,7 @@ public:
 
 private:
 	std::string content_;
-	SignTextDrawer* drawer_instance_{};
+	IndependentStringDrawer* drawer_instance_{};
 	bool active_;
 
 	friend class SignToggleDelta;

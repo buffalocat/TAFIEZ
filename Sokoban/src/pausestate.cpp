@@ -80,7 +80,7 @@ void Menu<State>::draw() {
 
 PauseState::PauseState(GameState* parent) : GameState(parent),
 playing_state_{ static_cast<PlayingState*>(parent) },
-menu_{ window_, gfx_->fonts_->get_font(Fonts::KALAM_BOLD, 72) } {
+menu_{ window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72) } {
 	menu_.push_entry("Unpause", &PauseState::unpause);
 	if (dynamic_cast<RealPlayingState*>(parent)) {
 		menu_.push_entry("Save Game", &PauseState::save);

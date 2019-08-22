@@ -154,7 +154,7 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
 			// Listeners only have to get activated once
             map_->put_in_map(block, false, true, nullptr);
             map_->take_from_map(block, true, false, delta_frame_);
-			block->destroy(delta_frame_);
+			block->destroy(delta_frame_, CauseOfDeath::Fallen);
             if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
                 snake_check_.erase(sb);
             }

@@ -36,7 +36,7 @@ public:
 
 	void cleanup_on_take(RoomMap* map, bool real);
 	void setup_on_put(RoomMap* map, bool real);
-	void destroy(DeltaFrame*);
+	void destroy(DeltaFrame*, CauseOfDeath);
 
 	void draw(GraphicsManager* gfx, FPoint3 p);
 

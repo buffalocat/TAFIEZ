@@ -2,6 +2,7 @@
 #include "playingstate.h"
 
 #include "graphicsmanager.h"
+#include "fontmanager.h"
 #include "stringdrawer.h"
 
 #include "gameobject.h"
@@ -75,6 +76,7 @@ void PlayingState::handle_input() {
 				}
 			}
 			room_->map()->reset_local_state();
+			set_death_text(player_->death());
 			return;
 		}
 	} else {
@@ -98,13 +100,17 @@ void PlayingState::handle_input() {
 		create_child(std::make_unique<PauseState>(this));
 		return;
 	}
+	
+	set_death_text(player_->death());
+	if (player_->death() != CauseOfDeath::None) {
+		return;
+	}
+
 	if (input_cooldown > 0) {
 		return;
 	}
 	RoomMap* map = room_->map();
-	if (player_->state() == PlayerState::Dead) {
-		return;
-	}
+	
 	// Process normal gameplay input
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
 		create_move_processor();
@@ -213,6 +219,35 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 		}
 	}
 	return true;
+}
+
+void PlayingState::set_death_text(CauseOfDeath death) {
+	static CauseOfDeath current_death = CauseOfDeath::None;
+	if (death != current_death) {
+		current_death = death;
+		std::string death_str{};
+		switch (death) {
+		case CauseOfDeath::None:
+			death_str = "";
+			break;
+		case CauseOfDeath::Fallen:
+			death_str = "FALLEN";
+			break;
+		case CauseOfDeath::Split:
+			death_str = "SPLIT";
+			break;
+		case CauseOfDeath::Voided:
+			death_str = "VOIDED";
+			break;
+		case CauseOfDeath::Incinerated:
+			death_str = "INCINERATED";
+			break;
+		}
+		death_message_ = std::make_unique<IndependentStringDrawer>(
+			text_->fonts_->get_font(Fonts::ABEEZEE, 108),
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, 0.0f, 4);
+		text_->toggle_string_drawer(death_message_.get(), true);
+	}
 }
 
 void PlayingState::make_subsave() {}

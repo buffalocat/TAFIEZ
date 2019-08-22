@@ -18,5 +18,5 @@ const glm::vec4 COLOR_VECTORS[] = {
 	glm::vec4{1.0f, 1.0f, 1.0f, 1.0f},
 	glm::vec4{0.1f, 0.1f, 0.1f, 1.0f},
 	glm::vec4{0.2f, 0.3f, 0.6f, 1.0f},
-	glm::vec4{0.6f, 0.1f, 0.7f, 1.0f},
+	glm::vec4{0.3f, 0.1f, 0.5f, 1.0f},
 };

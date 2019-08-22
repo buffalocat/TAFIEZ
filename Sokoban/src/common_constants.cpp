@@ -53,3 +53,4 @@ const std::string NEW_FILE_START_MAP = "story1";
 const std::string WORLD_RESET_START_MAP = "story2";
 
 const std::string Fonts::KALAM_BOLD = "resources/kalam/Kalam-Bold.ttf";
+const std::string Fonts::ABEEZEE = "resources/abeezee/ABeeZee-Regular.otf";

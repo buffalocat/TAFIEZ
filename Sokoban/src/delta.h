@@ -22,6 +22,7 @@ class FloorSign;
 class TextRenderer;
 
 enum class PlayerState;
+enum class CauseOfDeath;
 
 class Delta {
 public:
@@ -223,7 +224,7 @@ private:
 
 class PlayerStateDelta : public Delta {
 public:
-	PlayerStateDelta(Player* player, Car* car, PlayerState state);
+	PlayerStateDelta(Player* player);
 	~PlayerStateDelta();
 	void revert();
 
@@ -231,6 +232,7 @@ private:
 	Player* player_;
 	Car* car_;
 	PlayerState state_;
+	CauseOfDeath death_;
 };
 
 

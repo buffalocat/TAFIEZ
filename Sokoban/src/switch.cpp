@@ -23,6 +23,9 @@ void Switch::make_str(std::string& str) {
 }
 
 void Switch::push_signaler(Signaler* signaler) {
+	if (!signaler) {
+		throw std::runtime_error("We pushed a null signaler??");
+	}
     signalers_.push_back(signaler);
 }
 

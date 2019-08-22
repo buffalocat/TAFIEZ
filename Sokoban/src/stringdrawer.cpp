@@ -61,33 +61,33 @@ void StringDrawer::kill_instance() {
 
 const unsigned int SIGN_FADE_FRAMES = 4;
 
-SignTextDrawer::SignTextDrawer(Font* font, glm::vec4 color, std::string label, float y) :
-	StringDrawer(font, color, label, 0, y, 1, 1) {}
+IndependentStringDrawer::IndependentStringDrawer(Font* font, glm::vec4 color, std::string label, float y, int fade_frames) :
+	StringDrawer(font, color, label, 0, y, 1, 1), fade_frames_{ std::max(1, fade_frames) } {}
 
-SignTextDrawer::~SignTextDrawer() {}
+IndependentStringDrawer::~IndependentStringDrawer() {}
 
-void SignTextDrawer::own_self(std::unique_ptr<StringDrawer> self) {
+void IndependentStringDrawer::own_self(std::unique_ptr<StringDrawer> self) {
 	self_ = std::move(self);
 }
 
-void SignTextDrawer::update() {
+void IndependentStringDrawer::update() {
 	if (prepare_to_kill_) {
 		if (--fade_counter_ == 0) {
 			active_ = false;
 		}
 	} else {
-		if (fade_counter_ < SIGN_FADE_FRAMES) {
+		if (fade_counter_ < fade_frames_) {
 			++fade_counter_;
 		}
 	}
 	color_.w = (float)fade_counter_ / (float)SIGN_FADE_FRAMES;
 }
 
-void SignTextDrawer::kill_instance() {
+void IndependentStringDrawer::kill_instance() {
 	prepare_to_kill_ = true;
 }
 
-void SignTextDrawer::cleanup() {
+void IndependentStringDrawer::cleanup() {
 	self_ = {};
 }
 

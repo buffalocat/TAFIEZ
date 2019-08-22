@@ -57,7 +57,7 @@ int Player::color() {
 
 void Player::set_free(DeltaFrame* delta_frame) {
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<PlayerStateDelta>(this, car_, state_));
+		delta_frame->push(std::make_unique<PlayerStateDelta>(this));
 	}
 	state_ = PlayerState::Free;
 	set_car(nullptr);
@@ -70,7 +70,7 @@ void Player::set_bound() {
 
 void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<PlayerStateDelta>(this, car_, state_));
+		delta_frame->push(std::make_unique<PlayerStateDelta>(this));
 	}
 	if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 		if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
@@ -126,10 +126,9 @@ void Player::set_car(Car* car) {
 }
 
 bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	auto delta = std::make_unique<PlayerStateDelta>(this, car_, state_);
+	auto delta = std::make_unique<PlayerStateDelta>(this);
 	switch (state_) {
 	case PlayerState::Free:
-	case PlayerState::Dead:
 		return false;
 	case PlayerState::Bound:
 		if (auto* car = car_bound(map)) {
@@ -162,16 +161,20 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 		// Fallthrough
 	case PlayerState::RidingNormal:
 		state_ = PlayerState::Bound;
+		set_car(nullptr);
 		break;
 	}
 	delta_frame->push(std::move(delta));
 	return true;
 }
 
-void Player::destroy(DeltaFrame* delta_frame) {
-	delta_frame->push(std::make_unique<PlayerStateDelta>(this, car_, state_));
-	state_ = PlayerState::Dead;
-	set_car(nullptr);
+void Player::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
+	delta_frame->push(std::make_unique<PlayerStateDelta>(this));
+	death_ = death;
+}
+
+CauseOfDeath Player::death() {
+	return death_;
 }
 
 Car* Player::car_riding() {
@@ -181,7 +184,6 @@ Car* Player::car_riding() {
 Car* Player::car_bound(RoomMap* map) {
     switch (state_) {
 	case PlayerState::Free:
-	case PlayerState::Dead:
 		return nullptr;
 	case PlayerState::Bound:
 		return dynamic_cast<Car*>(map->view(shifted_pos({ 0,0,-1 }))->modifier());
@@ -218,26 +220,20 @@ void Player::draw(GraphicsManager* gfx) {
 	case PlayerState::Free:
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
 		break;
-	case PlayerState::Dead:
 	case PlayerState::RidingHidden:
 	default:
 		break;
 	}
-	
-	// TODO: make it so the player *can't* have a modifier
-    if (modifier_) {
-        modifier()->draw(gfx, p);
-    }
 }
 
 FPoint3 Player::cam_pos() {
 	switch (state_) {
-	case PlayerState::RidingNormal:
-		return real_pos() + FPoint3{ 0, 0, -1 };
+	case PlayerState::Free:
+		return real_pos();
 	case PlayerState::RidingHidden:
 		return car_->parent_->real_pos();
 	default:
-		return real_pos();
+		return real_pos() + FPoint3{ 0, 0, -1 };
 	}
 }
 

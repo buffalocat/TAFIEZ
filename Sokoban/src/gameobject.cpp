@@ -80,9 +80,9 @@ void GameObject::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
-void GameObject::destroy(DeltaFrame* delta_frame) {
+void GameObject::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
 	if (modifier_) {
-		modifier_->destroy(delta_frame);
+		modifier_->destroy(delta_frame, death);
 	}
 }
 

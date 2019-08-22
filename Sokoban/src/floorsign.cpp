@@ -69,11 +69,13 @@ void FloorSign::toggle_active(TextRenderer* text, DeltaFrame* delta_frame) {
 	}
 }
 
+const int SIGN_FADE_FRAMES = 4;
+
 void FloorSign::set_text_state(bool state, TextRenderer* text) {
 	if (state) {
-		auto drawer = std::make_unique<SignTextDrawer>(
-			text->fonts_->get_font(Fonts::KALAM_BOLD, 36),
-			glm::vec4(0.9, 0.7, 0.8, 1.0), content_, 0.5f);
+		auto drawer = std::make_unique<IndependentStringDrawer>(
+			text->fonts_->get_font(Fonts::ABEEZEE, 36),
+			glm::vec4(0.6, 0.3, 0.4, 1.0), content_, 0.5f, SIGN_FADE_FRAMES);
 		drawer_instance_ = drawer.get();
 		drawer_instance_->own_self(std::move(drawer));
 		text->string_drawers_.push_back(ProtectedStringDrawer(drawer_instance_));

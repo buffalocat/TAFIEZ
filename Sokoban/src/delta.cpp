@@ -208,13 +208,14 @@ void SignalerCountDelta::revert() {
 }
 
 
-PlayerStateDelta::PlayerStateDelta(Player* player, Car* car, PlayerState state) :
-	player_{ player }, car_{ car }, state_{ state } {}
+PlayerStateDelta::PlayerStateDelta(Player* player) :
+	player_{ player }, car_{ player->car_ }, state_{ player->state_ }, death_{ player->death_ } {}
 
 PlayerStateDelta::~PlayerStateDelta() {}
 
 void PlayerStateDelta::revert() {
 	player_->state_ = state_;
+	player_->death_ = death_;
 	player_->set_car(car_);
 }
 

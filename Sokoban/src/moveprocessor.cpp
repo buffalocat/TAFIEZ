@@ -237,9 +237,8 @@ void MoveProcessor::try_door_unentry() {
 		door_state_ = DoorState::IntSucceeded;
 		state_ = MoveStep::PostDoorInit;
 	} else {
-		std::cout << "TERRIBLE THINGS HAPPENED! (we're in the void!)" << std::endl;
 		door_state_ = DoorState::Voided;
-		player_->destroy(delta_frame_);
+		player_->destroy(delta_frame_, CauseOfDeath::Voided);
 	}
 }
 

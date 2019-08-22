@@ -10,7 +10,6 @@ enum class PlayerState {
     Bound = 2,
     RidingNormal = 3,
 	RidingHidden = 4,
-	Dead = 5,
 };
 
 class Car;
@@ -34,7 +33,8 @@ public:
 
 	void set_strictest(RoomMap* map, DeltaFrame*);
 	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
-	void destroy(DeltaFrame*);
+	void destroy(DeltaFrame*, CauseOfDeath);
+	CauseOfDeath death();
 
     Car* car_riding();
 	Car* car_bound(RoomMap* map);
@@ -51,6 +51,7 @@ private:
 
 	Car* car_;
 	PlayerState state_;
+	CauseOfDeath death_ = CauseOfDeath::None;
 
 	friend class PlayerStateDelta;
 };

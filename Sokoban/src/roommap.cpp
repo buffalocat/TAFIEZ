@@ -397,7 +397,6 @@ void RoomMap::set_initial_state_on_start() {
 		DeltaFrame df{};
 		MoveProcessor mp = MoveProcessor(nullptr, this, &df, nullptr, false);
 		set_initial_state(false, &df, &mp);
-		// Ensures that at least one loop happens
 		while (!mp.update()) {}
 	}
 }

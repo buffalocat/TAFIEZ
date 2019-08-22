@@ -152,7 +152,7 @@ CameraContext* NullCameraContext::deserialize(MapFileI& file) {
 Camera::Camera(int w, int h) :
 	active_label_{}, label_display_cooldown_{},
 	width_{ w }, height_{ h },
-	default_context_{ ClampedCameraContext("DEFAULT", IntRect{0,0,w - 1,h - 1}, 0, false, false,
+	default_context_{ ClampedCameraContext("", IntRect{0,0,w - 1,h - 1}, 0, true, false,
 		0, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
 	context_{}, loaded_contexts_{},
 	context_map_{},
@@ -243,7 +243,7 @@ void Camera::set_target(FPoint3 rpos) {
 bool Camera::update_label() {
 	if (context_->named_area_) {
 		std::string label = context_->label_;
-		if (!label.empty() && active_label_ != label) {
+		if (active_label_ != label) {
 			active_label_ = label;
 			return true;
 		}

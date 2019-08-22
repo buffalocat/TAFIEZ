@@ -381,7 +381,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);
 					}
-					cur->destroy(delta_frame_);
+					cur->destroy(delta_frame_, CauseOfDeath::Split);
 				// The middle block couldn't be split; split around instead
 				} else {
 					std::vector<SnakeBlock*> links = cur->links_;
