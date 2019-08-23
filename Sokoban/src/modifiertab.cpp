@@ -29,7 +29,7 @@ ModifierTab::ModifierTab(EditorState* editor) : EditorTab(editor) {}
 ModifierTab::~ModifierTab() {}
 
 // Current object type
-static ModCode mod_code = ModCode::NONE;
+static ModCode mod_code = ModCode::Car;
 
 // Model objects that new objects are created from
 static Car model_car{ nullptr, CarType::Normal, {} };
@@ -79,10 +79,10 @@ void ModifierTab::mod_tab_options() {
 			return;
 		}
 	} else {
-		ImGui::RadioButton("Car##MOD_object", &mod_code, ModCode::Car);
 		ImGui::RadioButton("Door##MOD_object", &mod_code, ModCode::Door);
-		ImGui::RadioButton("Gate##MOD_object", &mod_code, ModCode::Gate);
+		ImGui::RadioButton("Car##MOD_object", &mod_code, ModCode::Car);
 		ImGui::RadioButton("PressSwitch##MOD_object", &mod_code, ModCode::PressSwitch);
+		ImGui::RadioButton("Gate##MOD_object", &mod_code, ModCode::Gate);
 		ImGui::RadioButton("AutoBlock##MOD_object", &mod_code, ModCode::AutoBlock);
 		ImGui::RadioButton("PuppetBlock##MOD_object", &mod_code, ModCode::PuppetBlock);
 		ImGui::RadioButton("ClearFlag##MOD_object", &mod_code, ModCode::ClearFlag);
@@ -182,6 +182,20 @@ void ModifierTab::select_color_cycle(ColorCycle* cycle) {
 		ImGui::InputInt(color_ordinals[i], &cycle->colors_[i]);
 		color_button(cycle->colors_[i]);
 	}
+}
+
+bool ModifierTab::handle_keyboard_input() {
+	if (EditorTab::handle_keyboard_input()) {
+		return true;
+	}
+	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT)) {
+		for (int i = 1; i <= 9; ++i) {
+			if (glfwGetKey(editor_->window_, GLFW_KEY_0 + i) == GLFW_PRESS) {
+				mod_code = static_cast<ModCode>(i);
+			}
+		}
+	}
+	return false;
 }
 
 void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {

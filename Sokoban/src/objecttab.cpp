@@ -21,7 +21,7 @@ ObjectTab::ObjectTab(EditorState* editor) :
 ObjectTab::~ObjectTab() {}
 
 // Current object type
-static ObjCode obj_code = ObjCode::NONE;
+static ObjCode obj_code = ObjCode::Wall;
 
 // Model objects that new objects are created from
 static PushBlock model_pb{ Point3{0,0,0}, GREEN, true, true, Sticky::None };
@@ -52,9 +52,9 @@ void ObjectTab::main_loop(EditorRoom* eroom) {
 }
 
 void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
-	ImGui::RadioButton("Wall##OBJECT_object", obj_code_ptr, ObjCode::Wall);
 	ImGui::RadioButton("PushBlock##OBJECT_object", obj_code_ptr, ObjCode::PushBlock);
 	ImGui::RadioButton("SnakeBlock##OBJECT_object", obj_code_ptr, ObjCode::SnakeBlock);
+	ImGui::RadioButton("Wall##OBJECT_object", obj_code_ptr, ObjCode::Wall);
 }
 
 void ObjectTab::object_tab_options() {
@@ -185,6 +185,20 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 	}
 	obj->pos_ = selected_pos;
 	return std::move(obj);
+}
+
+bool ObjectTab::handle_keyboard_input() {
+	if (EditorTab::handle_keyboard_input()) {
+		return true;
+	}
+	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT)) {
+		for (int i = 1; i <= 3; ++i) {
+			if (glfwGetKey(editor_->window_, GLFW_KEY_0 + i) == GLFW_PRESS) {
+				obj_code = static_cast<ObjCode>(i);
+			}
+		}
+	}
+	return false;
 }
 
 void ObjectTab::handle_left_click(EditorRoom* eroom, Point3 pos) {

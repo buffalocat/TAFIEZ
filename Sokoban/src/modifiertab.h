@@ -11,6 +11,7 @@ public:
     ~ModifierTab();
     void init();
     void main_loop(EditorRoom*);
+	bool handle_keyboard_input();
     void handle_left_click(EditorRoom*, Point3);
     void handle_right_click(EditorRoom*, Point3);
 

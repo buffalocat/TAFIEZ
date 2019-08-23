@@ -169,7 +169,7 @@ void FallStepProcessor::settle(FallComponent* comp) {
     handle_fallen_blocks(comp);
     for (FallComponent* above : comp->above_) {
         if (!above->settled_) {
-            settle(comp);
+            settle(above);
         }
     }
 }

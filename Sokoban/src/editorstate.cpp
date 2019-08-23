@@ -61,9 +61,11 @@ EditorState::~EditorState() {
 // which inherit from EditorBaseState
 bool EditorState::handle_keyboard_input_main_state() {
 	for (int i = 0; i < tabs_.size(); ++i) {
-		if (glfwGetKey(window_, GLFW_KEY_1 + i) == GLFW_PRESS) {
-			set_active_tab_by_index(i);
-			return false;
+		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) != GLFW_PRESS) {
+			if (glfwGetKey(window_, GLFW_KEY_1 + i) == GLFW_PRESS) {
+				set_active_tab_by_index(i);
+				return false;
+			}
 		}
 	}
 	if (glfwGetKey(window_, GLFW_KEY_T)) {
