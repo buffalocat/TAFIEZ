@@ -15,8 +15,7 @@
 #include "gate.h"
 
 ObjectTab::ObjectTab(EditorState* editor) :
-	EditorTab(editor),
-	map_{} {}
+	EditorTab(editor) {}
 
 ObjectTab::~ObjectTab() {}
 
@@ -43,12 +42,11 @@ void ObjectTab::main_loop(EditorRoom* eroom) {
 		ImGui::Text("No room loaded.");
 		return;
 	}
-	map_ = eroom->map();
 
 	ImGui::Checkbox("Inspect Mode##OBJECT_inspect", &inspect_mode_);
 	ImGui::Separator();
 
-	object_tab_options();
+	object_tab_options(eroom->map());
 }
 
 void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
@@ -57,7 +55,7 @@ void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
 	ImGui::RadioButton("Wall##OBJECT_object", obj_code_ptr, ObjCode::Wall);
 }
 
-void ObjectTab::object_tab_options() {
+void ObjectTab::object_tab_options(RoomMap* map) {
 	GameObject* obj = nullptr;
 	if (inspect_mode_) {
 		if (selected_obj) {
@@ -97,7 +95,7 @@ void ObjectTab::object_tab_options() {
 		ImGui::InputInt("Color##SB_modify_COLOR", &sb->color_);
 		color_button(sb->color_);
 		if (obj && sb->color_ != prev_color) {
-			sb->remove_wrong_color_links(map_, nullptr);
+			sb->remove_wrong_color_links(map, nullptr);
 		}
 		ImGui::Text("Number of Ends");
 		ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);
@@ -130,22 +128,22 @@ void ObjectTab::object_tab_options() {
 		if (ImGui::Button("Transmute##OBJECT")) {
 			if (auto new_obj = create_from_model(transmute_obj_code, selected_obj)) {
 				if (selected_obj->id_ == GENERIC_WALL_ID) {
-					map_->clear(selected_pos);
+					map->clear(selected_pos);
 				} else {
-					map_->take_from_map(selected_obj, true, false, nullptr);
-					map_->remove_from_object_array(selected_obj);
+					map->take_from_map(selected_obj, true, false, nullptr);
+					map->remove_from_object_array(selected_obj);
 				}
 				selected_obj = new_obj.get();
-				map_->create_in_map(std::move(new_obj), false, nullptr);
+				map->create_in_map(std::move(new_obj), false, nullptr);
 			}
 			// If the new object was a generic Wall, we don't have a new pointer
 			else if (transmute_obj_code == ObjCode::Wall) {
 				// If the old object was also a generic Wall, do nothing
 				if (selected_obj->id_ != GENERIC_WALL_ID) {
-					map_->take_from_map(selected_obj, true, false, nullptr);
-					map_->remove_from_object_array(selected_obj);
-					map_->create_wall(selected_pos);
-					selected_obj = map_->view(selected_pos);
+					map->take_from_map(selected_obj, true, false, nullptr);
+					map->remove_from_object_array(selected_obj);
+					map->create_wall(selected_pos);
+					selected_obj = map->view(selected_pos);
 				}
 			}
 		}
@@ -202,22 +200,23 @@ bool ObjectTab::handle_keyboard_input() {
 }
 
 void ObjectTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
-	if (!map_->valid(pos)) {
+	RoomMap* map = eroom->map();
+	if (!map->valid(pos)) {
 		selected_obj = nullptr;
 		return;
 		// Even in create mode, let the user select an already-created object
 	}
 	selected_pos = pos;
-	if (inspect_mode_ || map_->view(pos)) {
-		selected_obj = map_->view(pos);
+	if (inspect_mode_ || map->view(pos)) {
+		selected_obj = map->view(pos);
 		return;
 	}
 	if (std::unique_ptr<GameObject> obj = create_from_model(obj_code, nullptr)) {
 		selected_obj = obj.get();
-		map_->create_in_map(std::move(obj), false, nullptr);
+		map->create_in_map(std::move(obj), false, nullptr);
 	} else if (obj_code == ObjCode::Wall) {
-		map_->create_wall(pos);
-		selected_obj = map_->view(pos);
+		map->create_wall(pos);
+		selected_obj = map->view(pos);
 	}
 }
 
@@ -226,7 +225,8 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (inspect_mode_) {
 		return;
 	}
-	GameObject* obj = map_->view(pos);
+	RoomMap* map = eroom->map();
+	GameObject* obj = map->view(pos);
 	if (obj) {
 		if (obj->obj_code() == ObjCode::Player) {
 			return;
@@ -237,10 +237,10 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 		selected_obj = nullptr;
 		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object
 		if (obj->id_ == GENERIC_WALL_ID) {
-			map_->at(pos) = 0;
+			map->at(pos) = 0;
 		} else {
-			map_->take_from_map(obj, true, false, nullptr);
-			map_->remove_from_object_array(obj);
+			map->take_from_map(obj, true, false, nullptr);
+			map->remove_from_object_array(obj);
 		}
 	}
 }

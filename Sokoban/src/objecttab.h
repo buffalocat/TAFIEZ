@@ -20,10 +20,9 @@ public:
 
 private:
 	void object_type_choice(ObjCode*);
-	void object_tab_options();
+	void object_tab_options(RoomMap*);
 
 	std::unique_ptr<GameObject> create_from_model(ObjCode, GameObject* prev);
-	RoomMap* map_;
 };
 
 #endif // OBJECTTAB_H

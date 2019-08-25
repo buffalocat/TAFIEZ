@@ -25,11 +25,12 @@ const int SWITCH_RESPONSE_FRAMES = 4;
 const int COLOR_CHANGE_MOVEMENT_FRAMES = 4;
 const int TOGGLE_RIDING_MOVEMENT_FRAMES = 4;
 const int FALL_MOVEMENT_FRAMES = 4;
-const int MAX_COOLDOWN = 7;
+const int MAX_COOLDOWN = 8;
 
 const int UNDO_COMBO_FIRST = 4;
-const int UNDO_COMBO_SECOND = 10;
-const int UNDO_COOLDOWN_FIRST = 7;
+const int UNDO_COMBO_SECOND = 12;
+
+const int UNDO_COOLDOWN_FIRST = 8;
 const int UNDO_COOLDOWN_SECOND = 4;
 const int UNDO_COOLDOWN_FINAL = 2;
 

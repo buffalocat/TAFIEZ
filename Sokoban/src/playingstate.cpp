@@ -51,6 +51,11 @@ void PlayingState::main_loop() {
 void PlayingState::handle_input() {
 	static int input_cooldown = 0;
 	static int undo_combo = 0;
+
+	if (input_cooldown > 0) {
+		--input_cooldown;
+	}
+
 	if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
 		if (input_cooldown == 0) {
 			++undo_combo;
@@ -82,9 +87,7 @@ void PlayingState::handle_input() {
 	} else {
 		undo_combo = 0;
 	}
-	if (input_cooldown > 0) {
-		--input_cooldown;
-	}
+
 	// Ignore all other input if an animation is occurring
 	if (move_processor_) {
 		if (move_processor_->update()) {
