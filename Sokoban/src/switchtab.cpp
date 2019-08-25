@@ -342,7 +342,7 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 			auto sw = dynamic_cast<Switch*>(mod);
 			if (sw && std::find(switches_ptr_->begin(), switches_ptr_->end(), sw) == switches_ptr_->end()) {
 				switches_ptr_->push_back(sw);
-				if (inspect_mode_) {
+				if (inspect_mode_ && selected_sig) {
 					sw->push_signaler(selected_sig);
 				}
 				return;
@@ -350,7 +350,7 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 			auto swble = dynamic_cast<Switchable*>(mod);
 			if (swble && std::find(switchables_ptr_->begin(), switchables_ptr_->end(), swble) == switchables_ptr_->end()) {
 				switchables_ptr_->push_back(swble);
-				if (inspect_mode_) {
+				if (inspect_mode_ && selected_sig) {
 					switch (sig_type_) {
 					case SignalerType::Threshold:
 						swble->push_signaler(selected_sig, 0);

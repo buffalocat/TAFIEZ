@@ -29,9 +29,6 @@ void Switchable::make_str(std::string& str) {
 }
 
 void Switchable::push_signaler(Signaler* signaler, int index) {
-	if (!signaler) {
-		throw std::runtime_error("We pushed a null signaler??");
-	}
 	signalers_.push_back(std::make_pair(signaler, index));
 }
 
