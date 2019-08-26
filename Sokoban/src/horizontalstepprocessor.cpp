@@ -192,9 +192,10 @@ bool HorizontalStepProcessor::compute_push_component(GameObject* start_block) {
 			}
 		}
 	}
-	// If the block was a snake block, check its strongly dragged links
-	if (auto* sb = dynamic_cast<SnakeBlock*>(start_block)) {
-		snake_strong_drag_check(sb);
+	for (auto* block : comp->blocks_) {
+		if (auto* sb = dynamic_cast<SnakeBlock*>(block)) {
+			snake_strong_drag_check(sb);
+		}
 	}
 	return !comp->blocked_;
 }
