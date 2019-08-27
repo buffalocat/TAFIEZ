@@ -13,12 +13,15 @@
 
 GateBody::GateBody(Gate* gate, Point3 pos) :
 	PushBlock(pos, gate->color_, gate->pushable(), gate->gravitable(), Sticky::None),
-	snake_{ gate->parent_->obj_code() == ObjCode::SnakeBlock } {
+	snake_{ gate->parent_->obj_code() == ObjCode::SnakeBlock },
+	persistent_{ gate->persistent_ }, corrupt_{ false } {
 	set_gate(gate);
 }
 
-GateBody::GateBody(Point3 pos, int color, bool pushable, bool gravitable, bool snake) :
-	PushBlock(pos, color, pushable, gravitable, Sticky::None), snake_{ snake } {}
+GateBody::GateBody(Point3 pos, int color, bool pushable, bool gravitable,
+	bool snake, bool persistent, bool corrupt) :
+	PushBlock(pos, color, pushable, gravitable, Sticky::None),
+	gate_{}, snake_{ snake }, persistent_{ persistent }, corrupt_{ corrupt } {}
 
 GateBody::~GateBody() {}
 
@@ -31,15 +34,14 @@ ObjCode GateBody::obj_code() {
 }
 
 void GateBody::serialize(MapFileO& file) {
-	file << color_ << pushable_ << gravitable_ << snake_;
+	file << color_ << pushable_ << gravitable_ << snake_ << persistent_ << corrupt_;
 }
 
 std::unique_ptr<GameObject> GateBody::deserialize(MapFileI& file) {
 	Point3 pos{ file.read_point3() };
-	unsigned char b[4];
-	file.read(b, 4);
-	auto gate_body = std::make_unique<GateBody>(pos, b[0], b[1], b[2], b[3]);
-	return std::move(gate_body);
+	unsigned char b[6];
+	file.read(b, 6);
+	return std::make_unique<GateBody>(pos, b[0], b[1], b[2], b[3], b[4], b[5]);
 }
 
 bool GateBody::relation_check() {
@@ -73,6 +75,19 @@ Point3 GateBody::update_gate_pos(DeltaFrame* delta_frame) {
 	return dpos;
 }
 
+void GateBody::destroy(DeltaFrame* delta_frame, CauseOfDeath) {
+	if (gate_) {
+		gate_->body_ = nullptr;
+		delta_frame->push(std::make_unique<DestructionDelta>(this));
+	}
+}
+
+void GateBody::undestroy() {
+	if (gate_) {
+		gate_->body_ = this;
+	}
+}
+
 void GateBody::collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& to_check) {
 	if (gate_) {
 		to_check.push_back(gate_->parent_);
@@ -83,7 +98,8 @@ void GateBody::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
 	// TODO: make this depend on the state animation
 	double height = 1.0f;
-	BlockTexture tex = gate_->persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody;
+	BlockTexture tex = corrupt_ ? BlockTexture::GateBodyCorrupt :
+		(persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody);
 	ModelInstancer& model = snake_ ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
 		glm::vec3(0.7f, 0.7f, height), tex, color_);

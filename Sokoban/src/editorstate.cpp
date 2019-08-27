@@ -110,7 +110,8 @@ void EditorState::main_loop() {
 
     if (active_room_) {
 		// Header Information
-        ImGui::Text(("Current Room: " + active_room_->room->name()).c_str());
+		RoomMap* map = active_room_->map();
+        ImGui::Text("Current Room: %s (%d,%d,%d)", active_room_->room->name().c_str(), map->width_, map->height_, map->depth_);
 		unsigned int layer = active_room_->cam_pos.z;
 		if (one_layer_) {
 			ImGui::Text("Just Layer %d", layer);

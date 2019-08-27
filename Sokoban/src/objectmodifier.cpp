@@ -58,7 +58,9 @@ void ObjectModifier::setup_on_editor_creation(EditorGlobalData* global, Room* ro
 
 void ObjectModifier::cleanup_on_editor_destruction(EditorGlobalData* global) {}
 
-void ObjectModifier::destroy(DeltaFrame*, CauseOfDeath) {};
+void ObjectModifier::destroy(DeltaFrame*, CauseOfDeath) {}
+
+void ObjectModifier::undestroy() {}
 
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 

@@ -7,6 +7,7 @@ class Room;
 class RoomMap;
 class PlayingGlobalData;
 class GameObject;
+class ObjectModifier;
 class PushBlock;
 class SnakeBlock;
 class Switchable;
@@ -97,6 +98,28 @@ public:
 private:
 	GameObject* obj_;
 	RoomMap* map_;
+};
+
+
+class DestructionDelta : public Delta {
+public:
+	DestructionDelta(GameObject* obj);
+	~DestructionDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+};
+
+
+class ModDestructionDelta : public Delta {
+public:
+	ModDestructionDelta(ObjectModifier* obj);
+	~ModDestructionDelta();
+	void revert();
+
+private:
+	ObjectModifier* mod_;
 };
 
 

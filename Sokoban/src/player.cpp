@@ -169,8 +169,12 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 }
 
 void Player::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
-	delta_frame->push(std::make_unique<PlayerStateDelta>(this));
+	delta_frame->push(std::make_unique<DestructionDelta>(this));
 	death_ = death;
+}
+
+void Player::undestroy() {
+	death_ = CauseOfDeath::None;
 }
 
 CauseOfDeath Player::death() {

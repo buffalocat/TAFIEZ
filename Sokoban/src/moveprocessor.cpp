@@ -2,6 +2,7 @@
 #include "moveprocessor.h"
 
 #include "common_constants.h"
+#include "color_constants.h"
 
 #include "gameobject.h"
 #include "player.h"
@@ -11,6 +12,7 @@
 #include "roommap.h"
 #include "door.h"
 #include "car.h"
+#include "gate.h"
 
 #include "snakeblock.h"
 
@@ -123,6 +125,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	map_->alert_activated_listeners(delta_frame_, this);
 	map_->reset_local_state();
 	map_->check_signalers(delta_frame_, this);
+	raise_gates();
 	map_->check_clear_flag_collected(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
@@ -148,6 +151,28 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 			break;
 		}
 	}
+}
+
+void MoveProcessor::push_rising_gate(Gate* gate) {
+	rising_gates_[gate->body_->pos_].push_back(gate);
+}
+
+void MoveProcessor::raise_gates() {
+	for (auto& p : rising_gates_) {
+		auto& vec = p.second;
+		if (vec.size() > 1) {
+			for (auto* gate : vec) {
+				GateBody* body = gate->body_;
+				body->destroy(delta_frame_, CauseOfDeath::Collided);
+			}
+			auto corrupt = std::make_unique<GateBody>(p.first, WHITE, true, true, true, false, true);
+			fall_check_.push_back(corrupt.get());
+			map_->create_in_map(std::move(corrupt), true, delta_frame_);
+		} else {
+			vec[0]->raise_gate(map_, delta_frame_);
+		}
+	}
+	rising_gates_.clear();
 }
 
 void MoveProcessor::plan_door_move(Door* door) {

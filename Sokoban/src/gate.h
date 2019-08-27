@@ -25,9 +25,12 @@ public:
 
     bool can_set_state(bool state, RoomMap*);
     void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void raise_gate(RoomMap*, DeltaFrame*);
 
 	void cleanup_on_take(RoomMap* map, bool real);
 	void setup_on_put(RoomMap* map, bool real);
+	void destroy(DeltaFrame*, CauseOfDeath);
+	void undestroy();
 
     void draw(GraphicsManager*, FPoint3);
 

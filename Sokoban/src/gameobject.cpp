@@ -86,6 +86,12 @@ void GameObject::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
 	}
 }
 
+void GameObject::undestroy() {
+	if (modifier_) {
+		modifier_->undestroy();
+	}
+}
+
 void GameObject::set_modifier(std::unique_ptr<ObjectModifier> mod) {
 	modifier_ = std::move(mod);
 }

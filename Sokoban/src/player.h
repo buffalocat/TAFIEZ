@@ -34,6 +34,7 @@ public:
 	void set_strictest(RoomMap* map, DeltaFrame*);
 	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
 	void destroy(DeltaFrame*, CauseOfDeath);
+	void undestroy();
 	CauseOfDeath death();
 
     Car* car_riding();

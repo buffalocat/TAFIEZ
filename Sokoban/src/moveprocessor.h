@@ -11,7 +11,7 @@ class RoomMap;
 class DeltaFrame;
 class SnakeBlock;
 class Door;
-class GateBody;
+class Gate;
 
 enum class MoveStep {
 	Default = 0,
@@ -52,6 +52,7 @@ public:
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);
+	void push_rising_gate(Gate* gate);
 
 	void plan_door_move(Door*);
     void try_door_entry();
@@ -69,11 +70,11 @@ public:
 	void set_initializer_state();
 
 private:
-    void move_bound(Point3);
-    void move_general(Point3);
+	void raise_gates();
 
 	std::vector<GameObject*> moving_blocks_{};
 	std::vector<GameObject*> fall_check_{};
+	std::unordered_map<Point3, std::vector<Gate*>, Point3Hash> rising_gates_{};
 
     PlayingState* playing_state_;
     RoomMap* map_;

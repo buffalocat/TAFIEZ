@@ -6,6 +6,7 @@
 #include "gatebody.h"
 #include "mapfile.h"
 #include "roommap.h"
+#include "delta.h"
 
 #include "moveprocessor.h"
 #include "graphicsmanager.h"
@@ -66,7 +67,7 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 	if (body_) {
 		// Add animation
 		if (state()) {
-			map->put_in_map(body_, true, true, delta_frame);
+			mp->push_rising_gate(this);
 		} else {
 			map->take_from_map(body_, true, true, delta_frame);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });
@@ -75,6 +76,10 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 			}
 		}
 	}
+}
+
+void Gate::raise_gate(RoomMap* map, DeltaFrame* delta_frame) {
+	map->put_in_map(body_, true, true, delta_frame);
 }
 
 void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
@@ -99,6 +104,19 @@ void Gate::cleanup_on_take(RoomMap* map, bool real) {
 	Switchable::cleanup_on_take(map, real);
 	if (body_) {
 		map->remove_listener(this, body_->pos_);
+	}
+}
+
+void Gate::destroy(DeltaFrame* delta_frame, CauseOfDeath) {
+	delta_frame->push(std::make_unique<ModDestructionDelta>(this));
+	if (body_) {
+		body_->set_gate(nullptr);
+	}
+}
+
+void Gate::undestroy() {
+	if (body_) {
+		body_->set_gate(this);
 	}
 }
 

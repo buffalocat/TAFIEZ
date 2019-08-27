@@ -52,6 +52,7 @@ enum class CauseOfDeath {
 	Split = 2,
 	Incinerated = 3,
 	Voided = 4,
+	Collided = 5,
 };
 
 Sticky operator &(Sticky a, Sticky b);

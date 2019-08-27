@@ -110,6 +110,24 @@ void TakeDelta::revert() {
 }
 
 
+DestructionDelta::DestructionDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+DestructionDelta::~DestructionDelta() {}
+
+void DestructionDelta::revert() {
+	obj_->undestroy();
+}
+
+ModDestructionDelta::ModDestructionDelta(ObjectModifier* mod) :
+	mod_{ mod } {}
+
+ModDestructionDelta::~ModDestructionDelta() {}
+
+void ModDestructionDelta::revert() {
+	mod_->undestroy();
+}
+
 MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
 	obj_{ obj }, dpos_{ dpos }, map_{ map } {}
 
