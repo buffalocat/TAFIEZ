@@ -57,6 +57,7 @@ public:
     bool try_color_change();
 	bool try_toggle_riding();
 	bool try_jump();
+	void try_jump_refresh();
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);

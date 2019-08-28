@@ -57,7 +57,10 @@ bool MoveProcessor::update() {
 	for (GameObject* block : moving_blocks_) {
 		block->update_animation();
 	}
-	//update_gate_transitions();
+	// End of move checks
+	if (frames_ <= 0) {
+		try_jump_refresh();
+	}
 	return frames_ <= 0;
 }
 
@@ -140,6 +143,20 @@ bool MoveProcessor::try_jump() {
 	return true;
 }
 
+void MoveProcessor::try_jump_refresh() {
+	if (!player_ || player_->gravitable_) {
+		// The player is not in a jumped state
+		return;
+	}
+	// If the player would fall, we can't refresh it yet
+	player_->gravitable_ = true;
+	if (FallStepProcessor(map_, nullptr, { player_ }).run(true)) {
+		player_->gravitable_ = false;
+		return;
+	}
+	delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
+}
+
 void MoveProcessor::add_neighbors_to_fall_check(GameObject* obj) {
 	fall_check_.push_back(obj);
 	for (Point3 d : DIRECTIONS) {
@@ -152,7 +169,7 @@ void MoveProcessor::add_neighbors_to_fall_check(GameObject* obj) {
 void MoveProcessor::try_fall_step() {
 	moving_blocks_.clear();
 	if (!fall_check_.empty()) {
-		FallStepProcessor(map_, delta_frame_, std::move(fall_check_)).run();
+		FallStepProcessor(map_, delta_frame_, std::move(fall_check_)).run(false);
 		fall_check_.clear();
 	}
 }

@@ -14,7 +14,7 @@ fall_check_ {fall_check}, map_ {map}, delta_frame_ {delta_frame} {}
 FallStepProcessor::~FallStepProcessor() {}
 
 // Returns whether anything falls
-bool FallStepProcessor::run() {
+bool FallStepProcessor::run(bool test) {
     while (!fall_check_.empty()) {
         std::vector<GameObject*> next_fall_check {};
         for (GameObject* block : fall_check_) {
@@ -37,6 +37,10 @@ bool FallStepProcessor::run() {
     if (fall_comps_unique_.empty()) {
         return false;
     }
+	// If we're just testing, then don't actually perform the fall; we have our answer
+	if (test) {
+		return true;
+	}
     // Collect all falling snakes, and their adjacent maybe-confused snakes
     for (auto& comp : fall_comps_unique_) {
         for (GameObject* block : comp->blocks_) {
