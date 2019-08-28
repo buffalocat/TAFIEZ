@@ -187,11 +187,19 @@ int GameObject::color() {
 	return NO_COLOR;
 }
 
-
 Block::Block(Point3 pos, bool pushable, bool gravitable) :
 	GameObject(pos, pushable, gravitable) {}
 
 Block::~Block() {}
+
+void Block::draw_force_indicators(ModelInstancer& model, FPoint3 p, double radius) {
+	if (!pushable_) {
+		model.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
+	}
+	if (!gravitable_) {
+		model.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
+	}
+}
 
 
 ColoredBlock::ColoredBlock(Point3 pos, int color, bool pushable, bool gravitable) :

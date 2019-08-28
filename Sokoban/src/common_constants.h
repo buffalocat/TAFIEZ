@@ -37,6 +37,7 @@ extern const int HORIZONTAL_MOVEMENT_FRAMES;
 extern const int SWITCH_RESPONSE_FRAMES;
 extern const int COLOR_CHANGE_MOVEMENT_FRAMES;
 extern const int TOGGLE_RIDING_MOVEMENT_FRAMES;
+extern const int JUMP_MOVEMENT_FRAMES;
 extern const int FALL_MOVEMENT_FRAMES;
 extern const int MAX_COOLDOWN;
 

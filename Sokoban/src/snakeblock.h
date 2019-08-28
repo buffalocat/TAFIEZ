@@ -16,6 +16,7 @@ public:
     void relation_serialize(MapFileO& file);
 
 	bool is_snake();
+	Sticky sticky();
 
     void collect_sticky_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 
@@ -35,14 +36,14 @@ public:
     bool can_link(SnakeBlock*);
 
     void draw(GraphicsManager*);
-	void draw_force_indicators(GraphicsManager* gfx, FPoint3 p, double radius);
 
     bool available();
     bool confused(RoomMap*);
     void collect_maybe_confused_neighbors(RoomMap*, std::set<SnakeBlock*>& check);
     void remove_wrong_color_links(RoomMap*, DeltaFrame*);
     void check_add_local_links(RoomMap*, DeltaFrame*);
-	void break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);
+	void break_blocked_links_horizontal(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);
+	void break_blocked_links(std::vector<GameObject*>& fall_check, DeltaFrame* delta_frame);
 
     void reset_internal_state();
 

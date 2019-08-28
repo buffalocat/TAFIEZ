@@ -20,29 +20,20 @@
 
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
+#include "jumpstepprocessor.h"
 
 MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFrame* delta_frame, Player* player, bool animated) :
 	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
 
 MoveProcessor::~MoveProcessor() {}
 
-// TODO: remove the switch, put all logic in HSP
-bool MoveProcessor::try_move(Point3 dir) {
-	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
-	if (moving_blocks_.empty()) {
-		return false;
-	}
-	state_ = MoveStep::Horizontal;
-	frames_ = HORIZONTAL_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
-	return true;
-}
-
 bool MoveProcessor::update() {
 	if (--frames_ <= 0) {
 		switch (state_) {
 		case MoveStep::Horizontal:
+		case MoveStep::Jump:
 			// Even if no switch checks occur, the next frame chunk
-			// cannot be skipped - horizontal animation must finish.
+			// cannot be skipped - movement animation must finish.
 			perform_switch_checks(false);
 			break;
 		case MoveStep::PostDoorInit:
@@ -57,6 +48,7 @@ bool MoveProcessor::update() {
 			// If nothing happens, skip the next forced wait.
 			perform_switch_checks(true);
 			break;
+		case MoveStep::Waiting:
 		default:
 			break;
 		}
@@ -76,6 +68,25 @@ void MoveProcessor::abort() {
 	}
 }
 
+void MoveProcessor::reset_player_jump() {
+	// If the player jumped immediately before this, make them gravitable again
+	if (!player_->gravitable_) {
+		player_->gravitable_ = true;
+		delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
+	}
+}
+
+bool MoveProcessor::try_move_horizontal(Point3 dir) {
+	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
+	if (moving_blocks_.empty()) {
+		return false;
+	}
+	state_ = MoveStep::Horizontal;
+	frames_ = HORIZONTAL_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
+	reset_player_jump();
+	return true;
+}
+
 // Returns whether a color change occured
 bool MoveProcessor::try_color_change() {
 	Car* car = player_->car_bound(map_);
@@ -90,6 +101,7 @@ bool MoveProcessor::try_color_change() {
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;
 	delta_frame_->push(std::make_unique<ColorChangeDelta>(car, true));
 	add_neighbors_to_fall_check(car->parent_);
+	reset_player_jump();
 	return true;
 }
 
@@ -100,6 +112,31 @@ bool MoveProcessor::try_toggle_riding() {
 	}
 	state_ = MoveStep::ToggleRiding;
 	frames_ = TOGGLE_RIDING_MOVEMENT_FRAMES;
+	fall_check_.push_back(player_);
+	if (Car* car = player_->car_bound(map_)) {
+		fall_check_.push_back(car->parent_);
+	}
+	reset_player_jump();
+	return true;
+}
+
+bool MoveProcessor::try_jump() {
+	Car* car = player_->car_riding();
+	if (!car || (car->type_ != CarType::Hover)) {
+		return false;
+	}
+	// We can't jump if we just jumped!
+	if (!player_->gravitable_) {
+		return false;
+	}
+	JumpStepProcessor(map_, delta_frame_, player_, fall_check_, moving_blocks_).run();
+	if (moving_blocks_.empty()) {
+		return false;
+	}
+	state_ = MoveStep::Jump;
+	frames_ = JUMP_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
+	player_->gravitable_ = false;
+	delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
 	return true;
 }
 
@@ -129,7 +166,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	map_->check_clear_flag_collected(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
-		frames_ = FALL_MOVEMENT_FRAMES;
+		frames_ = SWITCH_RESPONSE_FRAMES;
 	} else {
 		state_ = MoveStep::Done;
 		switch (door_state_) {
@@ -161,11 +198,17 @@ void MoveProcessor::raise_gates() {
 	for (auto& p : rising_gates_) {
 		auto& vec = p.second;
 		if (vec.size() > 1) {
+			bool pushable = true;
+			bool gravitable = true;
 			for (auto* gate : vec) {
 				GateBody* body = gate->body_;
+				pushable &= body->pushable_;
+				gravitable &= body->gravitable_;
 				body->destroy(delta_frame_, CauseOfDeath::Collided);
 			}
-			auto corrupt = std::make_unique<GateBody>(p.first, WHITE, true, true, true, false, true);
+			// Corrupt GateBodies are snake-shaped, because one ingredient must ALWAYS be a snake
+			// Whether they're persistent doesn't matter, because they don't function
+			auto corrupt = std::make_unique<GateBody>(p.first, WHITE, pushable, gravitable, true, false, true);
 			fall_check_.push_back(corrupt.get());
 			map_->create_in_map(std::move(corrupt), true, delta_frame_);
 		} else {

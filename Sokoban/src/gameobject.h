@@ -10,6 +10,7 @@ class PositionalAnimation;
 class DeltaFrame;
 class RoomMap;
 class GraphicsManager;
+class ModelInstancer;
 class MapFileI;
 class MapFileO;
 
@@ -86,6 +87,8 @@ class Block : public GameObject {
 public:
 	Block(Point3 pos, bool pushable, bool gravitable);
 	virtual ~Block();
+
+	void draw_force_indicators(ModelInstancer& model, FPoint3 p, double radius);
 };
 
 // A block to which the player can be "bound" - it's most things that aren't Walls.

@@ -100,6 +100,7 @@ void ModifierTab::mod_tab_options() {
 		ImGui::RadioButton("Normal Car##MOD_CAR_type", &car->type_, CarType::Normal);
 		ImGui::RadioButton("Locked Car##MOD_CAR_type", &car->type_, CarType::Locked);
 		ImGui::RadioButton("Convertible##MOD_CAR_type", &car->type_, CarType::Convertible);
+		ImGui::RadioButton("Hover##MOD_CAR_type", &car->type_, CarType::Hover);
 		select_color_cycle(color_cycle);
 		break;
 	}

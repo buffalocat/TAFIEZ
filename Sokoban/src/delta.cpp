@@ -238,6 +238,16 @@ void PlayerStateDelta::revert() {
 }
 
 
+ToggleGravitableDelta::ToggleGravitableDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+ToggleGravitableDelta::~ToggleGravitableDelta() {}
+
+void ToggleGravitableDelta::revert() {
+	obj_->gravitable_ = !obj_->gravitable_;
+}
+
+
 ColorChangeDelta::ColorChangeDelta(Car* car, bool undo) : car_{ car }, undo_{ undo } {}
 
 ColorChangeDelta::~ColorChangeDelta() {}

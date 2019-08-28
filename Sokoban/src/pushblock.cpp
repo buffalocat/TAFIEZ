@@ -71,20 +71,11 @@ void PushBlock::draw(GraphicsManager* gfx) {
 		tex = tex | modifier_->texture();
 	}
 	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color());
-    draw_force_indicators(gfx, p, 1.1f);
+    draw_force_indicators(gfx->cube, p, 1.1f);
 	if (auto* car = dynamic_cast<Car*>(modifier())) {
 		
 	}
     if (modifier_) {
         modifier()->draw(gfx, p);
     }
-}
-
-void PushBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, double radius) {
-	if (!pushable_) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
-	}
-	if (!gravitable_) {
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
-	}
 }

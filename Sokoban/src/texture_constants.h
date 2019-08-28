@@ -20,7 +20,8 @@ enum class BlockTexture {
 	ConvertibleCar = 12,
 	AutoBlock = 16,
 	PuppetBlock = 20,
-	// Unused car variants : 24, 28
+	HoverCar = 24,
+	// Unused car variants : 28
 
 	// Double-size
 	Sign = 48,

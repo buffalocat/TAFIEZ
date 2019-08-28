@@ -23,6 +23,8 @@ enum class MoveStep {
 	PostDoorInit = 6,
 	FirstLoadInit = 7,
 	ToggleRiding = 8,
+	Jump = 9,
+	Waiting = 10,
 };
 
 enum class DoorState {
@@ -46,9 +48,15 @@ public:
     MoveProcessor(PlayingState*, RoomMap*, DeltaFrame*, Player*, bool);
     ~MoveProcessor();
 
-    bool try_move(Point3);
+	bool update();
+	void abort();
+
+	void reset_player_jump();
+
+    bool try_move_horizontal(Point3);
     bool try_color_change();
 	bool try_toggle_riding();
+	bool try_jump();
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);
@@ -63,9 +71,6 @@ public:
     void add_to_fall_check(GameObject*);
 	void add_neighbors_to_fall_check(GameObject*);
     void add_to_moving_blocks(GameObject*);
-
-    bool update();
-    void abort();
 
 	void set_initializer_state();
 

@@ -64,12 +64,17 @@ bool SnakeBlock::is_snake() {
 	return true;
 }
 
+Sticky SnakeBlock::sticky() {
+	return weak_ ? Sticky::WeakSnake : Sticky::StrongSnake;
+}
+
 void SnakeBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
-	if ((Sticky::Snake & sticky_level) == Sticky::None) {
-		return;
+	Sticky sticky_condition = sticky() & sticky_level;
+	for (SnakeBlock* link : links_) {
+		if ((sticky_condition & link->sticky()) != Sticky::None) {
+			links.push_back(link);
+		}
 	}
-	// Insert this Snake's links into the collection of links
-	links.insert(links.end(), links_.begin(), links_.end());
 }
 
 void SnakeBlock::reset_internal_state() {
@@ -150,7 +155,7 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 		tex = tex | modifier_->texture();
 	}
 	gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
-	draw_force_indicators(gfx, p, 1.1f);
+	draw_force_indicators(gfx->diamond, p, 1.1f);
 	for (auto link : links_) {
 		FPoint3 q = link->real_pos();
 		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
@@ -159,15 +164,6 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	}
 	if (modifier_) {
 		modifier()->draw(gfx, p);
-	}
-}
-
-void SnakeBlock::draw_force_indicators(GraphicsManager* gfx, FPoint3 p, double radius) {
-	if (!pushable_) {
-		gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, BLACK);
-	}
-	if (!gravitable_) {
-		gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z + 0.2f), glm::vec3(radius, radius, 0.1f), BlockTexture::Blank, WHITE);
 	}
 }
 
@@ -235,7 +231,7 @@ void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* map, std::set<SnakeBl
 	}
 }
 
-void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir) {
+void SnakeBlock::break_blocked_links_horizontal(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir) {
 	bool break_blocked = false;
 	// If there's something moving behind us, break all blocked links
 	if (GameObject* obj = map->view(pos_ - dir)) {
@@ -254,14 +250,18 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, RoomM
 		}
 	}
 	if (break_blocked){
-		auto links_copy = links_;
-		for (SnakeBlock* link : links_copy) {
-			if (PushComponent* comp = link->push_comp()) {
-				// If both blocks are strong, don't break the link!!
-				if (comp->blocked_ && (weak_ || link->weak_)) {
-					remove_link(link, delta_frame);
-					fall_check.push_back(link);
-				}
+		break_blocked_links(fall_check, delta_frame);
+	}
+}
+
+void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, DeltaFrame* delta_frame) {
+	auto links_copy = links_;
+	for (SnakeBlock* link : links_copy) {
+		if (PushComponent* comp = link->push_comp()) {
+			// If both blocks are strong, don't break the link!!
+			if (comp->blocked_ && (weak_ || link->weak_)) {
+				remove_link(link, delta_frame);
+				fall_check.push_back(link);
 			}
 		}
 	}

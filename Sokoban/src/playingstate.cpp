@@ -133,16 +133,24 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
 	}
+	if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		create_move_processor();
+		if (move_processor_->try_jump()) {
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		} else {
+			move_processor_.reset(nullptr);
+		}
+	}
 	for (auto p : MOVEMENT_KEYS) {
 		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
 			create_move_processor();
 			// p.second is direction of movement
-			if (!move_processor_->try_move(p.second)) {
+			if (!move_processor_->try_move_horizontal(p.second)) {
 				move_processor_.reset(nullptr);
 				return;
 			}
 			input_cooldown = MAX_COOLDOWN;
-			Point3 pos_below;
 			return;
 		}
 	}

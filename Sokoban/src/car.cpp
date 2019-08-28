@@ -45,6 +45,8 @@ BlockTexture Car::texture() {
 		return BlockTexture::NormalCar;
 	case CarType::Convertible:
 		return BlockTexture::ConvertibleCar;
+	case CarType::Hover:
+		return BlockTexture::HoverCar;
 	default:
 		return BlockTexture::Default;
 	}
@@ -78,6 +80,7 @@ void Car::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp)
 	if (player_) {
 		switch (type_) {
 		case CarType::Normal:
+		case CarType::Hover:
 			if (!(player_->pos_ == pos_above())) {
 				mp->add_to_fall_check(player_);
 				player_->set_strictest(map, delta_frame);
@@ -102,6 +105,7 @@ void Car::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
 	if (player_) {
 		switch (type_) {
 		case CarType::Normal:
+		case CarType::Hover:
 			player_->set_free(delta_frame);
 			break;
 		case CarType::Convertible:
@@ -125,6 +129,7 @@ std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map,
     dup->parent_ = parent;
 	switch (type_) {
 	case CarType::Normal:
+	case CarType::Hover:
 		dup->player_ = nullptr;
 		break;
 	case CarType::Convertible:

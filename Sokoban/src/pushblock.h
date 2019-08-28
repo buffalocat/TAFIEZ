@@ -16,7 +16,6 @@ public:
     void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 
     virtual void draw(GraphicsManager*);
-	void draw_force_indicators(GraphicsManager* gfx, FPoint3 p, double radius);
 
     Sticky sticky();
 

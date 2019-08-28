@@ -21,11 +21,15 @@ const int DEFAULT_BOARD_HEIGHT = 13;
 const int DEFAULT_BOARD_DEPTH = 3;
 
 const int HORIZONTAL_MOVEMENT_FRAMES = 8;
+const int JUMP_MOVEMENT_FRAMES = 8;
 const int SWITCH_RESPONSE_FRAMES = 4;
+const int FALL_MOVEMENT_FRAMES = 4;
+
 const int COLOR_CHANGE_MOVEMENT_FRAMES = 4;
 const int TOGGLE_RIDING_MOVEMENT_FRAMES = 4;
-const int FALL_MOVEMENT_FRAMES = 4;
 const int MAX_COOLDOWN = 8;
+
+// Note: MAX_COOLDOWN <= any individual move step's frames
 
 const int UNDO_COMBO_FIRST = 4;
 const int UNDO_COMBO_SECOND = 12;

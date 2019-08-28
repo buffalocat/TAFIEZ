@@ -46,6 +46,8 @@ int Player::color() {
 		return PINK;
 		break;
 	case PlayerState::RidingNormal:
+		return gravitable_ ? RED : GREEN;
+		break;
 	case PlayerState::RidingHidden:
 		return RED;
 		break;
@@ -76,6 +78,7 @@ void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 		if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
 			switch (car->type_) {
 			case CarType::Normal:
+			case CarType::Hover:
 				state_ = PlayerState::RidingNormal;
 				set_car(car);
 				break;
@@ -136,6 +139,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 			case CarType::Locked:
 				return false;
 			case CarType::Normal:
+			case CarType::Hover:
 				state_ = PlayerState::RidingNormal;
 				set_car(car);
 				break;
@@ -182,7 +186,16 @@ CauseOfDeath Player::death() {
 }
 
 Car* Player::car_riding() {
-	return car_;
+	switch (state_) {
+	case PlayerState::Free:
+	case PlayerState::Bound:
+		return nullptr;
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
+		return car_;
+	default:
+		return nullptr;
+	}
 }
 
 Car* Player::car_bound(RoomMap* map) {

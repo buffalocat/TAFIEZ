@@ -259,6 +259,17 @@ private:
 };
 
 
+class ToggleGravitableDelta : public Delta {
+public:
+	ToggleGravitableDelta(GameObject* obj);
+	~ToggleGravitableDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+};
+
+
 class ColorChangeDelta : public Delta {
 public:
 	ColorChangeDelta(Car* car, bool undo);
