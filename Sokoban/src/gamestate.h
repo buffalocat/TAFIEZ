@@ -15,6 +15,7 @@ public:
     void check_for_escape_quit();
     bool check_for_queued_quit();
 	void queue_quit();
+	virtual bool can_quit();
 
 	GraphicsManager* gfx_{};
 	std::unique_ptr<TextRenderer> text_{};

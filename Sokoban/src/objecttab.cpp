@@ -95,7 +95,7 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 		ImGui::InputInt("Color##SB_modify_COLOR", &sb->color_);
 		color_button(sb->color_);
 		if (obj && sb->color_ != prev_color) {
-			sb->remove_wrong_color_links(map, nullptr);
+			sb->remove_wrong_color_links(nullptr);
 		}
 		ImGui::Text("Number of Ends");
 		ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);

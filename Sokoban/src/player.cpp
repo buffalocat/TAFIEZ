@@ -244,7 +244,15 @@ void Player::draw(GraphicsManager* gfx) {
 }
 
 FPoint3 Player::cam_pos() {
-	return real_pos();
+	switch (state_) {
+	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
+		return car_->parent_->real_pos() + Point3{ 0,0,1 };
+	case PlayerState::Free:
+	case PlayerState::Bound:
+	default:
+		return real_pos();
+	}
 }
 
 // NOTE: if the Player becomes a subclass of a more general "Passenger" type, move this up to that class.

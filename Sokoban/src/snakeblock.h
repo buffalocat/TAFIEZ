@@ -32,6 +32,9 @@ public:
     void remove_link(SnakeBlock*, DeltaFrame*);
     void remove_link_quiet(SnakeBlock*);
     void remove_link_one_way(SnakeBlock*);
+	// This method only exists because sometimes we want to break links
+	// *after* removing something from the map
+	void remove_link_one_way_undoable(SnakeBlock* sb, DeltaFrame* delta_frame);
 
     bool can_link(SnakeBlock*);
 
@@ -40,7 +43,8 @@ public:
     bool available();
     bool confused(RoomMap*);
     void collect_maybe_confused_neighbors(RoomMap*, std::set<SnakeBlock*>& check);
-    void remove_wrong_color_links(RoomMap*, DeltaFrame*);
+    void remove_wrong_color_links(DeltaFrame*);
+	void break_tangible_links(DeltaFrame*, std::vector<GameObject*>& fall_check);
     void check_add_local_links(RoomMap*, DeltaFrame*);
 	void break_blocked_links_horizontal(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);
 	void break_blocked_links(std::vector<GameObject*>& fall_check, DeltaFrame* delta_frame);

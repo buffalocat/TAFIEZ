@@ -301,3 +301,18 @@ void EditorState::manage_flag(bool create, unsigned int* flag_ptr, EditorRoom* e
 		*flag_ptr = 0;
 	}
 }
+
+bool EditorState::can_quit() {
+	bool result = false;
+	ImGui::OpenPopup("Quit?");
+	if (ImGui::BeginPopupModal("Quit?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Are you sure you want to quit?\n");
+		ImGui::Separator();
+		if (ImGui::Button("Yes", ImVec2(-1, 0))) {
+			ImGui::CloseCurrentPopup();
+			result = true;
+		}
+		ImGui::EndPopup();
+	}
+	return result;
+}

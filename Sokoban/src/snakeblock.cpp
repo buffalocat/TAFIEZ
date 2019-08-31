@@ -191,13 +191,18 @@ void SnakeBlock::remove_link(SnakeBlock* sb, DeltaFrame* delta_frame) {
 	delta_frame->push(std::make_unique<RemoveLinkDelta>(this, sb));
 }
 
-void SnakeBlock::remove_link_quiet(SnakeBlock* sb) {
+void SnakeBlock::remove_link_quiet(SnakeBlock* sb) { 
 	links_.erase(std::find(links_.begin(), links_.end(), sb));
 	sb->links_.erase(std::find(sb->links_.begin(), sb->links_.end(), this));
 }
 
 void SnakeBlock::remove_link_one_way(SnakeBlock* sb) {
 	links_.erase(std::find(links_.begin(), links_.end(), sb));
+}
+
+void SnakeBlock::remove_link_one_way_undoable(SnakeBlock* sb, DeltaFrame* delta_frame) {
+	links_.erase(std::find(links_.begin(), links_.end(), sb));
+	delta_frame->push(std::make_unique<RemoveLinkOneWayDelta>(this, sb));
 }
 
 bool SnakeBlock::can_link(SnakeBlock* snake) {
@@ -267,7 +272,7 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, Delta
 	}
 }
 
-void SnakeBlock::remove_wrong_color_links(RoomMap* map, DeltaFrame* delta_frame) {
+void SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
 	auto links_copy = links_;
 	for (auto link : links_copy) {
 		if (color_ != link->color_) {
@@ -276,6 +281,17 @@ void SnakeBlock::remove_wrong_color_links(RoomMap* map, DeltaFrame* delta_frame)
 			} else {
 				remove_link_quiet(link);
 			}
+		}
+	}
+}
+
+// Call when a group of snake blocks becomes intangible, in particular for door movement
+void SnakeBlock::break_tangible_links(DeltaFrame* delta_frame, std::vector<GameObject*>& fall_check) {
+	auto links_copy = links_;
+	for (auto link : links_copy) {
+		if (link->tangible_) {
+			remove_link_one_way_undoable(link, delta_frame);
+			fall_check.push_back(link);
 		}
 	}
 }

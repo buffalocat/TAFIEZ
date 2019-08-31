@@ -196,6 +196,17 @@ private:
 	SnakeBlock* b_;
 };
 
+class RemoveLinkOneWayDelta : public Delta {
+public:
+	RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b);
+	~RemoveLinkOneWayDelta();
+	void revert();
+
+private:
+	SnakeBlock* a_;
+	SnakeBlock* b_;
+};
+
 
 class RoomChangeDelta : public Delta {
 public:

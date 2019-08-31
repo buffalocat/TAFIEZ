@@ -87,9 +87,9 @@ menu_{ window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72) } {
 		if (playing_state_->global_->has_flag(WORLD_RESET_GLOBAL_ID)) {
 			menu_.push_entry("World Reset", &PauseState::world_reset);
 		}
-		menu_.push_entry("Quit Game", &PauseState::quit);
+		menu_.push_entry("Quit Game", &PauseState::quit_playing);
 	} else if (dynamic_cast<TestPlayingState*>(parent)) {
-		menu_.push_entry("Quit Test Session", &PauseState::quit);
+		menu_.push_entry("Quit Test Session", &PauseState::quit_playing);
 	}
 }
 
@@ -114,8 +114,7 @@ void PauseState::save() {
 	playing_state_->make_subsave();
 }
 
-void PauseState::quit() {
-	//TODO: "Are you sure?"
+void PauseState::quit_playing() {
 	queue_quit();
 	playing_state_->queue_quit();
 }

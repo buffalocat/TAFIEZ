@@ -186,6 +186,15 @@ void RemoveLinkDelta::revert() {
 }
 
 
+RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+RemoveLinkOneWayDelta::~RemoveLinkOneWayDelta() {}
+
+void RemoveLinkOneWayDelta::revert() {
+	a_->add_link_one_way(b_);
+}
+
+
 RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
 	state_{ state }, room_{ room } {}
 

@@ -27,6 +27,7 @@ public:
     EditorState(GameState* parent);
     virtual ~EditorState();
     void main_loop();
+	bool can_quit();
 
 	bool handle_keyboard_input_main_state();
     void set_active_room(std::string name);

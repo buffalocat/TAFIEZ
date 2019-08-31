@@ -55,7 +55,7 @@ private:
 	void unpause();
 	void save();
 	void world_reset();
-	void quit();
+	void quit_playing();
 
 	PlayingState* playing_state_;
 	Menu<PauseState> menu_;

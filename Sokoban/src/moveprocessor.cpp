@@ -97,7 +97,7 @@ bool MoveProcessor::try_color_change() {
 		return false;
 	}
 	if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
-		snake->remove_wrong_color_links(map_, delta_frame_);
+		snake->remove_wrong_color_links(delta_frame_);
 		snake->check_add_local_links(map_, delta_frame_);
 	}
 	state_ = MoveStep::ColorChange;
@@ -272,6 +272,11 @@ void MoveProcessor::try_door_entry() {
 			map_->take_from_map(obj.raw, true, true, delta_frame_);
 			add_neighbors_to_fall_check(obj.raw);
 		}
+		for (auto& obj : door_travelling_objs_) {
+			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
+				snake->break_tangible_links(delta_frame_, fall_check_);
+			}
+		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		state_ = MoveStep::DoorMove;
 	} else {
@@ -295,6 +300,11 @@ void MoveProcessor::try_int_door_exit() {
 			obj.raw->abstract_put(obj.dest, delta_frame_);
 			map_->put_in_map(obj.raw, true, true, delta_frame_);
 		}
+		for (auto& obj : door_travelling_objs_) {
+			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
+				snake->check_add_local_links(map_, delta_frame_);
+			}
+		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;
 		state_ = MoveStep::PostDoorInit;
@@ -317,6 +327,11 @@ void MoveProcessor::try_door_unentry() {
 		for (auto& obj : door_travelling_objs_) {
 			add_to_fall_check(obj.raw);
 			map_->put_in_map(obj.raw, true, true, delta_frame_);
+		}
+		for (auto& obj : door_travelling_objs_) {
+			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
+				snake->check_add_local_links(map_, delta_frame_);
+			}
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;

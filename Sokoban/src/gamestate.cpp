@@ -32,7 +32,9 @@ void GameState::check_for_escape_quit() {
         if (parent_) {
             parent_->can_escape_quit_ = false;
         }
-        defer_to_parent();
+		if (can_quit()) {
+			defer_to_parent();
+		}
     } else if (!can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
         can_escape_quit_ = true;
     }
@@ -40,12 +42,15 @@ void GameState::check_for_escape_quit() {
 
 bool GameState::check_for_queued_quit() {
 	if (queued_quit_) {
-		defer_to_parent();
-		return true;
+		return can_quit();
 	}
 	return false;
 }
 
 void GameState::queue_quit() {
 	queued_quit_ = true;
+}
+
+bool GameState::can_quit() {
+	return true;
 }
