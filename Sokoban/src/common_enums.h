@@ -11,17 +11,18 @@ enum class ObjCode {
 };
 
 enum class ModCode {
-    NONE = 0,
-    Door = 1,
-    Car = 2,
-    PressSwitch = 3,
-    Gate = 4,
-    AutoBlock = 5,
+	NONE = 0,
+	Door = 1,
+	Car = 2,
+	PressSwitch = 3,
+	Gate = 4,
+	AutoBlock = 5,
 	PuppetBlock = 6,
 	ClearFlag = 7,
 	WorldResetKey = 8,
 	PermanentSwitch = 9,
 	FloorSign = 10,
+	Incinerator = 11,
 };
 
 enum class CameraCode {

@@ -48,7 +48,6 @@ bool Switchable::state() {
 	return default_ ^ active_;
 }
 
-// TODO: put a wait between receiving signals and applying them, like with Signalers
 void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 	if (signal) {
@@ -63,7 +62,7 @@ void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_fra
 	waiting_ = !can_set_state(default_ ^ cur_signal, map);
 	if (active_ != (waiting_ ^ cur_signal)) {
 		active_ = !active_;
-		apply_state_change(map, delta_frame, mp);
+		mp->activated_switchables_.push_back(this);
 	}
 }
 
@@ -74,7 +73,7 @@ void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 		waiting_ = false;
 		active_ = !active_;
-		mp->activated_switchables_.insert(this);
+		mp->activated_switchables_.push_back(this);
 	}
 }
 

@@ -144,7 +144,7 @@ void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, bool activat
 }
 
 void RoomMap::remove_from_object_array(GameObject* obj) {
-	obj_array_.destroy(obj);
+	obj_array_.uncreate(obj);
 }
 
 void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {

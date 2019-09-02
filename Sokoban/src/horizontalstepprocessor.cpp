@@ -10,10 +10,10 @@
 
 #include "snakeblock.h"
 
-HorizontalStepProcessor::HorizontalStepProcessor(RoomMap* map, DeltaFrame* delta_frame, Player* player, Point3 dir,
+HorizontalStepProcessor::HorizontalStepProcessor(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame, Player* player, Point3 dir,
 	std::vector<GameObject*>& fall_check, std::vector<GameObject*>& moving_blocks) :
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
-	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
+	move_processor_{ mp }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
 
 HorizontalStepProcessor::~HorizontalStepProcessor() {
 	for (auto sb : moving_snakes_) {
@@ -255,7 +255,7 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	for (auto sb : moving_snakes_) {
 		sb->break_blocked_links_horizontal(fall_check_, map_, delta_frame_, dir_);
 	}
-	SnakePuller snake_puller{ map_, delta_frame_, moving_blocks_, link_add_check, fall_check_ };
+	SnakePuller snake_puller{ move_processor_, map_, delta_frame_, moving_blocks_, link_add_check, fall_check_ };
 	for (auto sb : moving_snakes_) {
 		sb->collect_maybe_confused_neighbors(map_, link_add_check);
 		snake_puller.prepare_pull(sb);

@@ -172,8 +172,13 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 	return true;
 }
 
-void Player::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
-	delta_frame->push(std::make_unique<DestructionDelta>(this));
+void Player::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+	if (collect_links) {
+		if (Car* car = car_riding()) {
+			mp->fall_check_.push_back(car->parent_);
+		}
+	}
+	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	death_ = death;
 }
 
@@ -256,7 +261,7 @@ FPoint3 Player::cam_pos() {
 }
 
 // NOTE: if the Player becomes a subclass of a more general "Passenger" type, move this up to that class.
-void Player::collect_special_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
+void Player::collect_special_links(RoomMap* map, std::vector<GameObject*>& links) {
     if (state_ == PlayerState::RidingNormal) {
         links.push_back(map->view(shifted_pos({0,0,-1})));
     }

@@ -21,6 +21,7 @@
 #include "worldresetkey.h"
 #include "permanentswitch.h"
 #include "floorsign.h"
+#include "incinerator.h"
 
 #include "colorcycle.h"
 
@@ -39,6 +40,7 @@ static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
 static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
 static FloorSign model_floor_sign{ nullptr, "", false };
+static Incinerator model_incinerator{ nullptr, 0, false, true, false };
 
 
 static ColorCycle model_color_cycle{};
@@ -89,6 +91,7 @@ void ModifierTab::mod_tab_options() {
 		ImGui::RadioButton("WorldResetKey##MOD_object", &mod_code, ModCode::WorldResetKey);
 		ImGui::RadioButton("PermanentSwitch##MOD_object", &mod_code, ModCode::PermanentSwitch);
 		ImGui::RadioButton("FloorSign##MOD_object", &mod_code, ModCode::FloorSign);
+		ImGui::RadioButton("Incinerator##MOD_object", &mod_code, ModCode::Incinerator);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -156,6 +159,14 @@ void ModifierTab::mod_tab_options() {
 		snprintf(buf, 256, sign->content_.c_str());
 		ImGui::InputTextMultiline("Sign Text:##MOD_FLOOR_SIGN_text", buf, 256);
 		sign->content_ = std::string(buf);
+		break;
+	}
+	case ModCode::Incinerator:
+	{
+		ImGui::Text("Incinerator");
+		Incinerator* incinerator = mod ? static_cast<Incinerator*>(mod) : &model_incinerator;
+		ImGui::Checkbox("Persistent?##MOD_INCINERATOR_persistent", &incinerator->persistent_);
+		ImGui::Checkbox("Active by Default?##MOD_INCINERATOR_default", &incinerator->default_);
 		break;
 	}
 	// Trivial objects
@@ -250,8 +261,8 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	case ModCode::FloorSign:
 		mod = std::make_unique<FloorSign>(obj, model_floor_sign.content_, false);
 		break;
-	default:
-		return;
+	case ModCode::Incinerator:
+		mod = std::make_unique<Incinerator>(model_incinerator);
 	}
 	if (!mod->valid_parent(obj)) {
 		return;

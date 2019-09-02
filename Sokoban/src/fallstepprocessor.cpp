@@ -8,8 +8,9 @@
 #include "snakeblock.h"
 
 // Move fall_check directly from MoveProcessor into FallStepProcessor
-FallStepProcessor::FallStepProcessor(RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
-fall_check_ {fall_check}, map_ {map}, delta_frame_ {delta_frame} {}
+FallStepProcessor::FallStepProcessor(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
+	fall_check_ {fall_check},
+	move_processor_{ mp }, map_ {map}, delta_frame_ {delta_frame} {}
 
 FallStepProcessor::~FallStepProcessor() {}
 
@@ -141,7 +142,6 @@ void FallStepProcessor::check_land_sticky(FallComponent* comp) {
     }
 }
 
-// TODO: Check snake links post-fall!!
 void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
     comp->settled_ = true;
     std::vector<GameObject*> live_blocks {};
@@ -158,7 +158,7 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
 			// Listeners only have to get activated once
             map_->put_in_map(block, false, true, nullptr);
             map_->take_from_map(block, true, false, delta_frame_);
-			block->destroy(delta_frame_, CauseOfDeath::Fallen);
+			block->destroy(move_processor_, CauseOfDeath::Fallen, false);
             if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
                 snake_check_.erase(sb);
             }

@@ -14,6 +14,7 @@
 #include "car.h"
 #include "gate.h"
 #include "signaler.h"
+#include "incinerator.h"
 
 #include "snakeblock.h"
 
@@ -81,7 +82,7 @@ void MoveProcessor::reset_player_jump() {
 }
 
 bool MoveProcessor::try_move_horizontal(Point3 dir) {
-	HorizontalStepProcessor(map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
+	HorizontalStepProcessor(this, map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
 	if (moving_blocks_.empty()) {
 		return false;
 	}
@@ -151,7 +152,7 @@ void MoveProcessor::try_jump_refresh() {
 	}
 	// If the player would fall, we can't refresh it yet
 	player_->gravitable_ = true;
-	if (FallStepProcessor(map_, nullptr, { player_ }).run(true)) {
+	if (FallStepProcessor(this, map_, nullptr, { player_ }).run(true)) {
 		player_->gravitable_ = false;
 		return;
 	}
@@ -170,7 +171,7 @@ void MoveProcessor::add_neighbors_to_fall_check(GameObject* obj) {
 void MoveProcessor::try_fall_step() {
 	moving_blocks_.clear();
 	if (!fall_check_.empty()) {
-		FallStepProcessor(map_, delta_frame_, std::move(fall_check_)).run(false);
+		FallStepProcessor(this, map_, delta_frame_, std::move(fall_check_)).run(false);
 		fall_check_.clear();
 	}
 }
@@ -184,6 +185,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 		switchable->apply_state_change(map_, delta_frame_, this);
 	}
 	raise_gates();
+	run_incinerators();
 	map_->check_clear_flag_collected(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
@@ -215,6 +217,16 @@ void MoveProcessor::push_rising_gate(Gate* gate) {
 	rising_gates_[gate->body_->pos_].push_back(gate);
 }
 
+void MoveProcessor::run_incinerators() {
+	for (auto* inc : activated_incinerators_) {
+		if (GameObject* above = map_->view(inc->pos_above())) {
+			map_->take_from_map(above, true, true, delta_frame_);
+			above->destroy(this, CauseOfDeath::Incinerated, true);
+		}
+	}
+	activated_incinerators_.clear();
+}
+
 void MoveProcessor::raise_gates() {
 	for (auto& p : rising_gates_) {
 		auto& vec = p.second;
@@ -225,7 +237,7 @@ void MoveProcessor::raise_gates() {
 				GateBody* body = gate->body_;
 				pushable &= body->pushable_;
 				gravitable &= body->gravitable_;
-				body->destroy(delta_frame_, CauseOfDeath::Collided);
+				body->destroy(this, CauseOfDeath::Collided, true);
 			}
 			// Corrupt GateBodies are snake-shaped, because one ingredient must ALWAYS be a snake
 			// Whether they're persistent doesn't matter, because they don't function
@@ -311,7 +323,7 @@ void MoveProcessor::try_int_door_exit() {
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;
-		state_ = MoveStep::PostDoorInit;
+		state_ = MoveStep::DoorMove;
 	} else {
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::AwaitingUnentry;
@@ -339,10 +351,10 @@ void MoveProcessor::try_door_unentry() {
 		}
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::IntSucceeded;
-		state_ = MoveStep::PostDoorInit;
+		state_ = MoveStep::DoorMove;
 	} else {
 		door_state_ = DoorState::Voided;
-		player_->destroy(delta_frame_, CauseOfDeath::Voided);
+		player_->destroy(this, CauseOfDeath::Voided, true);
 	}
 }
 

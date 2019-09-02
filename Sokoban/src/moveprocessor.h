@@ -13,6 +13,7 @@ class SnakeBlock;
 class Door;
 class Switchable;
 class Gate;
+class Incinerator;
 
 
 enum class MoveStep {
@@ -77,20 +78,22 @@ public:
 
 	void set_initializer_state();
 
-	std::set<Switchable*> activated_switchables_{};
-
-private:
-	void raise_gates();
+	PlayingState* playing_state_;
+	RoomMap* map_;
+	DeltaFrame* delta_frame_;
+	Player* player_;
 
 	std::vector<GameObject*> moving_blocks_{};
 	std::vector<GameObject*> fall_check_{};
-	std::unordered_map<Point3, std::vector<Gate*>, Point3Hash> rising_gates_{};
-	
-    PlayingState* playing_state_;
-    RoomMap* map_;
-    DeltaFrame* delta_frame_;
-	Player* player_;
 
+	std::vector<Switchable*> activated_switchables_{};
+
+	std::vector<Incinerator*> activated_incinerators_{};
+	void run_incinerators();
+	std::unordered_map<Point3, std::vector<Gate*>, Point3Hash> rising_gates_{};
+	void raise_gates();
+
+private:
 	Door* entry_door_{};
 	std::vector<DoorTravellingObj> door_travelling_objs_{};
 	Room* dest_room_{};

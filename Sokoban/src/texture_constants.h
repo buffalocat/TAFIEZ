@@ -36,6 +36,7 @@ enum class BlockTexture {
 	GateBasePersistent,
 	GateBodyPersistent,
 	GateBodyCorrupt,
+	Incinerator,
 	
 	// Other Single-Size
 	Blank = 64,

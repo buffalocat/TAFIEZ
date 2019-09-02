@@ -14,7 +14,7 @@ public:
     void push_object(std::unique_ptr<GameObject> obj);
     GameObject* operator[](unsigned int id) const;
     GameObject* safe_get(unsigned int id) const;
-    void destroy(GameObject* obj);
+    void uncreate(GameObject* obj);
 
 private:
     std::vector<std::unique_ptr<GameObject>> array_;

@@ -10,10 +10,11 @@ class Player;
 
 class RoomMap;
 class DeltaFrame;
+class MoveProcessor;
 
 class HorizontalStepProcessor {
 public:
-    HorizontalStepProcessor(RoomMap*, DeltaFrame*, Player*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
+    HorizontalStepProcessor(MoveProcessor* mp, RoomMap*, DeltaFrame*, Player*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
     ~HorizontalStepProcessor();
 
     void run();
@@ -40,6 +41,7 @@ private:
     std::vector<GameObject*>& moving_blocks_;
     std::vector<GameObject*>& fall_check_;
 
+	MoveProcessor* move_processor_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
 	Player* player_;

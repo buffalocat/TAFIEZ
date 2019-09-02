@@ -9,6 +9,7 @@ class ObjectModifier;
 class PositionalAnimation;
 class DeltaFrame;
 class RoomMap;
+class MoveProcessor;
 class GraphicsManager;
 class ModelInstancer;
 class MapFileI;
@@ -42,7 +43,7 @@ public:
 
     virtual void setup_on_put(RoomMap*, bool real);
     virtual void cleanup_on_take(RoomMap*, bool real);
-	virtual void destroy(DeltaFrame*, CauseOfDeath);
+	virtual void destroy(MoveProcessor*, CauseOfDeath , bool collect_links);
 	virtual void undestroy();
 
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
@@ -55,7 +56,7 @@ public:
 	virtual bool is_snake();
 	virtual bool has_sticky_neighbor(RoomMap*);
 	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
-	virtual void collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
+	virtual void collect_special_links(RoomMap*, std::vector<GameObject*>& links);
 
 	ObjectModifier* modifier();
 	virtual int color();

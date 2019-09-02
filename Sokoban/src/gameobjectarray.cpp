@@ -31,6 +31,6 @@ GameObject* GameObjectArray::safe_get(unsigned int id) const {
 }
 
 // TODO: use a minheap of "deleted IDs" to potentially reuse object IDs.
-void GameObjectArray::destroy(GameObject* obj) {
+void GameObjectArray::uncreate(GameObject* obj) {
     array_[obj->id_].reset(nullptr);
 }

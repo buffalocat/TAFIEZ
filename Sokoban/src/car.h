@@ -33,11 +33,11 @@ public:
 	int next_color();
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
-	void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&);
+	void collect_special_links(RoomMap*, std::vector<GameObject*>&);
 
 	void cleanup_on_take(RoomMap* map, bool real);
 	void setup_on_put(RoomMap* map, bool real);
-	void destroy(DeltaFrame*, CauseOfDeath);
+	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
 
 	void draw(GraphicsManager* gfx, FPoint3 p);
 

@@ -6,10 +6,11 @@
 class RoomMap;
 class DeltaFrame;
 class SnakeBlock;
+class MoveProcessor;
 
 class FallStepProcessor {
 public:
-    FallStepProcessor(RoomMap*, DeltaFrame*, std::vector<GameObject*>&&);
+    FallStepProcessor(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check);
     ~FallStepProcessor();
 
     bool run(bool test);
@@ -24,6 +25,8 @@ private:
 	std::vector<std::unique_ptr<FallComponent>> fall_comps_unique_{};
     std::vector<GameObject*> fall_check_;
 	std::set<SnakeBlock*> snake_check_{};
+
+	MoveProcessor* move_processor_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
     int layers_fallen_ = 0;

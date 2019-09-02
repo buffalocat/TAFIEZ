@@ -69,7 +69,7 @@ public:
 
 class SnakePuller {
 public:
-    SnakePuller(RoomMap*, DeltaFrame*,
+    SnakePuller(MoveProcessor*, RoomMap*, DeltaFrame*,
                 std::vector<GameObject*>& moving_blocks,
                 std::set<SnakeBlock*>& link_add_check,
                 std::vector<GameObject*>& fall_check);
@@ -78,6 +78,7 @@ public:
     void perform_pulls();
 
 private:
+	MoveProcessor* move_processor_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
 	std::vector<SnakeBlock*> snakes_to_pull_{};

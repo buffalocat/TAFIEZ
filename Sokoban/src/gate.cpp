@@ -53,7 +53,7 @@ void Gate::shift_internal_pos(Point3 d) {
 	}
 }
 
-void Gate::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& to_check) {
+void Gate::collect_special_links(RoomMap*, std::vector<GameObject*>& to_check) {
 	if (body_ && state()) {
 		to_check.push_back(body_);
 	}
@@ -83,8 +83,9 @@ void Gate::raise_gate(RoomMap* map, DeltaFrame* delta_frame) {
 	map->put_in_map(body_, true, true, delta_frame);
 }
 
+// TODO: put the abstract_shift in a better place than this!!!
 void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (body_) {
+	if (parent_->tangible_ && body_) {
 		Point3 dpos = body_->update_gate_pos(delta_frame);
 		if (!state()) {
 			body_->abstract_shift(dpos, delta_frame);
@@ -108,9 +109,12 @@ void Gate::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
-void Gate::destroy(DeltaFrame* delta_frame, CauseOfDeath) {
-	delta_frame->push(std::make_unique<ModDestructionDelta>(this));
+void Gate::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+	mp->delta_frame_->push(std::make_unique<ModDestructionDelta>(this));
 	if (body_) {
+		if (collect_links) {
+			mp->fall_check_.push_back(body_);
+		}
 		body_->set_gate(nullptr);
 	}
 }

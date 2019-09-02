@@ -271,6 +271,9 @@
     <ClInclude Include="src\jumpstepprocessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\incinerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -494,6 +497,9 @@
     </ClCompile>
     <ClCompile Include="src\jumpstepprocessor.cpp">
       <Filter>Source Files\Move Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\incinerator.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

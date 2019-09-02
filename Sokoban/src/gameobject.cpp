@@ -10,6 +10,7 @@
 #include "mapfile.h"
 #include "objectmodifier.h"
 #include "animation.h"
+#include "moveprocessor.h"
 
 #include "component.h"
 
@@ -80,9 +81,12 @@ void GameObject::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
-void GameObject::destroy(DeltaFrame* delta_frame, CauseOfDeath death) {
+void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+	if (collect_links) {
+		collect_sticky_links(mp->map_, Sticky::All, mp->fall_check_);
+	}
 	if (modifier_) {
-		modifier_->destroy(delta_frame, death);
+		modifier_->destroy(mp, death, collect_links);
 	}
 }
 
@@ -160,9 +164,9 @@ void GameObject::collect_sticky_component(RoomMap* map, Sticky sticky_level, Com
 		cur->comp_ = comp;
 		comp->blocks_.push_back(cur);
 		cur->collect_sticky_links(map, sticky_level, to_check);
-		cur->collect_special_links(map, sticky_level, to_check);
+		cur->collect_special_links(map, to_check);
 		if (ObjectModifier* mod = cur->modifier()) {
-			mod->collect_sticky_links(map, sticky_level, to_check);
+			mod->collect_special_links(map, to_check);
 		}
 	}
 }
@@ -181,7 +185,7 @@ bool GameObject::has_sticky_neighbor(RoomMap* map) {
 
 void GameObject::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
 
-void GameObject::collect_special_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
+void GameObject::collect_special_links(RoomMap*, std::vector<GameObject*>&) {}
 
 int GameObject::color() {
 	return NO_COLOR;

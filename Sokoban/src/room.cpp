@@ -28,6 +28,7 @@
 #include "worldresetkey.h"
 #include "permanentswitch.h"
 #include "floorsign.h"
+#include "incinerator.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -288,10 +289,8 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_MODCODE(WorldResetKey);
 			CASE_MODCODE(PermanentSwitch);
 			CASE_MODCODE(FloorSign);
+			CASE_MODCODE(Incinerator);
 		case ModCode::NONE:
-			break;
-		default:
-			throw std::runtime_error("Unknown Modifier code encountered in .map file (it's probably corrupt/an old version)");
 			break;
 		}
 		auto* obj_raw = obj.get();

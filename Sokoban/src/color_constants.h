@@ -22,6 +22,7 @@ enum {
     DARK_GREY = 14,
 	DARK_BLUE = 15,
 	BRIGHT_PURPLE = 16,
+	ORANGE = 17,
 	NUM_COLORS,
 };
 

@@ -12,7 +12,8 @@
 
 DoorData::DoorData(Point3_S16 p, std::string start_room, std::string dest_room) : pos{ p }, start{ start_room }, dest{ dest_room } {}
 
-Door::Door(GameObject* parent, int count, bool persistent, bool def, bool active): Switchable(parent, count, persistent, def, active, false), data_ {} {}
+Door::Door(GameObject* parent, int count, bool persistent, bool def, bool active):
+	Switchable(parent, count, persistent, def, active, false), data_ {} {}
 
 Door::~Door() {}
 
@@ -79,7 +80,7 @@ bool Door::can_set_state(bool state, RoomMap* map) {
     return true;
 }
 
-void Door::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+void Door::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 	if (parent_->tangible_) {
 		mp->plan_door_move(this);
 	}
