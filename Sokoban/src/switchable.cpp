@@ -74,7 +74,7 @@ void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 		waiting_ = false;
 		active_ = !active_;
-		apply_state_change(map, delta_frame, mp);
+		mp->activated_switchables_.insert(this);
 	}
 }
 

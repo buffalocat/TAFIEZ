@@ -66,9 +66,10 @@ bool Gate::can_set_state(bool state, RoomMap* map) {
 void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (body_) {
 		// Add animation
-		if (state()) {
+		bool cur_state = state();
+		if (cur_state && !body_->tangible_) {
 			mp->push_rising_gate(this);
-		} else {
+		} else if (!cur_state && body_->tangible_) {
 			map->take_from_map(body_, true, true, delta_frame);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });
 			if (above && above->gravitable_) {

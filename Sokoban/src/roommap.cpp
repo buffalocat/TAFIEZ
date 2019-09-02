@@ -464,7 +464,7 @@ void RoomMap::push_signaler(std::unique_ptr<Signaler> signaler) {
 	signalers_.push_back(std::move(signaler));
 }
 
-// TODO: make this *not* violate locality (i.e., keep a set of "maybe activated" signalers)
+// It's probably more efficient to just check all signalers than to keep track
 void RoomMap::check_signalers(DeltaFrame* delta_frame, MoveProcessor* mp) {
 	for (auto& signaler : signalers_) {
 		signaler->check_send_signal(this, delta_frame, mp);

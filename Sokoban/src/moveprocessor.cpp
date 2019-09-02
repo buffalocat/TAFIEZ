@@ -13,6 +13,7 @@
 #include "door.h"
 #include "car.h"
 #include "gate.h"
+#include "signaler.h"
 
 #include "snakeblock.h"
 
@@ -179,6 +180,9 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	map_->alert_activated_listeners(delta_frame_, this);
 	map_->reset_local_state();
 	map_->check_signalers(delta_frame_, this);
+	for (auto* switchable : activated_switchables_) {
+		switchable->apply_state_change(map_, delta_frame_, this);
+	}
 	raise_gates();
 	map_->check_clear_flag_collected(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {

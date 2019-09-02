@@ -11,7 +11,9 @@ class RoomMap;
 class DeltaFrame;
 class SnakeBlock;
 class Door;
+class Switchable;
 class Gate;
+
 
 enum class MoveStep {
 	Default = 0,
@@ -75,13 +77,15 @@ public:
 
 	void set_initializer_state();
 
+	std::set<Switchable*> activated_switchables_{};
+
 private:
 	void raise_gates();
 
 	std::vector<GameObject*> moving_blocks_{};
 	std::vector<GameObject*> fall_check_{};
 	std::unordered_map<Point3, std::vector<Gate*>, Point3Hash> rising_gates_{};
-
+	
     PlayingState* playing_state_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
