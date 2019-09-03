@@ -51,13 +51,8 @@ void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
 }
 
 void Room::set_cam_pos(Point3 vpos, FPoint3 rpos, bool display_labels, bool snap) {
-	if (camera_->update_context(vpos) && display_labels) {
-		if (camera_->update_label()) {
-			context_label_ = std::make_unique<RoomLabelDrawer>(
-				gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
-				camera_->active_label_, 0.65f);
-			state_->text_->toggle_string_drawer(context_label_.get(), true);
-		}
+	if (camera_->update_context(vpos) && display_labels && camera_->update_label()) {
+		should_update_label_ = true;
 	}
 	camera_->set_target(rpos);
 	if (snap) {
@@ -96,7 +91,18 @@ void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool
 		map_->draw(gfx_, camera_->get_rotation());
 	}
 	gfx_->draw();
+	update_room_label();
 	state_->text_->draw();
+}
+
+void Room::update_room_label() {
+	if (should_update_label_) {
+		context_label_ = std::make_unique<RoomLabelDrawer>(
+			gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
+			camera_->active_label_, 0.65f);
+		state_->text_->toggle_string_drawer(context_label_.get(), true);
+		should_update_label_ = false;
+	}
 }
 
 void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho) {

@@ -113,6 +113,9 @@ void TextRenderer::draw() {
 		}
 	}
 	string_drawers_ = std::move(new_drawers);
+	if (auto error = glGetError()) {
+		std::cout << "Error detected after draw! " << error << std::endl;
+	}
 }
 
 void TextRenderer::toggle_string_drawer(StringDrawer* drawer, bool active) {

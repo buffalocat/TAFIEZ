@@ -34,6 +34,7 @@ public:
     void draw_at_player(Player* target, bool display_labels, bool ortho, bool one_layer);
 	void draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer);
     void update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho);
+	void update_room_label();
 
     void extend_by(Point3 d);
     void shift_by(Point3 d);
@@ -43,6 +44,7 @@ public:
 
 	std::unique_ptr<RoomLabelDrawer> zone_label_{};
 	std::unique_ptr<RoomLabelDrawer> context_label_{};
+	bool should_update_label_ = false;
 
 private:
 	std::unique_ptr<RoomMap> map_{};
