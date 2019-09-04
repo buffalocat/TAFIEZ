@@ -4,6 +4,7 @@
 struct EditorRoom;
 class EditorState;
 class GraphicsManager;
+class RoomMap;
 
 struct Point3;
 
@@ -16,6 +17,7 @@ public:
 	virtual bool handle_keyboard_input();
     virtual void handle_left_click(EditorRoom*, Point3);
     virtual void handle_right_click(EditorRoom*, Point3);
+	bool kill_object(Point3 pos, RoomMap* map);
 
 protected:
     EditorState* editor_;

@@ -302,7 +302,10 @@ void EditorState::manage_flag(bool create, unsigned int* flag_ptr, EditorRoom* e
 	}
 }
 
-bool EditorState::can_quit() {
+bool EditorState::can_quit(bool confirm) {
+	if (!confirm) {
+		return true;
+	}
 	bool result = false;
 	ImGui::OpenPopup("Quit?");
 	if (ImGui::BeginPopupModal("Quit?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {

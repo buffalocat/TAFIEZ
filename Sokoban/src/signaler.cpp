@@ -12,11 +12,13 @@ Signaler::Signaler(const std::string& label, int count) :
 Signaler::~Signaler() {}
 
 void Signaler::push_switch(Switch* obj, bool mutual) {
-	if (obj) {
-		switches_.push_back(obj);
-		if (mutual) {
-			obj->push_signaler(this);
-		}
+	// TODO: fix the heart of the problem in SwitchTab, so "corrupt" signalers never get made
+	if (!obj) {
+		return;
+	}
+	switches_.push_back(obj);
+	if (mutual) {
+		obj->push_signaler(this);
 	}
 }
 
@@ -63,6 +65,9 @@ void ThresholdSignaler::serialize(MapFileO& file) {
 }
 
 void ThresholdSignaler::push_switchable(Switchable* obj, bool mutual, int) {
+	if (!obj) {
+		return;
+	}
 	switchables_.push_back(obj);
 	if (mutual) {
 		obj->push_signaler(this, 0);
@@ -112,6 +117,9 @@ void ParitySignaler::serialize(MapFileO& file) {
 }
 
 void ParitySignaler::push_switchable(Switchable* obj, bool mutual, int index) {
+	if (!obj) {
+		return;
+	}
 	switchables_[index].push_back(obj);
 	if (mutual) {
 		obj->push_signaler(this, 0);

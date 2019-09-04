@@ -23,7 +23,12 @@ static Signaler* selected_sig = nullptr;
 void SwitchTab::init() {
 	model_switches_.clear();
 	model_switchables_.clear();
-	model_threshold_ = 0;
+	for (auto& swlist : model_p_switchables_) {
+		swlist.clear();
+	}
+	model_label_ = {};
+	model_threshold_ = 1;
+	model_parity_level_ = 2;
 	selected_sig = nullptr;
 }
 
@@ -80,6 +85,7 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 			return;
 		}
 	} else {
+		selected_sig = nullptr;
 		ImGui::RadioButton("Threshold Signaler##SWITCH", &sig_type_, SignalerType::Threshold);
 		ImGui::RadioButton("Parity Signaler##SWITCH", &sig_type_, SignalerType::Parity);
 	}

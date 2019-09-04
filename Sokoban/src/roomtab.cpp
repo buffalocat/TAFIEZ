@@ -6,6 +6,7 @@
 #include "roommap.h"
 #include "gameobject.h"
 #include "savefile.h"
+#include "player.h"
 
 RoomTab::RoomTab(EditorState* editor) : EditorTab(editor) {}
 
@@ -76,6 +77,8 @@ void RoomTab::zone_options(RoomMap* room) {
 }
 
 void RoomTab::shift_extend_options(EditorRoom* eroom) {
+	RoomMap* map = eroom->map();
+	Player* player = dynamic_cast<Player*>(map->view(eroom->start_pos));
 	Point3 cur_room_dims{ eroom->map()->width_, eroom->map()->height_, eroom->map()->depth_ };
 	ImGui::Text("Current Room Dimensions: (%d,%d,%d)", cur_room_dims.x, cur_room_dims.y, cur_room_dims.z);
 
@@ -93,6 +96,7 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 
 	if (ImGui::Button("Shift room?##ROOM")) {
 		Point3 dpos = { shift_width, shift_height, shift_depth };
+		map->take_from_map(player, true, false, nullptr);
 		eroom->room->shift_by(dpos);
 		shift_width = 0;
 		shift_height = 0;
@@ -102,6 +106,9 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 		if (!eroom->map()->valid(eroom->start_pos)) {
 			eroom->start_pos = { 0,0,0 };
 		}
+		player->pos_ = eroom->start_pos;
+		kill_object(player->pos_, map);
+		map->put_in_map(player, true, false, nullptr);
 		eroom = editor_->reload(eroom);
 	}
 
@@ -119,6 +126,7 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 
 	if (ImGui::Button("Extend room?##ROOM")) {
 		Point3 dpos = { extend_width, extend_height, extend_depth };
+		map->take_from_map(player, true, false, nullptr);
 		eroom->room->extend_by(dpos);
 		extend_width = 0;
 		extend_height = 0;
@@ -126,6 +134,9 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 		if (!eroom->map()->valid(eroom->start_pos)) {
 			eroom->start_pos = { 0,0,0 };
 		}
+		player->pos_ = eroom->start_pos;
+		kill_object(player->pos_, map);
+		map->put_in_map(player, true, false, nullptr);
 		eroom = editor_->reload(eroom);
 	}
 }

@@ -225,22 +225,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (inspect_mode_) {
 		return;
 	}
-	RoomMap* map = eroom->map();
-	GameObject* obj = map->view(pos);
-	if (obj) {
-		if (obj->obj_code() == ObjCode::Player) {
-			return;
-		}
-		if (auto* mod = obj->modifier()) {
-			mod->cleanup_on_editor_destruction(editor_->global_.get());
-		}
+	if (kill_object(pos, eroom->map())) {
 		selected_obj = nullptr;
-		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object
-		if (obj->id_ == GENERIC_WALL_ID) {
-			map->at(pos) = 0;
-		} else {
-			map->take_from_map(obj, true, false, nullptr);
-			map->remove_from_object_array(obj);
-		}
 	}
 }

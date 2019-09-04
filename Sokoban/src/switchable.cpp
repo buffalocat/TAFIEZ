@@ -20,7 +20,7 @@ void Switchable::make_str(std::string& str) {
 		std::string sig_list{ "(" };
 		for (auto& p : signalers_) {
 			if (p.first) {
-				sig_list += p.first->label_;
+				sig_list += p.first->label_ + "; ";
 			}
 		}
 		sig_list += ")";

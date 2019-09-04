@@ -4,6 +4,9 @@
 #include "point.h"
 #include "editorstate.h"
 #include "color_constants.h"
+#include "gameobject.h"
+#include "objectmodifier.h"
+#include "roommap.h"
 
 EditorTab::EditorTab(EditorState* editor) : editor_{ editor }, gfx_{ editor->gfx_ } {}
 
@@ -22,6 +25,27 @@ bool EditorTab::handle_keyboard_input() {
 void EditorTab::handle_left_click(EditorRoom* eroom, Point3 pos) {}
 
 void EditorTab::handle_right_click(EditorRoom* eroom, Point3 pos) {}
+
+bool EditorTab::kill_object(Point3 pos, RoomMap* map) {
+	// The player can't be killed
+	if (GameObject* obj = map->view(pos)) {
+		if (obj->obj_code() == ObjCode::Player) {
+			return false;
+		}
+		if (auto* mod = obj->modifier()) {
+			mod->cleanup_on_editor_destruction(editor_->global_.get());
+		}
+		// When we "destroy" a wall, it doesn't actually destroy the unique Wall object
+		if (obj->id_ == GENERIC_WALL_ID) {
+			map->at(pos) = 0;
+		} else {
+			map->take_from_map(obj, true, false, nullptr);
+			map->remove_from_object_array(obj);
+		}
+		return true;
+	}
+	return false;
+}
 
 void color_button(int color_id) {
 	glm::vec4 color = COLOR_VECTORS[color_id];
