@@ -218,13 +218,15 @@ void MoveProcessor::push_rising_gate(Gate* gate) {
 }
 
 void MoveProcessor::run_incinerators() {
-	for (auto* inc : activated_incinerators_) {
-		if (GameObject* above = map_->view(inc->pos_above())) {
-			map_->take_from_map(above, true, true, delta_frame_);
-			above->destroy(this, CauseOfDeath::Incinerated, true);
+	for (auto* inc : alerted_incinerators_) {
+		if (inc->state()) {
+			if (GameObject* above = map_->view(inc->pos_above())) {
+				map_->take_from_map(above, true, true, delta_frame_);
+				above->destroy(this, CauseOfDeath::Incinerated, true);
+			}
 		}
 	}
-	activated_incinerators_.clear();
+	alerted_incinerators_.clear();
 }
 
 void MoveProcessor::raise_gates() {

@@ -38,9 +38,15 @@ bool Incinerator::can_set_state(bool state, RoomMap* map) {
 	return true;
 }
 
-void Incinerator::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (parent_->tangible_ && state()) {
-		mp->activated_incinerators_.push_back(this);
+void Incinerator::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
+	if (parent_->tangible_) {
+		mp->alerted_incinerators_.push_back(this);
+	}
+}
+
+void Incinerator::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
+	if (parent_->tangible_) {
+		mp->alerted_incinerators_.push_back(this);
 	}
 }
 

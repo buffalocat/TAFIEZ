@@ -88,7 +88,7 @@ public:
 
 	std::vector<Switchable*> activated_switchables_{};
 
-	std::vector<Incinerator*> activated_incinerators_{};
+	std::vector<Incinerator*> alerted_incinerators_{};
 	void run_incinerators();
 	std::unordered_map<Point3, std::vector<Gate*>, Point3Hash> rising_gates_{};
 	void raise_gates();
