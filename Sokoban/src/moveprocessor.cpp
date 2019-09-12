@@ -220,9 +220,14 @@ void MoveProcessor::push_rising_gate(Gate* gate) {
 void MoveProcessor::run_incinerators() {
 	for (auto* inc : alerted_incinerators_) {
 		if (inc->state()) {
-			if (GameObject* above = map_->view(inc->pos_above())) {
-				map_->take_from_map(above, true, true, delta_frame_);
-				above->destroy(this, CauseOfDeath::Incinerated, true);
+			Point3 pos_above = inc->pos_above();
+			if (GameObject* above = map_->view(pos_above)) {
+				if (above->id_ == GENERIC_WALL_ID) {
+					map_->clear(pos_above);
+				} else {
+					map_->take_from_map(above, true, true, delta_frame_);
+					above->destroy(this, CauseOfDeath::Incinerated, true);
+				}
 			}
 		}
 	}

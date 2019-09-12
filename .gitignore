@@ -34,6 +34,9 @@ Sokoban/Win32/*
 # Private Maps
 *_.map
 
+# Main Folder dlls
+Sokoban/*.dll
+
 # Temp Maps
 Sokoban/maps/temp/*
 !Sokoban/maps/temp/.keep
