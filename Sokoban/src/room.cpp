@@ -130,7 +130,8 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 		double cam_y = s_tilt * c_rot * cam_radius;
 		double cam_z = c_tilt * cam_radius;
 
-		gfx_->set_light_source(glm::vec3(cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
+
+		gfx_->set_light_source(glm::vec3(-cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
 
 		view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
 			glm::vec3(-target_pos.x, target_pos.y, target_pos.z),
