@@ -122,15 +122,19 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 
 		double cam_tilt = camera_->get_tilt();
 		double cam_rotation = camera_->get_rotation();
-		double cam_x = sin(cam_tilt) * sin(cam_rotation) * cam_radius;
-		double cam_y = sin(cam_tilt) * cos(cam_rotation) * cam_radius;
-		double cam_z = cos(cam_tilt) * cam_radius;
+		double s_tilt = sin(cam_tilt);
+		double c_tilt = cos(cam_tilt);
+		double s_rot = sin(cam_rotation);
+		double c_rot = cos(cam_rotation);
+		double cam_x = s_tilt * s_rot * cam_radius;
+		double cam_y = s_tilt * c_rot * cam_radius;
+		double cam_z = c_tilt * cam_radius;
 
 		gfx_->set_light_source(glm::vec3(cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
 
 		view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
 			glm::vec3(-target_pos.x, target_pos.y, target_pos.z),
-			glm::vec3(0.0, -1.0, 1.0));
+			glm::vec3(-s_rot, -c_rot, 1.0));
 		projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
 	}
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
@@ -310,7 +314,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 
 #define CASE_CAMCODE(CLASS)\
 case CameraCode::CLASS:\
-    camera_->push_context(std::unique_ptr<CameraContext>(CLASS ## CameraContext::deserialize(file)));\
+    camera_->push_context(CLASS ## CameraContext::deserialize(file));\
     break;
 
 void Room::read_camera_rects(MapFileI& file) {
@@ -319,8 +323,7 @@ void Room::read_camera_rects(MapFileI& file) {
 		file.read(b, 1);
 		CameraCode code = static_cast<CameraCode>(b[0]);
 		switch (code) {
-			CASE_CAMCODE(Clamped)
-			CASE_CAMCODE(Null)
+			CASE_CAMCODE(General)
 		case CameraCode::NONE:
 			return;
 		default:

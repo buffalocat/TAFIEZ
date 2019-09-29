@@ -88,6 +88,9 @@ void PlayingState::handle_input() {
 		undo_combo = 0;
 	}
 
+	// Manual camera movement
+	room_->camera()->handle_free_cam_input(window_);
+
 	// Ignore all other input if an animation is occurring
 	if (move_processor_) {
 		if (move_processor_->update()) {

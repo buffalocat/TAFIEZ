@@ -12,9 +12,17 @@ const double ORTHO_HEIGHT = (double)SCREEN_HEIGHT / (double)MESH_SIZE;
 const double FOV_VERTICAL = glm::radians(60.0);
 const double ASPECT_RATIO = (double)SCREEN_WIDTH / (double)SCREEN_HEIGHT;
 
+const double TWO_PI = 6.28318530718;
+
 const double DEFAULT_CAM_RADIUS = 10.0;
 const double DEFAULT_CAM_TILT = 0.3;
 const double DEFAULT_CAM_ROTATION = 0.0;
+
+const double MAX_CAM_TILT = 1.5;
+const double MIN_CAM_TILT = 0.0;
+
+const double FREE_CAM_TILT_SPEED = 0.01;
+const double FREE_CAM_ROT_SPEED = 0.02;
 
 const int DEFAULT_BOARD_WIDTH = 17;
 const int DEFAULT_BOARD_HEIGHT = 13;

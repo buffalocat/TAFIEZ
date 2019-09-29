@@ -10,13 +10,31 @@
 #include "fontmanager.h"
 
 
-CameraContext::CameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child) :
-	label_{ label }, rect_{ rect }, priority_{ priority }, named_area_{ named_area }, null_child_{ null_child } {}
+CameraContext::CameraContext(IntRect rect, int priority) :
+	rect_{ rect }, priority_{ priority } {}
 
 CameraContext::~CameraContext() {}
 
+void CameraContext::serialize(MapFileO& file) {}
+
 bool CameraContext::is_null() {
 	return false;
+}
+
+bool CameraContext::has_null_child() {
+	return false;
+}
+
+bool CameraContext::is_free() {
+	return false;
+}
+
+double* CameraContext::get_tilt_ptr() {
+	return nullptr;
+}
+
+double* CameraContext::get_rot_ptr() {
+	return nullptr;
 }
 
 FPoint3 CameraContext::center(FPoint3 pos) {
@@ -33,6 +51,10 @@ double CameraContext::tilt(FPoint3 pos) {
 
 double CameraContext::rotation(FPoint3 pos) {
 	return DEFAULT_CAM_ROTATION;
+}
+
+std::string CameraContext::label() {
+	return "";
 }
 
 void CameraContext::shift_by(Point3 d, int width, int height) {
@@ -53,107 +75,211 @@ void CameraContext::extend_by(Point3 d, int width, int height) {
 	clamp(&rect_.yb, 0, height - 1);
 }
 
-ClampedCameraContext::ClampedCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool null_child,
-	unsigned int flags, double radius, double tilt, FloatRect center) :
-	CameraContext(label, rect, priority, named_area, null_child),
-	rad_{ radius }, tilt_{ tilt }, center_{ center } {}
 
-ClampedCameraContext::~ClampedCameraContext() {}
+const double VERT_ANGLE = 0.52359877559; // FOV_VERTICAL / 2.0
+const double WIDTH_FACTOR = 0.76980035892; // tan(VERT_ANGLE) * ASPECT_RATIO
 
-FPoint3 ClampedCameraContext::center(FPoint3 pos) {
-	return {
-		std::min(std::max(pos.x, center_.xa), center_.xb),
-		std::min(std::max(pos.y, center_.ya), center_.yb),
-		pos.z,
-	};
+CamRectCalculator::CamRectCalculator(double tilt) {
+	set_tilt(tilt);
 }
 
-double ClampedCameraContext::radius(FPoint3 pos) {
+CamRectCalculator::~CamRectCalculator() {}
+
+void CamRectCalculator::set_tilt(double tilt) {
+	tilt_ = tilt;
+	hor_excess_factor_ = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
+	upper_excess_factor_ = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
+	lower_excess_factor_ = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
+}
+
+// TODO: account for z here?
+
+double CamRectCalculator::compute_radius(FloatRect vis, unsigned int flags) {
+	double xrad = (vis.xb + 1 - vis.xa) / (2 * hor_excess_factor_);
+	double yrad = (vis.yb + 1 - vis.ya) / (upper_excess_factor_ + lower_excess_factor_);
+	if (flags & CAM_FLAGS::RAD_SMALLER) {
+		return std::min(xrad, yrad);
+	} else if (flags & CAM_FLAGS::RAD_LARGER) {
+		return std::max(xrad, yrad);
+	} else if (flags & CAM_FLAGS::RAD_CLAMP_X) {
+		return xrad;
+	} else if (flags & CAM_FLAGS::RAD_CLAMP_Y) {
+		return yrad;
+	} else {
+		return DEFAULT_CAM_RADIUS;
+	}
+}
+
+FloatRect CamRectCalculator::compute_center_from_vis_rad(FloatRect vis, double rad) {
+	return FloatRect{ vis.xa + rad * hor_excess_factor_ - 0.5, vis.ya + rad * upper_excess_factor_ - 0.5,
+		vis.xb - rad * hor_excess_factor_ + 0.5, vis.yb - rad * lower_excess_factor_ + 0.5 };
+}
+
+GeneralCameraContext::GeneralCameraContext(IntRect rect, int priority, unsigned int flags) : CameraContext(rect, priority),
+	flags_{ flags }, label_{},
+	rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT }, rot_{ DEFAULT_CAM_ROTATION } {}
+
+GeneralCameraContext::~GeneralCameraContext() {}
+
+void GeneralCameraContext::serialize(MapFileO& file) {
+	file << CameraCode::General;
+	file << rect_ << priority_;
+	file.write_uint32(flags_);
+	// Choose serialization based on flags
+	if (flags_ & CAM_FLAGS::NAMED_AREA) {
+		file << label_;
+	}
+	if (flags_ & CAM_FLAGS::VIS_AUTO) {
+		file << pad_.left;
+		file << pad_.right;
+		file << pad_.top;
+		file << pad_.bottom;
+	} else {
+		file << visible_;
+	}
+	if (flags_ & CAM_FLAGS::TILT_CUSTOM) {
+		file << tilt_;
+	}
+	if (!(flags_ & CAM_FLAGS::RAD_AUTO)) {
+		file << rad_;
+	}
+	if (flags_ & CAM_FLAGS::ROT_CUSTOM) {
+		file << rot_;
+	}
+}
+
+std::unique_ptr<CameraContext> GeneralCameraContext::deserialize(MapFileI& file) {
+	IntRect rect;
+	int priority;
+	file >> rect >> priority;
+	unsigned int flags = file.read_uint32();
+	auto context = std::make_unique<GeneralCameraContext>(rect, priority, flags);
+	// Pull other data from file
+	if (flags & CAM_FLAGS::NAMED_AREA) {
+		context->label_ = file.read_str();
+	}
+	if (flags & CAM_FLAGS::VIS_AUTO) {
+		Padding pad;
+		pad.left = file.read_byte();
+		pad.right = file.read_byte();
+		pad.top = file.read_byte();
+		pad.bottom = file.read_byte();
+		context->pad_ = pad;
+		context->visible_ = FloatRect{
+			(float)rect.xa - pad.left,
+			(float)rect.ya - pad.top,
+			(float)rect.xb + pad.right,
+			(float)rect.yb + pad.bottom,
+		};
+	} else {
+		file >> context->visible_;
+	}
+	if (flags & CAM_FLAGS::TILT_CUSTOM) {
+		file >> context->tilt_;
+	}
+	CamRectCalculator calc{ context->tilt_ };
+	if (flags & CAM_FLAGS::RAD_AUTO) {
+		if (flags & CAM_FLAGS::RAD_DEFAULT) {
+			context->rad_ = DEFAULT_CAM_RADIUS;
+		} else {
+			context->rad_ = calc.compute_radius(context->visible_, flags);
+		}
+	} else {
+		file >> context->rad_;
+	}
+	if (flags & CAM_FLAGS::CENTER_USED) {
+		context->center_ = calc.compute_center_from_vis_rad(context->visible_, context->rad_);
+	}
+	if (flags & CAM_FLAGS::ROT_CUSTOM) {
+		file >> context->rot_;
+	}
+	return std::move(context);
+}
+
+bool GeneralCameraContext::is_null() {
+	return flags_ & CAM_FLAGS::NULL_AREA;
+}
+
+bool GeneralCameraContext::has_null_child() {
+	return flags_ & CAM_FLAGS::HAS_NULL_CHILD;
+}
+
+bool GeneralCameraContext::is_free() {
+	return flags_ & CAM_FLAGS::FREE_CAM;
+}
+
+bool GeneralCameraContext::can_override_free() {
+	return true;
+}
+
+std::string GeneralCameraContext::label() {
+	if (flags_ & CAM_FLAGS::NAMED_AREA) {
+		return label_;
+	}
+	return "";
+}
+
+FPoint3 GeneralCameraContext::center(FPoint3 pos) {
+	FPoint3 c = pos;
+	if (flags_ & CAM_FLAGS::POS_CLAMP_X) {
+		c.x = std::min(std::max(c.x, center_.xa), center_.xb);
+	} else if (flags_ & CAM_FLAGS::POS_FIX_X) {
+		c.x = (center_.xa + center_.xb) / 2.0;
+	}
+	if (flags_ & CAM_FLAGS::POS_CLAMP_Y) {
+		c.y = std::min(std::max(c.y, center_.ya), center_.yb);
+	} else if (flags_ & CAM_FLAGS::POS_FIX_Y) {
+		c.y = (center_.ya + center_.yb) / 2.0;
+	}
+	return c;
+}
+
+double GeneralCameraContext::radius(FPoint3 pos) {
 	return rad_;
 }
 
-double ClampedCameraContext::tilt(FPoint3 pos) {
+double GeneralCameraContext::tilt(FPoint3 pos) {
 	return tilt_;
 }
 
-enum CLAMPED_CAM {
-	// Individual Flags
-	UNIFORM_PAD = 1 << 1,
-	XY_PAD = 1 << 2,
-	ALL_PAD = 1 << 3,
-	RAD_SMALLER = 1 << 4,
-	RAD_LARGER = 1 << 5,
-	RAD_CLAMP_X = 1 << 6,
-	RAD_CLAMP_Y = 1 << 7,
-	// Is the visible rect determined from other information?
-	VIS_AUTO = UNIFORM_PAD | XY_PAD | ALL_PAD,
-	// Is the radius determined from other information?
-	RAD_AUTO = RAD_SMALLER | RAD_LARGER | RAD_CLAMP_X | RAD_CLAMP_Y,
-};
-
-void ClampedCameraContext::serialize(MapFileO& file) {
-	file << CameraCode::Clamped;
-	file << label_ << rect_ << priority_ << named_area_ << null_child_;
-	file.write_uint32(flags_);
-	// Choose serialization based on flags
-	file << center_;
-	file << rad_ << tilt_;
+double GeneralCameraContext::rotation(FPoint3 pos) {
+	return rot_;
 }
 
-CameraContext* ClampedCameraContext::deserialize(MapFileI& file) {
-	std::string label = file.read_str();
-	IntRect rect;
-	int priority;
-	bool named_area, null_child;
-	file >> rect >> priority >> named_area >> null_child;
-	unsigned int flags = file.read_uint32();
-	// USE FLAGS
-	FloatRect center;
-	double rad, tilt;
-	file >> center >> rad >> tilt;
-	return new ClampedCameraContext(label, rect, priority, named_area, null_child, flags, rad, tilt, center);
-}
-
-void ClampedCameraContext::shift_by(Point3 d, int width, int height) {
+void GeneralCameraContext::shift_by(Point3 d, int width, int height) {
 	CameraContext::shift_by(d, width, height);
+	visible_.xa += d.x;
+	visible_.xb += d.x;
+	visible_.ya += d.y;
+	visible_.yb += d.y;
 	center_.xa += d.x;
 	center_.xb += d.x;
 	center_.ya += d.y;
 	center_.yb += d.y;
 }
 
+double* GeneralCameraContext::get_tilt_ptr() {
+	return &tilt_;
+}
 
-NullCameraContext::NullCameraContext(std::string label, IntRect rect, int priority, bool named_area, bool independent) :
-	CameraContext(label, rect, priority, named_area, false), independent_{ independent } {}
+double* GeneralCameraContext::get_rot_ptr() {
+	return &rot_;
+}
 
-NullCameraContext::~NullCameraContext() {}
+DependentNullCameraContext::DependentNullCameraContext(IntRect rect, int priority) :
+	CameraContext(rect, priority) {}
 
-bool NullCameraContext::is_null() {
+DependentNullCameraContext::~DependentNullCameraContext() {}
+
+bool DependentNullCameraContext::is_null() {
 	return true;
 }
-
-void NullCameraContext::serialize(MapFileO& file) {
-	if (independent_) {
-		file << (unsigned char)CameraCode::Null;
-		file << label_ << rect_ << named_area_ << priority_;
-	}
-}
-
-CameraContext* NullCameraContext::deserialize(MapFileI& file) {
-	std::string label = file.read_str();
-	IntRect rect;
-	int priority;
-	bool named_area;
-	file >> rect >> priority >> named_area;
-	return new NullCameraContext(label, rect, priority, named_area, true);
-}
-
 
 Camera::Camera(int w, int h) :
 	active_label_{}, label_display_cooldown_{},
 	width_{ w }, height_{ h },
-	default_context_{ ClampedCameraContext("", IntRect{0,0,w - 1,h - 1}, 0, true, false,
-		0, DEFAULT_CAM_RADIUS, DEFAULT_CAM_TILT, FloatRect{0,0,w - 1,h - 1}) },
+	default_context_{ GeneralCameraContext(IntRect{0,0,w - 1,h - 1}, 0, CAM_FLAGS::DEFAULT) },
+	free_context_{ GeneralCameraContext(IntRect{0,0,w - 1,h - 1}, 0, CAM_FLAGS::FREE_CAM) },
 	context_{}, loaded_contexts_{},
 	context_map_{},
 	target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
@@ -183,10 +309,10 @@ void Camera::push_context(std::unique_ptr<CameraContext> context) {
 			}
 		}
 	}
-	if (context->null_child_) {
+	if (context->has_null_child()) {
 		IntRect border_rect{ std::max(0, rect.xa - 1), std::max(0, rect.ya - 1),
-			std::min(width_ - 1, rect.xb + 1), std::min(height_ - 1, rect.yb + 1) };
-		push_context(std::make_unique<NullCameraContext>(context->label_ + "(NULL)", border_rect, priority - 1, false, false));
+				std::min(width_ - 1, rect.xb + 1), std::min(height_ - 1, rect.yb + 1) };
+		push_context(std::make_unique<DependentNullCameraContext>(border_rect, priority - 1));
 	}
 	loaded_contexts_.push_back(std::move(context));
 }
@@ -194,7 +320,6 @@ void Camera::push_context(std::unique_ptr<CameraContext> context) {
 // Note: it just gets replaced with the default context (until the map is reloaded)
 void Camera::remove_context(CameraContext* context) {
 	IntRect rect = context->rect_;
-	int priority = context->priority_;
 	for (int i = rect.xa; i <= rect.xb; ++i) {
 		for (int j = rect.ya; j <= rect.yb; ++j) {
 			if (context_map_[i][j] == context) {
@@ -234,19 +359,18 @@ bool Camera::update_context(Point3 vpos) {
 }
 
 void Camera::set_target(FPoint3 rpos) {
-	target_pos_ = context_->center(rpos);
-	target_rad_ = context_->radius(rpos);
-	target_tilt_ = context_->tilt(rpos);
-	target_rot_ = context_->rotation(rpos);
+	CameraContext* context = free_override_ ? &free_context_ : context_;
+	target_pos_ = context->center(rpos);
+	target_rad_ = context->radius(rpos);
+	target_tilt_ = context->tilt(rpos);
+	target_rot_ = context->rotation(rpos);
 }
 
 bool Camera::update_label() {
-	if (context_->named_area_) {
-		std::string label = context_->label_;
-		if (active_label_ != label) {
-			active_label_ = label;
-			return true;
-		}
+	std::string label = context_->label();
+	if (active_label_ != label) {
+		active_label_ = label;
+		return !label.empty();
 	}
 	return false;
 }
@@ -262,6 +386,12 @@ void Camera::update() {
 	cur_pos_ = FPoint3{ damp_avg(target_pos_.x, cur_pos_.x), damp_avg(target_pos_.y, cur_pos_.y), damp_avg(target_pos_.z, cur_pos_.z) };
 	cur_rad_ = damp_avg(target_rad_, cur_rad_);
 	cur_tilt_ = damp_avg(target_tilt_, cur_tilt_);
+	double drot = cur_rot_ - target_rot_;
+	if (drot > TWO_PI / 2.0) {
+		cur_rot_ -= TWO_PI;
+	} else if (drot < -TWO_PI / 2.0) {
+		cur_rot_ += TWO_PI;
+	}
 	cur_rot_ = damp_avg(target_rot_, cur_rot_);
 }
 
@@ -284,6 +414,40 @@ void Camera::extend_by(Point3 d) {
 		context->extend_by(d, width_, height_);
 	}
 }
+
+void Camera::handle_free_cam_input(GLFWwindow* window) {
+	double* tilt_ptr = nullptr;
+	double* rot_ptr = nullptr;
+	if (context_->is_free()) {
+		tilt_ptr = context_->get_tilt_ptr();
+		rot_ptr = context_->get_rot_ptr();
+	}
+	if (free_override_) {
+		tilt_ptr = free_context_.get_tilt_ptr();
+		rot_ptr = free_context_.get_rot_ptr();
+	}
+	if (tilt_ptr) {
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			*tilt_ptr = std::min(*tilt_ptr + FREE_CAM_TILT_SPEED, MAX_CAM_TILT);
+		} else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			*tilt_ptr = std::max(*tilt_ptr - FREE_CAM_TILT_SPEED, MIN_CAM_TILT);
+		}
+	}
+	if (rot_ptr) {
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			*rot_ptr += FREE_CAM_ROT_SPEED;
+			if (*rot_ptr >= TWO_PI) {
+				*rot_ptr -= TWO_PI;
+			}
+		} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			*rot_ptr -= FREE_CAM_ROT_SPEED;
+			if (*rot_ptr <= -TWO_PI) {
+				*rot_ptr += TWO_PI;
+			}
+		}
+	}
+}
+
 
 // We have a few magic numbers for tweaking camera smoothness
 // This function may be something more interesting than exponential damping later

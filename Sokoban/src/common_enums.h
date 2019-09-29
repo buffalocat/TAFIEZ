@@ -25,12 +25,11 @@ enum class ModCode {
 	Incinerator = 11,
 };
 
+// This is useless for now, but we'll keep it anyway
 enum class CameraCode {
     NONE = 0,
-    Free = 1,
-    Fixed = 2,
-    Clamped = 3,
-    Null = 4,
+    General = 1,
+	// Radial?
 };
 
 enum class Sticky {

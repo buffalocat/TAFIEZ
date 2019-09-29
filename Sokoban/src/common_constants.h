@@ -49,9 +49,17 @@ extern const int UNDO_COOLDOWN_FINAL;
 
 extern const int MAX_UNDO_DEPTH;
 
+extern const double TWO_PI;
+
 extern const double DEFAULT_CAM_RADIUS;
 extern const double DEFAULT_CAM_TILT;
 extern const double DEFAULT_CAM_ROTATION;
+
+extern const double MAX_CAM_TILT;
+extern const double MIN_CAM_TILT;
+
+extern const double FREE_CAM_TILT_SPEED;
+extern const double FREE_CAM_ROT_SPEED;
 
 extern const std::filesystem::path MAPS_MAIN;
 extern const std::filesystem::path MAPS_TEMP;

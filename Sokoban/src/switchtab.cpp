@@ -32,13 +32,14 @@ void SwitchTab::init() {
 	selected_sig = nullptr;
 }
 
-int SwitchTab::get_signaler_labels(const char* labels[], std::vector<std::unique_ptr<Signaler>>& signalers) {
+int SwitchTab::get_signaler_labels(const char* labels[], std::string labels_str[], std::vector<std::unique_ptr<Signaler>>& signalers) {
 	int i = 0;
 	for (auto& s : signalers) {
-		if (s->label_.empty()) {
+		labels_str[i] = s->label_;
+		if (labels_str[i].empty()) {
 			labels[i] = "(UNNAMED)";
 		} else {
-			labels[i] = s->label_.c_str();
+			labels[i] = labels_str[i].c_str();
 		}
 		++i;
 	}
@@ -69,8 +70,10 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 	if (inspect_mode_) {
 		static int current = 0;
 		auto& signalers = eroom->map()->signalers_;
-		const char* labels[1024];
-		int len = get_signaler_labels(labels, signalers);
+		static const int MAX_SIG_COUNT = 1024;
+		static std::string labels_str[MAX_SIG_COUNT];
+		const char* labels[MAX_SIG_COUNT];
+		int len = get_signaler_labels(labels, labels_str, signalers);
 		if (ImGui::ListBox("Signalers##SWITCH", &current, labels, len, len)) {
 			selected_sig = signalers[current].get();
 			// We could put a virtual sig_type() method in Signaler, but this would be the only place it got used

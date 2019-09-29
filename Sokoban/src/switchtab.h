@@ -25,7 +25,7 @@ public:
     void handle_left_click(EditorRoom*, Point3);
     void handle_right_click(EditorRoom*, Point3);
 
-    int get_signaler_labels(const char* labels[], std::vector<std::unique_ptr<Signaler>>& signalers);
+    int get_signaler_labels(const char* labels[], std::string labels_str[], std::vector<std::unique_ptr<Signaler>>& signalers);
 	void threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* map);
 	void parity_signaler_options(ParitySignaler* p_sig, RoomMap* map);
 

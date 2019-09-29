@@ -7,81 +7,212 @@
 #include "common_enums.h"
 #include "camera.h"
 
-// Half of the vertical FOV angle
-static double VERT_ANGLE;
-// 2*width_factor*radius = width of visible rectangle
-static double WIDTH_FACTOR;
 
-CameraTab::CameraTab(EditorState* editor) : EditorTab(editor),
-label_{}, rect_{}, vis_{}, priority_{10},
-rad_{ DEFAULT_CAM_RADIUS }, tilt_{ DEFAULT_CAM_TILT } {
-	VERT_ANGLE = FOV_VERTICAL / 2.0;
-	WIDTH_FACTOR = tan(VERT_ANGLE) * ASPECT_RATIO;
+CameraTab::CameraTab(EditorState* editor) : EditorTab(editor) {
+	model_general_data = std::make_unique<GeneralContextData>();
 }
 
 CameraTab::~CameraTab() {}
 
 static CameraContext* selected_cam = nullptr;
 
-static IntRect* rect_ptr = nullptr;
-static int* priority_ptr = nullptr;
-static bool* named_area_ptr = nullptr;
-static bool* null_child_ptr = nullptr;
-static double* rad_ptr = nullptr;
-static double* tilt_ptr = nullptr;
+enum class PaddingMode {
+	Uniform,
+	XY,
+	All,
+};
 
-static bool bind_vis_to_area = false;
-static double max_radius = DEFAULT_CAM_RADIUS;
+enum class RadiusMode {
+	Custom,
+	Larger,
+	Smaller,
+	ClampX,
+	ClampY,
+	Default,
+};
 
-static FloatRect computed_center = {0,0,0,0};
+enum class PositionMode {
+	Free,
+	Clamp,
+	Fix,
+};
+
+class GeneralContextData {
+public:
+	GeneralContextData();
+	GeneralContextData(GeneralCameraContext* context);
+	~GeneralContextData();
+	void load_from_context(GeneralCameraContext* context);
+	void unpack_flags();
+	void pack_flags();
+	void write_to_context(GeneralCameraContext* context);
+
+	void editor_options();
+
+private:
+	unsigned int flags = 0;
+	bool null_area = false, named_area = false, has_null_child = false, free_cam = false;
+	PaddingMode pad_mode = PaddingMode::Uniform;
+	RadiusMode rad_mode = RadiusMode::Larger;
+	PositionMode x_pos_mode = PositionMode::Clamp, y_pos_mode = PositionMode::Clamp;
+	bool tilt_custom = false, rot_custom = false;
+
+	IntRect rect{ 0,0,0,0 };
+	int priority = 10;
+	std::string label = "";
+	double rad = DEFAULT_CAM_RADIUS;
+	double tilt = DEFAULT_CAM_TILT;
+	double rot = DEFAULT_CAM_ROTATION;
+	Padding pad{ 0,0,0,0 };
+
+	friend class CameraTab;
+};
+
+GeneralContextData::GeneralContextData() {}
+
+GeneralContextData::GeneralContextData(GeneralCameraContext* context) {
+	load_from_context(context);
+}
+
+GeneralContextData::~GeneralContextData() {}
+
+void GeneralContextData::load_from_context(GeneralCameraContext* context) {
+	rect = context->rect_;
+	priority = context->priority_;
+	flags = context->flags_;
+	unpack_flags();
+	label = context->label_;
+	rad = context->rad_;
+	tilt = context->tilt_;
+	rot = context->rot_;
+	pad = context->pad_;
+}
+
+void GeneralContextData::unpack_flags() {
+	null_area = flags & CAM_FLAGS::NULL_AREA;
+	named_area = flags & CAM_FLAGS::NAMED_AREA;
+	has_null_child = flags & CAM_FLAGS::HAS_NULL_CHILD;
+	free_cam = flags & CAM_FLAGS::FREE_CAM;
+	if (flags & CAM_FLAGS::PAD_UNIFORM) {
+		pad_mode = PaddingMode::Uniform;
+	} else if (flags & CAM_FLAGS::PAD_XY) {
+		pad_mode = PaddingMode::XY;
+	} else { // flags & CAM_FLAGS::PAD_ALL
+		pad_mode = PaddingMode::All;
+	}
+	if (flags & CAM_FLAGS::RAD_SMALLER) {
+		rad_mode = RadiusMode::Smaller;
+	} else if (flags & CAM_FLAGS::RAD_LARGER) {
+		rad_mode = RadiusMode::Larger;
+	} else if (flags & CAM_FLAGS::RAD_CLAMP_X) {
+		rad_mode = RadiusMode::ClampX;
+	} else if (flags & CAM_FLAGS::RAD_CLAMP_Y) {
+		rad_mode = RadiusMode::ClampY;
+	} else if (flags & CAM_FLAGS::RAD_DEFAULT) {
+		rad_mode = RadiusMode::Default;
+	} else {
+		rad_mode = RadiusMode::Custom;
+	}
+	if (flags & CAM_FLAGS::POS_CLAMP_X) {
+		x_pos_mode = PositionMode::Clamp;
+	} else if (flags & CAM_FLAGS::POS_FIX_X) {
+		x_pos_mode = PositionMode::Fix;
+	} else {
+		x_pos_mode = PositionMode::Free;
+	}
+	if (flags & CAM_FLAGS::POS_CLAMP_Y) {
+		y_pos_mode = PositionMode::Clamp;
+	} else if (flags & CAM_FLAGS::POS_FIX_Y) {
+		y_pos_mode = PositionMode::Fix;
+	} else {
+		y_pos_mode = PositionMode::Free;
+	}
+	tilt_custom = flags & CAM_FLAGS::TILT_CUSTOM;
+	rot_custom = flags & CAM_FLAGS::ROT_CUSTOM;
+}
+
+void GeneralContextData::pack_flags() {
+	flags = (null_area * CAM_FLAGS::NULL_AREA) |
+		(named_area * CAM_FLAGS::NAMED_AREA) |
+		(has_null_child * CAM_FLAGS::HAS_NULL_CHILD) |
+		(free_cam * CAM_FLAGS::FREE_CAM) |
+		(tilt_custom * CAM_FLAGS::TILT_CUSTOM) |
+		(rot_custom * CAM_FLAGS::ROT_CUSTOM);
+	switch (pad_mode) {
+	case PaddingMode::Uniform:
+		flags |= CAM_FLAGS::PAD_UNIFORM;
+		break;
+	case PaddingMode::XY:
+		flags |= CAM_FLAGS::PAD_XY;
+		break;
+	case PaddingMode::All:
+		flags |= CAM_FLAGS::PAD_ALL;
+		break;
+	}
+	switch (rad_mode) {
+	case RadiusMode::Smaller:
+		flags |= CAM_FLAGS::RAD_SMALLER;
+		break;
+	case RadiusMode::Larger:
+		flags |= CAM_FLAGS::RAD_LARGER;
+		break;
+	case RadiusMode::ClampX:
+		flags |= CAM_FLAGS::RAD_CLAMP_X;
+		break;
+	case RadiusMode::ClampY:
+		flags |= CAM_FLAGS::RAD_CLAMP_Y;
+		break;
+	case RadiusMode::Default:
+		flags |= CAM_FLAGS::RAD_DEFAULT;
+		break;
+	}
+	switch (x_pos_mode) {
+	case PositionMode::Clamp:
+		flags |= CAM_FLAGS::POS_CLAMP_X;
+		break;
+	case PositionMode::Fix:
+		flags |= CAM_FLAGS::POS_FIX_X;
+		break;
+	}
+	switch (y_pos_mode) {
+	case PositionMode::Clamp:
+		flags |= CAM_FLAGS::POS_CLAMP_Y;
+		break;
+	case PositionMode::Fix:
+		flags |= CAM_FLAGS::POS_FIX_Y;
+		break;
+	}
+}
+
+void GeneralContextData::write_to_context(GeneralCameraContext* context) {
+	context->rect_ = rect;
+	context->priority_ = priority;
+	pack_flags();
+	context->flags_ = flags;
+	context->label_ = label;
+	context->rad_ = rad;
+	context->tilt_ = tilt;
+	context->rot_ = rot;
+	context->pad_ = pad;
+}
 
 void CameraTab::init() {
 	inspect_mode_ = false;
 	selected_cam = nullptr;
 }
 
-int CameraTab::get_context_labels(const char* labels[], std::vector<std::unique_ptr<CameraContext>>& contexts) {
+int CameraTab::get_context_labels(const char* labels[], std::string labels_str[], std::vector<std::unique_ptr<CameraContext>>& contexts) {
 	int i = 0;
 	for (auto& c : contexts) {
-		if (c->label_.empty()) {
+		labels_str[i] = c->label();
+		if (labels_str[i].empty()) {
 			labels[i] = "(UNNAMED)";
 		} else {
-			labels[i] = c->label_.c_str();
+			labels[i] = labels_str[i].c_str();
 		}
 		++i;
 	}
 	return i;
-}
-
-FloatRect compute_vis_from_center(FloatRect center) {
-	double tilt = *tilt_ptr;
-	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
-	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
-	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
-	double rad = *rad_ptr;
-	return FloatRect{ round(center.xa - rad * hor_excess_factor + 0.5), center.ya - rad * upper_excess_factor + 0.5,
-		center.xb + rad * hor_excess_factor - 0.5, center.yb + rad * lower_excess_factor - 0.5};
-}
-
-double compute_actual_radius(FloatRect vis) {
-	double tilt = *tilt_ptr;
-	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
-	double hor_max_radius = (vis.xb + 1 - vis.xa) / (2 * hor_excess_factor);
-	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
-	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
-	double vert_max_radius = (vis.yb + 1 - vis.ya) / (upper_excess_factor + lower_excess_factor);
-	return std::min(max_radius, std::min(hor_max_radius, vert_max_radius));
-}
-
-FloatRect compute_center_from_vis(FloatRect vis) {
-	double tilt = *tilt_ptr;
-	double hor_excess_factor = (WIDTH_FACTOR * cos(VERT_ANGLE) * cos(tilt)) / cos(VERT_ANGLE - tilt);
-	double upper_excess_factor = tan(VERT_ANGLE + tilt) * cos(tilt) - sin(tilt);
-	double lower_excess_factor = tan(VERT_ANGLE - tilt) * cos(tilt) + sin(tilt);
-	double rad = *rad_ptr;
-	auto f = FloatRect{ vis.xa + rad * hor_excess_factor - 0.5, vis.ya + rad * upper_excess_factor - 0.5,
-		vis.xb - rad * hor_excess_factor + 0.5, vis.yb - rad * lower_excess_factor + 0.5 };
-	return f;
 }
 
 void CameraTab::main_loop(EditorRoom* eroom) {
@@ -95,150 +226,188 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 	ImGui::Checkbox("Inspect Mode##CAMERA_inspect", &inspect_mode_);
 	ImGui::Separator();
 
-	rad_ptr = &rad_;
-	tilt_ptr = &tilt_;
+	GeneralContextData* current_general_data = nullptr;
 
 	if (inspect_mode_) {
 		static int current = 0;
 		auto& contexts = eroom->room->camera()->loaded_contexts();
-		const char* labels[1024];
-		int len = get_context_labels(labels, contexts);
+		static const int MAX_CONTEXT_COUNT = 256;
+		static std::string labels_str[MAX_CONTEXT_COUNT];
+		const char* labels[MAX_CONTEXT_COUNT];
+		int len = get_context_labels(labels, labels_str, contexts);
 		auto* prev_selected = selected_cam;
 		if (ImGui::ListBox("Camera Contexts##CAMERA", &current, labels, len, len)) {
 			selected_cam = contexts[current].get();
 		}
 		if (selected_cam) {
-			rect_ptr = &selected_cam->rect_;
-			priority_ptr = &selected_cam->priority_;
-			named_area_ptr = &selected_cam->named_area_;
-			null_child_ptr = &selected_cam->null_child_;
-			if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
-				rad_ptr = &clamped->rad_;
-				tilt_ptr = &clamped->tilt_;
+			if (auto* selected_general_cam = dynamic_cast<GeneralCameraContext*>(selected_cam)) {
 				if (selected_cam != prev_selected) {
-					max_radius = clamped->rad_;
-					vis_ = compute_vis_from_center(clamped->center_);
+					selected_general_data = std::make_unique<GeneralContextData>(selected_general_cam);
 				}
+				current_general_data = selected_general_data.get();
+			} else {
+				ImGui::Text("Can't edit; not a GeneralCameraContext");
+				return;
 			}
 		} else {
 			ImGui::Text("No CameraContext selected.");
 			return;
 		}
 	} else {
-		rect_ptr = &rect_;
-		priority_ptr = &priority_;
-		named_area_ptr = &named_area_;
-		null_child_ptr = &null_child_;
-		rad_ptr = &rad_;
-		tilt_ptr = &tilt_;
+		selected_general_data = nullptr;
+		current_general_data = model_general_data.get();
 	}
+	rect_ptr = &current_general_data->rect;
+
+	current_general_data->editor_options();
 
 	ImGui::Separator();
 
-	const static int MAX_LABEL_LENGTH = 64;
-	static char label_buf[MAX_LABEL_LENGTH] = "";
-
 	if (inspect_mode_) {
-		if (selected_cam) {
-			snprintf(label_buf, MAX_LABEL_LENGTH, "%s", selected_cam->label_.c_str());
-			if (ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH)) {
-				selected_cam->label_ = std::string(label_buf);
-			}
-			if (ImGui::Button("Erase Selected CameraContext##CAMERA")) {
-				eroom->room->camera()->remove_context(selected_cam);
-				selected_cam = nullptr;
-				return;
-			}
+		if (auto* selected_general_cam = dynamic_cast<GeneralCameraContext*>(selected_cam)) {
+			selected_general_data->write_to_context(selected_general_cam);
+		}
+		if (ImGui::Button("Erase Selected CameraContext##CAMERA")) {
+			eroom->room->camera()->remove_context(selected_cam);
+			selected_cam = nullptr;
+			selected_general_data = nullptr;
+			return;
 		}
 	} else {
-		ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH);
-	}
-
-	label_ = label_buf;
-
-	ImGui::Text("Context Area Corners: (%d, %d), (%d, %d)", rect_ptr->xa, rect_ptr->ya, rect_ptr->xb, rect_ptr->yb);
-	ImGui::Checkbox("Match Visible to Context Area?", &bind_vis_to_area);
-	if (bind_vis_to_area) {
-		vis_ = { rect_ptr->xa, rect_ptr->ya, rect_ptr->xb, rect_ptr->yb };
-	} else {
-		ImGui::Text("Visible Corners: (%.2f, %.2f), (%.2f, %.2f)", vis_.xa, vis_.ya, vis_.xb, vis_.yb);
-	}
-
-	ImGui::InputInt("Priority##CAMERA", priority_ptr);
-	
-	ImGui::Separator();
-
-	ImGui::InputDouble("Max Radius##CAMERA", &max_radius);
-	if (tilt_ptr) {
-		ImGui::InputDouble("Tilt##CAMERA", tilt_ptr);
-	}
-	*rad_ptr = compute_actual_radius(vis_);
-	ImGui::Text("Actual Radius: %f", *rad_ptr);
-	ImGui::Checkbox("Named Area?##CAMERA", named_area_ptr);
-	ImGui::Checkbox("Null Boundary?##CAMERA", null_child_ptr);
-
-	if (inspect_mode_) {
-		if (auto* clamped = dynamic_cast<ClampedCameraContext*>(selected_cam)) {
-			clamped->center_ = compute_center_from_vis(vis_);
-		}
-	} else {
-		if (ImGui::Button("Make CameraContext##CAMERA")) {
-			compute_center_from_vis(vis_);
-			eroom->room->camera()->push_context(std::make_unique<ClampedCameraContext>(label_, rect_, priority_, named_area_, null_child_, 0, rad_, tilt_, compute_center_from_vis(vis_)));
+		if (ImGui::Button("Make GeneralCameraContext##CAMERA")) {
+			auto new_context = std::make_unique<GeneralCameraContext>(IntRect{}, 0, 0);
+			model_general_data->write_to_context(new_context.get());
+			eroom->room->camera()->push_context(std::move(new_context));
+			model_general_data = std::make_unique<GeneralContextData>();
+			rect_ptr = &model_general_data->rect;
 		}	
 	}
 }
 
-void CameraTab::normalize_rect_a_b() {
-	if (rect_ptr->xa > rect_ptr->xb) {
-		int temp = rect_ptr->xa;
-		rect_ptr->xa = rect_ptr->xb;
-		rect_ptr->xb = temp;
+void GeneralContextData::editor_options() {
+	ImGui::Text("Context Area Corners: (%d, %d), (%d, %d)", rect.xa, rect.ya, rect.xb, rect.yb);
+	
+	ImGui::InputInt("Priority##CAMERA", &priority);
+
+	ImGui::Checkbox("Null Context##CAMERA", &null_area);
+	if (null_area) {
+		return;
 	}
-	if (rect_ptr->ya > rect_ptr->yb) {
-		int temp = rect_ptr->ya;
-		rect_ptr->ya = rect_ptr->yb;
-		rect_ptr->yb = temp;
+
+	ImGui::Checkbox("Named Area##CAMERA", &named_area);
+	ImGui::Checkbox("Has Null Child##CAMERA", &has_null_child);
+	ImGui::Checkbox("Free-cam Area##CAMERA", &free_cam);
+
+	ImGui::Separator();
+	if (named_area) {
+		ImGui::Text("Level Name (context label)");
+	} else {
+		ImGui::Text("Camera Context Label");
 	}
+	const static int MAX_LABEL_LENGTH = 64;
+	static char label_buf[MAX_LABEL_LENGTH] = "";
+	snprintf(label_buf, MAX_LABEL_LENGTH, "%s", label.c_str());
+	if (ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH)) {
+		label = std::string(label_buf);
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Padding Mode");
+	ImGui::RadioButton("Uniform Padding##CAMERA", &pad_mode, PaddingMode::Uniform);
+	ImGui::RadioButton("XY Padding##CAMERA", &pad_mode, PaddingMode::XY);
+	ImGui::RadioButton("All Different Padding##CAMERA", &pad_mode, PaddingMode::All);
+	switch (pad_mode) {
+	case PaddingMode::Uniform:
+		ImGui::InputInt("Uniform pad##CAMERA", &pad.left);
+		pad.right = pad.top = pad.bottom = pad.left;
+		break;
+	case PaddingMode::XY:
+		ImGui::InputInt("X-pad##CAMERA", &pad.left);
+		pad.right = pad.left;
+		ImGui::InputInt("Y-pad##CAMERA", &pad.top);
+		pad.bottom = pad.top;
+		break;
+	case PaddingMode::All:
+		ImGui::InputInt("Left pad##CAMERA", &pad.left);
+		ImGui::InputInt("Right pad##CAMERA", &pad.right);
+		ImGui::InputInt("Top pad##CAMERA", &pad.top);
+		ImGui::InputInt("Bottom pad##CAMERA", &pad.bottom);
+		break;
+	}
+
+	ImGui::Separator();
+	ImGui::Checkbox("Custom Tilt##CAMERA", &tilt_custom);
+	if (tilt_custom) {
+		ImGui::InputDouble("Tilt##CAMERA", &tilt);
+	} else {
+		tilt = DEFAULT_CAM_TILT;
+	}
+	ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
+	if (rot_custom) {
+		ImGui::InputDouble("Rotation##CAMERA", &rot);
+	} else {
+		rot = DEFAULT_CAM_ROTATION;
+	}
+
+	FloatRect vis = { rect.xa - pad.left, rect.ya - pad.top, rect.xb + pad.right, rect.yb + pad.bottom };
+	ImGui::Separator();
+	ImGui::Text("Radius Mode");
+	ImGui::RadioButton("Clamp to Shorter Dimension##CAMERA", &rad_mode, RadiusMode::Smaller);
+	ImGui::RadioButton("Clamp to Longer Dimension (Fixed)##CAMERA", &rad_mode, RadiusMode::Larger);
+	ImGui::RadioButton("Clamp to X (moves along Y)##CAMERA", &rad_mode, RadiusMode::ClampX);
+	ImGui::RadioButton("Clamp to Y (moves along X)##CAMERA", &rad_mode, RadiusMode::ClampY);
+	ImGui::RadioButton("Default Radius Size##CAMERA", &rad_mode, RadiusMode::Default);
+	ImGui::RadioButton("Custom Radius Size##CAMERA", &rad_mode, RadiusMode::Custom);
+	switch (rad_mode) {
+	case RadiusMode::Smaller:
+	case RadiusMode::Larger:
+		x_pos_mode = PositionMode::Clamp;
+		y_pos_mode = PositionMode::Clamp;
+		break;
+	case RadiusMode::ClampX:
+		x_pos_mode = PositionMode::Fix;
+		y_pos_mode = PositionMode::Clamp;
+		break;
+	case RadiusMode::ClampY:
+		x_pos_mode = PositionMode::Clamp;
+		y_pos_mode = PositionMode::Fix;
+		break;
+	case RadiusMode::Custom:
+		x_pos_mode = PositionMode::Free;
+		y_pos_mode = PositionMode::Free;
+		ImGui::InputDouble("Radius##CAMERA", &rad);
+		break;
+	case RadiusMode::Default:
+		x_pos_mode = PositionMode::Free;
+		y_pos_mode = PositionMode::Free;
+		rad = DEFAULT_CAM_RADIUS;
+		break;
+	}
+
+	// Maybe put manual PositionMode choices here?
 }
 
-void CameraTab::normalize_vis_a_b() {
-	if (vis_.xa > vis_.xb) {
-		double temp = vis_.xa;
-		vis_.xa = vis_.xb;
-		vis_.xb = temp;
+void CameraTab::normalize_rect_a_b(IntRect* rect) {
+	if (rect->xa > rect->xb) {
+		std::swap(rect->xa, rect->xb);
 	}
-	if (vis_.ya > vis_.yb) {
-		double temp = vis_.ya;
-		vis_.ya = vis_.yb;
-		vis_.yb = temp;
+	if (rect->ya > rect->yb) {
+		std::swap(rect->ya, rect->yb);
 	}
 }
 
 void CameraTab::handle_left_click(EditorRoom*, Point3 p) {
-	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		if (!bind_vis_to_area) {
-			vis_.xa = (double)p.x;
-			vis_.ya = (double)p.y;
-			normalize_vis_a_b();
-		}
-	} else {
+	if (rect_ptr) {
 		rect_ptr->xa = p.x;
 		rect_ptr->ya = p.y;
-		normalize_rect_a_b();
+		normalize_rect_a_b(rect_ptr);
 	}
 }
 
 void CameraTab::handle_right_click(EditorRoom*, Point3 p) {
-	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		if (!bind_vis_to_area) {
-			vis_.xb = (double)p.x;
-			vis_.yb = (double)p.y;
-			normalize_vis_a_b();
-		}
-	} else {
+	if (rect_ptr) {
 		rect_ptr->xb = p.x;
 		rect_ptr->yb = p.y;
-		normalize_rect_a_b();
+		normalize_rect_a_b(rect_ptr);
 	}
 }
