@@ -23,12 +23,8 @@
 
 #include "common_constants.h"
 
-const std::unordered_map<int, Point3> MOVEMENT_KEYS{
-	{GLFW_KEY_RIGHT, {1, 0, 0}},
-	{GLFW_KEY_LEFT,  {-1,0, 0}},
-	{GLFW_KEY_DOWN,  {0, 1, 0}},
-	{GLFW_KEY_UP,    {0,-1, 0}},
-};
+const int MOVEMENT_KEYS[4] = { GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_UP, };
+const Point3 MOVEMENT_DIRS[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { -1, 0, 0 }, { 0, -1, 0 } };
 
 PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 	room{ std::move(arg_room) } {}
@@ -145,11 +141,16 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
 	}
-	for (auto p : MOVEMENT_KEYS) {
-		if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
+	for (int i = 0; i < 4; ++i) {
+		if (glfwGetKey(window_, MOVEMENT_KEYS[i]) == GLFW_PRESS) {
+			static bool rotate_controls = true;
+			if (rotate_controls) {
+				const double HALF_PI = 1.57079632679;
+				double angle = room_->camera()->get_rotation();
+				i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
+			}
 			create_move_processor();
-			// p.second is direction of movement
-			if (!move_processor_->try_move_horizontal(p.second)) {
+			if (!move_processor_->try_move_horizontal(MOVEMENT_DIRS[i])) {
 				move_processor_.reset(nullptr);
 				return;
 			}
