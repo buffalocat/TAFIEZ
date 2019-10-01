@@ -57,7 +57,7 @@ private:
 
 class CameraContext {
 public:
-    CameraContext(IntRect rect, int priority);
+    CameraContext(IntRect rect, int priority, std::string label);
     ~CameraContext();
 	virtual bool is_null();
 	virtual bool has_null_child();
@@ -68,7 +68,7 @@ public:
     virtual double radius(FPoint3);
     virtual double tilt(FPoint3);
     virtual double rotation(FPoint3);
-	virtual std::string label();
+	virtual std::string area_name();
 
 	virtual void shift_by(Point3 d, int width, int height);
 	virtual void extend_by(Point3 d, int width, int height);
@@ -78,6 +78,7 @@ public:
 
 	IntRect rect_;
 	int priority_;
+	std::string label_;
 };
 
 struct Padding {
@@ -86,7 +87,7 @@ struct Padding {
 
 class GeneralCameraContext: public CameraContext {
 public:
-    GeneralCameraContext(IntRect rect, int priority, unsigned int flags);
+    GeneralCameraContext(IntRect rect, int priority, std::string label, unsigned int flags);
     ~GeneralCameraContext();
 	void serialize(MapFileO& file);
 	static std::unique_ptr<CameraContext> deserialize(MapFileI& file);
@@ -96,7 +97,7 @@ public:
 	virtual bool is_free();
 	virtual bool can_override_free();
 
-	std::string label();
+	std::string area_name();
     FPoint3 center(FPoint3);
     double radius(FPoint3);
     double tilt(FPoint3);
@@ -109,7 +110,6 @@ public:
 
 private:
 	unsigned int flags_;
-	std::string label_;
 	double rad_;
 	double tilt_;
 	double rot_;
@@ -122,7 +122,7 @@ private:
 
 class DependentNullCameraContext: public CameraContext {
 public:
-    DependentNullCameraContext(IntRect rect, int priority);
+    DependentNullCameraContext(IntRect rect, int priority, std::string label);
     ~DependentNullCameraContext();
     bool is_null();
 };

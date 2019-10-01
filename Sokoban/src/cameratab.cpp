@@ -204,7 +204,7 @@ void CameraTab::init() {
 int CameraTab::get_context_labels(const char* labels[], std::string labels_str[], std::vector<std::unique_ptr<CameraContext>>& contexts) {
 	int i = 0;
 	for (auto& c : contexts) {
-		labels_str[i] = c->label();
+		labels_str[i] = c->label_;
 		if (labels_str[i].empty()) {
 			labels[i] = "(UNNAMED)";
 		} else {
@@ -254,9 +254,11 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 			return;
 		}
 	} else {
+		selected_cam = nullptr;
 		selected_general_data = nullptr;
 		current_general_data = model_general_data.get();
 	}
+
 	rect_ptr = &current_general_data->rect;
 
 	current_general_data->editor_options();
@@ -275,7 +277,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 		}
 	} else {
 		if (ImGui::Button("Make GeneralCameraContext##CAMERA")) {
-			auto new_context = std::make_unique<GeneralCameraContext>(IntRect{}, 0, 0);
+			auto new_context = std::make_unique<GeneralCameraContext>(IntRect{}, 0, "", 0);
 			model_general_data->write_to_context(new_context.get());
 			eroom->room->camera()->push_context(std::move(new_context));
 			model_general_data = std::make_unique<GeneralContextData>();
@@ -285,20 +287,7 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 }
 
 void GeneralContextData::editor_options() {
-	ImGui::Text("Context Area Corners: (%d, %d), (%d, %d)", rect.xa, rect.ya, rect.xb, rect.yb);
 	
-	ImGui::InputInt("Priority##CAMERA", &priority);
-
-	ImGui::Checkbox("Null Context##CAMERA", &null_area);
-	if (null_area) {
-		return;
-	}
-
-	ImGui::Checkbox("Named Area##CAMERA", &named_area);
-	ImGui::Checkbox("Has Null Child##CAMERA", &has_null_child);
-	ImGui::Checkbox("Free-cam Area##CAMERA", &free_cam);
-
-	ImGui::Separator();
 	if (named_area) {
 		ImGui::Text("Level Name (context label)");
 	} else {
@@ -309,6 +298,26 @@ void GeneralContextData::editor_options() {
 	snprintf(label_buf, MAX_LABEL_LENGTH, "%s", label.c_str());
 	if (ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH)) {
 		label = std::string(label_buf);
+	}
+	
+	ImGui::Text("Context Area Corners: (%d, %d), (%d, %d)", rect.xa, rect.ya, rect.xb, rect.yb);
+	
+	ImGui::InputInt("Priority##CAMERA", &priority);
+
+	ImGui::Separator();
+
+	ImGui::Checkbox("Null Context##CAMERA", &null_area);
+	if (null_area) {
+		return;
+	}
+
+	ImGui::Checkbox("Named Area##CAMERA", &named_area);
+	ImGui::Checkbox("Has Null Child##CAMERA", &has_null_child);
+	ImGui::Checkbox("Free-cam Area##CAMERA", &free_cam);
+
+	if (free_cam) {
+		tilt_custom = false;
+		rot_custom = false;
 	}
 
 	ImGui::Separator();
