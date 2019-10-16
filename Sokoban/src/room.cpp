@@ -269,6 +269,7 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_OBJCODE(SnakeBlock);
 			CASE_OBJCODE(GateBody);
 			CASE_OBJCODE(Wall);
+			CASE_OBJCODE(ArtWall);
 			// Some Object types should never actually be serialized (as "Objects")
 		case ObjCode::Player:
 		{

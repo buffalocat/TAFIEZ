@@ -8,6 +8,7 @@ enum class ObjCode {
     Wall = 3,
     Player = 4,
     GateBody = 5,
+	ArtWall = 6,
 };
 
 enum class ModCode {

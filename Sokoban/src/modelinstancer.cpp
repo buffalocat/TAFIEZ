@@ -88,10 +88,10 @@ void SingleDrawer::process_draw() {
 	instances_.clear();
 }
 
-WallInstancer::WallInstancer(std::string path) : ModelInstancer(path) {}
+StaticInstancer::StaticInstancer(std::string path) : ModelInstancer(path) {}
 
-WallInstancer::~WallInstancer() {}
+StaticInstancer::~StaticInstancer() {}
 
-void WallInstancer::draw() {
+void StaticInstancer::draw() {
 	model_.draw_instanced((unsigned int)instances_.size());
 }

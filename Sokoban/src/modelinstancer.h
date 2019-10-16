@@ -39,9 +39,9 @@ private:
 	void process_draw();
 };
 
-class WallInstancer : public ModelInstancer {
+class StaticInstancer : public ModelInstancer {
 public:
-	WallInstancer(std::string path);
-	~WallInstancer();
+	StaticInstancer(std::string path);
+	~StaticInstancer();
 	void draw();
 };

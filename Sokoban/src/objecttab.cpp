@@ -25,6 +25,7 @@ static ObjCode obj_code = ObjCode::Wall;
 // Model objects that new objects are created from
 static PushBlock model_pb{ Point3{0,0,0}, GREEN, true, true, Sticky::None };
 static SnakeBlock model_sb{ Point3{0,0,0}, PURPLE, true, true, 2, true };
+static ArtWall model_artwall{ Point3{0,0,0}, 0 };
 
 // Object Inspection
 static GameObject* selected_obj = nullptr;
@@ -53,6 +54,7 @@ void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
 	ImGui::RadioButton("PushBlock##OBJECT_object", obj_code_ptr, ObjCode::PushBlock);
 	ImGui::RadioButton("SnakeBlock##OBJECT_object", obj_code_ptr, ObjCode::SnakeBlock);
 	ImGui::RadioButton("Wall##OBJECT_object", obj_code_ptr, ObjCode::Wall);
+	ImGui::RadioButton("ArtWall##OBJECT_object", obj_code_ptr, ObjCode::ArtWall);
 }
 
 void ObjectTab::object_tab_options(RoomMap* map) {
@@ -117,6 +119,13 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 	case ObjCode::Wall:
 		ImGui::Text("Wall");
 		break;
+	case ObjCode::ArtWall:
+	{
+		ImGui::Text("ArtWall");
+		ArtWall* artwall = obj ? static_cast<ArtWall*>(obj) : &model_artwall;
+		ImGui::InputInt("Wall Flavor##ARTWALL_flavor", &artwall->flavor_);
+		break;
+	}
 	default:
 		break;
 	}
@@ -164,6 +173,9 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 		break;
 	case ObjCode::SnakeBlock:
 		obj = std::make_unique<SnakeBlock>(model_sb);
+		break;
+	case ObjCode::ArtWall:
+		obj = std::make_unique<ArtWall>(model_artwall);
 		break;
 	default:
 		return nullptr;

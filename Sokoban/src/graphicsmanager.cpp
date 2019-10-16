@@ -83,6 +83,8 @@ void GraphicsManager::draw() {
 	top_diamond.draw();
 	six_squares_diamond.draw();
 
+	cube_edges.draw();
+
 	wall.draw();
 }
 

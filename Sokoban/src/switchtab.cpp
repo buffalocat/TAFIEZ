@@ -346,12 +346,15 @@ void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* map) {
 }
 
 void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
+	if (inspect_mode_ && !selected_sig) {
+		return;
+	}
 	if (GameObject* obj = eroom->map()->view(pos)) {
 		if (ObjectModifier* mod = obj->modifier()) {
 			auto sw = dynamic_cast<Switch*>(mod);
 			if (sw && std::find(switches_ptr_->begin(), switches_ptr_->end(), sw) == switches_ptr_->end()) {
 				switches_ptr_->push_back(sw);
-				if (inspect_mode_ && selected_sig) {
+				if (inspect_mode_) {
 					sw->push_signaler(selected_sig);
 				}
 				return;
@@ -359,7 +362,7 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 			auto swble = dynamic_cast<Switchable*>(mod);
 			if (swble && std::find(switchables_ptr_->begin(), switchables_ptr_->end(), swble) == switchables_ptr_->end()) {
 				switchables_ptr_->push_back(swble);
-				if (inspect_mode_ && selected_sig) {
+				if (inspect_mode_) {
 					switch (sig_type_) {
 					case SignalerType::Threshold:
 						swble->push_signaler(selected_sig, 0);
@@ -376,6 +379,9 @@ void SwitchTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 }
 
 void SwitchTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
+	if (inspect_mode_ && !selected_sig) {
+		return;
+	}
 	if (GameObject* obj = eroom->map()->view(pos)) {
 		ObjectModifier* mod = obj->modifier();
 		if (auto sw = dynamic_cast<Switch*>(mod)) {

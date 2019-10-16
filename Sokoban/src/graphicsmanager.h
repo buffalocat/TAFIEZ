@@ -43,7 +43,10 @@ public:
 	DynamicInstancer top_diamond{ DynamicInstancer("resources/top_diamond.obj") };
 	DynamicInstancer six_squares_diamond{ DynamicInstancer("resources/six_squares_diamond.obj") };
 
-	WallInstancer wall{ WallInstancer("resources/uniform_cube.obj") };
+	DynamicInstancer cube_edges{ DynamicInstancer("resources/cube_edges.obj") };
+
+	// Unused for now
+	StaticInstancer wall{ StaticInstancer("resources/uniform_cube.obj") };
 
 	// Models which aren't common enough to be worth instancing
 	SingleDrawer windshield{ SingleDrawer("resources/windshield.obj") };
