@@ -55,6 +55,10 @@ void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_fra
 	} else {
 		--count_;
 	}
+	mp->activated_switchables_.insert(this);
+}
+
+void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	bool cur_signal = count_ > 0;
 	if ((persistent_ && active_) || ((active_ ^ waiting_) == cur_signal)) {
 		return;
@@ -62,7 +66,7 @@ void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_fra
 	waiting_ = !can_set_state(default_ ^ cur_signal, map);
 	if (active_ != (waiting_ ^ cur_signal)) {
 		active_ = !active_;
-		mp->activated_switchables_.push_back(this);
+		apply_state_change(map, delta_frame, mp);
 	}
 }
 
@@ -73,7 +77,7 @@ void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 		waiting_ = false;
 		active_ = !active_;
-		mp->activated_switchables_.push_back(this);
+		mp->activated_switchables_.insert(this);
 	}
 }
 

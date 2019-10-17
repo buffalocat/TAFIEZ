@@ -26,6 +26,7 @@ public:
     void receive_signal(bool signal, RoomMap*, DeltaFrame*, MoveProcessor*);
     virtual void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
     void check_waiting(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void check_active_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
     void cleanup_on_take(RoomMap* map, bool real);
     void setup_on_put(RoomMap* map, bool real);

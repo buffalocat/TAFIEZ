@@ -182,8 +182,9 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	map_->reset_local_state();
 	map_->check_signalers(delta_frame_, this);
 	for (auto* switchable : activated_switchables_) {
-		switchable->apply_state_change(map_, delta_frame_, this);
+		switchable->check_active_change(map_, delta_frame_, this);
 	}
+	activated_switchables_.clear();
 	raise_gates();
 	run_incinerators();
 	map_->check_clear_flag_collected(delta_frame_);

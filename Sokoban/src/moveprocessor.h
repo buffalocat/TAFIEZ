@@ -86,7 +86,7 @@ public:
 	std::vector<GameObject*> moving_blocks_{};
 	std::vector<GameObject*> fall_check_{};
 
-	std::vector<Switchable*> activated_switchables_{};
+	std::unordered_set<Switchable*> activated_switchables_{};
 
 	std::vector<Incinerator*> alerted_incinerators_{};
 	void run_incinerators();
