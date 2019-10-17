@@ -23,6 +23,7 @@ public:
 
     void receive_signal(bool signal);
     virtual void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*) = 0;
+	virtual void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*) = 0;
 	void update_count(DeltaFrame*);
 	void reset_prev_count(int count);
 
@@ -47,6 +48,7 @@ public:
 	void remove_switchable(Switchable*, int index);
 
 	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
 private:
 	std::vector<Switchable*> switchables_{};

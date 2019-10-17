@@ -48,6 +48,8 @@ bool Switchable::state() {
 	return default_ ^ active_;
 }
 
+//TODO : move Delta creation into check_active_change (requires keeping better track of count, like with signalers)
+
 void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
 	if (signal) {
@@ -59,8 +61,17 @@ void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_fra
 }
 
 void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (persistent_ && (active_ ^ waiting_)) {
+		if (waiting_ && can_set_state(default_ ^ 1, map)) {
+			active_ = true;
+			waiting_ = false;
+			apply_state_change(map, delta_frame, mp);
+		}
+		return;
+	}
 	bool cur_signal = count_ > 0;
-	if ((persistent_ && active_) || ((active_ ^ waiting_) == cur_signal)) {
+	if (active_ == cur_signal) {
+		waiting_ = false;
 		return;
 	}
 	waiting_ = !can_set_state(default_ ^ cur_signal, map);
@@ -73,10 +84,8 @@ void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, Move
 void Switchable::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
 void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (waiting_ && can_set_state(!(default_ ^ active_), map)) {
+	if (waiting_) {
 		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
-		waiting_ = false;
-		active_ = !active_;
 		mp->activated_switchables_.insert(this);
 	}
 }

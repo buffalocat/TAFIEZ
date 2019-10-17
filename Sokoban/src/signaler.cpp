@@ -88,6 +88,14 @@ void ThresholdSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame,
 	update_count(delta_frame);
 }
 
+void ThresholdSignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (count_ >= threshold_) {
+		for (Switchable* obj : switchables_) {
+			obj->receive_signal(true, map, delta_frame, mp);
+		}
+	}
+}
+
 
 ParitySignaler::ParitySignaler(std::string label, int count, int parity_level, bool initialized) :
 	Signaler(label, count), parity_level_{ parity_level }, initialized_{ initialized } {
@@ -145,7 +153,6 @@ void ParitySignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, Mo
 	update_count(delta_frame);
 }
 
-// Unlike ThresholdSignalers, these must (potentially) send a signal immediately
 void ParitySignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	for (Switchable* obj : switchables_[count_ % parity_level_]) {
 		obj->receive_signal(true, map, delta_frame, mp);
