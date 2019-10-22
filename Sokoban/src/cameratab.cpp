@@ -51,10 +51,10 @@ public:
 
 private:
 	unsigned int flags = 0;
-	bool null_area = false, named_area = false, has_null_child = false, free_cam = false;
+	bool null_area = false, named_area = true, has_null_child = true, free_cam = false;
 	PaddingMode pad_mode = PaddingMode::Uniform;
-	RadiusMode rad_mode = RadiusMode::Larger;
-	PositionMode x_pos_mode = PositionMode::Clamp, y_pos_mode = PositionMode::Clamp;
+	RadiusMode rad_mode = RadiusMode::Default;
+	PositionMode x_pos_mode = PositionMode::Free, y_pos_mode = PositionMode::Free;
 	bool tilt_custom = false, rot_custom = false;
 
 	IntRect rect{ 0,0,0,0 };
@@ -293,10 +293,10 @@ void GeneralContextData::editor_options() {
 	} else {
 		ImGui::Text("Camera Context Label");
 	}
-	const static int MAX_LABEL_LENGTH = 64;
+	const static int MAX_LABEL_LENGTH = 128;
 	static char label_buf[MAX_LABEL_LENGTH] = "";
 	snprintf(label_buf, MAX_LABEL_LENGTH, "%s", label.c_str());
-	if (ImGui::InputText("Label##CAMERA", label_buf, MAX_LABEL_LENGTH)) {
+	if (ImGui::InputTextMultiline("Label##CAMERA", label_buf, MAX_LABEL_LENGTH, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 3))) {
 		label = std::string(label_buf);
 	}
 	

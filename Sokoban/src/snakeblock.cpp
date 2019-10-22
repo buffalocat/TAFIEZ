@@ -444,6 +444,9 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 
 void SnakePuller::perform_pulls() {
 	for (SnakeBlock* cur : snakes_to_pull_) {
+		if (auto* above = map_->view(cur->shifted_pos({ 0,0,1 }))) {
+			fall_check_.push_back(above);
+		}
 		while (SnakeBlock* next = cur->target_) {
 			cur->reset_internal_state();
 			moving_blocks_.push_back(cur);
