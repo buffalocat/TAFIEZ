@@ -212,7 +212,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		room->load_from_file(*objs_, file, global_.get(), &loaded_player);
 		if (loaded_player) {
 			room->map()->player_cycle_->add_player(loaded_player, nullptr, true);
-			loaded_player->validate_state(room->map(), nullptr);
+			loaded_player->validate_state(room->map());
 		}
 	} else {
 		room->load_from_file(*objs_, file, global_.get(), nullptr);

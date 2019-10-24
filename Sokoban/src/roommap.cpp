@@ -513,7 +513,7 @@ void RoomMap::uncollect_flag(int req) {
 
 void RoomMap::free_unbound_players(DeltaFrame* delta_frame) {
 	for (auto* player : player_cycle_->players_) {
-		player->validate_state(this, delta_frame);
+		player->validate_bound(this, delta_frame);
 	}
 }
 
