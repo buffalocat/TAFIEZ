@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "gameobject.h"
+#include "delta.h"
 
 class MoveProcessor;
 
@@ -46,15 +47,30 @@ public:
 
 	PlayerState state();
 
+	void set_car(Car* car);
+
 private:
 	void set_bound();
-	void set_car(Car* car);
 
 	Car* car_;
 	PlayerState state_;
 	CauseOfDeath death_ = CauseOfDeath::None;
 
 	friend class PlayerStateDelta;
+};
+
+
+class PlayerStateDelta : public Delta {
+public:
+	PlayerStateDelta(Player* player);
+	~PlayerStateDelta();
+	void revert();
+
+private:
+	Player* player_;
+	Car* car_;
+	PlayerState state_;
+	CauseOfDeath death_;
 };
 
 #endif // PLAYER_H

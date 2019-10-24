@@ -86,14 +86,14 @@ void Door::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 	}
 }
 
-void Door::setup_on_put(RoomMap* map, bool real) {
-	Switchable::setup_on_put(map, real);
+void Door::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::setup_on_put(map, delta_frame, real);
     map->add_listener(this, pos_above());
     map->activate_listener_of(this);
 }
 
-void Door::cleanup_on_take(RoomMap* map, bool real) {
-	Switchable::cleanup_on_take(map, real);
+void Door::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::cleanup_on_take(map, delta_frame, real);
     map->remove_listener(this, pos_above());
 }
 

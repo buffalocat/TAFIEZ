@@ -29,13 +29,13 @@ BlockTexture PuppetBlock::texture() {
 	return BlockTexture::PuppetBlock;
 }
 
-void PuppetBlock::setup_on_put(RoomMap* map, bool real) {
+void PuppetBlock::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		map->puppets_.push_back(this);
 	}
 }
 
-void PuppetBlock::cleanup_on_take(RoomMap* map, bool real) {
+void PuppetBlock::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		map->remove_puppet(this);
 	}

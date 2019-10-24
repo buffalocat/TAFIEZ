@@ -29,13 +29,13 @@ BlockTexture AutoBlock::texture() {
 	return BlockTexture::AutoBlock;
 }
 
-void AutoBlock::setup_on_put(RoomMap* map, bool real) {
+void AutoBlock::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		map->autos_.push_back(this);
 	}
 }
 
-void AutoBlock::cleanup_on_take(RoomMap* map, bool real) {
+void AutoBlock::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		map->remove_auto(this);
 	}

@@ -69,15 +69,15 @@ void GameObject::shift_internal_pos(Point3 d) {
 	}
 }
 
-void GameObject::setup_on_put(RoomMap* map, bool real) {
+void GameObject::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	if (modifier_) {
-		modifier_->setup_on_put(map, real);
+		modifier_->setup_on_put(map, delta_frame, real);
 	}
 }
 
-void GameObject::cleanup_on_take(RoomMap* map, bool real) {
+void GameObject::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	if (modifier_) {
-		modifier_->cleanup_on_take(map, real);
+		modifier_->cleanup_on_take(map, delta_frame, real);
 	}
 }
 
@@ -224,4 +224,34 @@ bool ColoredBlock::has_sticky_neighbor(RoomMap* map) {
 		}
 	}
 	return false;
+}
+
+
+DestructionDelta::DestructionDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+DestructionDelta::~DestructionDelta() {}
+
+void DestructionDelta::revert() {
+	obj_->undestroy();
+}
+
+
+AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos) :
+	obj_{ obj }, dpos_{ dpos } {}
+
+AbstractShiftDelta::~AbstractShiftDelta() {}
+
+void AbstractShiftDelta::revert() {
+	obj_->pos_ -= dpos_;
+}
+
+
+AbstractPutDelta::AbstractPutDelta(GameObject* obj, Point3 pos) :
+	obj_{ obj }, pos_{ pos } {}
+
+AbstractPutDelta::~AbstractPutDelta() {}
+
+void AbstractPutDelta::revert() {
+	obj_->pos_ = pos_;
 }

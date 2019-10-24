@@ -90,7 +90,7 @@ void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 	}
 }
 
-void Switchable::cleanup_on_take(RoomMap* map, bool real) {
+void Switchable::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		for (auto& p : signalers_) {
 			p.first->remove_switchable(this, p.second);
@@ -98,8 +98,20 @@ void Switchable::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
-void Switchable::setup_on_put(RoomMap* map, bool real) {
+void Switchable::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		connect_to_signalers();
 	}
+}
+
+
+SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool waiting) :
+	obj_{ obj }, count_{ count }, active_{ active }, waiting_{ waiting } {}
+
+SwitchableDelta::~SwitchableDelta() {}
+
+void SwitchableDelta::revert() {
+	obj_->count_ = count_;
+	obj_->active_ = active_;
+	obj_->waiting_ = waiting_;
 }

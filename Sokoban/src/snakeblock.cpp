@@ -311,7 +311,7 @@ bool SnakeBlock::confused(RoomMap* map) {
 	return available_count > ends_;
 }
 
-void SnakeBlock::cleanup_on_take(RoomMap* map, bool real) {
+void SnakeBlock::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	reset_internal_state();
 	if (real) {
 		for (SnakeBlock* link : links_) {
@@ -319,18 +319,18 @@ void SnakeBlock::cleanup_on_take(RoomMap* map, bool real) {
 		}
 	}
 	if (modifier_) {
-		modifier_->cleanup_on_take(map, real);
+		modifier_->cleanup_on_take(map, delta_frame, real);
 	}
 }
 
-void SnakeBlock::setup_on_put(RoomMap* map, bool real) {
+void SnakeBlock::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	if (real) {
 		for (SnakeBlock* link : links_) {
 			link->add_link_one_way(this);
 		}
 	}
 	if (modifier_) {
-		modifier_->setup_on_put(map, real);
+		modifier_->setup_on_put(map, delta_frame, real);
 	}
 }
 
@@ -457,4 +457,31 @@ void SnakePuller::perform_pulls() {
 		}
 		cur->reset_internal_state();
 	}
+}
+
+
+AddLinkDelta::AddLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+AddLinkDelta::~AddLinkDelta() {}
+
+void AddLinkDelta::revert() {
+	a_->remove_link_quiet(b_);
+}
+
+
+RemoveLinkDelta::RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+RemoveLinkDelta::~RemoveLinkDelta() {}
+
+void RemoveLinkDelta::revert() {
+	a_->add_link_quiet(b_);
+}
+
+
+RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+RemoveLinkOneWayDelta::~RemoveLinkOneWayDelta() {}
+
+void RemoveLinkOneWayDelta::revert() {
+	a_->add_link_one_way(b_);
 }

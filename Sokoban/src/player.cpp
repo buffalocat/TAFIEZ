@@ -179,6 +179,7 @@ void Player::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) 
 		}
 	}
 	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
+	mp->map_->player_cycle_->remove_player(this, mp->delta_frame_);
 	death_ = death;
 }
 
@@ -252,7 +253,7 @@ FPoint3 Player::cam_pos() {
 	switch (state_) {
 	case PlayerState::RidingNormal:
 	case PlayerState::RidingHidden:
-		return car_->parent_->real_pos() + Point3{ 0,0,1 };
+		return car_ ? (car_->parent_->real_pos() + Point3{ 0,0,1 }) : pos_;
 	case PlayerState::Free:
 	case PlayerState::Bound:
 	default:
@@ -260,9 +261,19 @@ FPoint3 Player::cam_pos() {
 	}
 }
 
-// NOTE: if the Player becomes a subclass of a more general "Passenger" type, move this up to that class.
 void Player::collect_special_links(RoomMap* map, std::vector<GameObject*>& links) {
     if (state_ == PlayerState::RidingNormal) {
         links.push_back(map->view(shifted_pos({0,0,-1})));
     }
+}
+
+PlayerStateDelta::PlayerStateDelta(Player* player) :
+	player_{ player }, car_{ player->car_ }, state_{ player->state_ }, death_{ player->death_ } {}
+
+PlayerStateDelta::~PlayerStateDelta() {}
+
+void PlayerStateDelta::revert() {
+	player_->state_ = state_;
+	player_->death_ = death_;
+	player_->set_car(car_);
 }

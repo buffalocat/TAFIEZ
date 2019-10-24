@@ -1,6 +1,7 @@
 #pragma once
 
 #include "objectmodifier.h"
+#include "delta.h"
 
 class ClearFlag : public ObjectModifier {
 public:
@@ -16,8 +17,8 @@ public:
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-	void cleanup_on_take(RoomMap* map, bool real);
-	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 
 	void draw(GraphicsManager*, FPoint3);
 
@@ -28,4 +29,16 @@ public:
 private:
 	int count_;
 	char zone_;
+};
+
+
+class ClearFlagToggleDelta : public Delta {
+public:
+	ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map);
+	~ClearFlagToggleDelta();
+	void revert();
+
+private:
+	ClearFlag* flag_;
+	RoomMap* map_;
 };

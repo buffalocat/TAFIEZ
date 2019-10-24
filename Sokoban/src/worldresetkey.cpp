@@ -57,12 +57,12 @@ void WorldResetKey::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProc
 	}
 }
 
-void WorldResetKey::setup_on_put(RoomMap* map, bool real) {
+void WorldResetKey::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
 }
 
-void WorldResetKey::cleanup_on_take(RoomMap* map, bool real) {
+void WorldResetKey::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
 }
 
@@ -70,4 +70,14 @@ void WorldResetKey::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (!collected_) {
 		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z + 1), glm::vec3(0.2, 0.2, 0.2), BlockTexture::BrokenEdges, glm::vec4(0.5, 1.0, 0.7, 1.0));
 	}
+}
+
+
+KeyCollectDelta::KeyCollectDelta(WorldResetKey* key) :
+	Delta(), key_{ key } {}
+
+KeyCollectDelta::~KeyCollectDelta() {}
+
+void KeyCollectDelta::revert() {
+	key_->collected_ = false;
 }

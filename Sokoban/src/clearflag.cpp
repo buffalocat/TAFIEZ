@@ -80,12 +80,12 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	}
 }
 
-void ClearFlag::setup_on_put(RoomMap* map, bool real) {
+void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
 }
 
-void ClearFlag::cleanup_on_take(RoomMap* map, bool real) {
+void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
 }
 
@@ -103,4 +103,15 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 		color = PURPLE;
 	}
 	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Blank, color);
+}
+
+
+ClearFlagToggleDelta::ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map) :
+	flag_{ flag }, map_{ map } {}
+
+ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
+
+void ClearFlagToggleDelta::revert() {
+	flag_->active_ = !flag_->active_;
+	map_->clear_flags_[flag_] = flag_->active_;
 }

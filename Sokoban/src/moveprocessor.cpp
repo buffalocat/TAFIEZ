@@ -54,6 +54,7 @@ bool MoveProcessor::update() {
 		default:
 			break;
 		}
+		
 	}
 	// TODO: move this responsibility to a new class
 	for (GameObject* block : moving_blocks_) {
@@ -74,10 +75,11 @@ void MoveProcessor::abort() {
 }
 
 void MoveProcessor::reset_player_jump() {
-	// If the player jumped immediately before this, make them gravitable again
-	if (!player_->gravitable_) {
-		player_->gravitable_ = true;
-		delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
+	for (auto* player : map_->player_list()) {
+		if (!player->gravitable_) {
+			player->gravitable_ = true;
+			delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player));
+		}
 	}
 }
 
@@ -368,8 +370,10 @@ void MoveProcessor::try_door_unentry() {
 
 void MoveProcessor::ext_door_exit() {
 	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_, playing_state_->active_room()));
+	map_->player_cycle_->remove_player(player_, delta_frame_);
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
+	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	for (auto& obj : door_travelling_objs_) {
 		add_to_fall_check(obj.raw);
 		obj.raw->abstract_put(obj.dest, delta_frame_);
@@ -394,4 +398,33 @@ void MoveProcessor::add_to_fall_check(GameObject* obj) {
 void MoveProcessor::set_initializer_state() {
 	frames_ = 1;
 	state_ = MoveStep::FirstLoadInit;
+}
+
+
+RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
+	state_{ state }, room_{ room } {}
+
+RoomChangeDelta::~RoomChangeDelta() {}
+
+void RoomChangeDelta::revert() {
+	state_->activate_room(room_);
+}
+
+
+ToggleGravitableDelta::ToggleGravitableDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+ToggleGravitableDelta::~ToggleGravitableDelta() {}
+
+void ToggleGravitableDelta::revert() {
+	obj_->gravitable_ = !obj_->gravitable_;
+}
+
+
+ColorChangeDelta::ColorChangeDelta(Car* car, bool undo) : car_{ car }, undo_{ undo } {}
+
+ColorChangeDelta::~ColorChangeDelta() {}
+
+void ColorChangeDelta::revert() {
+	car_->cycle_color(undo_);
 }

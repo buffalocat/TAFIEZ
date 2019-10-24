@@ -16,8 +16,8 @@ public:
 
 	BlockTexture texture();
 
-	void setup_on_put(RoomMap* map, bool real);
-	void cleanup_on_take(RoomMap* map, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

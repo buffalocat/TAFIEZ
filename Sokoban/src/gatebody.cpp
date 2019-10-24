@@ -111,3 +111,13 @@ void GateBody::draw(GraphicsManager* gfx) {
 		draw_force_indicators(model, p, 0.75f);
 	}
 }
+
+
+GatePosDelta::GatePosDelta(GateBody* gate_body, Point3 dpos) :
+	gate_body_{ gate_body }, dpos_{ dpos } {}
+
+GatePosDelta::~GatePosDelta() {}
+
+void GatePosDelta::revert() {
+	gate_body_->gate_pos_ -= dpos_;
+}

@@ -2,6 +2,7 @@
 #define GATEBODY_H
 
 #include "pushblock.h"
+#include "delta.h"
 
 class Gate;
 class MoveProcessor;
@@ -40,6 +41,18 @@ private:
 	bool corrupt_;
 
 	friend class GatePosDelta;
+};
+
+
+class GatePosDelta : public Delta {
+public:
+	GatePosDelta(GateBody* gate_body, Point3 dpos);
+	~GatePosDelta();
+	void revert();
+
+private:
+	GateBody* gate_body_;
+	Point3 dpos_;
 };
 
 #endif // GATEBODY_H

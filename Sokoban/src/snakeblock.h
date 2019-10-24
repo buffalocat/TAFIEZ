@@ -2,6 +2,7 @@
 #define SNAKEBLOCK_H
 
 #include "gameobject.h"
+#include "delta.h"
 
 class SnakeBlock: public ColoredBlock {
 public:
@@ -51,8 +52,8 @@ public:
 
     void reset_internal_state();
 
-	void setup_on_put(RoomMap*, bool real);
-    void cleanup_on_take(RoomMap*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+    void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
     std::unique_ptr<SnakeBlock> make_split_copy(RoomMap*, DeltaFrame*);
 
@@ -85,6 +86,41 @@ private:
     std::vector<GameObject*>& moving_blocks_;
     std::set<SnakeBlock*>& link_add_check_;
     std::vector<GameObject*>& fall_check_;
+};
+
+
+class AddLinkDelta : public Delta {
+public:
+	AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	~AddLinkDelta();
+	void revert();
+
+private:
+	SnakeBlock* a_;
+	SnakeBlock* b_;
+};
+
+
+class RemoveLinkDelta : public Delta {
+public:
+	RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	~RemoveLinkDelta();
+	void revert();
+
+private:
+	SnakeBlock* a_;
+	SnakeBlock* b_;
+};
+
+class RemoveLinkOneWayDelta : public Delta {
+public:
+	RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b);
+	~RemoveLinkOneWayDelta();
+	void revert();
+
+private:
+	SnakeBlock* a_;
+	SnakeBlock* b_;
 };
 
 #endif // SNAKEBLOCK_H

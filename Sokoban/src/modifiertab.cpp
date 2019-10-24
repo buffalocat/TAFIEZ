@@ -296,7 +296,7 @@ void ModifierTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 				map->remove_from_object_array(obj);
 				map->create_wall(pos);
 			} else {
-				mod->cleanup_on_take(map, true);
+				mod->cleanup_on_take(map, nullptr, true);
 				obj->set_modifier({});
 			}
 		}

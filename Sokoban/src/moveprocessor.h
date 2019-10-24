@@ -2,6 +2,7 @@
 #define MOVEPROCESSOR_H
 
 #include "point.h"
+#include "delta.h"
 
 class Player;
 class GameObject;
@@ -103,6 +104,42 @@ private:
 	DoorState door_state_ = DoorState::None;
 
     bool animated_;
+};
+
+
+class RoomChangeDelta : public Delta {
+public:
+	RoomChangeDelta(PlayingState* state, Room* room);
+	~RoomChangeDelta();
+	void revert();
+
+private:
+	PlayingState* state_;
+	Room* room_;
+};
+
+
+class ToggleGravitableDelta : public Delta {
+public:
+	ToggleGravitableDelta(GameObject* obj);
+	~ToggleGravitableDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+};
+
+class Car;
+
+class ColorChangeDelta : public Delta {
+public:
+	ColorChangeDelta(Car* car, bool undo);
+	~ColorChangeDelta();
+	void revert();
+
+private:
+	Car* car_;
+	bool undo_;
 };
 
 #endif // MOVEPROCESSOR_H

@@ -35,8 +35,8 @@ public:
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void collect_special_links(RoomMap*, std::vector<GameObject*>&);
 
-	void cleanup_on_take(RoomMap* map, bool real);
-	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
 
 	void draw(GraphicsManager* gfx, FPoint3 p);

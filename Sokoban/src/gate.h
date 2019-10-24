@@ -27,8 +27,8 @@ public:
     void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void raise_gate(RoomMap*, DeltaFrame*);
 
-	void cleanup_on_take(RoomMap* map, bool real);
-	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
 	void undestroy();
 

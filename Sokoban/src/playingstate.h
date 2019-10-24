@@ -40,7 +40,7 @@ public:
 
 	void main_loop();
 	void handle_input();
-	void create_move_processor();
+	void create_move_processor(Player* player);
 
 	Room* active_room();
 	bool activate_room(Room*);
@@ -52,6 +52,8 @@ public:
 
 	void snap_camera_to_player();
 
+	Player* player_doa();
+
 	virtual void make_subsave();
 	virtual void world_reset();
 
@@ -60,8 +62,6 @@ public:
 protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
 	Room* room_{};
-	std::vector<Player*> players_{};
-	Player* player_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
 
@@ -70,7 +70,8 @@ private:
 	std::unique_ptr<DeltaFrame> delta_frame_{};
 
 	std::unique_ptr<StringDrawer> death_message_{};
-	void set_death_text(CauseOfDeath death);
+	std::unique_ptr<StringDrawer> death_submessage_{};
+	void set_death_text();
 
     friend DoorMoveDelta;
 };

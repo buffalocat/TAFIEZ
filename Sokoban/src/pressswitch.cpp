@@ -53,14 +53,14 @@ void PressSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 	}
 }
 
-void PressSwitch::setup_on_put(RoomMap* map, bool real) {
-	Switch::setup_on_put(map, real);
+void PressSwitch::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switch::setup_on_put(map, delta_frame, real);
     map->add_listener(this, pos_above());
     map->activate_listener_of(this);
 }
 
-void PressSwitch::cleanup_on_take(RoomMap* map, bool real) {
-	Switch::cleanup_on_take(map, real);
+void PressSwitch::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switch::cleanup_on_take(map, delta_frame, real);
     map->remove_listener(this, pos_above());
 }
 

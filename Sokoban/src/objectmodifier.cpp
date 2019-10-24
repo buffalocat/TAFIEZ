@@ -3,6 +3,7 @@
 
 #include "gameobject.h"
 #include "texture_constants.h"
+#include "savefile.h"
 
 ObjectModifier::ObjectModifier(GameObject* parent): parent_ {parent} {}
 
@@ -50,9 +51,9 @@ BlockTexture ObjectModifier::texture() {
 
 void ObjectModifier::draw(GraphicsManager* gfx, FPoint3 p) {}
 
-void ObjectModifier::setup_on_put(RoomMap*, bool real) {}
+void ObjectModifier::setup_on_put(RoomMap*, DeltaFrame*, bool real) {}
 
-void ObjectModifier::cleanup_on_take(RoomMap*, bool real) {}
+void ObjectModifier::cleanup_on_take(RoomMap*, DeltaFrame*, bool real) {}
 
 void ObjectModifier::setup_on_editor_creation(EditorGlobalData* global, Room* room) {}
 
@@ -65,3 +66,23 @@ void ObjectModifier::undestroy() {}
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
 void ObjectModifier::collect_special_links(RoomMap*, std::vector<GameObject*>&) {}
+
+
+ModDestructionDelta::ModDestructionDelta(ObjectModifier* mod) :
+	mod_{ mod } {}
+
+ModDestructionDelta::~ModDestructionDelta() {}
+
+void ModDestructionDelta::revert() {
+	mod_->undestroy();
+}
+
+
+GlobalFlagDelta::GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag) :
+	Delta(), global_{ global }, flag_{ flag } {}
+
+GlobalFlagDelta::~GlobalFlagDelta() {}
+
+void GlobalFlagDelta::revert() {
+	global_->remove_flag(flag_);
+}

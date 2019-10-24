@@ -95,11 +95,11 @@ void Car::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp)
 	}
 }
 
-void Car::setup_on_put(RoomMap* map, bool real) {
+void Car::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->activate_listener_of(this);
 }
 
-void Car::cleanup_on_take(RoomMap* map, bool real) {}
+void Car::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {}
 
 void Car::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
 	if (player_) {
@@ -138,10 +138,12 @@ std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map,
 	case CarType::Convertible:
 	{
 		if (player_) {
-			// TODO: Alert the map of the new player
 			auto player_dup = std::make_unique<Player>(pos_above(), PlayerState::RidingHidden);
-			dup->player_ = player_dup.get();
+			player_dup->set_car(dup.get());
+			map->player_cycle_->add_player(player_dup.get(), delta_frame, false);
 			map->push_to_object_array(std::move(player_dup), delta_frame);
+		} else {
+			dup->player_ = nullptr;
 		}
 		break;
 	}

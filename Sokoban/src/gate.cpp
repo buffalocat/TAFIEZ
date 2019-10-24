@@ -94,16 +94,16 @@ void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp
 	}
 }
 
-void Gate::setup_on_put(RoomMap* map, bool real) {
-	Switchable::setup_on_put(map, real);
+void Gate::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::setup_on_put(map, delta_frame, real);
 	if (body_) {
 		map->add_listener(this, body_->pos_);
 		map->activate_listener_of(this);
 	}
 }
 
-void Gate::cleanup_on_take(RoomMap* map, bool real) {
-	Switchable::cleanup_on_take(map, real);
+void Gate::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::cleanup_on_take(map, delta_frame, real);
 	if (body_) {
 		map->remove_listener(this, body_->pos_);
 	}

@@ -26,8 +26,8 @@ public:
     void check_send_signal(RoomMap*, DeltaFrame*);
     bool should_toggle(RoomMap*);
 
-    void setup_on_put(RoomMap*, bool real);
-    void cleanup_on_take(RoomMap*, bool real);
+    void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+    void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
     void draw(GraphicsManager*, FPoint3);
 

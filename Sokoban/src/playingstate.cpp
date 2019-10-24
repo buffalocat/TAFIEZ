@@ -38,7 +38,7 @@ void PlayingState::main_loop() {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
 	handle_input();
-	room_->draw_at_player(player_, true, false, false);
+	room_->draw_at_player(player_doa(), true, false, false);
 	if (!move_processor_) {
 		undo_stack_->push(std::move(delta_frame_));
 	}
@@ -67,17 +67,13 @@ void PlayingState::handle_input() {
 				move_processor_.reset(nullptr);
 				delta_frame_->revert();
 				delta_frame_ = std::make_unique<DeltaFrame>();
-				if (player_) {
-					snap_camera_to_player();
-				}
+				snap_camera_to_player();
 			} else if (undo_stack_->non_empty()) {
 				undo_stack_->pop();
-				if (player_) {
-					snap_camera_to_player();
-				}
+				snap_camera_to_player();
 			}
 			room_->map()->reset_local_state();
-			set_death_text(player_->death());
+			set_death_text();
 			return;
 		}
 	} else {
@@ -103,19 +99,30 @@ void PlayingState::handle_input() {
 		return;
 	}
 	
-	set_death_text(player_->death());
-	if (player_->death() != CauseOfDeath::None) {
-		return;
-	}
+	RoomMap* map = room_->map();
+	PlayerCycle* p_cycle = map->player_cycle_.get();
+	Player* player = p_cycle->current_player();
+
+	set_death_text();
 
 	if (input_cooldown > 0) {
 		return;
 	}
-	RoomMap* map = room_->map();
 	
-	// Process normal gameplay input
+	if (glfwGetKey(window_, GLFW_KEY_B) == GLFW_PRESS) {
+		if (p_cycle->cycle_player(delta_frame_.get())) {
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+
+	// Input beyond this point requires an alive player.
+	if (!player) {
+		return;
+	}
+
 	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
-		create_move_processor();
+		create_move_processor(player);
 		if (move_processor_->try_toggle_riding()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -124,7 +131,7 @@ void PlayingState::handle_input() {
 		}
 	}
 	if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-		create_move_processor();
+		create_move_processor(player);
 		if (move_processor_->try_color_change()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -133,7 +140,7 @@ void PlayingState::handle_input() {
 		}
 	}
 	if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		create_move_processor();
+		create_move_processor(player);
 		if (move_processor_->try_jump()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -149,7 +156,7 @@ void PlayingState::handle_input() {
 				double angle = room_->camera()->get_rotation();
 				i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
 			}
-			create_move_processor();
+			create_move_processor(player);
 			if (!move_processor_->try_move_horizontal(MOVEMENT_DIRS[i])) {
 				move_processor_.reset(nullptr);
 				return;
@@ -160,8 +167,8 @@ void PlayingState::handle_input() {
 	}
 }
 
-void PlayingState::create_move_processor() {
-	move_processor_ = std::make_unique<MoveProcessor>(this, room_->map(), delta_frame_.get(), player_, true);
+void PlayingState::create_move_processor(Player* player) {
+	move_processor_ = std::make_unique<MoveProcessor>(this, room_->map(), delta_frame_.get(), player, true);
 }
 
 Room* PlayingState::active_room() {
@@ -204,8 +211,8 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		Player* loaded_player{};
 		room->load_from_file(*objs_, file, global_.get(), &loaded_player);
 		if (loaded_player) {
-			player_ = loaded_player;
-			player_->validate_state(room->map());
+			room->map()->player_cycle_->add_player(loaded_player, nullptr, true);
+			loaded_player->validate_state(room->map());
 		}
 	} else {
 		room->load_from_file(*objs_, file, global_.get(), nullptr);
@@ -236,8 +243,15 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 	return true;
 }
 
-void PlayingState::set_death_text(CauseOfDeath death) {
+enum class DeathState {
+	Alive,
+	DeadAlone,
+	DeadCanSwitch,
+};
+
+void PlayingState::set_death_text() {
 	static CauseOfDeath current_death = CauseOfDeath::None;
+	auto death = player_doa()->death();
 	if (death != current_death) {
 		current_death = death;
 		std::string death_str{};
@@ -263,6 +277,34 @@ void PlayingState::set_death_text(CauseOfDeath death) {
 			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, 0.0f, 4);
 		text_->toggle_string_drawer(death_message_.get(), true);
 	}
+	static DeathState current_death_state = DeathState::Alive;
+	DeathState death_state = DeathState::Alive;
+	std::string death_substr{};
+	if (death != CauseOfDeath::None) {
+		if (room_->map()->player_cycle_->any_player_alive()) {
+			death_state = DeathState::DeadCanSwitch;
+		} else {
+			death_state = DeathState::DeadAlone;
+		}
+	}
+	if (death_state != current_death_state) {
+		current_death_state = death_state;
+		switch (death_state) {
+		case DeathState::Alive:
+			death_substr = "";
+			break;
+		case DeathState::DeadAlone:
+			death_substr = "Press Z to undo";
+			break;
+		case DeathState::DeadCanSwitch:
+			death_substr = "Press B to switch";
+			break;
+		}
+		death_submessage_ = std::make_unique<IndependentStringDrawer>(
+			text_->fonts_->get_font(Fonts::ABEEZEE, 48),
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_substr, -0.2f, 4);
+		text_->toggle_string_drawer(death_submessage_.get(), true);
+	}
 }
 
 void PlayingState::make_subsave() {}
@@ -270,5 +312,15 @@ void PlayingState::make_subsave() {}
 void PlayingState::world_reset() {}
 
 void PlayingState::snap_camera_to_player() {
-	room_->set_cam_pos(player_->pos_, player_->cam_pos(), true, true);
+	Player* player = player_doa();
+	room_->set_cam_pos(player->pos_, player->cam_pos(), true, true);
+}
+
+Player* PlayingState::player_doa() {
+	PlayerCycle* pc = room_->map()->player_cycle_.get();
+	if (auto* player = pc->current_player()) {
+		return player;
+	} else {
+		return pc->dead_player();
+	}
 }

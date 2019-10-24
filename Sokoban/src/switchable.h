@@ -1,8 +1,8 @@
 #ifndef SWITCHABLE_H
 #define SWITCHABLE_H
 
-
 #include "objectmodifier.h"
+#include "delta.h"
 
 class RoomMap;
 class DeltaFrame;
@@ -28,8 +28,8 @@ public:
     void check_waiting(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_active_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-    void cleanup_on_take(RoomMap* map, bool real);
-    void setup_on_put(RoomMap* map, bool real);
+    void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+    void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 
 	bool persistent_;
 
@@ -43,6 +43,20 @@ protected:
 
     friend class ModifierTab;
     friend class SwitchableDelta;
+};
+
+
+class SwitchableDelta : public Delta {
+public:
+	SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
+	~SwitchableDelta();
+	void revert();
+
+private:
+	Switchable* obj_;
+	int count_;
+	bool active_;
+	bool waiting_;
 };
 
 

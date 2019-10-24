@@ -50,14 +50,14 @@ void Incinerator::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 	}
 }
 
-void Incinerator::setup_on_put(RoomMap* map, bool real) {
-	Switchable::setup_on_put(map, real);
+void Incinerator::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::setup_on_put(map, delta_frame, real);
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
 }
 
-void Incinerator::cleanup_on_take(RoomMap* map, bool real) {
-	Switchable::cleanup_on_take(map, real);
+void Incinerator::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
+	Switchable::cleanup_on_take(map, delta_frame, real);
 	map->remove_listener(this, pos_above());
 }
 

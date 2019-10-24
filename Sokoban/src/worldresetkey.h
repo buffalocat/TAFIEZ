@@ -1,5 +1,6 @@
 #pragma once
 #include "objectmodifier.h"
+#include "delta.h"
 
 class WorldResetKey : public ObjectModifier {
 public:
@@ -14,8 +15,8 @@ public:
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-	void cleanup_on_take(RoomMap* map, bool real);
-	void setup_on_put(RoomMap* map, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 
 	void draw(GraphicsManager*, FPoint3);
 
@@ -25,3 +26,13 @@ protected:
 	friend class KeyCollectDelta;
 };
 
+
+class KeyCollectDelta : public Delta {
+public:
+	KeyCollectDelta(WorldResetKey* key);
+	~KeyCollectDelta();
+	void revert();
+
+private:
+	WorldResetKey* key_;
+};

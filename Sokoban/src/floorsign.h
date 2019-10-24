@@ -1,5 +1,6 @@
 #pragma once
 #include "objectmodifier.h"
+#include "delta.h"
 
 class IndependentStringDrawer;
 class TextRenderer;
@@ -19,8 +20,8 @@ public:
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-	void setup_on_put(RoomMap*, bool real);
-	void cleanup_on_take(RoomMap*, bool real);
+	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
 	void set_text_state(bool state, TextRenderer* text);
 	void toggle_active(TextRenderer* text, DeltaFrame* delta_frame);
@@ -34,5 +35,17 @@ private:
 
 	friend class SignToggleDelta;
 	friend class ModifierTab;
+};
+
+
+class SignToggleDelta : public Delta {
+public:
+	SignToggleDelta(FloorSign* sign, TextRenderer* text);
+	~SignToggleDelta();
+	void revert();
+
+private:
+	FloorSign* sign_;
+	TextRenderer* text_;
 };
 

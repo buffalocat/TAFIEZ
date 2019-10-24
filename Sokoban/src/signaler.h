@@ -9,6 +9,8 @@ class MoveProcessor;
 class MapFileO;
 class ObjectModifier;
 
+#include "delta.h"
+
 class Signaler {
 public:
     Signaler(const std::string& label, int count);
@@ -76,6 +78,18 @@ private:
 	bool initialized_;
 
 	friend class SwitchTab;
+};
+
+
+class SignalerCountDelta : public Delta {
+public:
+	SignalerCountDelta(Signaler*, int count);
+	~SignalerCountDelta();
+	void revert();
+
+private:
+	Signaler* sig_;
+	int count_;
 };
 
 #endif // SIGNALER_H

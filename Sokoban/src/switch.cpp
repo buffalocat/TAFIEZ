@@ -53,7 +53,7 @@ void Switch::send_signal(bool signal) {
 	}
 }
 
-void Switch::cleanup_on_take(RoomMap* map, bool real) {
+void Switch::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		remove_from_signalers();
 		if (active_) {
@@ -62,11 +62,20 @@ void Switch::cleanup_on_take(RoomMap* map, bool real) {
 	}
 }
 
-void Switch::setup_on_put(RoomMap* map, bool real) {
+void Switch::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		connect_to_signalers();
 		if (active_) {
 			send_signal(true);
 		}
 	}
+}
+
+
+SwitchToggleDelta::SwitchToggleDelta(Switch* obj) : obj_{ obj } {}
+
+SwitchToggleDelta::~SwitchToggleDelta() {}
+
+void SwitchToggleDelta::revert() {
+	obj_->toggle();
 }

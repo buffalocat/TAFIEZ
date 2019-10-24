@@ -3,6 +3,7 @@
 
 #include "common_enums.h"
 #include "point.h"
+#include "delta.h"
 
 class GameObject;
 class RoomMap;
@@ -44,8 +45,8 @@ public:
 
 	virtual BlockTexture texture();
 
-    virtual void setup_on_put(RoomMap*, bool real);
-    virtual void cleanup_on_take(RoomMap*, bool real);
+    virtual void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+    virtual void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 	virtual void setup_on_editor_creation(EditorGlobalData* global, Room* room);
 	virtual void cleanup_on_editor_destruction(EditorGlobalData* global);
 	virtual void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
@@ -55,5 +56,29 @@ public:
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
     virtual void collect_special_links(RoomMap*, std::vector<GameObject*>&);
 };
+
+
+class ModDestructionDelta : public Delta {
+public:
+	ModDestructionDelta(ObjectModifier* obj);
+	~ModDestructionDelta();
+	void revert();
+
+private:
+	ObjectModifier* mod_;
+};
+
+
+class GlobalFlagDelta : public Delta {
+public:
+	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
+	~GlobalFlagDelta();
+	void revert();
+
+private:
+	PlayingGlobalData* global_;
+	unsigned int flag_;
+};
+
 
 #endif // OBJECTMODIFIER_H

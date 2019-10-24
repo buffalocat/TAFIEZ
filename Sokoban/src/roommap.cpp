@@ -150,7 +150,7 @@ void RoomMap::remove_from_object_array(GameObject* obj) {
 void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {
 	at(obj->pos_) += obj->id_;
 	obj->tangible_ = true;
-	obj->setup_on_put(this, real);
+	obj->setup_on_put(this, delta_frame, real);
 	if (activate_listeners) {
 		activate_listeners_at(obj->pos_);
 	}
@@ -163,7 +163,7 @@ void RoomMap::take_from_map(GameObject* obj, bool real, bool activate_listeners,
 	if (activate_listeners) {
 		activate_listeners_at(obj->pos_);
 	}
-	obj->cleanup_on_take(this, real);
+	obj->cleanup_on_take(this, delta_frame, real);
 	obj->tangible_ = false;
 	at(obj->pos_) -= obj->id_;
 	if (real && delta_frame) {
@@ -224,7 +224,6 @@ void RoomMap::remove_listener(ObjectModifier* obj, Point3 pos) {
 void RoomMap::activate_listener_of(ObjectModifier* obj) {
 	activated_listeners_.insert(obj);
 }
-
 
 void RoomMap::activate_listeners_at(Point3 pos) {
 	auto& cur_lis = listeners_[pos];
@@ -517,4 +516,215 @@ void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
 
 TextRenderer* RoomMap::text_renderer() {
 	return state_->text_.get();
+}
+
+std::vector<Player*>& RoomMap::player_list() {
+	return player_cycle_->players_;
+}
+
+
+PutDelta::PutDelta(GameObject* obj, RoomMap* map) :
+	obj_{ obj }, map_{ map } {}
+
+PutDelta::~PutDelta() {}
+
+void PutDelta::revert() {
+	map_->take_from_map(obj_, true, false, nullptr);
+}
+
+
+TakeDelta::TakeDelta(GameObject* obj, RoomMap* map) :
+	obj_{ obj }, map_{ map } {}
+
+TakeDelta::~TakeDelta() {}
+
+void TakeDelta::revert() {
+	map_->put_in_map(obj_, true, false, nullptr);
+}
+
+
+ObjArrayPushDelta::ObjArrayPushDelta(GameObject* obj, RoomMap* map) : obj_{ obj }, map_{ map } {}
+
+ObjArrayPushDelta::~ObjArrayPushDelta() {}
+
+void ObjArrayPushDelta::revert() {
+	map_->remove_from_object_array(obj_);
+}
+
+
+MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
+	obj_{ obj }, dpos_{ dpos }, map_{ map } {}
+
+MotionDelta::~MotionDelta() {}
+
+void MotionDelta::revert() {
+	map_->shift(obj_, -dpos_, false, nullptr);
+}
+
+
+BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* map) :
+	objs_{ objs }, dpos_{ dpos }, map_{ map } {}
+
+BatchMotionDelta::~BatchMotionDelta() {}
+
+void BatchMotionDelta::revert() {
+	map_->batch_shift(objs_, -dpos_, false, nullptr);
+}
+
+
+ClearFlagCollectionDelta::ClearFlagCollectionDelta(RoomMap* map, int req) :
+	map_{ map }, req_{ req } {}
+
+ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
+
+void ClearFlagCollectionDelta::revert() {
+	map_->uncollect_flag(req_);
+}
+
+
+MapInitDelta::MapInitDelta(RoomMap* map) : Delta(), map_{ map } {}
+
+MapInitDelta::~MapInitDelta() {}
+
+void MapInitDelta::revert() {
+	map_->inited_ = false;
+}
+
+
+PlayerCycle::PlayerCycle() {}
+
+PlayerCycle::~PlayerCycle() {}
+
+#include "player.h"
+
+void PlayerCycle::print_status() {
+	std::cout << "Index: " << index_ << "\n"
+		<< "Dead: " << dead_player_ << "\n"
+		<< "Dead Index: " << dead_index_ << "\n";
+	std::cout << "Players:" << players_.size() << std::endl;
+	for (auto* player : players_) {
+		std::cout << player->pos_ << std::endl;
+	}
+}
+
+void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init) {
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<AddPlayerDelta>(this, index_));
+	}
+	if (init) {
+		index_ = (int)players_.size();
+	}
+	players_.push_back(player);
+	print_status();
+}
+
+void PlayerCycle::add_player_at_pos(Player* player, int index) {
+	if (index < dead_index_) {
+		++dead_index_;
+	}
+	players_.insert(players_.begin() + index, player);
+	print_status();
+}
+
+void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
+	auto rem_it = std::find(players_.begin(), players_.end(), player);
+	if (rem_it == players_.end()) {
+		return;
+	}
+	int rem_index = (int)std::distance(players_.begin(), rem_it);
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<RemovePlayerDelta>(this, player, dead_player_, index_, dead_index_, rem_index));
+	}
+	if (index_ == rem_index) {
+		dead_player_ = player;
+		dead_index_ = index_;
+		index_ = -1;
+	}
+	if (rem_index < dead_index_) {
+		--dead_index_;
+	}
+	if (rem_index < index_) {
+		--index_;
+	}
+	players_.erase(rem_it);
+	print_status();
+}
+
+bool PlayerCycle::cycle_player(DeltaFrame* delta_frame) {
+	auto delta = std::make_unique<CyclePlayerDelta>(this, dead_player_, index_, dead_index_);
+	if (index_ == -1) {
+		if (players_.size() == 0) {
+			return false;
+		} else {
+			dead_player_ = nullptr;
+			if (dead_index_ < players_.size()) {
+				index_ = dead_index_;
+			} else {
+				index_ = 0;
+			}
+			dead_index_ = -1;
+		}
+	} else {
+		if (players_.size() ==  1) {
+			return false;
+		} else if (index_ == players_.size() - 1) {
+			index_ = 0;
+		} else {
+			++index_;
+		}
+	}
+	delta_frame->push(std::move(delta));
+	print_status();
+	return true;
+}
+
+Player* PlayerCycle::current_player() {
+	if (index_ >= 0) {
+		return players_[index_];
+	} else {
+		return nullptr;
+	}
+}
+
+Player* PlayerCycle::dead_player() {
+	return dead_player_;
+}
+
+bool PlayerCycle::any_player_alive() {
+	return players_.size() > 0;
+}
+
+
+AddPlayerDelta::AddPlayerDelta(PlayerCycle* cycle, int index) :
+	cycle_{ cycle }, index_{ index } {}
+
+AddPlayerDelta::~AddPlayerDelta() {}
+
+void AddPlayerDelta::revert() {
+	cycle_->players_.pop_back();
+	cycle_->index_ = index_;
+}
+
+
+RemovePlayerDelta::RemovePlayerDelta(PlayerCycle* cycle, Player* player, Player* dead_player, int index, int dead_index, int rem) :
+	cycle_{ cycle }, player_{ player }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index }, rem_{ rem } {}
+
+RemovePlayerDelta::~RemovePlayerDelta() {}
+
+void RemovePlayerDelta::revert() {
+	cycle_->dead_player_ = dead_player_;
+	cycle_->index_ = index_;
+	cycle_->add_player_at_pos(player_, rem_);
+}
+
+
+CyclePlayerDelta::CyclePlayerDelta(PlayerCycle* cycle, Player* dead_player, int index, int dead_index) :
+	cycle_{ cycle }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index } {}
+
+CyclePlayerDelta::~CyclePlayerDelta() {}
+
+void CyclePlayerDelta::revert() {
+	cycle_->dead_player_ = dead_player_;
+	cycle_->index_ = index_;
+	cycle_->dead_index_ = dead_index_;
 }

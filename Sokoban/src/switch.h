@@ -1,8 +1,8 @@
 #ifndef SWITCH_H
 #define SWITCH_H
 
-
 #include "objectmodifier.h"
+#include "delta.h"
 
 class GameObject;
 class RoomMap;
@@ -25,8 +25,8 @@ public:
     void toggle();
 	void send_signal(bool signal);
 
-	virtual void setup_on_put(RoomMap*, bool real);
-	virtual void cleanup_on_take(RoomMap*, bool real);
+	virtual void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+	virtual void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
 protected:
     bool persistent_;
@@ -35,4 +35,16 @@ protected:
 
     friend class ModifierTab;
 };
+
+
+class SwitchToggleDelta : public Delta {
+public:
+	SwitchToggleDelta(Switch* obj);
+	~SwitchToggleDelta();
+	void revert();
+
+private:
+	Switch* obj_;
+};
+
 #endif // SWITCH_H

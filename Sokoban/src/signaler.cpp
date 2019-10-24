@@ -158,3 +158,12 @@ void ParitySignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame, M
 		obj->receive_signal(true, map, delta_frame, mp);
 	}
 }
+
+
+SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) : sig_{ sig }, count_{ count } {}
+
+SignalerCountDelta::~SignalerCountDelta() {}
+
+void SignalerCountDelta::revert() {
+	sig_->reset_prev_count(count_);
+}

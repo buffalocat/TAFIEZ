@@ -4,6 +4,7 @@
 #include "common_enums.h"
 #include "point.h"
 #include "colorcycle.h"
+#include "delta.h"
 
 class ObjectModifier;
 class PositionalAnimation;
@@ -39,10 +40,8 @@ public:
     void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
 	void abstract_put(Point3 pos, DeltaFrame* delta_frame);
 
-    virtual void draw(GraphicsManager*) = 0;
-
-    virtual void setup_on_put(RoomMap*, bool real);
-    virtual void cleanup_on_take(RoomMap*, bool real);
+    virtual void setup_on_put(RoomMap*, DeltaFrame*, bool real);
+    virtual void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 	virtual void destroy(MoveProcessor*, CauseOfDeath , bool collect_links);
 	virtual void undestroy();
 
@@ -60,6 +59,8 @@ public:
 
 	ObjectModifier* modifier();
 	virtual int color();
+
+	virtual void draw(GraphicsManager*) = 0;
 
     void reset_animation();
     void set_linear_animation(Point3);
@@ -103,6 +104,41 @@ public:
 	bool has_sticky_neighbor(RoomMap*);
 
 	int color_ = 0;
+};
+
+
+class DestructionDelta : public Delta {
+public:
+	DestructionDelta(GameObject* obj);
+	~DestructionDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+};
+
+
+class AbstractShiftDelta : public Delta {
+public:
+	AbstractShiftDelta(GameObject* obj, Point3 dpos);
+	~AbstractShiftDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+	Point3 dpos_;
+};
+
+
+class AbstractPutDelta : public Delta {
+public:
+	AbstractPutDelta(GameObject* obj, Point3 pos);
+	~AbstractPutDelta();
+	void revert();
+
+private:
+	GameObject* obj_;
+	Point3 pos_;
 };
 
 #endif // GAMEOBJECT_H

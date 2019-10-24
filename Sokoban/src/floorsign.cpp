@@ -84,7 +84,7 @@ void FloorSign::set_text_state(bool state, TextRenderer* text) {
 	}
 }
 
-void FloorSign::setup_on_put(RoomMap* map, bool real) {
+void FloorSign::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
 	if (real && active_) {
@@ -92,7 +92,7 @@ void FloorSign::setup_on_put(RoomMap* map, bool real) {
 	}
 }
 
-void FloorSign::cleanup_on_take(RoomMap* map, bool real) {
+void FloorSign::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
 	if (real && active_) {
 		set_text_state(false, map->text_renderer());
@@ -102,4 +102,14 @@ void FloorSign::cleanup_on_take(RoomMap* map, bool real) {
 void FloorSign::draw(GraphicsManager* gfx, FPoint3 p) {
 	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Sign, glm::vec4(0.6, 0.3, 0.4, 1.0));
+}
+
+
+SignToggleDelta::SignToggleDelta(FloorSign* sign, TextRenderer* text) :
+	Delta(), sign_{ sign }, text_{ text } {}
+
+SignToggleDelta::~SignToggleDelta() {}
+
+void SignToggleDelta::revert() {
+	sign_->toggle_active(text_, nullptr);
 }
