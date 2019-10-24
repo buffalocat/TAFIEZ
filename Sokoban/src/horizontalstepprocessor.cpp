@@ -75,9 +75,6 @@ void HorizontalStepProcessor::move_bound() {
 		return;
 	}
 	perform_horizontal_step();
-	if (!map_->view(player_->pos_ + Point3{ 0, 0, -1 })) {
-		player_->set_free(delta_frame_);
-	}
 }
 
 void HorizontalStepProcessor::move_riding() {
@@ -273,4 +270,5 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	for (auto sb : link_add_check) {
 		sb->check_add_local_links(map_, delta_frame_);
 	}
+	map_->free_unbound_players(delta_frame_);
 }

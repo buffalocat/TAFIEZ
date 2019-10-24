@@ -190,6 +190,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	raise_gates();
 	run_incinerators();
 	map_->check_clear_flag_collected(delta_frame_);
+	map_->free_unbound_players(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
 		frames_ = SWITCH_RESPONSE_FRAMES;

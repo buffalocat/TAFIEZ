@@ -8,6 +8,7 @@
 #include "wall.h"
 #include "delta.h"
 #include "snakeblock.h"
+#include "player.h"
 #include "switch.h"
 #include "signaler.h"
 #include "mapfile.h"
@@ -510,6 +511,12 @@ void RoomMap::uncollect_flag(int req) {
 	}
 }
 
+void RoomMap::free_unbound_players(DeltaFrame* delta_frame) {
+	for (auto* player : player_cycle_->players_) {
+		player->validate_state(this, delta_frame);
+	}
+}
+
 void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
 	effects_->push_trail(block, height, drop);
 }
@@ -595,18 +602,6 @@ PlayerCycle::PlayerCycle() {}
 
 PlayerCycle::~PlayerCycle() {}
 
-#include "player.h"
-
-void PlayerCycle::print_status() {
-	std::cout << "Index: " << index_ << "\n"
-		<< "Dead: " << dead_player_ << "\n"
-		<< "Dead Index: " << dead_index_ << "\n";
-	std::cout << "Players:" << players_.size() << std::endl;
-	for (auto* player : players_) {
-		std::cout << player->pos_ << std::endl;
-	}
-}
-
 void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init) {
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<AddPlayerDelta>(this, index_));
@@ -615,7 +610,6 @@ void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init)
 		index_ = (int)players_.size();
 	}
 	players_.push_back(player);
-	print_status();
 }
 
 void PlayerCycle::add_player_at_pos(Player* player, int index) {
@@ -623,7 +617,6 @@ void PlayerCycle::add_player_at_pos(Player* player, int index) {
 		++dead_index_;
 	}
 	players_.insert(players_.begin() + index, player);
-	print_status();
 }
 
 void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
@@ -647,7 +640,6 @@ void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
 		--index_;
 	}
 	players_.erase(rem_it);
-	print_status();
 }
 
 bool PlayerCycle::cycle_player(DeltaFrame* delta_frame) {
@@ -674,7 +666,6 @@ bool PlayerCycle::cycle_player(DeltaFrame* delta_frame) {
 		}
 	}
 	delta_frame->push(std::move(delta));
-	print_status();
 	return true;
 }
 

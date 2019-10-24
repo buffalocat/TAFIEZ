@@ -73,6 +73,8 @@ public:
 	void collect_flag();
 	void uncollect_flag(int req);
 
+	void free_unbound_players(DeltaFrame*);
+
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
 
@@ -224,8 +226,6 @@ public:
 	Player* current_player();
 	Player* dead_player();
 	bool any_player_alive();
-
-	void print_status();
 
 private:
 	std::vector<Player*> players_{};

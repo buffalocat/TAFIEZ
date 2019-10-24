@@ -97,21 +97,16 @@ void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 	}
 }
 
-// If we load in the player from the map, make sure it is allowed to be in the state it thinks it's in
-void Player::validate_state(RoomMap* map) {
+// Make sure the player is allowed to be in the state it thinks it's in
+void Player::validate_state(RoomMap* map, DeltaFrame* delta_frame) {
 	switch (state_) {
 	case PlayerState::RidingNormal:
-		set_strictest(map, nullptr);
+		set_strictest(map, delta_frame);
 		break;
 	case PlayerState::Bound:
-		if (dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
-			set_bound();
-		} else {
-			set_free(nullptr);
+		if (!dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
+			set_free(delta_frame);
 		}
-		break;
-	case PlayerState::Free:
-		set_free(nullptr);
 		break;
 	default:
 		break;

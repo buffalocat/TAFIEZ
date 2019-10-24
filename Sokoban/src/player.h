@@ -30,7 +30,7 @@ public:
 	FPoint3 cam_pos();
 	
 	void set_free(DeltaFrame* delta_frame);
-	void validate_state(RoomMap* map);
+	void validate_state(RoomMap* map, DeltaFrame* delta_frame);
 
 	void set_strictest(RoomMap* map, DeltaFrame*);
 	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
