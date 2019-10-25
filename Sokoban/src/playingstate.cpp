@@ -212,7 +212,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		room->load_from_file(*objs_, file, global_.get(), &loaded_player);
 		if (loaded_player) {
 			room->map()->player_cycle_->add_player(loaded_player, nullptr, true);
-			loaded_player->validate_state(room->map());
+			loaded_player->validate_state(room->map(), nullptr);
 		}
 	} else {
 		room->load_from_file(*objs_, file, global_.get(), nullptr);
@@ -220,8 +220,10 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }
 
-bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs, Room** dest_room_ptr) {
-	DoorData* data = door->data();
+bool PlayingState::can_use_door(Door* ent_door, Room** dest_room_ptr,
+	std::vector<DoorTravellingObj>& objs,
+	std::vector<std::vector<Point3>>& dest_pos_grid) {
+	DoorData* data = ent_door->data();
 	// If you can't load the room, give up
 	// A door to a nonexistent room is indistinguishable from a blocked door
 	if (!loaded_rooms_.count(data->dest)) {
@@ -233,14 +235,24 @@ bool PlayingState::can_use_door(Door* door, std::vector<DoorTravellingObj>& objs
 	*dest_room_ptr = dest_room;
 	RoomMap* cur_map = room_->map();
 	RoomMap* dest_map = dest_room->map();
-	Point3 dest_pos_local = Point3{ data->pos } +Point3{ dest_room->offset_pos_ };
-	for (auto& obj : objs) {
-		obj.dest = dest_pos_local + obj.raw->pos_ - door->pos();
-		if (dest_map->view(obj.dest)) {
-			return false;
+	Point3 ent_door_pos = ent_door->pos();
+	for (auto* dest_door : dest_map->door_groups_[data->id]) {
+		std::vector<Point3> dest_pos_list{};
+		Point3 exit_door_pos = dest_door->pos();
+		bool door_ok = true;
+		for (auto& obj : objs) {
+			Point3 dest_pos = exit_door_pos + (obj.raw->pos_ - ent_door_pos);
+			if (dest_map->view(dest_pos)) {
+				door_ok = false;
+				break;
+			}
+			dest_pos_list.push_back(dest_pos);
+		}
+		if (door_ok) {
+			dest_pos_grid.push_back(std::move(dest_pos_list));
 		}
 	}
-	return true;
+	return dest_pos_grid.size() > 0;
 }
 
 enum class DeathState {

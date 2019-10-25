@@ -21,6 +21,7 @@ class PlayingGlobalData;
 class GameObject;
 class Player;
 
+class Door;
 class AutoBlock;
 class PuppetBlock;
 class ClearFlag;
@@ -75,6 +76,10 @@ public:
 
 	void free_unbound_players(DeltaFrame*);
 
+	void add_door(Door* door);
+	void remove_door(Door* door);
+	unsigned int get_smallest_unused_door_id();
+
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
 
@@ -86,6 +91,7 @@ public:
 
     void make_fall_trail(GameObject*, int height, int drop);
 
+	std::vector<Door*>& door_group(unsigned int id);
 	std::vector<Player*>& player_list();
 
 // Public "private" members
@@ -104,6 +110,7 @@ public:
 	std::unique_ptr<PlayerCycle> player_cycle_{ std::make_unique<PlayerCycle>() };
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
+	std::map<unsigned int, std::vector<Door*>> door_groups_{};
 
     GameObjectArray& obj_array_;
 	PlayingGlobalData* global_{};
@@ -214,6 +221,14 @@ private:
 };
 
 
+class ActivePlayerGuard {
+public:
+	ActivePlayerGuard(PlayerCycle*);
+	~ActivePlayerGuard();
+private:
+	PlayerCycle* cycle_;
+};
+
 class PlayerCycle {
 public:
 	PlayerCycle();
@@ -230,10 +245,11 @@ public:
 private:
 	std::vector<Player*> players_{};
 	Player* dead_player_{};
-	int index_ = 0;
+	int index_ = -1;
 	int dead_index_ = -1;
 
 	friend class RoomMap;
+	friend class ActivePlayerGuard;
 	friend class AddPlayerDelta;
 	friend class RemovePlayerDelta;
 	friend class CyclePlayerDelta;

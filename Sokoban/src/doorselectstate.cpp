@@ -6,8 +6,8 @@
 #include "roommap.h"
 #include "door.h"
 
-DoorSelectState::DoorSelectState(GameState* parent, Room* room, Point3 cam_pos, Point3* exit_pos):
-EditorBaseState(parent), room_ {room}, cam_pos_ {cam_pos}, exit_pos_ {exit_pos} {}
+DoorSelectState::DoorSelectState(GameState* parent, Room* room, Point3 cam_pos, unsigned int* exit_door_id):
+EditorBaseState(parent), room_ {room}, cam_pos_ {cam_pos}, exit_door_id_{exit_door_id} {}
 
 DoorSelectState::~DoorSelectState() {}
 
@@ -29,30 +29,28 @@ void DoorSelectState::main_loop() {
 
     room_->draw_at_pos(cam_pos_, false, true, one_layer_);
 
-    display_hover_pos_object(cam_pos_, room_->map());
+	RoomMap* room_map = room_->map();
+    display_hover_pos_object(cam_pos_, room_map);
 
     ImGui::Separator();
 
-    if (exit_pos_->x == -1) {
+    if (*exit_door_id_ == 0) {
         ImGui::Text("Destination not selected.");
     } else {
-        ImGui::Text("Destination Pos: (%d,%d,%d)", exit_pos_->x, exit_pos_->y, exit_pos_->z);
-        if (GameObject* obj = room_->map()->view(*exit_pos_)) {
-            ImGui::Text(obj->to_str().c_str());
-        } else {
-            ImGui::Text("Empty");
-        }
+		for (auto* exit_door : room_map->door_group(*exit_door_id_)) {
+			Point3 exit_pos = exit_door->pos();
+			ImGui::Text("Destination Pos: (%d,%d,%d)", exit_pos.x, exit_pos.y, exit_pos.z);
+			ImGui::Text(room_->map()->view(exit_pos)->to_str().c_str());
+		}
     }
-    ImGui::Text("Press escape to return.");
-
+	ImGui::Text("Press escape to return.");
     ImGui::End();
 }
 
 void DoorSelectState::handle_left_click(Point3 pos) {
-    if (pos.x == -1) {
-        return;
-    }
-    *exit_pos_ = pos;
+	if (auto door = dynamic_cast<Door*>(room_->map()->view(pos))) {
+		*exit_door_id_ = door->door_id_;
+	}
 }
 
 void DoorSelectState::handle_right_click(Point3 pos) {}

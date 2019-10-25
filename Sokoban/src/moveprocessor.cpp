@@ -10,7 +10,6 @@
 #include "delta.h"
 #include "room.h"
 #include "roommap.h"
-#include "door.h"
 #include "car.h"
 #include "gate.h"
 #include "signaler.h"
@@ -23,6 +22,7 @@
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
 #include "jumpstepprocessor.h"
+#include "door.h"
 
 MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFrame* delta_frame, Player* player, bool animated) :
 	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
@@ -272,11 +272,11 @@ void MoveProcessor::plan_door_move(Door* door) {
 		// TODO: rethink these checks to be SAFE
 		if (GameObject* above = map_->view(door->pos_above())) {
 			if (player_ == above) {
-				door_travelling_objs_.push_back({ player_, player_->pos_ });
+				door_travelling_objs_.push_back({ player_, {} });
 			} else if (Car* car = player_->car_riding()) {
 				if (above->modifier() == car) {
-					door_travelling_objs_.push_back({ player_, player_->pos_ });
-					door_travelling_objs_.push_back({ above, above->pos_ });
+					door_travelling_objs_.push_back({ player_, {} });
+					door_travelling_objs_.push_back({ above, {} });
 				}
 			}
 		}
@@ -289,7 +289,7 @@ void MoveProcessor::plan_door_move(Door* door) {
 }
 
 void MoveProcessor::try_door_entry() {
-	if (playing_state_->can_use_door(entry_door_, door_travelling_objs_, &dest_room_)) {
+	if (playing_state_->can_use_door(entry_door_, &dest_room_, door_travelling_objs_, door_dest_grid_)) {
 		if (dest_room_->map() == map_) {
 			door_state_ = DoorState::AwaitingIntExit;
 		} else {
@@ -313,33 +313,75 @@ void MoveProcessor::try_door_entry() {
 	}
 }
 
-void MoveProcessor::try_int_door_exit() {
-	bool can_move = true;
-	for (auto& obj : door_travelling_objs_) {
-		if (map_->view(obj.dest)) {
-			can_move = false;
-			break;
-		}
-	}
-	if (can_move) {
-		for (auto& obj : door_travelling_objs_) {
-			add_to_fall_check(obj.raw);
-			obj.raw->abstract_put(obj.dest, delta_frame_);
-			map_->put_in_map(obj.raw, true, true, delta_frame_);
-		}
-		for (auto& obj : door_travelling_objs_) {
-			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
-				snake->check_add_local_links(map_, delta_frame_);
+struct BlockedPosChecker {
+	RoomMap* map;
+	bool operator()(std::vector<Point3>& pos_list) {
+		for (Point3 pos : pos_list) {
+			if (map->view(pos)) {
+				return true;
 			}
 		}
-		frames_ = FALL_MOVEMENT_FRAMES;
-		door_state_ = DoorState::IntSucceeded;
-		state_ = MoveStep::DoorMove;
-	} else {
+		return false;
+	}
+};
+
+void MoveProcessor::place_door_travelling_objects() {
+	int num_exits = (int)door_dest_grid_.size();
+	int num_objs = (int)door_travelling_objs_.size();
+	std::vector<SnakeBlock*> moved_snakes{};
+	if (num_exits == 1) { // Normal door motion
+		for (int i = 0; i < num_objs; ++i) {
+			GameObject* obj = door_travelling_objs_[i].raw;
+			obj->abstract_put(door_dest_grid_[0][i], delta_frame_);
+			map_->put_in_map(obj, true, true, delta_frame_);
+			if (auto* snake = dynamic_cast<SnakeBlock*>(obj)) {
+				moved_snakes.push_back(snake);
+			}
+		}
+	} else { // Split through the door
+		std::vector<Player*> new_players{};
+		for (int i = 0; i < num_objs; ++i) {
+			GameObject* obj = door_travelling_objs_[i].raw;
+			for (int j = 0; j < num_exits; ++j) {
+				auto dup = obj->duplicate(map_, delta_frame_);
+				dup->abstract_put(door_dest_grid_[j][i], delta_frame_);
+				add_to_fall_check(dup.get());
+				if (auto* snake = dynamic_cast<SnakeBlock*>(dup.get())) {
+					moved_snakes.push_back(snake);
+				} else if (auto* player = dynamic_cast<Player*>(dup.get())) {
+					new_players.push_back(player);
+				}
+				map_->create_in_map(std::move(dup), true, delta_frame_);
+			}
+		}
+		// Make sure to move everything before destroying the originals
+		for (int i = 0; i < num_objs; ++i) {
+			door_travelling_objs_[i].raw->destroy(this, CauseOfDeath::Split, false);
+		}
+		for (auto* player : new_players) {
+			player->validate_state(map_, delta_frame_);
+			map_->player_cycle_->add_player(player, delta_frame_, false);
+		}
+	}
+	for (auto* snake : moved_snakes) {
+		snake->check_add_local_links(map_, delta_frame_);
+	}
+}
+
+void MoveProcessor::try_int_door_exit() {
+	door_dest_grid_.erase(std::remove_if(door_dest_grid_.begin(), door_dest_grid_.end(), BlockedPosChecker{ map_ }), door_dest_grid_.end());
+	// Can't move
+	if (door_dest_grid_.empty()) {
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::AwaitingUnentry;
 		state_ = MoveStep::DoorMove;
+		return;
+	// Normal door motion
 	}
+	place_door_travelling_objects();
+	frames_ = FALL_MOVEMENT_FRAMES;
+	door_state_ = DoorState::IntSucceeded;
+	state_ = MoveStep::DoorMove;
 }
 
 void MoveProcessor::try_door_unentry() {
@@ -365,7 +407,9 @@ void MoveProcessor::try_door_unentry() {
 		state_ = MoveStep::DoorMove;
 	} else {
 		door_state_ = DoorState::Voided;
-		player_->destroy(this, CauseOfDeath::Voided, true);
+		for (auto& obj : door_travelling_objs_) {
+			obj.raw->destroy(this, CauseOfDeath::Voided, true);
+		}
 	}
 }
 
@@ -375,11 +419,7 @@ void MoveProcessor::ext_door_exit() {
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
-	for (auto& obj : door_travelling_objs_) {
-		add_to_fall_check(obj.raw);
-		obj.raw->abstract_put(obj.dest, delta_frame_);
-		map_->put_in_map(obj.raw, true, true, delta_frame_);
-	}
+	place_door_travelling_objects();
 	playing_state_->snap_camera_to_player();
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;

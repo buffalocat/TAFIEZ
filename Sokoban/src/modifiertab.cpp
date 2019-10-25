@@ -34,14 +34,13 @@ static ModCode mod_code = ModCode::Car;
 
 // Model objects that new objects are created from
 static Car model_car{ nullptr, CarType::Normal, {} };
-static Door model_door{ nullptr, 0, false, true, false };
+static Door model_door{ nullptr, 0, false, true, false, 0 };
 static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false };
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
 static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
 static FloorSign model_floor_sign{ nullptr, "", false };
 static Incinerator model_incinerator{ nullptr, 0, false, true, false };
-
 
 static ColorCycle model_color_cycle{};
 
@@ -63,10 +62,10 @@ void ModifierTab::main_loop(EditorRoom* eroom) {
 
 	ImGui::Checkbox("Inspect Mode##MOD_inspect", &inspect_mode_);
 
-	mod_tab_options();
+	mod_tab_options(eroom->map());
 }
 
-void ModifierTab::mod_tab_options() {
+void ModifierTab::mod_tab_options(RoomMap* room_map) {
 	ObjectModifier* mod = nullptr;
 	if (inspect_mode_) {
 		if (selected_obj) {
@@ -113,6 +112,18 @@ void ModifierTab::mod_tab_options() {
 		Door* door = mod ? static_cast<Door*>(mod) : &model_door;
 		ImGui::Checkbox("Persistent?##MOD_DOOR_persistent", &door->persistent_);
 		ImGui::Checkbox("Active by Default?##MOD_DOOR_default", &door->default_);
+		int s_door_id = door->door_id_;
+		ImGui::InputInt("Door ID##MOD_DOOR_id", &s_door_id);
+		if (s_door_id < 0) {
+			s_door_id = 0;
+		}
+		unsigned int new_door_id = (unsigned int)s_door_id;
+		room_map->remove_door(door);
+		if (ImGui::Button("Find Smallest Unused ID##MOD_DOOR_id_button")) {
+			new_door_id = room_map->get_smallest_unused_door_id();
+		}
+		door->door_id_ = new_door_id;
+		room_map->add_door(door);
 		break;
 	}
 	case ModCode::Gate:

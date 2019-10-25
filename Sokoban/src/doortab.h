@@ -17,12 +17,12 @@ public:
     void init();
     void main_loop(EditorRoom*);
     void handle_left_click(EditorRoom*, Point3);
+	void handle_right_click(EditorRoom*, Point3);
 
 private:
-    Door* entrance_;
-    EditorRoom* exit_room_;
-    Point3 exit_pos_;
-    Door* exit_;
+	Door* ent_door_{};
+	EditorRoom* exit_room_{};
+    unsigned int exit_door_id_ = 0;
 };
 
 #endif // DOORTAB_H

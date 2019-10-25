@@ -29,6 +29,10 @@ std::unique_ptr<GameObject> Player::deserialize(MapFileI& file) {
 	return std::make_unique<Player>(pos, state);
 }
 
+std::unique_ptr<GameObject> Player::duplicate(RoomMap* room_map, DeltaFrame* delta_frame) {
+	return std::make_unique<Player>(pos_, state_);
+}
+
 std::string Player::name() {
     return "Player";
 }
@@ -40,16 +44,16 @@ ObjCode Player::obj_code() {
 int Player::color() {
 	switch (state_) {
 	case PlayerState::Free:
-		return BLUE;
+		return active_ ? BLUE : LIGHT_BLUE;
 		break;
 	case PlayerState::Bound:
-		return PINK;
+		return active_ ? ORANGE : LIGHT_ORANGE;
 		break;
 	case PlayerState::RidingNormal:
-		return gravitable_ ? RED : GREEN;
+		return active_ ? (gravitable_ ? SALMON : GREEN) : (gravitable_ ? LIGHT_PINK : LIGHT_GREEN);
 		break;
 	case PlayerState::RidingHidden:
-		return RED;
+		return NO_COLOR;
 		break;
 	default:
 		return NO_COLOR;
@@ -71,9 +75,9 @@ void Player::set_bound() {
 }
 
 void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
-	if (delta_frame) {
-		delta_frame->push(std::make_unique<PlayerStateDelta>(this));
-	}
+	auto delta = std::make_unique<PlayerStateDelta>(this);
+	auto prev_state = state_;
+	auto prev_car = car_;
 	if (auto* colored = dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 		if (auto* car = dynamic_cast<Car*>(colored->modifier())) {
 			switch (car->type_) {
@@ -95,27 +99,27 @@ void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 	} else {
 		set_free(nullptr);
 	}
+	if (delta_frame && (prev_state != state_ || prev_car != car_)) {
+		delta_frame->push(std::move(delta));
+	}
 }
 
 // Make sure the player is allowed to be in the state it thinks it's in
-void Player::validate_state(RoomMap* map) {
+void Player::validate_state(RoomMap* map, DeltaFrame* delta_frame) {
+	if (!tangible_) {
+		return;
+	}
 	switch (state_) {
 	case PlayerState::RidingNormal:
-		set_strictest(map, nullptr);
+		set_strictest(map, delta_frame);
 		break;
 	case PlayerState::Bound:
 		if (!dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
-			set_free(nullptr);
+			set_free(delta_frame);
 		}
 		break;
 	default:
 		break;
-	}
-}
-
-void Player::validate_bound(RoomMap* map, DeltaFrame* delta_frame) {
-	if (state_ == PlayerState::Bound && !dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
-		set_free(delta_frame);
 	}
 }
 

@@ -8,18 +8,25 @@
 #include "editorstate.h"
 #include "doorselectstate.h"
 
-DoorTab::DoorTab(EditorState* editor): EditorTab(editor),
-entrance_ {}, exit_room_ {}, exit_pos_ {-1,-1,-1} {}
+DoorTab::DoorTab(EditorState* editor): EditorTab(editor) {}
 
 DoorTab::~DoorTab() {}
 
 void DoorTab::init() {
-    entrance_ = nullptr;
+    ent_door_ = nullptr;
     exit_room_ = nullptr;
-    exit_pos_ = {-1,-1,-1};
+    exit_door_id_ = 0;
 }
 
 static bool failed_to_load_room = false;
+
+void print_door_data(RoomMap* map, unsigned int id) {
+	for (auto* exit_door : map->door_group(id)) {
+		Point3 exit_pos = exit_door->pos();
+		ImGui::Text("Destination Pos: (%d,%d,%d)", exit_pos.x, exit_pos.y, exit_pos.z);
+		ImGui::Text(map->view(exit_pos)->to_str().c_str());
+	}
+}
 
 void DoorTab::main_loop(EditorRoom* eroom) {
     ImGui::Text("The Door Tab");
@@ -30,26 +37,33 @@ void DoorTab::main_loop(EditorRoom* eroom) {
     }
 
     ImGui::Text("Click on a door to select it.");
-    if (!entrance_) {
+    if (!ent_door_) {
         return;
     }
 
     ImGui::Separator();
-
-    Point3 pos = entrance_->pos();
+	
+	RoomMap* room_map = eroom->map();
+    Point3 pos = ent_door_->pos();
     ImGui::Text("Currently selected door: (%d,%d,%d)", pos.x, pos.y, pos.z);
-    DoorData* data = entrance_->data();
+    DoorData* data = ent_door_->data();
     if (data) {
-        ImGui::Text("This door has destination \"%s\":(%d,%d,%d) [offset pos]", data->dest.c_str(), data->pos.x, data->pos.y, data->pos.z);
-        if (!exit_room_) {
-            ImGui::Text("...but that room's .map file doesn't appear to exist.");
-        }
+		ImGui::Text("Destination Room: %s", data->dest.c_str());
+		if (EditorRoom* exit_room = editor_->get_room(data->dest)) {
+			print_door_data(exit_room->map(), data->id);
+		} else {
+			ImGui::Text("...but that room's .map file doesn't appear to exist.");
+		}
 		if (ImGui::Button("Reset the destination to nothing?##DOOR")) {
-			entrance_->reset_data();
+			ent_door_->reset_data();
 		}
     } else {
         ImGui::Text("This door doesn't have a destination yet");
     }
+
+	ImGui::Separator();
+
+	ImGui::Text("Right click a door to select it as the destination.");
 
     static int current = 0;
     const char* room_names[256];
@@ -57,52 +71,49 @@ void DoorTab::main_loop(EditorRoom* eroom) {
     if (ImGui::ListBox("Loaded Maps##DOOR", &current, room_names, len, len)) {
         if (exit_room_ != editor_->get_room(room_names[current])) {
             exit_room_ = editor_->get_room(room_names[current]);
-            exit_pos_ = {-1,-1,-1};
+            exit_door_id_ = 0;
         }
     }
 
     if (!exit_room_) {
         ImGui::Text("No room selected");
         return;
-    }
+	} else if (exit_room_ == eroom) {
+		ImGui::Text("That's the current room");
+	} else {
+		ImGui::Text(("Destination Room: " + exit_room_->name()).c_str());
 
-    ImGui::Text(("Destination room: " + exit_room_->name()).c_str());
+		if (ImGui::Button("Select Destination Position##DOOR")) {
+			Point3 start_pos = exit_room_->start_pos;
+			auto select_state = std::make_unique<DoorSelectState>(editor_, exit_room_->room.get(), start_pos, &exit_door_id_);
+			editor_->create_child(std::move(select_state));
+		}
+	}
 
-    if (ImGui::Button("Select Destination Position##DOOR")) {
-        auto select_state = std::make_unique<DoorSelectState>(editor_, exit_room_->room.get(), exit_room_->start_pos, &exit_pos_);
-        editor_->create_child(std::move(select_state));
-    }
-
-    if (exit_pos_.x == -1) {
+    if (exit_door_id_ == 0) {
         ImGui::Text("No destination selected");
         return;
     }
 
-    ImGui::Text("Destination Position: (%d,%d,%d)", exit_pos_.x, exit_pos_.y, exit_pos_.z);
-    if (GameObject* obj = exit_room_->map()->view(exit_pos_)) {
-        ImGui::Text(obj->to_str().c_str());
-        if (Door* exit_door = dynamic_cast<Door*>(obj->modifier())) {
-            ImGui::Text("The exit position is also a door.");
-            if (ImGui::Button("Link Both Ways##DOOR")) {
-                entrance_->set_data(Point3_S16{exit_pos_ - Point3{exit_room_->room->offset_pos_}}, eroom->name(), exit_room_->name());
-                exit_door->set_data(Point3_S16{entrance_->pos() - Point3{eroom->room->offset_pos_}}, exit_room_->name(), eroom->name());
-                // We changed something remotely!
-                exit_room_->changed = true;
-            }
-        }
-    } else {
-        ImGui::Text("Empty");
-    }
+	print_door_data(exit_room_->map(), exit_door_id_);
 
-    if (ImGui::Button("Link One Way##DOOR")) {
-        entrance_->set_data(Point3_S16{exit_pos_ - Point3{exit_room_->room->offset_pos_}}, eroom->name(), exit_room_->name());
-    }
+	if (ImGui::Button("Link One Way##DOOR")) {
+		ent_door_->set_data(exit_door_id_, eroom->name(), exit_room_->name());
+	}
+
+	if (ImGui::Button("Link Both Ways##DOOR")) {
+		ent_door_->set_data(exit_door_id_, eroom->name(), exit_room_->name());
+		for (auto* exit_door : exit_room_->map()->door_group(exit_door_id_)) {
+			exit_door->set_data(ent_door_->door_id_, exit_room_->name(), eroom->name());
+		}
+		exit_room_->changed = true;
+	}
 }
 
 void DoorTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
     if (GameObject* obj = eroom->map()->view(pos)) {
         if (Door* door = dynamic_cast<Door*>(obj->modifier())) {
-            entrance_ = door;
+            ent_door_ = door;
             DoorData* data = door->data();
             if (data) {
                 // Try to load the destination room
@@ -111,12 +122,17 @@ void DoorTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
                     editor_->load_room(data->dest, true);
                     exit_room_ = editor_->get_room(data->dest);
                 }
-                if (exit_room_) {
-                    exit_pos_ = Point3{ data->pos} + Point3{exit_room_->room->offset_pos_};
-                } else {
-                    exit_pos_ = {-1,-1,-1};
-                }
+                
             }
         }
     }
+}
+
+void DoorTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
+	if (GameObject* obj = eroom->map()->view(pos)) {
+		if (Door* door = dynamic_cast<Door*>(obj->modifier())) {
+			exit_room_ = eroom;
+			exit_door_id_ = door->door_id_;
+		}
+	}
 }

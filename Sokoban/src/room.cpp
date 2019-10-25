@@ -352,15 +352,13 @@ void Room::read_snake_link(MapFileI& file) {
 }
 
 void Room::read_door_dest(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
-	Point3_S16 exit_pos;
-	file >> exit_pos;
-	auto door = static_cast<Door*>(map_->view(pos)->modifier());
+	auto door = static_cast<Door*>(map_->view(file.read_point3())->modifier());
+	unsigned int door_id = file.read_uint32();
 	std::string exit_room = file.read_str();
 	if (exit_room.empty()) {
 		exit_room = name_;
 	}
-	door->set_data(exit_pos, name_, exit_room);
+	door->set_data(door_id, name_, exit_room);
 }
 
 void Room::read_threshold_signaler(MapFileI& file) {

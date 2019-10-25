@@ -45,6 +45,8 @@ public:
 	virtual void destroy(MoveProcessor*, CauseOfDeath , bool collect_links);
 	virtual void undestroy();
 
+	virtual std::unique_ptr<GameObject> duplicate(RoomMap* , DeltaFrame* ) = 0;
+
     void set_modifier(std::unique_ptr<ObjectModifier> mod);
 
 	PushComponent* push_comp();

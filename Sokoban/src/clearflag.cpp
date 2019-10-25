@@ -92,7 +92,7 @@ void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 	int color = GOLD;
 	if (collected_) {
-		color = DARK_RED;
+		color = RED;
 	} else if (active_) {
 		if (real_) {
 			color = GREEN;

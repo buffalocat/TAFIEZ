@@ -23,18 +23,19 @@ public:
 	void serialize(MapFileO& file);
 	static std::unique_ptr<GameObject> deserialize(MapFileI& file);
 
+	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
+
     std::string name();
     ObjCode obj_code();
 	int color();
 
 	FPoint3 cam_pos();
 	
-	void set_free(DeltaFrame* delta_frame);
-	void validate_state(RoomMap* map);
-	void validate_bound(RoomMap* map, DeltaFrame* delta_frame);
+	void set_free(DeltaFrame*);
+	void validate_state(RoomMap*, DeltaFrame*);
 
-	void set_strictest(RoomMap* map, DeltaFrame*);
-	bool toggle_riding(RoomMap* map, DeltaFrame*, MoveProcessor* mp);
+	void set_strictest(RoomMap*, DeltaFrame*);
+	bool toggle_riding(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
 	void undestroy();
 	CauseOfDeath death();
@@ -49,6 +50,8 @@ public:
 	PlayerState state();
 
 	void set_car(Car* car);
+
+	bool active_ = false;
 
 private:
 	void set_bound();

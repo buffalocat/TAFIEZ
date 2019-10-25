@@ -334,6 +334,15 @@ void SnakeBlock::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) 
 	}
 }
 
+std::unique_ptr<GameObject> SnakeBlock::duplicate(RoomMap* room_map, DeltaFrame* delta_frame) {
+	auto dup = std::make_unique<SnakeBlock>(*this);
+	dup->links_ = {};
+	if (modifier_) {
+		dup->set_modifier(modifier_->duplicate(dup.get(), room_map, delta_frame));
+	}
+	return std::move(dup);
+}
+
 std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame* delta_frame) {
 	auto split = std::make_unique<SnakeBlock>(pos_, color_, pushable_, gravitable_, 1, weak_);
 	if (modifier_) {
@@ -341,7 +350,6 @@ std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame
 	}
 	return std::move(split);
 }
-
 
 SnakePuller::SnakePuller(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame,
 	std::vector<GameObject*>& moving_blocks,

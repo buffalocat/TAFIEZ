@@ -16,6 +16,8 @@ public:
     bool relation_check();
     void relation_serialize(MapFileO& file);
 
+	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
+
 	bool is_snake();
 	Sticky sticky();
 

@@ -18,6 +18,7 @@
 #include "moveprocessor.h"
 #include "common_constants.h"
 #include "clearflag.h"
+#include "door.h"
 #include "savefile.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
@@ -30,6 +31,7 @@ RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
 	}
+	door_groups_[0] = {};
 }
 
 RoomMap::~RoomMap() {}
@@ -200,6 +202,32 @@ void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, bool activ
 	}
 }
 
+void RoomMap::add_door(Door* door) {
+	unsigned int id = door->door_id_;
+	if (id > 0) {
+		door_groups_[id].push_back(door);
+	}
+}
+
+void RoomMap::remove_door(Door* door) {
+	unsigned int id = door->door_id_;
+	if (id > 0) {
+		auto group = door_groups_[door->door_id_];
+		if (group.size() <= 1) {
+			door_groups_.erase(id);
+		} else {
+			group.erase(std::remove(group.begin(), group.end(), door), group.end());
+		}
+	}
+}
+
+unsigned int RoomMap::get_smallest_unused_door_id() {
+	unsigned int i = 0;
+	while (door_groups_.count(i)) {
+		++i;
+	}
+	return i;
+}
 
 // TODO: consider making these sets instead of vectors
 void RoomMap::remove_auto(AutoBlock* obj) {
@@ -513,7 +541,7 @@ void RoomMap::uncollect_flag(int req) {
 
 void RoomMap::free_unbound_players(DeltaFrame* delta_frame) {
 	for (auto* player : player_cycle_->players_) {
-		player->validate_bound(this, delta_frame);
+		player->validate_state(this, delta_frame);
 	}
 }
 
@@ -523,6 +551,14 @@ void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
 
 TextRenderer* RoomMap::text_renderer() {
 	return state_->text_.get();
+}
+
+std::vector<Door*>& RoomMap::door_group(unsigned int id) {
+	if (door_groups_.count(id)) {
+		return door_groups_[id];
+	} else {
+		return door_groups_[0];
+	}
 }
 
 std::vector<Player*>& RoomMap::player_list() {
@@ -598,11 +634,25 @@ void MapInitDelta::revert() {
 }
 
 
+ActivePlayerGuard::ActivePlayerGuard(PlayerCycle* cycle) : cycle_{ cycle } {
+	if (cycle_->index_ >= 0) {
+		cycle_->players_[cycle_->index_]->active_ = false;
+	}
+}
+
+ActivePlayerGuard::~ActivePlayerGuard() {
+	if (cycle_->index_ >= 0) {
+		cycle_->players_[cycle_->index_]->active_ = true;
+	}
+}
+
+
 PlayerCycle::PlayerCycle() {}
 
 PlayerCycle::~PlayerCycle() {}
 
 void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init) {
+	ActivePlayerGuard guard{ this };
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<AddPlayerDelta>(this, index_));
 	}
@@ -620,6 +670,7 @@ void PlayerCycle::add_player_at_pos(Player* player, int index) {
 }
 
 void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
+	ActivePlayerGuard guard{ this };
 	auto rem_it = std::find(players_.begin(), players_.end(), player);
 	if (rem_it == players_.end()) {
 		return;
@@ -643,6 +694,7 @@ void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
 }
 
 bool PlayerCycle::cycle_player(DeltaFrame* delta_frame) {
+	ActivePlayerGuard guard{ this };
 	auto delta = std::make_unique<CyclePlayerDelta>(this, dead_player_, index_, dead_index_);
 	if (index_ == -1) {
 		if (players_.size() == 0) {
@@ -692,6 +744,7 @@ AddPlayerDelta::AddPlayerDelta(PlayerCycle* cycle, int index) :
 AddPlayerDelta::~AddPlayerDelta() {}
 
 void AddPlayerDelta::revert() {
+	ActivePlayerGuard guard{ cycle_ };
 	cycle_->players_.pop_back();
 	cycle_->index_ = index_;
 }
@@ -703,6 +756,7 @@ RemovePlayerDelta::RemovePlayerDelta(PlayerCycle* cycle, Player* player, Player*
 RemovePlayerDelta::~RemovePlayerDelta() {}
 
 void RemovePlayerDelta::revert() {
+	ActivePlayerGuard guard{ cycle_ };
 	cycle_->dead_player_ = dead_player_;
 	cycle_->index_ = index_;
 	cycle_->add_player_at_pos(player_, rem_);
@@ -715,6 +769,7 @@ CyclePlayerDelta::CyclePlayerDelta(PlayerCycle* cycle, Player* dead_player, int 
 CyclePlayerDelta::~CyclePlayerDelta() {}
 
 void CyclePlayerDelta::revert() {
+	ActivePlayerGuard guard{ cycle_ };
 	cycle_->dead_player_ = dead_player_;
 	cycle_->index_ = index_;
 	cycle_->dead_index_ = dead_index_;

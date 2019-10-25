@@ -13,6 +13,8 @@ public:
     virtual void serialize(MapFileO& file);
     static std::unique_ptr<GameObject> deserialize(MapFileI& file);
 
+	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
+
     void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 
     virtual void draw(GraphicsManager*);

@@ -17,6 +17,10 @@ std::unique_ptr<GameObject> Wall::deserialize(MapFileI& file) {
 	return std::make_unique<Wall>(pos);
 }
 
+std::unique_ptr<GameObject> Wall::duplicate(RoomMap*, DeltaFrame*) {
+	return std::make_unique<Wall>(pos_);
+}
+
 std::string Wall::name() {
     return "Wall";
 }
@@ -39,7 +43,7 @@ void Wall::draw(GraphicsManager* gfx, Point3 p) {
 }
 
 
-ArtWall::ArtWall(Point3 pos, int flavor) : GameObject(pos, false, false), flavor_{ flavor } {}
+ArtWall::ArtWall(Point3 pos, int flavor) : Wall(pos), flavor_{ flavor } {}
 
 ArtWall::~ArtWall() {}
 

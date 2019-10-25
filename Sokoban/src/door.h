@@ -10,15 +10,15 @@ class MapFileI;
 class MapFileO;
 
 struct DoorData {
-    Point3_S16 pos;
 	std::string start;
     std::string dest;
-    DoorData(Point3_S16 p, std::string start_room, std::string dest_room);
+	unsigned int id;
+    DoorData(std::string start_room, std::string dest_room, unsigned int id);
 };
 
 class Door: public Switchable {
 public:
-    Door(GameObject* parent, int count, bool persistent, bool def, bool active);
+    Door(GameObject* parent, int count, bool persistent, bool def, bool active, unsigned int door_id);
     virtual ~Door();
     Door(const Door&);
 
@@ -31,7 +31,7 @@ public:
     void relation_serialize(MapFileO& file);
     bool can_set_state(bool state, RoomMap*);
 
-    void set_data(Point3_S16, std::string start, std::string dest);
+    void set_data(unsigned int door_id, std::string start, std::string dest);
 	void reset_data();
 	DoorData* data();
 	bool usable();
@@ -45,8 +45,10 @@ public:
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
+	unsigned int door_id_;
+
 private:
-    std::unique_ptr<DoorData> data_;
+	std::unique_ptr<DoorData> data_{};
 };
 
 #endif // DOOR_H

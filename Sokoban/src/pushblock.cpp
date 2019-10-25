@@ -34,6 +34,14 @@ std::unique_ptr<GameObject> PushBlock::deserialize(MapFileI& file) {
     return std::make_unique<PushBlock>(pos, b[0], b[1], b[2], static_cast<Sticky>(b[3]));
 }
 
+std::unique_ptr<GameObject> PushBlock::duplicate(RoomMap* room_map, DeltaFrame* delta_frame) {
+	auto dup = std::make_unique<PushBlock>(*this);
+	if (modifier_) {
+		dup->set_modifier(modifier_->duplicate(dup.get(), room_map, delta_frame));
+	}
+	return std::move(dup);
+}
+
 void PushBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vector<GameObject*>& links) {
     Sticky sticky_condition = sticky_ & sticky_level;
     if (sticky_condition != Sticky::None) {
