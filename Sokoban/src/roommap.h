@@ -78,7 +78,7 @@ public:
 
 	void add_door(Door* door);
 	void remove_door(Door* door);
-	unsigned int get_smallest_unused_door_id();
+	unsigned int get_unused_door_id();
 
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);

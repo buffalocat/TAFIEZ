@@ -55,6 +55,7 @@ public:
 	bool update();
 	void abort();
 
+	void set_standing_door();
 	void reset_player_jump();
 
     bool try_move_horizontal(Point3);
@@ -96,6 +97,7 @@ public:
 	void raise_gates();
 
 private:
+	Door* standing_door_{};
 	Door* entry_door_{};
 	std::vector<DoorTravellingObj> door_travelling_objs_{};
 	std::vector<std::vector<Point3>> door_dest_grid_{};

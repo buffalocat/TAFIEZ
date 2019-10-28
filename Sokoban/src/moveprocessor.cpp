@@ -25,9 +25,32 @@
 #include "door.h"
 
 MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFrame* delta_frame, Player* player, bool animated) :
-	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {}
+	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {
+	set_standing_door();
+}
 
 MoveProcessor::~MoveProcessor() {}
+
+void MoveProcessor::set_standing_door() {
+	if (player_) {
+		Point3 door_pos;
+		switch (player_->state()) {
+		case PlayerState::Free:
+		case PlayerState::Bound:
+			door_pos = player_->shifted_pos({ 0, 0, -1 });
+			break;
+		case PlayerState::RidingNormal:
+		case PlayerState::RidingHidden:
+			door_pos = player_->shifted_pos({ 0, 0, -2 });
+			break;
+		}
+		if (GameObject* door_obj = map_->view(door_pos)) {
+			if (Door* door = dynamic_cast<Door*>(door_obj->modifier())) {
+				standing_door_ = door;
+			}
+		}
+	}
+}
 
 bool MoveProcessor::update() {
 	if (--frames_ <= 0) {
@@ -142,6 +165,8 @@ bool MoveProcessor::try_jump() {
 	}
 	state_ = MoveStep::Jump;
 	frames_ = JUMP_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
+	// If another player just jumped, that has to be reset
+	reset_player_jump();
 	player_->gravitable_ = false;
 	delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
 	return true;
@@ -215,6 +240,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 			break;
 		}
 	}
+	set_standing_door();
 }
 
 void MoveProcessor::push_rising_gate(Gate* gate) {
@@ -263,8 +289,8 @@ void MoveProcessor::raise_gates() {
 }
 
 void MoveProcessor::plan_door_move(Door* door) {
-	// Don't plan a door move if we loaded in on the door, or if we just used a door
-	if (!player_ || door_state_ != DoorState::None) {
+	// Don't plan a door move if we loaded in on the door, or if we just used a door, or if we were already on the door
+	if (!player_ || door_state_ != DoorState::None || door == standing_door_) {
 		return;
 	}
 	if (door_state_ == DoorState::None && door->usable()) {

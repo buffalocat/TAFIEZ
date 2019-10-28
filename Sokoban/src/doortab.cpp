@@ -91,7 +91,7 @@ void DoorTab::main_loop(EditorRoom* eroom) {
 	}
 
     if (exit_door_id_ == 0) {
-        ImGui::Text("No destination selected");
+        ImGui::Text("No destination selected, or selected destination has ID 0.");
         return;
     }
 

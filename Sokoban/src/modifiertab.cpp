@@ -112,18 +112,20 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		Door* door = mod ? static_cast<Door*>(mod) : &model_door;
 		ImGui::Checkbox("Persistent?##MOD_DOOR_persistent", &door->persistent_);
 		ImGui::Checkbox("Active by Default?##MOD_DOOR_default", &door->default_);
-		int s_door_id = door->door_id_;
-		ImGui::InputInt("Door ID##MOD_DOOR_id", &s_door_id);
-		if (s_door_id < 0) {
-			s_door_id = 0;
+		if (mod) {
+			int s_door_id = door->door_id_;
+			ImGui::InputInt("Door ID##MOD_DOOR_id", &s_door_id);
+			if (s_door_id < 0) {
+				s_door_id = 0;
+			}
+			unsigned int new_door_id = (unsigned int)s_door_id;
+			room_map->remove_door(door);
+			if (ImGui::Button("Find Unused ID##MOD_DOOR_id_button")) {
+				new_door_id = room_map->get_unused_door_id();
+			}
+			door->door_id_ = new_door_id;
+			room_map->add_door(door);
 		}
-		unsigned int new_door_id = (unsigned int)s_door_id;
-		room_map->remove_door(door);
-		if (ImGui::Button("Find Smallest Unused ID##MOD_DOOR_id_button")) {
-			new_door_id = room_map->get_smallest_unused_door_id();
-		}
-		door->door_id_ = new_door_id;
-		room_map->add_door(door);
 		break;
 	}
 	case ModCode::Gate:
@@ -241,8 +243,13 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		mod = std::make_unique<Car>(model_car);
 		break;
 	case ModCode::Door:
-		mod = std::make_unique<Door>(model_door);
+	{
+		auto door = std::make_unique<Door>(model_door);
+		door->door_id_ = map->get_unused_door_id();
+		map->add_door(door.get());
+		mod = std::move(door);
 		break;
+	}
 	case ModCode::Gate:
 	{
 		auto gate = std::make_unique<Gate>(model_gate);
