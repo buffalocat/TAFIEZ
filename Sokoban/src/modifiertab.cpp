@@ -187,8 +187,6 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 	case ModCode::PuppetBlock:
 	case ModCode::WorldResetKey:
 		break;
-	default:
-		break;
 	}
 }
 

@@ -89,8 +89,6 @@ void Car::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp)
 		case CarType::Convertible:
 			player_->abstract_put(pos_above(), delta_frame);
 			break;
-		default:
-			break;
 		}
 	}
 }
@@ -113,7 +111,6 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
 			break;
 		case CarType::Convertible:
 			player_->destroy(mp, death, collect_links);
-		default:
 			break;
 		}
 	}
@@ -147,8 +144,6 @@ std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map,
 		}
 		break;
 	}
-	default:
-		break;
 	}
     return std::move(dup);
 }

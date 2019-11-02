@@ -53,9 +53,7 @@ int Player::color() {
 		return active_ ? (gravitable_ ? SALMON : GREEN) : (gravitable_ ? LIGHT_PINK : LIGHT_GREEN);
 		break;
 	case PlayerState::RidingHidden:
-		return NO_COLOR;
-		break;
-	default:
+	default:	
 		return NO_COLOR;
 		break;
 	}
@@ -117,8 +115,6 @@ void Player::validate_state(RoomMap* map, DeltaFrame* delta_frame) {
 		if (!dynamic_cast<ColoredBlock*>(map->view(shifted_pos({ 0,0,-1 })))) {
 			set_free(delta_frame);
 		}
-		break;
-	default:
 		break;
 	}
 }
@@ -229,27 +225,25 @@ PlayerState Player::state() {
 
 void Player::draw(GraphicsManager* gfx) {
     FPoint3 p = real_pos();
+	auto* player_model = &gfx->cube;
+	float z_offset = 0.0f;
+	float side = 0.6f;
 	switch (state_) {
 	case PlayerState::RidingNormal:
 	{
-		auto* player_model = &gfx->cube;
 		auto* windshield_model = &gfx->windshield;
 		if (auto* snake = dynamic_cast<SnakeBlock*>(car_->parent_)) {
 			player_model = &gfx->diamond;
 			windshield_model = &gfx->windshield_diamond;
 		}
-		player_model->push_instance(glm::vec3(p.x, p.y, p.z - 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), BlockTexture::LightEdges, color());
+		z_offset = -0.2f;
+		side = 0.5f;
 		windshield_model->push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Darker, car_->parent_->color());
-		break;
 	}
-	case PlayerState::Bound:
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
-		break;
+	// Fallthrough
 	case PlayerState::Free:
-		gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(0.6f, 0.6f, 0.6f), BlockTexture::LightEdges, color());
-		break;
-	case PlayerState::RidingHidden:
-	default:
+	case PlayerState::Bound:
+		player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(side, side, side), BlockTexture::Edges, color());
 		break;
 	}
 }

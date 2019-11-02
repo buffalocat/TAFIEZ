@@ -121,8 +121,6 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 	case SignalerType::Parity:
 		parity_signaler_options(dynamic_cast<ParitySignaler*>(selected_sig), eroom->map());
 		break;
-	default:
-		break;
 	}
 }
 

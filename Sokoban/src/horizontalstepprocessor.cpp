@@ -36,8 +36,6 @@ void HorizontalStepProcessor::run() {
 	case PlayerState::RidingHidden:
 		move_riding();
 		break;
-	default:
-		break;
 	}
 }
 

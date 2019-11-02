@@ -74,7 +74,6 @@ bool MoveProcessor::update() {
 			perform_switch_checks(true);
 			break;
 		case MoveStep::Waiting:
-		default:
 			break;
 		}
 		
@@ -101,6 +100,7 @@ void MoveProcessor::reset_player_jump() {
 	for (auto* player : map_->player_list()) {
 		if (!player->gravitable_) {
 			player->gravitable_ = true;
+			fall_check_.push_back(player);
 			delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player));
 		}
 	}
@@ -235,8 +235,6 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 			break;
 		case DoorState::AwaitingUnentry:
 			try_door_unentry();
-			break;
-		default:
 			break;
 		}
 	}

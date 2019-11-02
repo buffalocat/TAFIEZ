@@ -77,8 +77,6 @@ void MainMenuState::main_loop() {
 			menu_type_ = Menu::Top;
 		}
 		break;
-	default:
-		break;
 	}    
     ImGui::End();
 }

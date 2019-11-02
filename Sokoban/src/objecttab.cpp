@@ -126,8 +126,6 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 		ImGui::InputInt("Wall Flavor##ARTWALL_flavor", &artwall->flavor_);
 		break;
 	}
-	default:
-		break;
 	}
 	if (inspect_mode_ && selected_obj) {
 		static ObjCode transmute_obj_code;
