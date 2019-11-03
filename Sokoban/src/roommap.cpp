@@ -212,7 +212,7 @@ void RoomMap::add_door(Door* door) {
 void RoomMap::remove_door(Door* door) {
 	unsigned int id = door->door_id_;
 	if (id > 0) {
-		auto group = door_groups_[door->door_id_];
+		auto& group = door_groups_[door->door_id_];
 		if (group.size() <= 1) {
 			door_groups_.erase(id);
 		} else {

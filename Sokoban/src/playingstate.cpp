@@ -109,7 +109,7 @@ void PlayingState::handle_input() {
 		return;
 	}
 	
-	if (glfwGetKey(window_, GLFW_KEY_B) == GLFW_PRESS) {
+	if (glfwGetKey(window_, GLFW_KEY_V) == GLFW_PRESS) {
 		if (p_cycle->cycle_player(delta_frame_.get())) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -309,7 +309,7 @@ void PlayingState::set_death_text() {
 			death_substr = "Press Z to undo";
 			break;
 		case DeathState::DeadCanSwitch:
-			death_substr = "Press B to switch";
+			death_substr = "Press V to switch";
 			break;
 		}
 		death_submessage_ = std::make_unique<IndependentStringDrawer>(
