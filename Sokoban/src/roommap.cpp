@@ -222,7 +222,7 @@ void RoomMap::remove_door(Door* door) {
 }
 
 unsigned int RoomMap::get_unused_door_id() {
-	unsigned int i = door_groups_.size();
+	unsigned int i = (unsigned int)door_groups_.size();
 	while (door_groups_.count(i)) {
 		--i;
 	}
