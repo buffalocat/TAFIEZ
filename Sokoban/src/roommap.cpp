@@ -451,9 +451,7 @@ void RoomMap::set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveP
 		return;
 	}
 	for (auto& sig : signalers_) {
-		if (auto* p_sig = dynamic_cast<ParitySignaler*>(sig.get())) {
-			p_sig->check_send_initial(this, delta_frame, mp);
-		}
+		sig->check_send_initial(this, delta_frame, mp);
 	}
 	mp->perform_switch_checks(false);
 	inited_ = true;
