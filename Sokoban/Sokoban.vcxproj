@@ -197,6 +197,7 @@
     <Image Include="Sokoban.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fpstimer.h" />
     <ClInclude Include="src\incinerator.h" />
     <ClInclude Include="src\jumpstepprocessor.h" />
     <ClInclude Include="src\floorsign.h" />
@@ -327,6 +328,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\fpstimer.cpp" />
     <ClCompile Include="src\incinerator.cpp" />
     <ClCompile Include="src\jumpstepprocessor.cpp" />
     <ClCompile Include="src\floorsign.cpp" />

@@ -274,6 +274,9 @@
     <ClInclude Include="src\incinerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fpstimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -500,6 +503,9 @@
     </ClCompile>
     <ClCompile Include="src\incinerator.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fpstimer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
