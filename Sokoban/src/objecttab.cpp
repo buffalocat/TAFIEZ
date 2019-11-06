@@ -102,6 +102,11 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 		ImGui::Text("Number of Ends");
 		ImGui::RadioButton("One Ended##SB_modify_snake_ends", &sb->ends_, 1);
 		ImGui::RadioButton("Two Ended##SB_modify_snake_ends", &sb->ends_, 2);
+		if (sb->links_.size() > sb->ends_) {
+			for (auto* link : sb->links_) {
+				sb->remove_link_quiet(link);
+			}
+		}
 		ImGui::Checkbox("Weak?##SB_modify_weak", &sb->weak_);
 	}
 	break;
