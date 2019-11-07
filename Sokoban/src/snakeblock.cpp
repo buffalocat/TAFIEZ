@@ -80,22 +80,23 @@ void SnakeBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::ve
 void SnakeBlock::reset_internal_state() {
 	distance_ = 0;
 	target_ = nullptr;
-	dragged_ = false;
 }
 
-void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vector<GameObject*>& links, bool strong) {
-	// If this block is weak, it can't drag strongly
-	if (strong && weak_) {
-		return;
-	}
+void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vector<GameObject*>& strong, std::vector<GameObject*>& weak) {
 	// Were we pushed by the object behind us? If so, drag all links
 	// NOTE: this does no harm even if obj is a link
 	if (GameObject* obj = map->view(pos_ - dir)) {
-		if (obj->comp_) {
-			for (SnakeBlock* link : links_) {
-				link->conditional_drag(links, strong);
+		if (auto* comp = obj->push_comp()) {
+			if (!comp->blocked_) {
+				for (SnakeBlock* link : links_) {
+					if (weak_ || link->weak_) {
+						weak.push_back(link);
+					} else {
+						strong.push_back(link);
+					}
+				}
+				return;
 			}
-			return;
 		}
 	}
 	// If there aren't 2 links, there's no need to drag anything
@@ -106,7 +107,12 @@ void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vect
 		Point3 link_pos{ links_[i]->pos_ };
 		// If there's a link behind us, drag the other
 		if (link_pos + dir == pos_) {
-			links_[1 - i]->conditional_drag(links, strong);
+			SnakeBlock* link = links_[1 - i];
+			if (weak_ || link->weak_) {
+				weak.push_back(link);
+			} else {
+				strong.push_back(link);
+			}
 			return;
 		}
 		// If there's a link in front of us, don't drag anything
@@ -116,14 +122,13 @@ void SnakeBlock::collect_dragged_snake_links(RoomMap* map, Point3 dir, std::vect
 	}
 	// At this point, we have 2 links, both of which are to the side
 	for (SnakeBlock* link : links_) {
-		link->conditional_drag(links, strong);
-	}
-}
-
-void SnakeBlock::conditional_drag(std::vector<GameObject*>& links, bool strong) {
-	if (!(strong && weak_) && !comp_) {
-		dragged_ = true;
-		links.push_back(this);
+		for (SnakeBlock* link : links_) {
+			if (weak_ || link->weak_) {
+				weak.push_back(link);
+			} else {
+				strong.push_back(link);
+			}
+		}
 	}
 }
 
@@ -240,8 +245,10 @@ void SnakeBlock::break_blocked_links_horizontal(std::vector<GameObject*>& fall_c
 	bool break_blocked = false;
 	// If there's something moving behind us, break all blocked links
 	if (GameObject* obj = map->view(pos_ - dir)) {
-		if (obj->comp_) {
-			break_blocked = true;
+		if (auto* comp = obj->push_comp()) {
+			if (comp->moving_) {
+				break_blocked = true;
+			}
 		}
 	}
 	// If we have two links, and neither is in front, break all blocked links

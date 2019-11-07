@@ -9,15 +9,15 @@ class RoomMap;
 struct Component {
     virtual ~Component();
 
-    std::vector<GameObject*> blocks_;
+	std::vector<GameObject*> blocks_{};
 };
 
 struct PushComponent: public Component {
     void add_pushing(Component* comp);
 
-    std::vector<PushComponent*> pushing_;
-    bool blocked_;
-    bool moving_;
+	std::vector<PushComponent*> pushing_{};
+    bool blocked_ = false;
+    bool moving_ = false;
 };
 
 struct FallComponent: Component {
@@ -26,8 +26,8 @@ struct FallComponent: Component {
     void settle_first();
     void take_falling(RoomMap* map);
 
-    std::vector<FallComponent*> above_;
-    bool settled_;
+	std::vector<FallComponent*> above_{};
+    bool settled_ = false;
 };
 
 #endif // COMPONENT_H

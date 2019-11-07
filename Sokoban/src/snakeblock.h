@@ -23,8 +23,7 @@ public:
 
     void collect_sticky_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 
-    void conditional_drag(std::vector<GameObject*>& links, bool strong);
-    void collect_dragged_snake_links(RoomMap*, Point3 dir, std::vector<GameObject*>& links, bool strong);
+    void collect_dragged_snake_links(RoomMap*, Point3 dir, std::vector<GameObject*>& strong, std::vector<GameObject*>& weak);
 
     bool moving_push_comp();
 
@@ -66,7 +65,6 @@ public:
 
 	SnakeBlock* target_{};
     unsigned int distance_ = 0;
-    bool dragged_ = false;
 };
 
 

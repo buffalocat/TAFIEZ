@@ -286,7 +286,7 @@ void RoomMap::draw(GraphicsManager* gfx, double angle) {
 	GameObjIDPosFunc drawer = ObjectDrawer{ obj_array_, gfx };
 	// TODO: use a smarter map rectangle!
 	for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
-		it->apply_to_rect_with_pos(MapRect{ 0,0,width_,height_ }, drawer);
+		it->apply_to_rect_with_pos(MapRect{ 0, 0, width_, height_ }, drawer);
 	}
 	// TODO: draw walls!
 	effects_->sort_by_distance(angle);

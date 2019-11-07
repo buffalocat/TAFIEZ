@@ -26,16 +26,16 @@ private:
 
     void perform_horizontal_step();
 
-    bool compute_push_component_tree(GameObject* block);
-    bool compute_push_component(GameObject* block);
-	void snake_strong_drag_check(SnakeBlock* block);
+    bool compute_push_component_tree(GameObject* block, bool dragged);
+    bool compute_push_component(GameObject* block, bool dragged, std::vector<GameObject*>& weak_links);
+	bool snake_drag_check(SnakeBlock* sb, std::vector<GameObject*>& weak_links);
 
     void collect_moving_and_weak_links(PushComponent* comp, std::vector<GameObject*>& weak_links);
 
 	std::vector<std::unique_ptr<PushComponent>> push_comps_unique_{};
+	std::vector<PushComponent*> orphaned_moving_comps_{};
 
 	std::vector<SnakeBlock*> moving_snakes_{};
-	std::vector<SnakeBlock*> snakes_to_recheck_{};
 	std::vector<SnakeBlock*> strong_drags_{};
 	std::vector<GameObject*> broken_weak_links_{};
     std::vector<GameObject*>& moving_blocks_;

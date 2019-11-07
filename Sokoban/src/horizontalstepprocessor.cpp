@@ -40,13 +40,13 @@ void HorizontalStepProcessor::run() {
 }
 
 void HorizontalStepProcessor::move_free() {
-	if (compute_push_component_tree(player_)) {
+	if (compute_push_component_tree(player_, false)) {
 		perform_horizontal_step();
 	}
 }
 
 void HorizontalStepProcessor::move_bound() {
-	if (!compute_push_component_tree(player_)) {
+	if (!compute_push_component_tree(player_, false)) {
 		return;
 	}
 	bool valid_move = false;
@@ -88,13 +88,13 @@ void HorizontalStepProcessor::move_riding() {
 	// If the player can move, then PuppetBlocks will move; otherwise, set driven_ to false
 	bool player_moved;
 	if (player_->state() == PlayerState::RidingNormal) {
-		player_moved = compute_push_component_tree(player_);
+		player_moved = compute_push_component_tree(player_, false);
 	} else { // When RidingHidden, the car represents the player
-		player_moved = compute_push_component_tree(car->parent_);
+		player_moved = compute_push_component_tree(car->parent_, false);
 	}
 	if (player_moved) {
 		for (PuppetBlock* pb : map_->puppets_) {
-			compute_push_component_tree(pb->parent_);
+			compute_push_component_tree(pb->parent_, false);
 		}
 	} else {
 		for (PuppetBlock* pb : map_->puppets_) {
@@ -102,7 +102,7 @@ void HorizontalStepProcessor::move_riding() {
 		}
 	}
 	for (AutoBlock* ab : map_->autos_) {
-		compute_push_component_tree(ab->parent_);
+		compute_push_component_tree(ab->parent_, false);
 	}
 	// Apply the step
 	if (!moving_blocks_.empty()) {
@@ -123,26 +123,19 @@ void HorizontalStepProcessor::move_riding() {
 
 // Try to push the block and build the resulting component tree
 // Return whether block is able to move
-bool HorizontalStepProcessor::compute_push_component_tree(GameObject* block) {
-	snakes_to_recheck_ = {};
-	if (!compute_push_component(block)) {
+bool HorizontalStepProcessor::compute_push_component_tree(GameObject* block, bool dragged) {
+	std::vector<GameObject*> weak_links{};
+	if (!compute_push_component(block, dragged, weak_links)) {
 		return false;
 	}
-	std::vector<GameObject*> weak_links{};
-	// Ensures that snakes which were "pushed late" still drag their links
-	for (auto snake : snakes_to_recheck_) {
-		snake->collect_dragged_snake_links(map_, dir_, weak_links, false);
-	}
 	collect_moving_and_weak_links(block->push_comp(), weak_links);
+	for (auto comp : orphaned_moving_comps_) {
+		collect_moving_and_weak_links(comp, weak_links);
+	}
+	orphaned_moving_comps_ = {};
 	for (auto link : weak_links) {
-		if (auto sb = dynamic_cast<SnakeBlock*>(link)) {
-			if (!compute_push_component_tree(link)) {
-				sb->dragged_ = false;
-			}
-		} else {
-			if (!compute_push_component_tree(link)) {
-				broken_weak_links_.push_back(link);
-			}
+		if (!compute_push_component_tree(link, true)) {
+			broken_weak_links_.push_back(link);
 		}
 	}
 	return true;
@@ -150,13 +143,13 @@ bool HorizontalStepProcessor::compute_push_component_tree(GameObject* block) {
 
 // Try to push the component containing block
 // Return whether block is able to move
-bool HorizontalStepProcessor::compute_push_component(GameObject* start_block) {
+bool HorizontalStepProcessor::compute_push_component(GameObject* start_block, bool dragged, std::vector<GameObject*>& weak_links) {
 	if (PushComponent* comp = start_block->push_comp()) {
-		if (!comp->blocked_) {
+		if (!comp->blocked_ && !dragged) {
 			if (auto* sb = dynamic_cast<SnakeBlock*>(start_block)) {
-				sb->dragged_ = false;
-				snakes_to_recheck_.push_back(sb);
-				snake_strong_drag_check(sb);
+				if (!snake_drag_check(sb, weak_links)) {
+					return false;
+				}
 			}
 		}
 		return !comp->blocked_;
@@ -169,51 +162,57 @@ bool HorizontalStepProcessor::compute_push_component(GameObject* start_block) {
 	for (auto* block : comp->blocks_) {
 		if (!block->pushable_ && !block->driven_) {
 			comp->blocked_ = true;
-			break;
+			return false;
 		}
 		if (GameObject* in_front = map_->view(block->pos_ + dir_)) {
 			if (in_front->pushable_ || in_front->driven_) {
-				if (compute_push_component(in_front)) {
+				if (compute_push_component(in_front, false, weak_links)) {
 					comp->add_pushing(in_front->push_comp());
 				} else {
 					// The thing we tried to push couldn't move
 					comp->blocked_ = true;
-					break;
+					return false;
 				}
 			} else {
 				// The thing we tried to push wasn't pushable
 				comp->blocked_ = true;
-				break;
+				return false;
 			}
 		}
 	}
-	for (auto* block : comp->blocks_) {
-		if (auto* sb = dynamic_cast<SnakeBlock*>(block)) {
-			snake_strong_drag_check(sb);
+	if (!dragged) {
+		for (auto* block : comp->blocks_) {
+			if (auto* sb = dynamic_cast<SnakeBlock*>(block)) {
+				if (!snake_drag_check(sb, weak_links)) {
+					return false;
+				}
+			}
 		}
 	}
 	return !comp->blocked_;
 }
 
-void HorizontalStepProcessor::snake_strong_drag_check(SnakeBlock* block) {
-	// A dragged block can't drag neighbors
-	if (!block->dragged_) {
-		auto* comp = block->push_comp();
-		std::vector<GameObject*> cur_strong_drags{};
-		block->collect_dragged_snake_links(map_, dir_, cur_strong_drags, true);
-		for (auto* link : cur_strong_drags) {
-			auto* s_link = static_cast<SnakeBlock*>(link);
-			if (compute_push_component(link)) {
-				strong_drags_.push_back(s_link);
-				comp->add_pushing(link->push_comp());
+bool HorizontalStepProcessor::snake_drag_check(SnakeBlock* sb, std::vector<GameObject*>& weak_links) {
+	std::vector<GameObject*> weak_links_temp{};
+	std::vector<GameObject*> strong_links{};
+	sb->collect_dragged_snake_links(map_, dir_, strong_links, weak_links_temp);
+	auto* comp = sb->push_comp();
+	for (auto* link : strong_links) {
+		if (compute_push_component(link, true, weak_links)) {
+			if (comp->moving_) {
+				orphaned_moving_comps_.push_back(link->push_comp());
 			} else {
-				s_link->dragged_ = false;
-				comp->blocked_ = true;
+				comp->add_pushing(link->push_comp());
 			}
+		} else {
+			// The component failed to move, but it's not necessarily blocked
+			return false;
 		}
 	}
+	// If the move was successful, keep the weak links
+	weak_links.insert(weak_links.end(), weak_links_temp.begin(), weak_links_temp.end());
+	return true;
 }
-
 
 void HorizontalStepProcessor::collect_moving_and_weak_links(PushComponent* comp, std::vector<GameObject*>& weak_links) {
 	if (comp->moving_) {
@@ -224,9 +223,6 @@ void HorizontalStepProcessor::collect_moving_and_weak_links(PushComponent* comp,
 		moving_blocks_.push_back(block);
 		if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
 			moving_snakes_.push_back(sb);
-			if (!sb->dragged_) {
-				sb->collect_dragged_snake_links(map_, dir_, weak_links, false);
-			}
 		} else {
 			block->collect_sticky_links(map_, Sticky::WeakStick, weak_links);
 		}
