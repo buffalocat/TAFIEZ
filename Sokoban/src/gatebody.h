@@ -26,10 +26,10 @@ public:
 	void set_gate(Gate*);
 	Point3 update_gate_pos(DeltaFrame*);
 
-	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
+	void destroy(MoveProcessor*, CauseOfDeath);
 	void undestroy();
 
-	void collect_special_links(RoomMap*, std::vector<GameObject*>&);
+	void collect_special_links(std::vector<GameObject*>&);
 
 	void draw(GraphicsManager*);
 

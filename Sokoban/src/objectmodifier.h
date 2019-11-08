@@ -49,12 +49,12 @@ public:
     virtual void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 	virtual void setup_on_editor_creation(EditorGlobalData* global, Room* room);
 	virtual void cleanup_on_editor_destruction(EditorGlobalData* global);
-	virtual void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
+	virtual void destroy(MoveProcessor*, CauseOfDeath);
 	virtual void undestroy();
 
     // Every type of Modifier can have at most one callback function for map listeners
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
-    virtual void collect_special_links(RoomMap*, std::vector<GameObject*>&);
+    virtual void collect_special_links(std::vector<GameObject*>&);
 };
 
 

@@ -53,7 +53,7 @@ void Gate::shift_internal_pos(Point3 d) {
 	}
 }
 
-void Gate::collect_special_links(RoomMap*, std::vector<GameObject*>& to_check) {
+void Gate::collect_special_links(std::vector<GameObject*>& to_check) {
 	if (body_ && state()) {
 		to_check.push_back(body_);
 	}
@@ -109,12 +109,9 @@ void Gate::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	}
 }
 
-void Gate::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+void Gate::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	mp->delta_frame_->push(std::make_unique<ModDestructionDelta>(this));
 	if (body_) {
-		if (collect_links) {
-			mp->fall_check_.push_back(body_);
-		}
 		body_->set_gate(nullptr);
 	}
 }

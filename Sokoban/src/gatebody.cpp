@@ -75,11 +75,8 @@ Point3 GateBody::update_gate_pos(DeltaFrame* delta_frame) {
 	return dpos;
 }
 
-void GateBody::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+void GateBody::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	if (gate_) {
-		if (collect_links) {
-			mp->fall_check_.push_back(gate_->parent_);
-		}
 		gate_->body_ = nullptr;
 		mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	}
@@ -91,7 +88,7 @@ void GateBody::undestroy() {
 	}
 }
 
-void GateBody::collect_special_links(RoomMap*, std::vector<GameObject*>& to_check) {
+void GateBody::collect_special_links(std::vector<GameObject*>& to_check) {
 	if (gate_) {
 		to_check.push_back(gate_->parent_);
 	}

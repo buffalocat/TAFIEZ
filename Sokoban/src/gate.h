@@ -21,7 +21,7 @@ public:
     void shift_internal_pos(Point3 d);
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
-    void collect_special_links(RoomMap*, std::vector<GameObject*>&);
+    void collect_special_links(std::vector<GameObject*>&);
 
     bool can_set_state(bool state, RoomMap*);
     void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
@@ -29,7 +29,7 @@ public:
 
 	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
-	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
+	void destroy(MoveProcessor*, CauseOfDeath);
 	void undestroy();
 
     void draw(GraphicsManager*, FPoint3);

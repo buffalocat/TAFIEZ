@@ -81,12 +81,9 @@ void GameObject::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 	}
 }
 
-void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
-	if (collect_links) {
-		collect_sticky_links(mp->map_, Sticky::All, mp->fall_check_);
-	}
+void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	if (modifier_) {
-		modifier_->destroy(mp, death, collect_links);
+		modifier_->destroy(mp, death);
 	}
 }
 
@@ -164,10 +161,7 @@ void GameObject::collect_sticky_component(RoomMap* map, Sticky sticky_level, Com
 		cur->comp_ = comp;
 		comp->blocks_.push_back(cur);
 		cur->collect_sticky_links(map, sticky_level, to_check);
-		cur->collect_special_links(map, to_check);
-		if (ObjectModifier* mod = cur->modifier()) {
-			mod->collect_special_links(map, to_check);
-		}
+		cur->collect_special_links(to_check);
 	}
 }
 
@@ -185,8 +179,11 @@ bool GameObject::has_sticky_neighbor(RoomMap* map) {
 
 void GameObject::collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>&) {}
 
-void GameObject::collect_special_links(RoomMap*, std::vector<GameObject*>&) {}
-
+void GameObject::collect_special_links(std::vector<GameObject*>& to_check) {
+	if (modifier_) {
+		modifier_->collect_special_links(to_check);
+	}
+}
 int GameObject::color() {
 	return NO_COLOR;
 }

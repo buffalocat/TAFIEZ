@@ -59,13 +59,13 @@ void ObjectModifier::setup_on_editor_creation(EditorGlobalData* global, Room* ro
 
 void ObjectModifier::cleanup_on_editor_destruction(EditorGlobalData* global) {}
 
-void ObjectModifier::destroy(MoveProcessor*, CauseOfDeath, bool collect_links) {}
+void ObjectModifier::destroy(MoveProcessor*, CauseOfDeath) {}
 
 void ObjectModifier::undestroy() {}
 
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
-void ObjectModifier::collect_special_links(RoomMap*, std::vector<GameObject*>&) {}
+void ObjectModifier::collect_special_links(std::vector<GameObject*>&) {}
 
 
 ModDestructionDelta::ModDestructionDelta(ObjectModifier* mod) :

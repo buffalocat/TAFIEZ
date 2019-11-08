@@ -76,7 +76,7 @@ public:
 	void ext_door_exit();
 
     void add_to_fall_check(GameObject*);
-	void add_neighbors_to_fall_check(GameObject*);
+	void collect_adj_fall_checks(GameObject*);
     void add_to_moving_blocks(GameObject*);
 
 	void set_initializer_state();

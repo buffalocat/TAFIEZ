@@ -42,7 +42,7 @@ public:
 
     virtual void setup_on_put(RoomMap*, DeltaFrame*, bool real);
     virtual void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
-	virtual void destroy(MoveProcessor*, CauseOfDeath , bool collect_links);
+	virtual void destroy(MoveProcessor*, CauseOfDeath);
 	virtual void undestroy();
 
 	virtual std::unique_ptr<GameObject> duplicate(RoomMap* , DeltaFrame* ) = 0;
@@ -57,7 +57,7 @@ public:
 	virtual bool is_snake();
 	virtual bool has_sticky_neighbor(RoomMap*);
 	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
-	virtual void collect_special_links(RoomMap*, std::vector<GameObject*>& links);
+	virtual void collect_special_links(std::vector<GameObject*>& links);
 
 	ObjectModifier* modifier();
 	virtual int color();

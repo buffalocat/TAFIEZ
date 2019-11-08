@@ -130,7 +130,7 @@ bool MoveProcessor::try_color_change() {
 	state_ = MoveStep::ColorChange;
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;
 	delta_frame_->push(std::make_unique<ColorChangeDelta>(car, true));
-	add_neighbors_to_fall_check(car->parent_);
+	collect_adj_fall_checks(car->parent_);
 	reset_player_jump();
 	return true;
 }
@@ -186,12 +186,12 @@ void MoveProcessor::try_jump_refresh() {
 	delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
 }
 
-void MoveProcessor::add_neighbors_to_fall_check(GameObject* obj) {
+void MoveProcessor::collect_adj_fall_checks(GameObject* obj) {
 	fall_check_.push_back(obj);
-	for (Point3 d : DIRECTIONS) {
-		if (GameObject* adj = map_->view(obj->shifted_pos(d))) {
-			fall_check_.push_back(adj);
-		}
+	obj->collect_sticky_links(map_, Sticky::All, fall_check_);
+	obj->collect_special_links(fall_check_);
+	if (auto* above = map_->view(obj->shifted_pos({ 0, 0, 1 }))) {
+		fall_check_.push_back(above);
 	}
 }
 
@@ -258,7 +258,8 @@ void MoveProcessor::run_incinerators() {
 						widowed_snakes.insert(widowed_snakes.end(), sb->links_.begin(), sb->links_.end());
 					}
 					map_->take_from_map(above, true, true, delta_frame_);
-					above->destroy(this, CauseOfDeath::Incinerated, true);
+					collect_adj_fall_checks(above);
+					above->destroy(this, CauseOfDeath::Incinerated);
 				}
 			}
 		}
@@ -281,7 +282,7 @@ void MoveProcessor::raise_gates() {
 				GateBody* body = gate->body_;
 				pushable &= body->pushable_;
 				gravitable &= body->gravitable_;
-				body->destroy(this, CauseOfDeath::Collided, true);
+				body->destroy(this, CauseOfDeath::Collided);
 			}
 			// Corrupt GateBodies are snake-shaped, because one ingredient must ALWAYS be a snake
 			// Whether they're persistent doesn't matter, because they don't function
@@ -330,7 +331,7 @@ void MoveProcessor::try_door_entry() {
 		}
 		for (auto& obj : door_travelling_objs_) {
 			map_->take_from_map(obj.raw, true, true, delta_frame_);
-			add_neighbors_to_fall_check(obj.raw);
+			collect_adj_fall_checks(obj.raw);
 		}
 		for (auto& obj : door_travelling_objs_) {
 			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
@@ -389,7 +390,7 @@ void MoveProcessor::place_door_travelling_objects() {
 		}
 		// Make sure to move everything before destroying the originals
 		for (int i = 0; i < num_objs; ++i) {
-			door_travelling_objs_[i].raw->destroy(this, CauseOfDeath::Split, false);
+			door_travelling_objs_[i].raw->destroy(this, CauseOfDeath::Split);
 		}
 		for (auto* player : new_players) {
 			player->validate_state(map_, delta_frame_);
@@ -441,7 +442,7 @@ void MoveProcessor::try_door_unentry() {
 	} else {
 		door_state_ = DoorState::Voided;
 		for (auto& obj : door_travelling_objs_) {
-			obj.raw->destroy(this, CauseOfDeath::Voided, true);
+			obj.raw->destroy(this, CauseOfDeath::Voided);
 		}
 	}
 }

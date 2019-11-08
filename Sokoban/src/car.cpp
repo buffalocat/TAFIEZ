@@ -58,7 +58,7 @@ void Car::shift_internal_pos(Point3 d) {
 	}
 }
 
-void Car::collect_special_links(RoomMap* map, std::vector<GameObject*>& to_check) {
+void Car::collect_special_links(std::vector<GameObject*>& to_check) {
 	if (player_ && player_->tangible_) {
         to_check.push_back(player_);
     }
@@ -99,18 +99,15 @@ void Car::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 
 void Car::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {}
 
-void Car::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
+void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	if (player_) {
 		switch (type_) {
 		case CarType::Normal:
 		case CarType::Hover:
-			if (collect_links) {
-				mp->fall_check_.push_back(player_);
-			}
 			player_->set_free(mp->delta_frame_);
 			break;
 		case CarType::Convertible:
-			player_->destroy(mp, death, collect_links);
+			player_->destroy(mp, death);
 			break;
 		}
 	}

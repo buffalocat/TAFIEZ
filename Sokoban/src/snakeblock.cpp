@@ -394,11 +394,8 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 				// For now, a snake which is linked to anything else
 				//(at level Sticky::AllStick) will not be split.
 				std::vector<GameObject*> sticky_comp{};
-				cur->collect_special_links(map_, sticky_comp);
+				cur->collect_special_links(sticky_comp);
 				cur->reset_internal_state();
-				if (ObjectModifier* mod = cur->modifier()) {
-					mod->collect_special_links(map_, sticky_comp);
-				}
 				// The split succeeded
 				if (sticky_comp.empty()) {
 					std::vector<SnakeBlock*> links = cur->links_;
@@ -412,7 +409,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 						split_copy->target_ = link;
 						snakes_to_pull_.push_back(split_copy);
 					}
-					cur->destroy(move_processor_, CauseOfDeath::Split, false);
+					cur->destroy(move_processor_, CauseOfDeath::Split);
 				// The middle block couldn't be split; split around instead
 				} else {
 					std::vector<SnakeBlock*> links = cur->links_;

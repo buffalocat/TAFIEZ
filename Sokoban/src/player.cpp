@@ -173,12 +173,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 	return true;
 }
 
-void Player::destroy(MoveProcessor* mp, CauseOfDeath death, bool collect_links) {
-	if (collect_links) {
-		if (Car* car = car_riding()) {
-			mp->fall_check_.push_back(car->parent_);
-		}
-	}
+void Player::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	mp->map_->player_cycle_->remove_player(this, mp->delta_frame_);
 	death_ = death;
@@ -260,9 +255,9 @@ FPoint3 Player::cam_pos() {
 	}
 }
 
-void Player::collect_special_links(RoomMap* map, std::vector<GameObject*>& links) {
+void Player::collect_special_links(std::vector<GameObject*>& links) {
     if (state_ == PlayerState::RidingNormal) {
-        links.push_back(map->view(shifted_pos({0,0,-1})));
+        links.push_back(car_->parent_);
     }
 }
 

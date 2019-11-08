@@ -36,14 +36,14 @@ public:
 
 	void set_strictest(RoomMap*, DeltaFrame*);
 	bool toggle_riding(RoomMap*, DeltaFrame*, MoveProcessor*);
-	void destroy(MoveProcessor*, CauseOfDeath, bool collect_links);
+	void destroy(MoveProcessor*, CauseOfDeath);
 	void undestroy();
 	CauseOfDeath death();
 
     Car* car_riding();
 	Car* car_bound(RoomMap* map);
 
-    virtual void collect_special_links(RoomMap*, std::vector<GameObject*>& links);
+    virtual void collect_special_links(std::vector<GameObject*>& links);
 
     void draw(GraphicsManager*);
 
