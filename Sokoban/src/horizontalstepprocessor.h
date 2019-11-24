@@ -12,6 +12,14 @@ class RoomMap;
 class DeltaFrame;
 class MoveProcessor;
 
+enum class PushResult {
+	Blocked,
+	CanMove,
+	Defer,
+};
+
+using PushCompPair = std::pair<PushComponent*, PushComponent*>;
+
 class HorizontalStepProcessor {
 public:
     HorizontalStepProcessor(MoveProcessor* mp, RoomMap*, DeltaFrame*, Player*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
@@ -26,14 +34,16 @@ private:
 
     void perform_horizontal_step();
 
-    bool compute_push_component_tree(GameObject* block, bool dragged);
-    bool compute_push_component(GameObject* block, bool dragged, std::vector<GameObject*>& weak_links);
-	bool snake_drag_check(SnakeBlock* sb, std::vector<GameObject*>& weak_links);
+	bool compute_push_component_tree(GameObject* block, bool dragged);
+	PushResult compute_push_component(GameObject* block, bool dragged);
+	bool snake_drag(SnakeBlock* sb);
 
-    void collect_moving_and_weak_links(PushComponent* comp, std::vector<GameObject*>& weak_links);
+    void collect_moving_and_weak_links(PushComponent* comp);
 
 	std::vector<std::unique_ptr<PushComponent>> push_comps_unique_{};
 	std::vector<PushComponent*> orphaned_moving_comps_{};
+	std::vector<GameObject*> weak_links_{};
+	std::vector<PushCompPair> deferred_{};
 
 	std::vector<SnakeBlock*> moving_snakes_{};
 	std::vector<SnakeBlock*> strong_drags_{};
