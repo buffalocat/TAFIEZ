@@ -207,15 +207,24 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	MapFileI file{ path };
 	std::string name = path.stem().string();
 	auto room = std::make_unique<Room>(this, name);
+	RoomInitData init_data{};
+	room->load_from_file(*objs_, file, global_.get(), &init_data);
 	if (use_default_player) {
-		Player* loaded_player{};
-		room->load_from_file(*objs_, file, global_.get(), &loaded_player);
-		if (loaded_player) {
-			room->map()->player_cycle_->add_player(loaded_player, nullptr, true);
-			loaded_player->validate_state(room->map(), nullptr);
-		}
+		room->map()->player_cycle_->set_active_player(init_data.default_player);
 	} else {
-		room->load_from_file(*objs_, file, global_.get(), nullptr);
+		if (Player* active_player = init_data.active_player) {
+			room->map()->player_cycle_->set_active_player(active_player);
+		}
+		// Uncreate the default objects we put in the map
+		if (Player* player = init_data.default_player) {
+			room->map()->player_cycle_->remove_player(player, nullptr);
+			room->map()->clear(player->pos_);
+			room->map()->remove_from_object_array(player);
+		}
+		if (Car* car = init_data.default_car) {
+			room->map()->clear(car->pos());
+			room->map()->remove_from_object_array(car->parent_);
+		}
 	}
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }

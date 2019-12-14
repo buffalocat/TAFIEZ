@@ -26,10 +26,10 @@ void EditorTab::handle_left_click(EditorRoom* eroom, Point3 pos) {}
 
 void EditorTab::handle_right_click(EditorRoom* eroom, Point3 pos) {}
 
-bool EditorTab::kill_object(Point3 pos, RoomMap* map) {
-	// The player can't be killed
+bool EditorTab::kill_object(Point3 pos, RoomMap* map, Point3 player_pos) {
 	if (GameObject* obj = map->view(pos)) {
-		if (obj->obj_code() == ObjCode::Player) {
+		// The player can't be killed
+		if (pos == player_pos) {
 			return false;
 		}
 		if (auto* mod = obj->modifier()) {

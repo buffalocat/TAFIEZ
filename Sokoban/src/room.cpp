@@ -164,11 +164,9 @@ void Room::write_to_file(MapFileO& file) {
 	map_->serialize(file);
 
 	camera_->serialize(file);
-
-	file << MapCode::End;
 }
 
-void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, Player** player_ptr) {
+void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, RoomInitData* init_data) {
 	unsigned char b[8];
 	bool reading_file = true;
 	auto* p_global = dynamic_cast<PlayingGlobalData*>(global);
@@ -202,7 +200,7 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			file >> offset_pos_;
 			break;
 		case MapCode::Objects:
-			read_objects(file, player_ptr);
+			read_objects(file);
 			break;
 		case MapCode::CameraRects:
 			read_camera_rects(file);
@@ -237,6 +235,20 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			}
 			break;
 		}
+		case MapCode::DefaultPlayerPos:
+			init_data->default_player = dynamic_cast<Player*>(map_->view(file.read_point3()));
+			break;
+		case MapCode::DefaultCarPos:
+		{
+			GameObject* car_obj = map_->view(file.read_point3());
+			if (Car* car = dynamic_cast<Car*>(car_obj->modifier())) {
+				init_data->default_car = car;
+			}
+			break;
+		}
+		case MapCode::ActivePlayerPos:
+			init_data->active_player = dynamic_cast<Player*>(map_->view(file.read_point3()));
+			break;
 		case MapCode::End:
 			reading_file = false;
 			break;
@@ -250,15 +262,15 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 #define CASE_OBJCODE(CLASS)\
 case ObjCode::CLASS:\
     obj = CLASS::deserialize(file);\
-    break
+    break;
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
     CLASS::deserialize(file, map_.get(), obj.get());\
-    break
+    break;
 
 
-void Room::read_objects(MapFileI& file, Player** player_ptr) {
+void Room::read_objects(MapFileI& file) {
 	unsigned char b;
 	std::unique_ptr<GameObject> obj{};
 	while (true) {
@@ -270,17 +282,12 @@ void Room::read_objects(MapFileI& file, Player** player_ptr) {
 			CASE_OBJCODE(GateBody);
 			CASE_OBJCODE(Wall);
 			CASE_OBJCODE(ArtWall);
-			// Some Object types should never actually be serialized (as "Objects")
 		case ObjCode::Player:
 		{
 			obj = Player::deserialize(file);
-			if (player_ptr) {
-				*player_ptr = static_cast<Player*>(obj.get());
-			} else {
-				// TODO: make this less fragile?
-				file.read(&b, 1);
-				continue;
-			}
+			// Players need special initialization when brought into the map
+			auto* player = static_cast<Player*>(obj.get());
+			map_->player_cycle_->add_player(player, nullptr, false);
 			break;
 		}
 		case ObjCode::NONE:

@@ -48,8 +48,10 @@ void DoorSelectState::main_loop() {
 }
 
 void DoorSelectState::handle_left_click(Point3 pos) {
-	if (auto door = dynamic_cast<Door*>(room_->map()->view(pos))) {
-		*exit_door_id_ = door->door_id_;
+	if (GameObject* door_obj = room_->map()->view(pos)) {
+		if (auto door = dynamic_cast<Door*>(door_obj->modifier())) {
+			*exit_door_id_ = door->door_id_;
+		}
 	}
 }
 

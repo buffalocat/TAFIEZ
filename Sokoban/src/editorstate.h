@@ -16,7 +16,9 @@ struct EditorRoom {
     Point3 start_pos;
     Point3 cam_pos;
     bool changed = true;
-    EditorRoom(std::unique_ptr<Room>, Point3);
+	bool include_car;
+    EditorRoom(std::unique_ptr<Room>, Point3, bool inc_car);
+	void write_to_file(MapFileO& file);
 
     RoomMap* map();
     std::string name();

@@ -21,6 +21,11 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 		return;
 	}
 
+	Point3 pp = eroom->start_pos;
+	ImGui::Text("The Player's start point is (%d,%d,%d).\nLeft click to change it.", pp.x, pp.y, pp.z);
+	ImGui::Checkbox("Include Car as starting object?", &eroom->include_car);
+	ImGui::Separator();
+
 	zone_options(eroom->map());
 	
 	int* req = &eroom->map()->clear_flag_req_;
@@ -107,7 +112,8 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 			eroom->start_pos = { 0,0,0 };
 		}
 		player->pos_ = eroom->start_pos;
-		kill_object(player->pos_, map);
+		// The player isn't in the map at this point; we don't have to worry about killing it
+		kill_object(player->pos_, map, { -1, -1, -1 });
 		map->put_in_map(player, true, false, nullptr);
 		eroom = editor_->reload(eroom);
 	}
@@ -135,7 +141,8 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 			eroom->start_pos = { 0,0,0 };
 		}
 		player->pos_ = eroom->start_pos;
-		kill_object(player->pos_, map);
+		// The player isn't in the map at this point; we don't have to worry about killing it
+		kill_object(player->pos_, map, { -1, -1, -1 });
 		map->put_in_map(player, true, false, nullptr);
 		eroom = editor_->reload(eroom);
 	}

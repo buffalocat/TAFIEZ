@@ -236,6 +236,7 @@ public:
 
 	void add_player(Player* player, DeltaFrame*, bool init);
 	void add_player_at_pos(Player* player, int index);
+	void set_active_player(Player* player);
 	void remove_player(Player* player, DeltaFrame*);
 	bool cycle_player(DeltaFrame*);
 	Player* current_player();

@@ -8,6 +8,7 @@
 #include "roommap.h"
 
 #include "gameobject.h"
+#include "player.h"
 #include "pushblock.h"
 #include "snakeblock.h"
 #include "wall.h"
@@ -26,6 +27,8 @@ static ObjCode obj_code = ObjCode::Wall;
 static PushBlock model_pb{ Point3{0,0,0}, GREEN, true, true, Sticky::None };
 static SnakeBlock model_sb{ Point3{0,0,0}, PURPLE, true, true, 2, true };
 static ArtWall model_artwall{ Point3{0,0,0}, 0 };
+static Player model_player{ Point3{0,0,0}, PlayerState::Free };
+
 
 // Object Inspection
 static GameObject* selected_obj = nullptr;
@@ -47,7 +50,7 @@ void ObjectTab::main_loop(EditorRoom* eroom) {
 	ImGui::Checkbox("Inspect Mode##OBJECT_inspect", &inspect_mode_);
 	ImGui::Separator();
 
-	object_tab_options(eroom->map());
+	object_tab_options(eroom);
 }
 
 void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
@@ -55,9 +58,11 @@ void ObjectTab::object_type_choice(ObjCode* obj_code_ptr) {
 	ImGui::RadioButton("SnakeBlock##OBJECT_object", obj_code_ptr, ObjCode::SnakeBlock);
 	ImGui::RadioButton("Wall##OBJECT_object", obj_code_ptr, ObjCode::Wall);
 	ImGui::RadioButton("ArtWall##OBJECT_object", obj_code_ptr, ObjCode::ArtWall);
+	ImGui::RadioButton("Player##OBJECT_object", obj_code_ptr, ObjCode::Player);
 }
 
-void ObjectTab::object_tab_options(RoomMap* map) {
+void ObjectTab::object_tab_options(EditorRoom* eroom) {
+	RoomMap* map = eroom->map();
 	GameObject* obj = nullptr;
 	if (inspect_mode_) {
 		if (selected_obj) {
@@ -85,8 +90,8 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 		ImGui::RadioButton("Weakly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::WeakBlock);
 		ImGui::RadioButton("Strongly Sticky##PB_modify_sticky", &pb->sticky_, Sticky::StrongBlock);
 		ImGui::RadioButton("SemiWeak Sticky##PB_modify_sticky", &pb->sticky_, Sticky::SemiBlock);
+		break;
 	}
-	break;
 	case ObjCode::SnakeBlock:
 	{
 		ImGui::Text("SnakeBlock");
@@ -108,19 +113,30 @@ void ObjectTab::object_tab_options(RoomMap* map) {
 			}
 		}
 		ImGui::Checkbox("Weak?##SB_modify_weak", &sb->weak_);
+		break;
 	}
-	break;
 	case ObjCode::GateBody:
 	{
 		ImGui::Text("GateBody");
 		Point3 p_pos = static_cast<GateBody*>(obj)->gate_pos();
 		ImGui::Text("See parent Gate at (%d,%d,%d)", p_pos.x, p_pos.y, p_pos.z);
-	}
-	break;
-	case ObjCode::Player: // The player can't be edited in any way!!
-		ImGui::Text("Player");
-		return;
 		break;
+	}
+	case ObjCode::Player:
+	{
+		ImGui::Text("Player");
+		if (selected_obj == map->view(eroom->start_pos)) {
+			ImGui::Text("The Default Startpoint Player");
+			return;
+		}
+		Player* player = obj ? static_cast<Player*>(obj) : &model_player;
+		ImGui::Text("Player State");
+		ImGui::RadioButton("Free##PLAYER_modify_state", &player->state_, PlayerState::Free);
+		ImGui::RadioButton("Bound##PLAYER_modify_state", &player->state_, PlayerState::Bound);
+		// Allowing the user to set "Riding" has annoying consequences
+		//ImGui::RadioButton("Riding##PLAYER_modify_state", &player->state_, PlayerState::RidingNormal);
+		break;
+	}
 	case ObjCode::Wall:
 		ImGui::Text("Wall");
 		break;
@@ -179,6 +195,9 @@ std::unique_ptr<GameObject> ObjectTab::create_from_model(ObjCode obj_code, GameO
 		break;
 	case ObjCode::ArtWall:
 		obj = std::make_unique<ArtWall>(model_artwall);
+		break;
+	case ObjCode::Player:
+		obj = std::make_unique<Player>(model_player);
 		break;
 	default:
 		return nullptr;
@@ -240,7 +259,7 @@ void ObjectTab::handle_right_click(EditorRoom* eroom, Point3 pos) {
 	if (inspect_mode_) {
 		return;
 	}
-	if (kill_object(pos, eroom->map())) {
+	if (kill_object(pos, eroom->map(), eroom->start_pos)) {
 		selected_obj = nullptr;
 	}
 }

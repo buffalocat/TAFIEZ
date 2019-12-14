@@ -122,7 +122,6 @@ void DoorTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
                     editor_->load_room(data->dest, true);
                     exit_room_ = editor_->get_room(data->dest);
                 }
-                
             }
         }
     }

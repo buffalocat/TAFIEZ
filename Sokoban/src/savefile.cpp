@@ -3,6 +3,8 @@
 
 #include "common_constants.h"
 #include "room.h"
+#include "roommap.h"
+#include "player.h"
 #include "playingstate.h"
 #include "mapfile.h"
 
@@ -203,6 +205,11 @@ std::filesystem::path SaveFile::get_path(std::string name, bool* from_main) {
 void SaveFile::save_room(Room* room, std::filesystem::path path) {
 	MapFileO file{ (path / room->name()).concat(".map") };
 	room->write_to_file(file);
+	if (Player* active_player = room->map()->player_cycle_->current_player()) {
+		file << MapCode::ActivePlayerPos;
+		file << active_player->pos_;
+	}
+	file << MapCode::End;
 }
 
 void SaveFile::world_reset() {

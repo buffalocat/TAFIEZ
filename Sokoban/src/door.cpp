@@ -25,7 +25,7 @@ void Door::make_str(std::string& str) {
 	if (data_) {
 		snprintf(buf, 64, "Door:(%d)\"%s\"[%d]", door_id_, data_->dest.c_str(), data_->id);
 	} else {
-		snprintf(buf, 64, "Door:NO DEST");
+		snprintf(buf, 64, "Door:(%d)[NONE]", door_id_);
 	}
 	str += buf;
 	Switchable::make_str(str);

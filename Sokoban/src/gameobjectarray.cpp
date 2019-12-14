@@ -5,7 +5,7 @@
 #include "objectmodifier.h"
 #include "animation.h"
 
-GameObjectArray::GameObjectArray(): array_ {} {
+GameObjectArray::GameObjectArray() {
     array_.push_back(nullptr);
     array_.push_back(std::make_unique<Wall>());
     array_[1]->id_ = 1;
@@ -30,7 +30,14 @@ GameObject* GameObjectArray::safe_get(unsigned int id) const {
     }
 }
 
+void GameObjectArray::schedule_deletion(GameObject* obj) {
+	to_delete_.push_back(obj);
+}
+
 // TODO: use a minheap of "deleted IDs" to potentially reuse object IDs.
-void GameObjectArray::uncreate(GameObject* obj) {
-    array_[obj->id_].reset(nullptr);
+void GameObjectArray::remove_deleted_objects() {
+	for (auto* obj : to_delete_) {
+		array_[obj->id_].reset(nullptr);
+	}
+	to_delete_ = {};
 }

@@ -61,6 +61,7 @@ private:
 	CauseOfDeath death_ = CauseOfDeath::None;
 
 	friend class PlayerStateDelta;
+	friend class ObjectTab;
 };
 
 

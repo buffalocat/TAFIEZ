@@ -24,8 +24,8 @@
 #include "cameratab.h"
 
 
-EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos):
-room {std::move(arg_room)}, start_pos {pos}, cam_pos {pos} {}
+EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos, bool inc_car):
+	room{ std::move(arg_room) }, start_pos{ pos }, cam_pos{ pos }, include_car{ inc_car } {}
 
 RoomMap* EditorRoom::map() {
     return room->map();
@@ -33,6 +33,21 @@ RoomMap* EditorRoom::map() {
 
 std::string EditorRoom::name() {
     return room->name();
+}
+
+void EditorRoom::write_to_file(MapFileO& file) {
+	room->write_to_file(file);
+	file << MapCode::DefaultPlayerPos;
+	file << start_pos;
+	if (include_car) {
+		if (GameObject* obj_below = map()->view(start_pos - Point3{ 0, 0, 1 })) {
+			if (Car* car = dynamic_cast<Car*>(obj_below->modifier())) {
+				file << MapCode::DefaultCarPos;
+				file << car->pos();
+			}
+		}
+	}
+	file << MapCode::End;
 }
 
 #define INIT_TAB(NAME)\
@@ -182,7 +197,7 @@ void EditorState::new_room(std::string name, int width, int height, int depth) {
 	Point3 player_pos{ 0,0,2 };
     room->map()->create_in_map(std::make_unique<Player>(player_pos, PlayerState::Free), false, nullptr);
 	room->set_cam_pos(player_pos, player_pos, false, true);
-    rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos);
+    rooms_[name] = std::make_unique<EditorRoom>(std::move(room), player_pos, true);
     set_active_room(name);
 }
 
@@ -205,13 +220,14 @@ void EditorState::load_room_from_path(std::filesystem::path path) {
 	std::string name = path.stem().string();
 	std::unique_ptr<Room> room = std::make_unique<Room>(this, name);
 
-	Player* player = nullptr;
-	room->load_from_file(*objs_, file, global_.get(), &player);
+	RoomInitData init_data;
+	room->load_from_file(*objs_, file, global_.get(), &init_data);
+	Player* player = init_data.default_player;
 	player->set_free(nullptr);
 	Point3 start_pos = player->pos_;
 	room->map()->set_initial_state_in_editor();
 	room->set_cam_pos(start_pos, start_pos, false, true);
-	rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos);
+	rooms_[name] = std::make_unique<EditorRoom>(std::move(room), start_pos, init_data.default_car != nullptr);
 }
 
 void EditorState::save_room(EditorRoom* eroom, bool commit) {
@@ -225,7 +241,7 @@ void EditorState::save_room(EditorRoom* eroom, bool commit) {
 	RoomMap* map = eroom->map();
 	Player* player = dynamic_cast<Player*>(map->view(eroom->start_pos));
 	player->set_strictest(map, nullptr);
-    eroom->room->write_to_file(file);
+    eroom->write_to_file(file);
 	player->set_free(nullptr);
 }
 

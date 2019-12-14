@@ -147,7 +147,7 @@ void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, bool activat
 }
 
 void RoomMap::remove_from_object_array(GameObject* obj) {
-	obj_array_.uncreate(obj);
+	obj_array_.schedule_deletion(obj);
 }
 
 void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {
@@ -414,6 +414,8 @@ void RoomStateInitializer::operator()(int id) {
 	}
 	if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(obj)) {
 		sb->check_add_local_links(map, delta_frame);
+	} else if (Player* player = dynamic_cast<Player*>(obj)) {
+			player->validate_state(map, delta_frame);
 	}
 	if (ObjectModifier* mod = obj->modifier()) {
 		map->activate_listener_of(mod);
@@ -658,6 +660,16 @@ void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init)
 		index_ = (int)players_.size();
 	}
 	players_.push_back(player);
+}
+
+void PlayerCycle::set_active_player(Player* player) {
+	ActivePlayerGuard guard{ this };
+	auto active_it = std::find(players_.begin(), players_.end(), player);
+	if (active_it == players_.end()) {
+		add_player(player, nullptr, true);
+	} else {
+		index_ = (int)std::distance(players_.begin(), active_it);
+	}
 }
 
 void PlayerCycle::add_player_at_pos(Player* player, int index) {

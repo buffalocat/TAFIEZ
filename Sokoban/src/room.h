@@ -13,8 +13,15 @@ class MapFileI;
 class MapFileO;
 class GameObject;
 class Player;
+class Car;
 class GlobalData;
 class RoomLabelDrawer;
+
+struct RoomInitData {
+	Player* default_player{};
+	Car* default_car{};
+	Player* active_player{};
+};
 
 class Room {
 public:
@@ -28,7 +35,7 @@ public:
 	Camera* camera();
 
     void write_to_file(MapFileO& file);
-    void load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, Player** player_ptr);
+    void load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, RoomInitData* init_data);
 
     void draw_at_pos(Point3 cam_pos, bool display_labels, bool ortho, bool one_layer);
     void draw_at_player(Player* target, bool display_labels, bool ortho, bool one_layer);
@@ -54,7 +61,7 @@ private:
 	GameState* state_;
 	GraphicsManager* gfx_;
 
-    void read_objects(MapFileI& file, Player** player_ptr);
+    void read_objects(MapFileI& file);
     void read_camera_rects(MapFileI& file);
     void read_snake_link(MapFileI& file);
     void read_door_dest(MapFileI& file);

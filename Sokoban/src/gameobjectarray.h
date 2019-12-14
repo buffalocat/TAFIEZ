@@ -14,10 +14,12 @@ public:
     void push_object(std::unique_ptr<GameObject> obj);
     GameObject* operator[](unsigned int id) const;
     GameObject* safe_get(unsigned int id) const;
-    void uncreate(GameObject* obj);
+    void schedule_deletion(GameObject* obj);
+	void remove_deleted_objects();
 
 private:
-    std::vector<std::unique_ptr<GameObject>> array_;
+	std::vector<std::unique_ptr<GameObject>> array_{};
+	std::vector<GameObject*> to_delete_{};
 };
 
 #endif // GAMEOBJECTARRAY_H

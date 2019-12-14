@@ -29,7 +29,7 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 	if (!std::filesystem::exists(path)) {
 		return false;
 	}
-	load_room_from_path(path, use_default_player || !from_main);
+	load_room_from_path(path, use_default_player);
 	return true;
 }
 
