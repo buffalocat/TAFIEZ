@@ -153,7 +153,7 @@ MapFileO& MapFileO::operator<<(unsigned int n) {
     return *this;
 }
 
-// Serializes floats in the range [2^-11, 2^11) with 24 bits of precision
+// Serializes floats in the range [-2^11, 2^11) with 24 bits of precision
 MapFileO& MapFileO::operator<<(double f) {
 	file_ << (unsigned char)(unsigned int)((f + (1 << 11)) / (1 << 4));
     file_ << (unsigned char)(unsigned int)((1 << 4) * f);

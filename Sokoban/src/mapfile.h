@@ -19,6 +19,7 @@ enum class MapCode {
 	GateBaseLocation = 13, // Indicates that a GateBody needs to be paired with its parent
 	WallPositions = 14, // Initiates list of Wall Positions
 	GlobalFlag = 15, // Indicates a global flag (only for flag-room synchronization purposes)
+	StartObject = 16, // Gives the position of an object which should be killed unless "starting" from this room
 	End = 255,
 };
 

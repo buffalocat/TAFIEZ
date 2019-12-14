@@ -24,9 +24,6 @@
 #include "cameratab.h"
 
 
-#define INIT_TAB(NAME)\
-tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this)));
-
 EditorRoom::EditorRoom(std::unique_ptr<Room> arg_room, Point3 pos):
 room {std::move(arg_room)}, start_pos {pos}, cam_pos {pos} {}
 
@@ -37,6 +34,9 @@ RoomMap* EditorRoom::map() {
 std::string EditorRoom::name() {
     return room->name();
 }
+
+#define INIT_TAB(NAME)\
+tabs_.push_back(std::make_pair(#NAME, std::make_unique<NAME ## Tab>(this)));
 
 EditorState::EditorState(GameState* parent): EditorBaseState(parent) {
     INIT_TAB(SaveLoad);

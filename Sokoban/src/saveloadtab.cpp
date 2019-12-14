@@ -1,10 +1,7 @@
 #include "stdafx.h"
 #include "saveloadtab.h"
 
-
-
 #include "common_constants.h"
-
 #include "room.h"
 #include "roommap.h"
 #include "gameobject.h"
