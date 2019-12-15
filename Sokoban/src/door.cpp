@@ -18,7 +18,7 @@ Door::Door(GameObject* parent, int count, bool persistent, bool def, bool active
 
 Door::~Door() {}
 
-Door::Door(const Door& d): Switchable(d.parent_, d.count_, d.persistent_, d.default_, d.active_, d.waiting_), data_{} {}
+Door::Door(const Door& d) : Switchable(d.parent_, d.count_, d.persistent_, d.default_, d.active_, d.waiting_), data_{}, door_id_{ d.door_id_ } {}
 
 void Door::make_str(std::string& str) {
 	char buf[64];
@@ -114,6 +114,8 @@ void Door::draw(GraphicsManager* gfx, FPoint3 p) {
 std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {
     auto dup = std::make_unique<Door>(*this);
     dup->parent_ = parent;
-    dup->data_ = std::make_unique<DoorData>(*data_);
+	if (data_) {
+		dup->data_ = std::make_unique<DoorData>(*data_);
+	}
     return std::move(dup);
 }
