@@ -11,6 +11,7 @@ enum class CarType {
 	Locked = 1,
 	Convertible = 2,
 	Hover = 3,
+	Binding = 4,
 };
 
 class Car: public ObjectModifier {

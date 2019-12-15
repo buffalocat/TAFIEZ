@@ -85,9 +85,8 @@ void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 				set_car(car);
 				break;
 			case CarType::Locked:
-				set_bound();
-				break;
 			case CarType::Convertible:
+			case CarType::Binding:
 				set_bound();
 				break;
 			}
@@ -133,6 +132,12 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 	auto delta = std::make_unique<PlayerStateDelta>(this);
 	switch (state_) {
 	case PlayerState::Free:
+		if (auto* car = car_below(map)) {
+			if (car->type_ == CarType::Binding) {
+				state_ = PlayerState::Bound;
+				break;
+			}
+		}
 		return false;
 	case PlayerState::Bound:
 		if (auto* car = car_bound(map)) {
@@ -151,6 +156,9 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 				map->take_from_map(this, true, true, delta_frame);
 				state_ = PlayerState::RidingHidden;
 				set_car(car);
+				break;
+			case CarType::Binding:
+				state_ = PlayerState::Free;
 				break;
 			}
 		} else {
@@ -200,12 +208,16 @@ Car* Player::car_riding() {
 	}
 }
 
+Car* Player::car_below(RoomMap* map) {
+	return dynamic_cast<Car*>(map->view(shifted_pos({ 0,0,-1 }))->modifier());
+}
+
 Car* Player::car_bound(RoomMap* map) {
     switch (state_) {
 	case PlayerState::Free:
 		return nullptr;
 	case PlayerState::Bound:
-		return dynamic_cast<Car*>(map->view(shifted_pos({ 0,0,-1 }))->modifier());
+		return car_below(map);
 	case PlayerState::RidingNormal:
 	case PlayerState::RidingHidden:
 		return car_;

@@ -41,6 +41,7 @@ public:
 	CauseOfDeath death();
 
     Car* car_riding();
+	Car* car_below(RoomMap* map);
 	Car* car_bound(RoomMap* map);
 
     virtual void collect_special_links(std::vector<GameObject*>& links);

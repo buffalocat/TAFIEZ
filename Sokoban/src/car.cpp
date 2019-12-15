@@ -47,6 +47,8 @@ BlockTexture Car::texture() {
 		return BlockTexture::ConvertibleCar;
 	case CarType::Hover:
 		return BlockTexture::HoverCar;
+	case CarType::Binding:
+		return BlockTexture::BindingCar;
 	default:
 		return BlockTexture::Default;
 	}
