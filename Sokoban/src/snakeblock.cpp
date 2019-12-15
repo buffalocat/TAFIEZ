@@ -229,6 +229,18 @@ void SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
 	}
 }
 
+// This is useful when a snake gets destroyed, because it can widow its links,
+// but also un-confuse its non-links
+void SnakeBlock::collect_all_viable_neighbors(RoomMap* map, std::set<SnakeBlock*>& check) {
+	for (Point3 d : H_DIRECTIONS) {
+		auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
+		// TODO: Make sure these conditions are reasonable
+		if (snake && (color_ == snake->color_)) {
+			check.insert(snake);
+		}
+	}
+}
+
 void SnakeBlock::collect_maybe_confused_neighbors(RoomMap* map, std::set<SnakeBlock*>& check) {
 	if (available()) {
 		for (Point3 d : H_DIRECTIONS) {

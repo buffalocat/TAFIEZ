@@ -246,7 +246,7 @@ void MoveProcessor::push_rising_gate(Gate* gate) {
 }
 
 void MoveProcessor::run_incinerators() {
-	std::vector<SnakeBlock*> widowed_snakes{};
+	std::set<SnakeBlock*> snake_check{};
 	for (auto* inc : alerted_incinerators_) {
 		if (inc->state()) {
 			Point3 pos_above = inc->pos_above();
@@ -255,7 +255,7 @@ void MoveProcessor::run_incinerators() {
 					map_->clear(pos_above);
 				} else {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
-						widowed_snakes.insert(widowed_snakes.end(), sb->links_.begin(), sb->links_.end());
+						sb->collect_all_viable_neighbors(map_, snake_check);
 					}
 					map_->take_from_map(above, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
@@ -264,7 +264,7 @@ void MoveProcessor::run_incinerators() {
 			}
 		}
 	}
-	for (auto* sb : widowed_snakes) {
+	for (auto* sb : snake_check) {
 		if (sb->tangible_) {
 			sb->check_add_local_links(map_, delta_frame_);
 		}
