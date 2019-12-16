@@ -41,12 +41,8 @@ void WorldResetKey::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProc
 	}
 	if (parent_->tangible_) {
 		if (auto* above = map->view(pos_above())) {
-			if (dynamic_cast<Player*>(above)) {
+			if (is_player_rep(above)) {
 				collected_ = true;
-			} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0, 0, 2 }))) {
-				if (player->car_riding()) {
-					collected_ = true;
-				}
 			}
 		}
 		if (collected_) {

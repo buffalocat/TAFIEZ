@@ -8,6 +8,7 @@
 #include "roommap.h"
 #include "player.h"
 #include "delta.h"
+#include "car.h"
 
 ClearFlag::ClearFlag(GameObject* parent, int count, bool real, bool active, bool collected, char zone) :
 	ObjectModifier(parent),
@@ -54,12 +55,8 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 		active_ = false;
 		if (auto* above = map->view(pos_above())) {
 			if (real_) {
-				if (dynamic_cast<Player*>(above)) {
+				if (is_player_rep(above)) {
 					active_ = true;
-				} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0, 0, 2 }))) {
-					if (player->car_riding()) {
-						active_ = true;
-					}
 				}
 			} else {
 				if (auto* mod = above->modifier()) {

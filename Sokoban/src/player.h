@@ -65,6 +65,8 @@ private:
 	friend class ObjectTab;
 };
 
+bool is_player_rep(GameObject*);
+
 
 class PlayerStateDelta : public Delta {
 public:

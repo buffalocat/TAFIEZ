@@ -287,3 +287,14 @@ void PlayerStateDelta::revert() {
 	player_->death_ = death_;
 	player_->set_car(car_);
 }
+
+bool is_player_rep(GameObject* obj) {
+	if (dynamic_cast<Player*>(obj)) {
+		return true;
+	} else if (auto* car = dynamic_cast<Car*>(obj->modifier())) {
+		if (car->player_) {
+			return true;
+		}
+	}
+	return false;
+}
