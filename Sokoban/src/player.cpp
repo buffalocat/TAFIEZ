@@ -141,6 +141,10 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 		return false;
 	case PlayerState::Bound:
 		if (auto* car = car_bound(map)) {
+			// Check if there's already someone in the car!
+			if (car->player_) {
+				return false;
+			}
 			switch (car->type_) {
 			case CarType::Locked:
 				return false;

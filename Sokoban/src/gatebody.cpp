@@ -102,7 +102,7 @@ void GateBody::draw(GraphicsManager* gfx) {
 		(persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody);
 	ModelInstancer& model = snake_ ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
-		glm::vec3(0.7f, 0.7f, height), tex, color_);
+		glm::vec3(0.6f, 0.6f, height), tex, color_);
 	// Only draw belts if there's no parent Gate (this is a strange choice)
 	if (!gate_) {
 		draw_force_indicators(model, p, 0.75f);
