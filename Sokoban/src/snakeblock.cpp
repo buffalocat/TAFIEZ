@@ -217,16 +217,19 @@ bool SnakeBlock::can_link(SnakeBlock* snake) {
 		!in_links(snake);
 }
 
-void SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
+bool SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
 	if (!available() || confused(map)) {
-		return;
+		return false;
 	}
+	bool added = false;
 	for (auto& d : H_DIRECTIONS) {
 		auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
 		if (snake && color() == snake->color() && snake->available() && !in_links(snake) && !snake->confused(map)) {
 			add_link(snake, delta_frame);
+			added = true;
 		}
 	}
+	return added;
 }
 
 // This is useful when a snake gets destroyed, because it can widow its links,
@@ -289,6 +292,20 @@ void SnakeBlock::break_blocked_links(std::vector<GameObject*>& fall_check, Delta
 			}
 		}
 	}
+}
+
+bool SnakeBlock::has_settled_link() {
+	for (SnakeBlock* link : links_) {
+		if (auto fall_comp = link->fall_comp()) {
+			if (fall_comp->settled_) {
+				return true;
+			}
+		// A block with no fall comp was already on the ground
+		} else {
+			return true;
+		}
+	}
+	return false;
 }
 
 void SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {

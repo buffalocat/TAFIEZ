@@ -296,6 +296,8 @@ void MoveProcessor::raise_gates() {
 	rising_gates_.clear();
 }
 
+DoorTravellingObj::DoorTravellingObj(GameObject* obj, Door* door) : raw{ obj }, rel_pos{ obj->pos_ - door->pos() } {}
+
 void MoveProcessor::plan_door_move(Door* door) {
 	// Don't plan a door move if we loaded in on the door, or if we just used a door, or if we were already on the door
 	if (!player_ || door_state_ != DoorState::None || door == standing_door_) {
@@ -306,11 +308,11 @@ void MoveProcessor::plan_door_move(Door* door) {
 		// TODO: rethink these checks to be SAFE
 		if (GameObject* above = map_->view(door->pos_above())) {
 			if (player_ == above) {
-				door_travelling_objs_.push_back({ player_, {} });
+				door_travelling_objs_.push_back({ player_, door });
 			} else if (Car* car = player_->car_riding()) {
 				if (above->modifier() == car) {
-					door_travelling_objs_.push_back({ player_, {} });
-					door_travelling_objs_.push_back({ above, {} });
+					door_travelling_objs_.push_back({ player_, door });
+					door_travelling_objs_.push_back({ above, door });
 				}
 			}
 		}
@@ -323,7 +325,7 @@ void MoveProcessor::plan_door_move(Door* door) {
 }
 
 void MoveProcessor::try_door_entry() {
-	if (playing_state_->can_use_door(entry_door_, &dest_room_, door_travelling_objs_, door_dest_grid_)) {
+	if (playing_state_->can_use_door(entry_door_, &dest_room_, door_travelling_objs_, exit_doors_)) {
 		if (dest_room_->map() == map_) {
 			door_state_ = DoorState::AwaitingIntExit;
 		} else {
@@ -347,39 +349,30 @@ void MoveProcessor::try_door_entry() {
 	}
 }
 
-struct BlockedPosChecker {
-	RoomMap* map;
-	bool operator()(std::vector<Point3>& pos_list) {
-		for (Point3 pos : pos_list) {
-			if (map->view(pos)) {
-				return true;
-			}
-		}
-		return false;
-	}
-};
-
 void MoveProcessor::place_door_travelling_objects() {
-	int num_exits = (int)door_dest_grid_.size();
+	int num_exits = (int)exit_doors_.size();
 	int num_objs = (int)door_travelling_objs_.size();
 	std::vector<SnakeBlock*> moved_snakes{};
 	if (num_exits == 1) { // Normal door motion
-		for (int i = 0; i < num_objs; ++i) {
-			GameObject* obj = door_travelling_objs_[i].raw;
-			obj->abstract_put(door_dest_grid_[0][i], delta_frame_);
+		Point3 exit_pos = exit_doors_[0]->pos();
+		for (auto& dto : door_travelling_objs_) {
+			GameObject* obj = dto.raw;
+			obj->abstract_put(exit_pos + dto.rel_pos, delta_frame_);
 			map_->put_in_map(obj, true, true, delta_frame_);
+			fall_check_.push_back(obj);
 			if (auto* snake = dynamic_cast<SnakeBlock*>(obj)) {
 				moved_snakes.push_back(snake);
 			}
 		}
 	} else { // Split through the door
 		std::vector<Player*> new_players{};
-		for (int i = 0; i < num_objs; ++i) {
-			GameObject* obj = door_travelling_objs_[i].raw;
-			for (int j = 0; j < num_exits; ++j) {
+		for (auto* exit_door : exit_doors_) {
+			Point3 exit_pos = exit_door->pos();
+			for (auto& dto : door_travelling_objs_) {
+				GameObject* obj = dto.raw;
 				auto dup = obj->duplicate(map_, delta_frame_);
-				dup->abstract_put(door_dest_grid_[j][i], delta_frame_);
-				add_to_fall_check(dup.get());
+				dup->abstract_put(exit_pos + dto.rel_pos, delta_frame_);
+				fall_check_.push_back(dup.get());
 				if (auto* snake = dynamic_cast<SnakeBlock*>(dup.get())) {
 					moved_snakes.push_back(snake);
 				} else if (auto* player = dynamic_cast<Player*>(dup.get())) {
@@ -402,10 +395,25 @@ void MoveProcessor::place_door_travelling_objects() {
 	}
 }
 
+struct BlockedPosChecker {
+	RoomMap* map;
+	std::vector<DoorTravellingObj>& door_travelling_objs;
+	bool operator()(Door* door) {
+		Point3 door_pos = door->pos();
+		for (auto& dto : door_travelling_objs) {
+			if (map->view(door_pos + dto.rel_pos)) {
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
 void MoveProcessor::try_int_door_exit() {
-	door_dest_grid_.erase(std::remove_if(door_dest_grid_.begin(), door_dest_grid_.end(), BlockedPosChecker{ map_ }), door_dest_grid_.end());
+	exit_doors_.erase(std::remove_if(exit_doors_.begin(), exit_doors_.end(),
+		BlockedPosChecker{ map_, door_travelling_objs_ }), exit_doors_.end());
 	// Can't move
-	if (door_dest_grid_.empty()) {
+	if (exit_doors_.empty()) {
 		frames_ = FALL_MOVEMENT_FRAMES;
 		door_state_ = DoorState::AwaitingUnentry;
 		state_ = MoveStep::DoorMove;

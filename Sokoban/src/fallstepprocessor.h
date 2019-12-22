@@ -24,7 +24,6 @@ public:
 private:
 	std::vector<std::unique_ptr<FallComponent>> fall_comps_unique_{};
     std::vector<GameObject*> fall_check_;
-	std::set<SnakeBlock*> snake_check_{};
 
 	MoveProcessor* move_processor_;
     RoomMap* map_;

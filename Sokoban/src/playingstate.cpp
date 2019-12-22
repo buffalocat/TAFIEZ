@@ -231,7 +231,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 
 bool PlayingState::can_use_door(Door* ent_door, Room** dest_room_ptr,
 	std::vector<DoorTravellingObj>& objs,
-	std::vector<std::vector<Point3>>& dest_pos_grid) {
+	std::vector<Door*>& exit_doors) {
 	DoorData* data = ent_door->data();
 	// If you can't load the room, give up
 	// A door to a nonexistent room is indistinguishable from a blocked door
@@ -250,18 +250,17 @@ bool PlayingState::can_use_door(Door* ent_door, Room** dest_room_ptr,
 		Point3 exit_door_pos = dest_door->pos();
 		bool door_ok = true;
 		for (auto& obj : objs) {
-			Point3 dest_pos = exit_door_pos + (obj.raw->pos_ - ent_door_pos);
+			Point3 dest_pos = exit_door_pos + obj.rel_pos;
 			if (dest_map->view(dest_pos)) {
 				door_ok = false;
 				break;
 			}
-			dest_pos_list.push_back(dest_pos);
 		}
 		if (door_ok) {
-			dest_pos_grid.push_back(std::move(dest_pos_list));
+			exit_doors.push_back(dest_door);
 		}
 	}
-	return dest_pos_grid.size() > 0;
+	return exit_doors.size() > 0;
 }
 
 enum class DeathState {

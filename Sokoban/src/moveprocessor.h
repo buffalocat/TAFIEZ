@@ -45,6 +45,7 @@ enum class DoorState {
 struct DoorTravellingObj {
 	GameObject* raw;
 	Point3 rel_pos;
+	DoorTravellingObj(GameObject* obj, Door* door);
 };
 
 class MoveProcessor {
@@ -100,7 +101,7 @@ private:
 	Door* standing_door_{};
 	Door* entry_door_{};
 	std::vector<DoorTravellingObj> door_travelling_objs_{};
-	std::vector<std::vector<Point3>> door_dest_grid_{};
+	std::vector<Door*> exit_doors_{};
 	Room* dest_room_{};
 
 	unsigned int frames_{};

@@ -212,17 +212,6 @@ int ColoredBlock::color() {
 	return color_;
 }
 
-bool ColoredBlock::has_sticky_neighbor(RoomMap* map) {
-	for (Point3 d : H_DIRECTIONS) {
-		if (ColoredBlock* adj = dynamic_cast<ColoredBlock*>(map->view(pos_ + d))) {
-			if ((adj->color() == color()) && static_cast<bool>(adj->sticky() & sticky())) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 
 DestructionDelta::DestructionDelta(GameObject* obj) :
 	obj_{ obj } {}

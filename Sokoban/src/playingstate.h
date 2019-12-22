@@ -48,7 +48,7 @@ public:
 	void load_room_from_path(std::filesystem::path path, bool use_default_player);
 	virtual bool load_room(std::string name, bool use_default_player) = 0;
 
-	bool can_use_door(Door* ent_door, Room** dest_room_ptr, std::vector<DoorTravellingObj>& objs, std::vector<std::vector<Point3>>& dest_pos_grid);
+	bool can_use_door(Door* ent_door, Room** dest_room_ptr, std::vector<DoorTravellingObj>& objs, std::vector<Door*>& exit_doors);
 
 	void snap_camera_to_player();
 

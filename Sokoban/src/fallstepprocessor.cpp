@@ -42,12 +42,15 @@ bool FallStepProcessor::run(bool test) {
 	if (test) {
 		return true;
 	}
+	std::set<SnakeBlock*> snake_add_link_check{};
+	std::vector<SnakeBlock*> falling_snakes{};
     // Collect all falling snakes, and their adjacent maybe-confused snakes
     for (auto& comp : fall_comps_unique_) {
         for (GameObject* block : comp->blocks_) {
             if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
-                snake_check_.insert(sb);
-                sb->collect_maybe_confused_neighbors(map_, snake_check_);
+				falling_snakes.push_back(sb);
+                snake_add_link_check.insert(sb);
+                sb->collect_maybe_confused_neighbors(map_, snake_add_link_check);
             }
         }
     }
@@ -58,11 +61,11 @@ bool FallStepProcessor::run(bool test) {
     while (true) {
         ++layers_fallen_;
         bool done_falling = true;
-        for (auto& comp : fall_comps_unique_) {
-            if (drop_check(comp.get())) {
-                done_falling = false;
-            }
-        }
+		for (auto& comp : fall_comps_unique_) {
+			if (drop_check(comp.get())) {
+				done_falling = false;
+			}
+		}
         if (done_falling) {
             break;
         }
@@ -71,9 +74,33 @@ bool FallStepProcessor::run(bool test) {
                 check_land_sticky(comp.get());
             }
         }
+		// Check for snake catching
+		std::vector<SnakeBlock*> temp_snakes{};
+		std::vector<SnakeBlock*> caught_snakes{};
+		for (auto* sb : falling_snakes) {
+			if (!sb->fall_comp()->settled_ && sb->pos_.z >= 0) {
+				temp_snakes.push_back(sb);
+				map_->put_in_map(sb, false, false, nullptr);
+			}
+		}
+		for (auto* sb : temp_snakes) {
+			if (sb->check_add_local_links(map_, delta_frame_)) {
+				if (sb->has_settled_link()) {
+					caught_snakes.push_back(sb);
+				}
+			}
+		}
+		for (auto* sb : temp_snakes) {
+			map_->take_from_map(sb, false, false, nullptr);
+		}
+		for (auto* sb : caught_snakes) {
+			settle(sb->fall_comp());
+		}
     }
-    for (SnakeBlock* snake : snake_check_) {
-        snake->check_add_local_links(map_, delta_frame_);
+    for (SnakeBlock* snake : snake_add_link_check) {
+		if (snake->tangible_) {
+			snake->check_add_local_links(map_, delta_frame_);
+		}
     }
     return true;
 }
@@ -159,9 +186,6 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
             map_->put_in_map(block, false, true, nullptr);
             map_->take_from_map(block, true, false, delta_frame_);
 			block->destroy(move_processor_, CauseOfDeath::Fallen);
-            if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(block)) {
-                snake_check_.erase(sb);
-            }
         }
     }
     if (!live_blocks.empty() && delta_frame_) {

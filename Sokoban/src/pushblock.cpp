@@ -54,6 +54,17 @@ void PushBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vec
     }
 }
 
+bool PushBlock::has_sticky_neighbor(RoomMap* map) {
+	for (Point3 d : H_DIRECTIONS) {
+		if (PushBlock* adj = dynamic_cast<PushBlock*>(map->view(pos_ + d))) {
+			if ((adj->color() == color()) && static_cast<bool>(adj->sticky() & sticky())) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 Sticky PushBlock::sticky() {
     return sticky_;
 }

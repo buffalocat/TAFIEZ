@@ -103,7 +103,6 @@ public:
 	virtual ~ColoredBlock();
 
 	int color();
-	bool has_sticky_neighbor(RoomMap*);
 
 	int color_ = 0;
 };
