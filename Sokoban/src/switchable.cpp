@@ -7,6 +7,7 @@
 
 Switchable::Switchable(GameObject* parent, int count, bool persistent, bool def, bool active, bool waiting) : ObjectModifier(parent),
 count_ { count },
+prev_count_{ count },
 persistent_{ persistent },
 default_{ def },
 active_{ active },
@@ -60,7 +61,22 @@ void Switchable::receive_signal(bool signal, RoomMap* map, DeltaFrame* delta_fra
 	mp->activated_switchables_.insert(this);
 }
 
+struct SwitchableDeltaGuard {
+	Switchable* swb;
+	DeltaFrame* delta_frame;
+	int count;
+	bool active;
+	bool waiting;
+	~SwitchableDeltaGuard() {
+		if (swb->count_ != count || swb->active_ != active || swb->waiting_ != waiting) {
+			delta_frame->push(std::make_unique<SwitchableDelta>(swb, count, active, waiting));
+		}
+	}
+};
+
 void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	// This will push a Delta when we return, but only if something has changed
+	auto guard = SwitchableDeltaGuard{ this, delta_frame, count_, active_, waiting_ };
 	if (persistent_ && (active_ ^ waiting_)) {
 		if (waiting_ && can_set_state(default_ ^ 1, map)) {
 			active_ = true;
@@ -82,6 +98,12 @@ void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, Move
 }
 
 void Switchable::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*) {}
+
+void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (waiting_) {
+		mp->activated_switchables_.insert(this);
+	}
+}
 
 void Switchable::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
@@ -105,6 +127,7 @@ SwitchableDelta::~SwitchableDelta() {}
 
 void SwitchableDelta::revert() {
 	obj_->count_ = count_;
+	obj_->prev_count_ = count_;
 	obj_->active_ = active_;
 	obj_->waiting_ = waiting_;
 }

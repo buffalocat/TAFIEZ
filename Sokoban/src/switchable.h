@@ -25,6 +25,7 @@ public:
     virtual bool can_set_state(bool state, RoomMap*) = 0;
     void receive_signal(bool signal, RoomMap*, DeltaFrame*, MoveProcessor*);
     virtual void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
+    void check_waiting(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_active_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
     void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
@@ -34,6 +35,7 @@ public:
 
 protected:
 	int count_;
+	int prev_count_;
     bool default_;
     bool active_; // Opposite of default behavior
     bool waiting_; // Toggle active as soon as possible
@@ -42,6 +44,7 @@ protected:
 
     friend class ModifierTab;
     friend class SwitchableDelta;
+	friend struct SwitchableDeltaGuard;
 };
 
 
