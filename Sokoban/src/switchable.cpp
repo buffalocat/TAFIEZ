@@ -76,7 +76,8 @@ struct SwitchableDeltaGuard {
 
 void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	// This will push a Delta when we return, but only if something has changed
-	auto guard = SwitchableDeltaGuard{ this, delta_frame, count_, active_, waiting_ };
+	auto guard = SwitchableDeltaGuard{ this, delta_frame, prev_count_, active_, waiting_ };
+	prev_count_ = count_;
 	if (persistent_ && (active_ ^ waiting_)) {
 		if (waiting_ && can_set_state(default_ ^ 1, map)) {
 			active_ = true;
