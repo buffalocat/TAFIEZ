@@ -90,7 +90,7 @@ void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp
 		if (!state()) {
 			body_->abstract_shift(dpos, delta_frame);
 		}
-		check_waiting(map, delta_frame, mp);
+		check_active_change(map, delta_frame, mp);
 	}
 }
 

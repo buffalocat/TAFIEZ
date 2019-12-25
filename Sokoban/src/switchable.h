@@ -25,7 +25,6 @@ public:
     virtual bool can_set_state(bool state, RoomMap*) = 0;
     void receive_signal(bool signal, RoomMap*, DeltaFrame*, MoveProcessor*);
     virtual void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
-    void check_waiting(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_active_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
     void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);

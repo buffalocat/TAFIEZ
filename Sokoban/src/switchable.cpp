@@ -83,13 +83,6 @@ void Switchable::check_active_change(RoomMap* map, DeltaFrame* delta_frame, Move
 
 void Switchable::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
-void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (waiting_) {
-		delta_frame->push(std::make_unique<SwitchableDelta>(this, count_, active_, waiting_));
-		mp->activated_switchables_.insert(this);
-	}
-}
-
 void Switchable::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
 		for (auto& p : signalers_) {
