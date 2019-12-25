@@ -106,6 +106,10 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 		switch (type_) {
 		case CarType::Normal:
 		case CarType::Hover:
+			if (!player_->gravitable_) {
+				player_->gravitable_ = true;
+				mp->delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
+			}
 			player_->set_free(mp->delta_frame_);
 			break;
 		case CarType::Convertible:
