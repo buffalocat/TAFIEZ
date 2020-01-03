@@ -144,9 +144,11 @@ bool MoveProcessor::try_toggle_riding() {
 	frames_ = TOGGLE_RIDING_MOVEMENT_FRAMES;
 	fall_check_.push_back(player_);
 	if (Car* car = player_->car_bound(map_)) {
+		map_->activate_listeners_at(car->pos());
 		fall_check_.push_back(car->parent_);
 	}
 	reset_player_jump();
+	set_standing_door();
 	return true;
 }
 
