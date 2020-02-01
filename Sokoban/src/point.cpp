@@ -59,6 +59,10 @@ bool operator==(const Point3& a, const Point3& b) {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
+bool operator!=(const Point3& a, const Point3& b) {
+	return !(a == b);
+}
+
 Point3 operator*(const int a, const Point3& p) {
     return {a*p.x, a*p.y, a*p.z};
 }

@@ -23,7 +23,7 @@ bool FallStepProcessor::run(bool test) {
                 auto comp_unique = std::make_unique<FallComponent>();
                 FallComponent* comp = comp_unique.get();
                 fall_comps_unique_.push_back(std::move(comp_unique));
-                block->collect_sticky_component(map_, Sticky::All, comp);
+                block->collect_sticky_component(map_, Sticky::Weak, comp);
                 collect_above(comp, next_fall_check);
             }
         }

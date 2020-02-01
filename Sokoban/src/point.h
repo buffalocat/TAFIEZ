@@ -68,6 +68,7 @@ FPoint3 operator+(const FPoint3& p, const FPoint3& q);
 bool operator==(const Point2& a, const Point2& b);
 
 bool operator==(const Point3& a, const Point3& b);
+bool operator!=(const Point3& a, const Point3& b);
 
 Point3 operator*(const int a, const Point3& p);
 

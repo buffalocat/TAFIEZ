@@ -308,10 +308,12 @@ bool SnakeBlock::has_settled_link() {
 	return false;
 }
 
-void SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
+std::vector<SnakeBlock*> SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
 	auto links_copy = links_;
+	std::vector<SnakeBlock*> removed_links {};
 	for (auto link : links_copy) {
 		if (color_ != link->color_) {
+			removed_links.push_back(link);
 			if (delta_frame) {
 				remove_link(link, delta_frame);
 			} else {
@@ -319,6 +321,7 @@ void SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
 			}
 		}
 	}
+	return removed_links;
 }
 
 // Call when a group of snake blocks becomes intangible, in particular for door movement
@@ -450,11 +453,13 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 					}
 				}
 				return;
-				// The chain was even length; cut!
+			// The chain was even length; cut!
 			} else if (cur->distance_ == prev->distance_) {
-				link_add_check_.insert(cur);
-				link_add_check_.insert(prev);
-				cur->remove_link(prev, delta_frame_);
+				if (cur->target_->pos_ - cur->pos_ != prev->target_->pos_ - prev->pos_) {
+					link_add_check_.insert(cur);
+					link_add_check_.insert(prev);
+					cur->remove_link(prev, delta_frame_);
+				}
 				snakes_to_pull_.push_back(cur);
 				snakes_to_pull_.push_back(prev);
 				return;

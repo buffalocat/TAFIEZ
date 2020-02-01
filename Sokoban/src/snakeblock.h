@@ -46,7 +46,7 @@ public:
     bool confused(RoomMap*);
 	void collect_all_viable_neighbors(RoomMap*, std::set<SnakeBlock*>& check);
     void collect_maybe_confused_neighbors(RoomMap*, std::set<SnakeBlock*>& check);
-    void remove_wrong_color_links(DeltaFrame*);
+	std::vector<SnakeBlock*> remove_wrong_color_links(DeltaFrame*);
 	void break_tangible_links(DeltaFrame*, std::vector<GameObject*>& fall_check);
     bool check_add_local_links(RoomMap*, DeltaFrame*);
 	void break_blocked_links_horizontal(std::vector<GameObject*>& fall_check, RoomMap* map, DeltaFrame* delta_frame, Point3 dir);

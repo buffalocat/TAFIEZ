@@ -38,17 +38,15 @@ enum class Sticky {
 	// Stickiness checks
 	WeakStick = 3,
 	StrongStick = 4,
-	Weak = 19,
-	Strong = 36,
-	All = 63,
+	Weak = 11,
+	Strong = 20,
 	// Block levels
     WeakBlock = 1,
 	SemiBlock = 3,
     StrongBlock = 6,
 	// Snakes
-	Snake = 8,
-	WeakSnake = 24,
-	StrongSnake = 40,
+	WeakSnake = 8,
+	StrongSnake = 24,
 };
 
 enum class CauseOfDeath {

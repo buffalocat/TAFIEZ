@@ -345,17 +345,19 @@ void GeneralContextData::editor_options() {
 	}
 
 	ImGui::Separator();
-	ImGui::Checkbox("Custom Tilt##CAMERA", &tilt_custom);
-	if (tilt_custom) {
-		ImGui::InputDouble("Tilt##CAMERA", &tilt);
-	} else {
-		tilt = DEFAULT_CAM_TILT;
-	}
-	ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
-	if (rot_custom) {
-		ImGui::InputDouble("Rotation##CAMERA", &rot);
-	} else {
-		rot = DEFAULT_CAM_ROTATION;
+	if (!free_cam) {
+		ImGui::Checkbox("Custom Tilt##CAMERA", &tilt_custom);
+		if (tilt_custom) {
+			ImGui::InputDouble("Tilt##CAMERA", &tilt);
+		} else {
+			tilt = DEFAULT_CAM_TILT;
+		}
+		ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
+		if (rot_custom) {
+			ImGui::InputDouble("Rotation##CAMERA", &rot);
+		} else {
+			rot = DEFAULT_CAM_ROTATION;
+		}
 	}
 
 	FloatRect vis = { rect.xa - pad.left, rect.ya - pad.top, rect.xb + pad.right, rect.yb + pad.bottom };

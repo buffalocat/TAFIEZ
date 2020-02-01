@@ -120,17 +120,19 @@ bool MoveProcessor::try_move_horizontal(Point3 dir) {
 // Returns whether a color change occured
 bool MoveProcessor::try_color_change() {
 	Car* car = player_->car_bound(map_);
+	collect_adj_fall_checks(car->parent_);
 	if (!(car && car->cycle_color(false))) {
 		return false;
 	}
 	if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
-		snake->remove_wrong_color_links(delta_frame_);
+		for (auto broken_link : snake->remove_wrong_color_links(delta_frame_)) {
+			broken_link->check_add_local_links(map_, delta_frame_);
+		}
 		snake->check_add_local_links(map_, delta_frame_);
 	}
 	state_ = MoveStep::ColorChange;
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;
 	delta_frame_->push(std::make_unique<ColorChangeDelta>(car, true));
-	collect_adj_fall_checks(car->parent_);
 	reset_player_jump();
 	return true;
 }
@@ -190,7 +192,7 @@ void MoveProcessor::try_jump_refresh() {
 
 void MoveProcessor::collect_adj_fall_checks(GameObject* obj) {
 	fall_check_.push_back(obj);
-	obj->collect_sticky_links(map_, Sticky::All, fall_check_);
+	obj->collect_sticky_links(map_, Sticky::Weak, fall_check_);
 	obj->collect_special_links(fall_check_);
 	if (auto* above = map_->view(obj->shifted_pos({ 0, 0, 1 }))) {
 		fall_check_.push_back(above);
