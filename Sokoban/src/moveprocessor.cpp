@@ -466,7 +466,7 @@ void MoveProcessor::ext_door_exit() {
 	map_ = dest_room_->map();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	place_door_travelling_objects();
-	playing_state_->snap_camera_to_player();
+	playing_state_->move_camera_to_player(true);
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;
 	state_ = MoveStep::PostDoorInit;

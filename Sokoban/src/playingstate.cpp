@@ -67,10 +67,10 @@ void PlayingState::handle_input() {
 				move_processor_.reset(nullptr);
 				delta_frame_->revert();
 				delta_frame_ = std::make_unique<DeltaFrame>();
-				snap_camera_to_player();
+				move_camera_to_player(true);
 			} else if (undo_stack_->non_empty()) {
 				undo_stack_->pop();
-				snap_camera_to_player();
+				move_camera_to_player(true);
 			}
 			room_->map()->reset_local_state();
 			set_death_text();
@@ -331,9 +331,9 @@ void PlayingState::make_subsave() {}
 
 void PlayingState::world_reset() {}
 
-void PlayingState::snap_camera_to_player() {
+void PlayingState::move_camera_to_player(bool snap) {
 	Player* player = player_doa();
-	room_->set_cam_pos(player->pos_, player->cam_pos(), true, true);
+	room_->set_cam_pos(player->pos_, player->cam_pos(), true, snap);
 }
 
 Player* PlayingState::player_doa() {

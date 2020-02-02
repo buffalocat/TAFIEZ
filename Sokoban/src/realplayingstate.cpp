@@ -19,7 +19,7 @@ RealPlayingState::~RealPlayingState() {}
 void RealPlayingState::start_from_map(std::string starting_map) {
 	load_room(starting_map, true);
 	activate_room(starting_map);
-	snap_camera_to_player();
+	move_camera_to_player(true);
 	room_->map()->set_initial_state_on_start();
 }
 
@@ -42,7 +42,7 @@ void RealPlayingState::load_most_recent_subsave() {
 	savefile_->load_most_recent_subsave(&cur_room_name);
 	load_room(cur_room_name, false);
 	activate_room(cur_room_name);
-	snap_camera_to_player();
+	move_camera_to_player(true);
 }
 
 void RealPlayingState::world_reset() {

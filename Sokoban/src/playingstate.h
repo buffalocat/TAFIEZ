@@ -50,7 +50,7 @@ public:
 
 	bool can_use_door(Door* ent_door, Room** dest_room_ptr, std::vector<DoorTravellingObj>& objs, std::vector<Door*>& exit_doors);
 
-	void snap_camera_to_player();
+	void move_camera_to_player(bool snap);
 
 	Player* player_doa();
 

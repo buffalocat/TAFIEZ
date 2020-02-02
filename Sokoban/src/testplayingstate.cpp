@@ -14,7 +14,7 @@ TestPlayingState::~TestPlayingState() {}
 void TestPlayingState::init(std::string map_name) {
 	load_room_from_temp(map_name, true);
 	activate_room(map_name);
-	snap_camera_to_player();
+	move_camera_to_player(true);
 	room_->map()->set_initial_state_on_start();
 }
 
