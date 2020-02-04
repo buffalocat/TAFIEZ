@@ -120,8 +120,11 @@ bool MoveProcessor::try_move_horizontal(Point3 dir) {
 // Returns whether a color change occured
 bool MoveProcessor::try_color_change() {
 	Car* car = player_->car_bound(map_);
+	if (!car) {
+		return false;
+	}
 	collect_adj_fall_checks(car->parent_);
-	if (!(car && car->cycle_color(false))) {
+	if (!car->cycle_color(false)) {
 		return false;
 	}
 	if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
