@@ -194,6 +194,9 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
 }
 
 void FallStepProcessor::settle(FallComponent* comp) {
+	if (comp->settled_) {
+		return;
+	}
     handle_fallen_blocks(comp);
     for (FallComponent* above : comp->above_) {
         if (!above->settled_) {
