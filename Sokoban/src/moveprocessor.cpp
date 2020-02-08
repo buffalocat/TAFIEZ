@@ -311,14 +311,14 @@ void MoveProcessor::plan_door_move(Door* door) {
 		return;
 	}
 	if (door_state_ == DoorState::None && door->usable()) {
-		// Also, it should probably be the responsibility of the objects/door, not the MoveProcessor
-		// TODO: rethink these checks to be SAFE
 		if (GameObject* above = map_->view(door->pos_above())) {
 			if (player_ == above) {
 				door_travelling_objs_.push_back({ player_, door });
 			} else if (Car* car = player_->car_riding()) {
 				if (above->modifier() == car) {
-					door_travelling_objs_.push_back({ player_, door });
+					if (player_->tangible_) {
+						door_travelling_objs_.push_back({ player_, door });
+					}
 					door_travelling_objs_.push_back({ above, door });
 				}
 			}
