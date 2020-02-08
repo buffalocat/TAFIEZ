@@ -125,9 +125,9 @@ void HorizontalStepProcessor::move_riding() {
 // Try to push the block and build the resulting component tree
 // Return whether block is able to move
 bool HorizontalStepProcessor::compute_push_component_tree(GameObject* block, bool dragged) {
-	deferred_ = {};
-	weak_links_ = {};
-	orphaned_moving_comps_ = {};
+	deferred_.clear();
+	weak_links_.clear();
+	orphaned_moving_comps_.clear();
 	if (compute_push_component(block, dragged) == PushResult::Blocked) {
 		for (auto& p : deferred_) {
 			if (p.second->blocked_) {

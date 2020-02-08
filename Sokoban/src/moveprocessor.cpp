@@ -76,8 +76,8 @@ bool MoveProcessor::update() {
 		case MoveStep::Waiting:
 			break;
 		}
-		
 	}
+	map_->handle_moved_cars(this);
 	// TODO: move this responsibility to a new class
 	for (GameObject* block : moving_blocks_) {
 		block->update_animation();
@@ -400,6 +400,7 @@ void MoveProcessor::place_door_travelling_objects() {
 	for (auto* snake : moved_snakes) {
 		snake->check_add_local_links(map_, delta_frame_);
 	}
+	map_->handle_moved_cars(this);
 }
 
 struct BlockedPosChecker {
@@ -469,6 +470,7 @@ void MoveProcessor::ext_door_exit() {
 	map_ = dest_room_->map();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	place_door_travelling_objects();
+	//TODO: delay this until we're back in the playing state (just flip a "Snap Camera" flag!)
 	playing_state_->move_camera_to_player(true);
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;

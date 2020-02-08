@@ -25,6 +25,7 @@ class Door;
 class AutoBlock;
 class PuppetBlock;
 class ClearFlag;
+class Car;
 
 class PlayerCycle;
 
@@ -88,6 +89,7 @@ public:
     void activate_listeners_at(Point3);
     void activate_listener_of(ObjectModifier* obj);
     void alert_activated_listeners(DeltaFrame*, MoveProcessor*);
+	void handle_moved_cars(MoveProcessor*);
 
     void make_fall_trail(GameObject*, int height, int drop);
 
@@ -110,6 +112,8 @@ public:
 	std::unique_ptr<PlayerCycle> player_cycle_{ std::make_unique<PlayerCycle>() };
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
+	std::vector<Car*> moved_cars_{};
+
 	std::map<unsigned int, std::vector<Door*>> door_groups_{};
 
     GameObjectArray& obj_array_;

@@ -19,6 +19,7 @@
 #include "common_constants.h"
 #include "clearflag.h"
 #include "door.h"
+#include "car.h"
 #include "savefile.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
@@ -31,7 +32,7 @@ RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
 	}
-	door_groups_[0] = {};
+	door_groups_[0].clear();
 }
 
 RoomMap::~RoomMap() {}
@@ -265,6 +266,13 @@ void RoomMap::alert_activated_listeners(DeltaFrame* delta_frame, MoveProcessor* 
 	for (ObjectModifier* obj : activated_listeners_) {
 		obj->map_callback(this, delta_frame, mp);
 	}
+}
+
+void RoomMap::handle_moved_cars(MoveProcessor* mp) {
+	for (Car* car : moved_cars_) {
+		car->handle_movement(this, mp->delta_frame_, mp);
+	}
+	moved_cars_.clear();
 }
 
 struct ObjectDrawer {

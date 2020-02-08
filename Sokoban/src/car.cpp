@@ -77,8 +77,7 @@ int Car::next_color() {
 	return color_cycle_.next_color();
 }
 
-void Car::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	// TODO: figure out a way to make this code run faster (on the same frame as input)
+void Car::handle_movement(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (player_) {
 		switch (type_) {
 		case CarType::Normal:
@@ -96,7 +95,7 @@ void Car::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp)
 }
 
 void Car::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
-	map->activate_listener_of(this);
+	map->moved_cars_.push_back(this);
 }
 
 void Car::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {}

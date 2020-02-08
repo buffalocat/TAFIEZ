@@ -88,7 +88,7 @@ void IndependentStringDrawer::kill_instance() {
 }
 
 void IndependentStringDrawer::cleanup() {
-	self_ = {};
+	self_.reset(nullptr);
 }
 
 const unsigned int ROOM_LABEL_DISPLAY_FRAMES = 180;

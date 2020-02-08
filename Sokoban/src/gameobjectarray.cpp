@@ -39,5 +39,5 @@ void GameObjectArray::remove_deleted_objects() {
 	for (auto* obj : to_delete_) {
 		array_[obj->id_].reset(nullptr);
 	}
-	to_delete_ = {};
+	to_delete_.clear();
 }

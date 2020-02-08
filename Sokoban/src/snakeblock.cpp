@@ -375,7 +375,7 @@ void SnakeBlock::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) 
 
 std::unique_ptr<GameObject> SnakeBlock::duplicate(RoomMap* room_map, DeltaFrame* delta_frame) {
 	auto dup = std::make_unique<SnakeBlock>(*this);
-	dup->links_ = {};
+	dup->links_.clear();
 	if (modifier_) {
 		dup->set_modifier(modifier_->duplicate(dup.get(), room_map, delta_frame));
 	}
