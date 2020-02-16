@@ -22,17 +22,31 @@ public:
 	bool alive_;
 };
 
+
+enum class GraphicsState {
+	None,
+	FadeOut,
+	Black,
+	FadeIn,
+};
+
+
 class GraphicsManager {
 public:
-    GraphicsManager(GLFWwindow*);
+	GraphicsManager(GLFWwindow*);
 	~GraphicsManager();
 
-    GLFWwindow* window();
+	GLFWwindow* window();
+
+	void update();
+	void set_state(GraphicsState state);
+	bool in_animation();
 
 	void prepare_object_rendering();
-    void set_PV(glm::mat4);
+	void post_rendering();
+	void set_PV(glm::mat4);
 	void set_light_source(glm::vec3);
-    void draw();
+	void draw_objects();
 
 	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube{ DynamicInstancer("resources/uniform_cube.obj") };
@@ -58,13 +72,25 @@ public:
 private:
 	GLFWwindow* window_;
 	std::vector<Animation*> animations;
+
 	GLuint atlas_;
+
+	GLuint fbo_;
+	GLuint color_tex_;
+	GLuint rbo_;
+	GLuint screen_vao_;
+	GLuint screen_vbo_;
+
+	GraphicsState state_ = GraphicsState::None;
+	int state_counter_ = 0;
+
 	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };
 	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
+	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
 
 	glm::mat4 PV_;
 
-    void load_texture_atlas();
+	void load_texture_atlas();
 };
 
 class TextRenderer {

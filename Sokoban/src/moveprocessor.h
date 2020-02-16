@@ -31,6 +31,11 @@ enum class MoveStep {
 	Waiting = 10,
 };
 
+enum class MoveAction {
+	None = 0,
+	DoorExit = 1,
+};
+
 enum class DoorState {
 	None = 0,
 	AwaitingEntry = 1,
@@ -106,6 +111,7 @@ private:
 
 	unsigned int frames_{};
 	MoveStep state_ = MoveStep::Default;
+	MoveAction deferred_action_ = MoveAction::None;
 	DoorState door_state_ = DoorState::None;
 
     bool animated_;

@@ -37,8 +37,11 @@ void PlayingState::main_loop() {
 	if (!move_processor_) {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
+	gfx_->update();
 	handle_input();
 	room_->draw_at_player(player_doa(), true, false, false);
+	// If a move is not currently happening, try to push the current DeltaFrame
+	// If it's trivial, nothing will happen
 	if (!move_processor_) {
 		undo_stack_->push(std::move(delta_frame_));
 	}
@@ -72,6 +75,7 @@ void PlayingState::handle_input() {
 				undo_stack_->pop();
 				move_camera_to_player(true);
 			}
+			gfx_->set_state(GraphicsState::None);
 			room_->map()->reset_local_state();
 			set_death_text();
 			return;
@@ -218,11 +222,11 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		// Uncreate the default objects we put in the map
 		if (Player* player = init_data.default_player) {
 			room->map()->player_cycle_->remove_player(player, nullptr);
-			room->map()->clear(player->pos_);
+			room->map()->take_from_map(player, true, false, nullptr);
 			room->map()->remove_from_object_array(player);
 		}
 		if (Car* car = init_data.default_car) {
-			room->map()->clear(car->pos());
+			room->map()->take_from_map(car->parent_, true, false, nullptr);
 			room->map()->remove_from_object_array(car->parent_);
 		}
 	}
@@ -336,6 +340,7 @@ void PlayingState::move_camera_to_player(bool snap) {
 	room_->set_cam_pos(player->pos_, player->cam_pos(), true, snap);
 }
 
+// The current player, dead or alive
 Player* PlayingState::player_doa() {
 	PlayerCycle* pc = room_->map()->player_cycle_.get();
 	if (auto* player = pc->current_player()) {

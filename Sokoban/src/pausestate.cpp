@@ -127,5 +127,5 @@ void PauseState::world_reset() {
 // Won't do quite the right thing, because some objects aren't in draw_world()
 void PauseState::draw_paused_game() {
 	gfx_->prepare_object_rendering();
-	gfx_->draw();
+	gfx_->draw_objects();
 }

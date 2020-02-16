@@ -90,9 +90,10 @@ void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool
 	} else {
 		map_->draw(gfx_, camera_->get_rotation());
 	}
-	gfx_->draw();
+	gfx_->draw_objects();
 	update_room_label();
 	state_->text_->draw();
+	gfx_->post_rendering();
 }
 
 void Room::update_room_label() {

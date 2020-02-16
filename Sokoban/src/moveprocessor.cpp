@@ -18,6 +18,7 @@
 #include "snakeblock.h"
 
 #include "playingstate.h"
+#include "graphicsmanager.h"
 
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
@@ -53,6 +54,18 @@ void MoveProcessor::set_standing_door() {
 }
 
 bool MoveProcessor::update() {
+	switch (deferred_action_) {
+	case MoveAction::DoorExit:
+		if (playing_state_->gfx_->in_animation()) {
+			return false;
+		} else {
+			deferred_action_ = MoveAction::None;
+			ext_door_exit();
+		}
+		break;
+	default:
+		break;
+	}
 	if (--frames_ <= 0) {
 		switch (state_) {
 		case MoveStep::Horizontal:
@@ -81,6 +94,9 @@ bool MoveProcessor::update() {
 	// TODO: move this responsibility to a new class
 	for (GameObject* block : moving_blocks_) {
 		block->update_animation();
+	}
+	if (deferred_action_ != MoveAction::None) {
+		return false;
 	}
 	// End of move checks
 	if (frames_ <= 0) {
@@ -238,7 +254,8 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 			try_int_door_exit();
 			break;
 		case DoorState::AwaitingExtExit:
-			ext_door_exit();
+			playing_state_->gfx_->set_state(GraphicsState::FadeOut);
+			deferred_action_ = MoveAction::DoorExit;
 			break;
 		case DoorState::AwaitingUnentry:
 			try_door_unentry();
@@ -475,6 +492,7 @@ void MoveProcessor::ext_door_exit() {
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;
 	state_ = MoveStep::PostDoorInit;
+	playing_state_->gfx_->set_state(GraphicsState::FadeIn);
 }
 
 // NOTE: could be dangerous if repeated calls are made

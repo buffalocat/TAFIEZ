@@ -100,6 +100,7 @@ bool EditorState::handle_keyboard_input_main_state() {
 }
 
 void EditorState::main_loop() {
+	gfx_->set_state(GraphicsState::None);
     bool p_open = true;
     if (!ImGui::Begin("Editor Window##ROOT", &p_open)) {
         ImGui::End();

@@ -49,7 +49,7 @@ const int UNDO_COOLDOWN_FIRST = FULL_STEP_FRAMES;
 const int UNDO_COOLDOWN_SECOND = HALF_STEP_FRAMES;
 const int UNDO_COOLDOWN_FINAL = 2;
 
-const int MAX_UNDO_DEPTH = 1000;
+const int MAX_UNDO_DEPTH = 1 << 16;
 
 const int FAST_MAP_MOVE = 10;
 
