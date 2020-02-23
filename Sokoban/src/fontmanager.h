@@ -17,6 +17,7 @@ public:
 	Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size);
 	~Font();
 
+	void prepare_rendering();
 	void init_glyphs(int font_size);
 	void render_glyphs();
 	void generate_string_verts(const char* text, float x, float y, float sx, float sy, std::vector<TextVertex>& text_verts, float* width);

@@ -28,17 +28,6 @@ public:
 	void draw();
 };
 
-class SingleDrawer : private DynamicInstancer {
-public:
-	SingleDrawer(std::string path);
-	~SingleDrawer();
-	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color);
-	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color);
-
-private:
-	void process_draw();
-};
-
 class StaticInstancer : public ModelInstancer {
 public:
 	StaticInstancer(std::string path);

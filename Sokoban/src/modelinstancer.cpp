@@ -67,27 +67,6 @@ void DynamicInstancer::draw() {
 	instances_.clear();
 }
 
-SingleDrawer::SingleDrawer(std::string path) : DynamicInstancer(path) {}
-
-SingleDrawer::~SingleDrawer() {}
-
-void SingleDrawer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color) {
-	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), COLOR_VECTORS[color] });
-	process_draw();
-}
-
-void SingleDrawer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color) {
-	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
-	process_draw();
-}
-
-void SingleDrawer::process_draw() {
-	glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData), instances_.data(), GL_STATIC_DRAW);
-	model_.draw_single();
-	instances_.clear();
-}
-
 StaticInstancer::StaticInstancer(std::string path) : ModelInstancer(path) {}
 
 StaticInstancer::~StaticInstancer() {}

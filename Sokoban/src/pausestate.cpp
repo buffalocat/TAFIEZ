@@ -71,7 +71,7 @@ void Menu<State>::handle_input(State* game_state) {
 
 template <class State>
 void Menu<State>::draw() {
-	font_->shader_->use();
+	prepare_text_rendering(font_->shader_);
 	for (auto& entry : entries_) {
 		entry.text->render();
 	}
@@ -102,7 +102,10 @@ void PauseState::main_loop() {
 }
 
 void PauseState::draw() {
-	//draw_paused_game();
+	double prev_shadow = gfx_->shadow_;
+	gfx_->shadow_ = 0.3;
+	gfx_->post_rendering();
+	gfx_->shadow_ = prev_shadow;
 	menu_.draw();
 }
 
@@ -122,10 +125,4 @@ void PauseState::quit_playing() {
 void PauseState::world_reset() {
 	playing_state_->world_reset();
 	unpause();
-}
-
-// Won't do quite the right thing, because some objects aren't in draw_world()
-void PauseState::draw_paused_game() {
-	gfx_->prepare_object_rendering();
-	gfx_->draw_objects();
 }

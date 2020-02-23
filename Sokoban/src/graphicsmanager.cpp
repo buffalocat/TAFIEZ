@@ -3,6 +3,7 @@
 #include "common_constants.h"
 #include "texture_constants.h"
 #include "fontmanager.h"
+#include "animationmanager.h"
 #include "stringdrawer.h"
 #include "model.h"
 
@@ -30,19 +31,23 @@ ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	window_{ window } {
 	fonts_ = std::make_unique<FontManager>(&text_shader_);
+	anims_ = std::make_unique<AnimationManager>(&particle_shader_);
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
-	instanced_shader_.setFloat("texScale", 1.0f / TEXTURE_ATLAS_SIZE);
+	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Initialize frame buffer to hold all renders
 	glGenFramebuffers(1, &fbo_);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	// Make a color texture
 	glGenTextures(1, &color_tex_);
 	glBindTexture(GL_TEXTURE_2D, color_tex_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1200, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1200, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// Make a depth/stencil buffer
 	glGenRenderbuffers(1, &rbo_);
@@ -62,8 +67,6 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	glBindBuffer(GL_ARRAY_BUFFER, screen_vbo_);
 	const float quad_vertex_data[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f, 1.0f,
-		 1.0f, -1.0f, 1.0f, 0.0f,
 		-1.0f,  1.0f, 0.0f, 1.0f,
 		 1.0f,  1.0f, 1.0f, 1.0f,
 		 1.0f, -1.0f, 1.0f, 0.0f,
@@ -91,18 +94,18 @@ void GraphicsManager::set_state(GraphicsState state) {
 	state_ = state;
 	switch (state) {
 	case GraphicsState::None:
-		post_shader_.setFloat("shadow", 1);
+		shadow_ = 1;
 		break;
 	case GraphicsState::FadeOut:
 		state_counter_ = FADE_OUT_FRAMES;
-		post_shader_.setFloat("shadow", 1);
+		shadow_ = 1;
 		break;
 	case GraphicsState::Black:
-		post_shader_.setFloat("shadow", 0);
+		shadow_ = 0;
 		break;
 	case GraphicsState::FadeIn:
 		state_counter_ = 0;
-		post_shader_.setFloat("shadow", 0);
+		shadow_ = 0;
 		break;
 	}
 }
@@ -110,7 +113,7 @@ void GraphicsManager::set_state(GraphicsState state) {
 void GraphicsManager::update() {
 	switch (state_) {
 	case GraphicsState::FadeIn:
-		post_shader_.setFloat("shadow", (double)(state_counter_) / FADE_IN_FRAMES);
+		shadow_ = (double)(state_counter_) / FADE_IN_FRAMES;
 		if (state_counter_ < FADE_IN_FRAMES) {
 			++state_counter_;
 		} else {
@@ -118,7 +121,7 @@ void GraphicsManager::update() {
 		}
 		break;
 	case GraphicsState::FadeOut:
-		post_shader_.setFloat("shadow", (double)(state_counter_) / FADE_OUT_FRAMES);
+		shadow_ = (double)(state_counter_) / FADE_IN_FRAMES;
 		if (state_counter_ > 0) {
 			--state_counter_;
 		} else {
@@ -126,6 +129,7 @@ void GraphicsManager::update() {
 		}
 		break;
 	}
+	anims_->update();
 }
 
 bool GraphicsManager::in_animation() {
@@ -156,16 +160,48 @@ void GraphicsManager::load_texture_atlas() {
 	stbi_image_free(texture_data);
 }
 
-void GraphicsManager::prepare_object_rendering() {
+void GraphicsManager::set_PV(glm::mat4 proj, glm::mat4 view) {
+	proj_ = proj;
+	view_ = view;
+}
+
+void GraphicsManager::set_light_source(glm::vec3 light_source) {
+	light_source_ = light_source;
+}
+
+void GraphicsManager::draw_objects() {
 	instanced_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	glClearColor(0.0f, 0.7f, 0.9f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	instanced_shader_.setMat4("PV", proj_ * view_);
+	instanced_shader_.setVec3("lightSource", light_source_);
+
+	cube.draw();
+	top_cube.draw();
+	six_squares.draw();
+	windshield.draw();
+
+	diamond.draw();
+	top_diamond.draw();
+	six_squares_diamond.draw();
+	windshield_diamond.draw();
+
+	cube_edges.draw();
+	flag.draw();
+}
+
+void GraphicsManager::draw_particles() {
+	particle_shader_.use();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	particle_shader_.setMat4("Proj", proj_);
+	particle_shader_.setMat4("View", view_);
+	anims_->render_particles(glm::vec3(view_[0][2], view_[1][2], view_[2][2]));
 }
 
 void GraphicsManager::post_rendering() {
@@ -173,36 +209,19 @@ void GraphicsManager::post_rendering() {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	post_shader_.use();
+	post_shader_.setFloat("shadow", shadow_);
 	glBindVertexArray(screen_vao_);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glBindTexture(GL_TEXTURE_2D, color_tex_);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void GraphicsManager::set_PV(glm::mat4 PV) {
-	if (PV != PV_) {
-		PV_ = PV;
-		instanced_shader_.setMat4("PV", PV);
-	}
-}
 
-void GraphicsManager::set_light_source(glm::vec3 dir) {
-	instanced_shader_.setVec3("lightSource", dir);
-}
-
-void GraphicsManager::draw_objects() {
-	cube.draw();
-	top_cube.draw();
-	six_squares.draw();
-
-	diamond.draw();
-	top_diamond.draw();
-	six_squares_diamond.draw();
-
-	cube_edges.draw();
-
-	wall.draw();
+void prepare_text_rendering(Shader* text_shader) {
+	text_shader->use();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 }
 
 
@@ -219,8 +238,8 @@ TextRenderer::~TextRenderer() {
 }
 
 void TextRenderer::draw() {
-	text_shader_->use();
 	std::vector<ProtectedStringDrawer> new_drawers{};
+	prepare_text_rendering(text_shader_);
 	for (auto& p : string_drawers_) {
 		if (p.alive_) {
 			if (p.drawer_->active_) {

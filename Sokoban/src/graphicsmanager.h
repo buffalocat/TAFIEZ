@@ -6,6 +6,7 @@
 
 struct GLFWwindow;
 class FontManager;
+class AnimationManager;
 class Animation;
 class StringDrawer;
 
@@ -42,32 +43,33 @@ public:
 	void set_state(GraphicsState state);
 	bool in_animation();
 
-	void prepare_object_rendering();
-	void post_rendering();
-	void set_PV(glm::mat4);
+	void set_PV(glm::mat4, glm::mat4);
 	void set_light_source(glm::vec3);
+
 	void draw_objects();
+	void draw_particles();
+	void post_rendering();
 
 	// These must be drawn (in a batch) in draw_world()
-	DynamicInstancer cube{ DynamicInstancer("resources/uniform_cube.obj") };
-	DynamicInstancer top_cube{ DynamicInstancer("resources/top_cube.obj") };
-	DynamicInstancer six_squares{ DynamicInstancer("resources/six_squares.obj") };
+	DynamicInstancer cube{ "resources/uniform_cube.obj" };
+	DynamicInstancer top_cube{ "resources/top_cube.obj" };
+	DynamicInstancer six_squares{ "resources/six_squares.obj" };
+	DynamicInstancer windshield{ "resources/windshield.obj" };
 
-	DynamicInstancer diamond{ DynamicInstancer("resources/diamond.obj") };
-	DynamicInstancer top_diamond{ DynamicInstancer("resources/top_diamond.obj") };
-	DynamicInstancer six_squares_diamond{ DynamicInstancer("resources/six_squares_diamond.obj") };
+	DynamicInstancer diamond{ "resources/diamond.obj" };
+	DynamicInstancer top_diamond{ "resources/top_diamond.obj" };
+	DynamicInstancer six_squares_diamond{ "resources/six_squares_diamond.obj" };
+	DynamicInstancer windshield_diamond{ "resources/windshield_diamond.obj" };
 
-	DynamicInstancer cube_edges{ DynamicInstancer("resources/cube_edges.obj") };
-
-	// Unused for now
-	StaticInstancer wall{ StaticInstancer("resources/uniform_cube.obj") };
-
-	// Models which aren't common enough to be worth instancing
-	SingleDrawer windshield{ SingleDrawer("resources/windshield.obj") };
-	SingleDrawer windshield_diamond{ SingleDrawer("resources/windshield_diamond.obj") };
-	SingleDrawer flag{ SingleDrawer("resources/flag.obj") };
+	DynamicInstancer cube_edges{ "resources/cube_edges.obj" };
+	DynamicInstancer flag{ "resources/flag.obj" };
 
 	std::unique_ptr<FontManager> fonts_{};
+	std::unique_ptr<AnimationManager> anims_{};
+
+	glm::mat4 proj_, view_;
+	glm::vec3 light_source_;
+	double shadow_;
 
 private:
 	GLFWwindow* window_;
@@ -84,14 +86,15 @@ private:
 	GraphicsState state_ = GraphicsState::None;
 	int state_counter_ = 0;
 
-	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };
+	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };	
 	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
 	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
-
-	glm::mat4 PV_;
+	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
 
 	void load_texture_atlas();
 };
+
+void prepare_text_rendering(Shader* text_shader);
 
 class TextRenderer {
 public:

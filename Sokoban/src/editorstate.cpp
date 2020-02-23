@@ -100,7 +100,6 @@ bool EditorState::handle_keyboard_input_main_state() {
 }
 
 void EditorState::main_loop() {
-	gfx_->set_state(GraphicsState::None);
     bool p_open = true;
     if (!ImGui::Begin("Editor Window##ROOT", &p_open)) {
         ImGui::End();
@@ -145,7 +144,7 @@ void EditorState::main_loop() {
 				keyboard_cooldown_ = MAX_COOLDOWN;
 			}
 		}
-	}	
+	}
 
 	// Draw the EditorTab
 	ImGui::BeginChild("Active Tab Pane##ROOT", ImVec2(0, 0), true);
@@ -157,6 +156,10 @@ void EditorState::main_loop() {
 	if (keyboard_cooldown_ > 0) {
 		--keyboard_cooldown_;
 	}
+
+	gfx_->set_state(GraphicsState::None);
+	gfx_->draw_objects();
+	gfx_->post_rendering();
 }
 
 void EditorState::set_active_tab_by_index(int i) {

@@ -424,6 +424,11 @@ struct BlockedPosChecker {
 	RoomMap* map;
 	std::vector<DoorTravellingObj>& door_travelling_objs;
 	bool operator()(Door* door) {
+		// Remove a door if it has become intangible
+		if (!door->parent_->tangible_) {
+			return true;
+		}
+		// Remove a door if the destination of any object is blocked
 		Point3 door_pos = door->pos();
 		for (auto& dto : door_travelling_objs) {
 			if (map->view(door_pos + dto.rel_pos)) {
@@ -458,6 +463,9 @@ void MoveProcessor::try_door_unentry() {
 			can_move = false;
 			break;
 		}
+	}
+	if (!entry_door_->parent_->tangible_) {
+		can_move = false;
 	}
 	if (can_move) {
 		for (auto& obj : door_travelling_objs_) {

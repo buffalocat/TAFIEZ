@@ -7,5 +7,10 @@ BlockTexture operator |(BlockTexture a, BlockTexture b) {
 }
 
 glm::vec2 tex_to_vec(BlockTexture tex_id) {
-	return { (float)((int)tex_id % TEXTURE_ATLAS_SIZE), (float)((int)tex_id / TEXTURE_ATLAS_SIZE) };
+	return { (float)((int)tex_id % BLOCK_TEXTURE_ATLAS_SIZE), (float)((int)tex_id / BLOCK_TEXTURE_ATLAS_SIZE) };
+}
+
+
+glm::vec2 tex_to_vec(ParticleTexture tex_id) {
+	return { (float)((int)tex_id % PARTICLE_TEXTURE_ATLAS_SIZE), (float)((int)tex_id / PARTICLE_TEXTURE_ATLAS_SIZE) };
 }

@@ -277,6 +277,9 @@
     <ClInclude Include="src\fpstimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\animationmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -506,6 +509,9 @@
     </ClCompile>
     <ClCompile Include="src\fpstimer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\animationmanager.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

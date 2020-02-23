@@ -1,9 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 // The atlas is a square of 2^k * 2^k square textures
-const int TEXTURE_ATLAS_SIZE = 16;
+const int BLOCK_TEXTURE_ATLAS_SIZE = 16;
 
 // Reading off the texture atlas starting from top, left to right
 enum class BlockTexture {
@@ -47,3 +45,17 @@ enum class BlockTexture {
 BlockTexture operator |(BlockTexture a, BlockTexture b);
 
 glm::vec2 tex_to_vec(BlockTexture tex_id);
+
+
+// The atlas is a square of 2^k * 2^k square textures
+const int PARTICLE_TEXTURE_ATLAS_SIZE = 4;
+
+// Reading off the texture atlas starting from top, left to right
+enum class ParticleTexture {
+	SolidSquare = 0,
+	BlurDisk = 1,
+	Square = 2,
+	Circle = 3,
+};
+
+glm::vec2 tex_to_vec(ParticleTexture tex_id);

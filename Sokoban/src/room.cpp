@@ -83,17 +83,13 @@ void Room::draw_at_player(Player* player, bool display_labels, bool ortho, bool 
 }
 
 void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer) {
-	gfx_->prepare_object_rendering();
 	update_view(vpos, rpos, display_labels, ortho);
 	if (one_layer) {
 		map_->draw_layer(gfx_, vpos.z);
 	} else {
 		map_->draw(gfx_, camera_->get_rotation());
 	}
-	gfx_->draw_objects();
 	update_room_label();
-	state_->text_->draw();
-	gfx_->post_rendering();
 }
 
 void Room::update_room_label() {
@@ -140,7 +136,7 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 		projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
 	}
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
-	gfx_->set_PV(projection * view);
+	gfx_->set_PV(projection, view);
 }
 
 void Room::shift_by(Point3 d) {

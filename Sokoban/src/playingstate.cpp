@@ -2,6 +2,7 @@
 #include "playingstate.h"
 
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 #include "fontmanager.h"
 #include "stringdrawer.h"
 
@@ -37,9 +38,14 @@ void PlayingState::main_loop() {
 	if (!move_processor_) {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
-	gfx_->update();
 	handle_input();
 	room_->draw_at_player(player_doa(), true, false, false);
+	// Draw stuff
+	gfx_->update();
+	gfx_->draw_objects();
+	gfx_->draw_particles();
+	text_->draw();
+	gfx_->post_rendering();
 	// If a move is not currently happening, try to push the current DeltaFrame
 	// If it's trivial, nothing will happen
 	if (!move_processor_) {

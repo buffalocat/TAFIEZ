@@ -49,7 +49,6 @@ public:
 
 private:
 	void draw();
-	void draw_paused_game();
 
 	//Menu Callbacks
 	void unpause();
