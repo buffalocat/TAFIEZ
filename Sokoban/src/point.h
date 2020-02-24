@@ -3,6 +3,8 @@
 
 void clamp(int* n, int a, int b);
 
+struct glm::vec3;
+
 // Standard Points serialize their components as unsigned chars
 struct Point2 {
     int x;
@@ -32,6 +34,7 @@ struct Point3 {
     Point3(): x {0}, y {0}, z {0} {}
     Point3(int ax, int ay, int az): x {ax}, y {ay}, z {az} {}
     explicit Point3(const Point3_S16&);
+	explicit operator glm::vec3() const;
 };
 
 struct FPoint3 {
@@ -41,6 +44,7 @@ struct FPoint3 {
     FPoint3(): x {}, y {}, z {} {}
     FPoint3(double ax, double ay, double az): x {ax}, y {ay}, z {az} {}
     FPoint3(const Point3& p): x {static_cast<double>(p.x)}, y {static_cast<double>(p.y)}, z {static_cast<double>(p.z)} {}
+	explicit operator glm::vec3() const;
 };
 
 struct IntRect {

@@ -58,9 +58,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\animation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\autoblock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -498,9 +495,6 @@
     <ClCompile Include="src\effects.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\animation.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\jumpstepprocessor.cpp">
       <Filter>Source Files\Move Processing</Filter>
     </ClCompile>
@@ -512,6 +506,9 @@
     </ClCompile>
     <ClCompile Include="src\animationmanager.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common_enums.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

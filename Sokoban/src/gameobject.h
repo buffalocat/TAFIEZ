@@ -61,19 +61,14 @@ public:
 
 	ObjectModifier* modifier();
 	virtual int color();
+	FPoint3 real_pos();
 
 	virtual void draw(GraphicsManager*) = 0;
 
-    void reset_animation();
-    void set_linear_animation(Point3);
-    bool update_animation(); // Return whether the animation is done
-    void shift_pos_from_animation();
-    FPoint3 real_pos();
-
 	std::unique_ptr<ObjectModifier> modifier_{};
-	std::unique_ptr<PositionalAnimation> animation_{};
 	Component* comp_;
     Point3 pos_;
+	FPoint3 dpos_{};
 	unsigned int id_ = 0;
     bool pushable_;
     bool gravitable_;

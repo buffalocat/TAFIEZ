@@ -19,6 +19,7 @@
 
 #include "playingstate.h"
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
@@ -26,8 +27,11 @@
 #include "door.h"
 
 MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFrame* delta_frame, Player* player, bool animated) :
-	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, animated_{ animated } {
+	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, anims_{}, animated_{ animated } {
 	set_standing_door();
+	if (playing_state) {
+		anims_ = playing_state->gfx_->anims_.get();
+	}
 }
 
 MoveProcessor::~MoveProcessor() {}
@@ -91,10 +95,6 @@ bool MoveProcessor::update() {
 		}
 	}
 	map_->handle_moved_cars(this);
-	// TODO: move this responsibility to a new class
-	for (GameObject* block : moving_blocks_) {
-		block->update_animation();
-	}
 	if (deferred_action_ != MoveAction::None) {
 		return false;
 	}
@@ -103,13 +103,6 @@ bool MoveProcessor::update() {
 		try_jump_refresh();
 	}
 	return frames_ <= 0;
-}
-
-void MoveProcessor::abort() {
-	// TODO: Put this in the new animation managing class
-	for (GameObject* block : moving_blocks_) {
-		block->reset_animation();
-	}
 }
 
 void MoveProcessor::reset_player_jump() {
@@ -123,7 +116,7 @@ void MoveProcessor::reset_player_jump() {
 }
 
 bool MoveProcessor::try_move_horizontal(Point3 dir) {
-	HorizontalStepProcessor(this, map_, delta_frame_, player_, dir, fall_check_, moving_blocks_).run();
+	HorizontalStepProcessor(this, map_, delta_frame_, player_, anims_, dir, fall_check_, moving_blocks_).run();
 	if (moving_blocks_.empty()) {
 		return false;
 	}
@@ -182,7 +175,7 @@ bool MoveProcessor::try_jump() {
 	if (!player_->gravitable_) {
 		return false;
 	}
-	JumpStepProcessor(map_, delta_frame_, player_, fall_check_, moving_blocks_).run();
+	JumpStepProcessor(map_, delta_frame_, player_, anims_, fall_check_, moving_blocks_).run();
 	if (moving_blocks_.empty()) {
 		return false;
 	}
@@ -273,6 +266,7 @@ void MoveProcessor::run_incinerators() {
 	std::set<SnakeBlock*> snake_check{};
 	for (auto* inc : alerted_incinerators_) {
 		if (inc->state()) {
+			anims_->receive_signal(AnimationSignal::IncineratorOn, inc->parent_, delta_frame_);
 			Point3 pos_above = inc->pos_above();
 			if (GameObject* above = map_->view(pos_above)) {
 				if (above->id_ == GENERIC_WALL_ID) {
@@ -283,9 +277,12 @@ void MoveProcessor::run_incinerators() {
 					}
 					map_->take_from_map(above, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
+					anims_->receive_signal(AnimationSignal::IncineratorBurn, above, nullptr);
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
 			}
+		} else {
+			anims_->receive_signal(AnimationSignal::IncineratorOff, inc->parent_, delta_frame_);
 		}
 	}
 	for (auto* sb : snake_check) {

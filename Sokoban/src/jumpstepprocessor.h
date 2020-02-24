@@ -6,13 +6,14 @@
 class GameObject;
 class SnakeBlock;
 class Player;
+class AnimationManager;
 
 class RoomMap;
 class DeltaFrame;
 
 class JumpStepProcessor {
 public:
-	JumpStepProcessor(RoomMap*, DeltaFrame*, Player*, std::vector<GameObject*>&, std::vector<GameObject*>&);
+	JumpStepProcessor(RoomMap*, DeltaFrame*, Player*, AnimationManager*, std::vector<GameObject*>&, std::vector<GameObject*>&);
 	~JumpStepProcessor();
 
 	void run();
@@ -33,4 +34,5 @@ private:
 	RoomMap* map_;
 	DeltaFrame* delta_frame_;
 	Player* player_;
+	AnimationManager* anims_;
 };

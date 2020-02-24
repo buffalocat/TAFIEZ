@@ -3,7 +3,6 @@
 
 #include "wall.h"
 #include "objectmodifier.h"
-#include "animation.h"
 
 GameObjectArray::GameObjectArray() {
     array_.push_back(nullptr);

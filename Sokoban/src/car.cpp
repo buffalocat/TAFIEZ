@@ -122,7 +122,7 @@ void Car::draw(GraphicsManager* gfx, FPoint3 p) {
 	// TODO: Add rotated six_squares!!!
 	if (int color = next_color()) {
 		ModelInstancer& model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
-		model.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.01f, 1.01f, 1.01f), BlockTexture::Blank, color);
+		model.push_instance(glm::vec3(p), glm::vec3(1.01f), BlockTexture::Blank, color);
 	}
 }
 

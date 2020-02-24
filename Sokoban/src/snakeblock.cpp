@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "snakeblock.h"
+
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 #include "texture_constants.h"
 
 #include "mapfile.h"
@@ -141,7 +143,6 @@ bool SnakeBlock::moving_push_comp() {
 }
 
 void SnakeBlock::draw(GraphicsManager* gfx) {
-	FPoint3 p{ real_pos() };
 	BlockTexture tex;
 	if (weak_) {
 		if (ends_ == 1) {
@@ -159,10 +160,12 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	if (modifier_) {
 		tex = tex | modifier_->texture();
 	}
-	gfx->diamond.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color_);
+	FPoint3 p{ real_pos() };
+	gfx->diamond.push_instance(glm::vec3(p), glm::vec3(1.0f), tex, color_);
 	draw_force_indicators(gfx->diamond, p, 1.1f);
 	for (auto link : links_) {
-		FPoint3 q = link->real_pos();
+		// TODO: FIX
+		FPoint3 q{ link->real_pos() };
 		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
 		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.z + 0.5f),
 			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
@@ -390,11 +393,12 @@ std::unique_ptr<SnakeBlock> SnakeBlock::make_split_copy(RoomMap* map, DeltaFrame
 	return std::move(split);
 }
 
-SnakePuller::SnakePuller(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame,
+SnakePuller::SnakePuller(MoveProcessor* mp, RoomMap* map,
+	DeltaFrame* delta_frame, AnimationManager* anims,
 	std::vector<GameObject*>& moving_blocks,
 	std::set<SnakeBlock*>& link_add_check,
 	std::vector<GameObject*>& fall_check) :
-	move_processor_{ mp }, map_{ map }, delta_frame_{ delta_frame },
+	move_processor_{ mp }, map_{ map }, delta_frame_{ delta_frame }, anims_{ anims },
 	moving_blocks_{ moving_blocks }, link_add_check_{ link_add_check }, fall_check_{ fall_check } {}
 
 SnakePuller::~SnakePuller() {}
@@ -497,7 +501,9 @@ void SnakePuller::perform_pulls() {
 			cur->reset_internal_state();
 			moving_blocks_.push_back(cur);
 			Point3 dir = next->pos_ - cur->pos_;
-			cur->set_linear_animation(dir);
+			if (anims_) {
+				anims_->set_linear_animation(point_to_dir(dir), cur);
+			}
 			map_->shift(cur, dir, true, delta_frame_);
 			cur = next;
 		}

@@ -1,6 +1,20 @@
 #ifndef COMMON_ENUMS_H
 #define COMMON_ENUMS_H
 
+enum class Direction {
+	NONE = 0,
+	Left = 1,
+	Far = 2,
+	Right = 3,
+	Close = 4,
+	Up = 5,
+	Down = 6,
+};
+
+Direction point_to_dir(Point3 p);
+
+Point3 dir_to_point(Direction dir);
+
 enum class ObjCode {
     NONE = 0,
     PushBlock = 1,

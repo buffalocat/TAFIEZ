@@ -70,7 +70,7 @@ Sticky PushBlock::sticky() {
 }
 
 void PushBlock::draw(GraphicsManager* gfx) {
-    FPoint3 p {real_pos()};
+	FPoint3 p{ real_pos() };
     BlockTexture tex {BlockTexture::Blank};
     switch (sticky_) {
     case Sticky::None:
@@ -89,7 +89,7 @@ void PushBlock::draw(GraphicsManager* gfx) {
 	if (modifier_) {
 		tex = tex | modifier_->texture();
 	}
-	gfx->cube.push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), tex, color());
+	gfx->cube.push_instance(glm::vec3(p), glm::vec3(1.0f), tex, color());
     draw_force_indicators(gfx->cube, p, 1.1f);
 	if (auto* car = dynamic_cast<Car*>(modifier())) {
 		

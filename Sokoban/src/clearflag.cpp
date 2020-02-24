@@ -99,7 +99,7 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 	} else if (!real_) {
 		color = PURPLE;
 	}
-	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Blank, color);
+	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f), BlockTexture::Blank, color);
 }
 
 

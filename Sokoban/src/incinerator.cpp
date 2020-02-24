@@ -5,6 +5,7 @@
 #include "mapfile.h"
 #include "roommap.h"
 #include "moveprocessor.h"
+#include "animationmanager.h"
 #include "color_constants.h"
 #include "texture_constants.h"
 #include "graphicsmanager.h"
@@ -44,7 +45,7 @@ void Incinerator::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 	}
 }
 
-void Incinerator::apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
+void Incinerator::apply_state_change(RoomMap*, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
 		mp->alerted_incinerators_.push_back(this);
 	}

@@ -4,6 +4,8 @@
 #include "gameobject.h"
 #include "delta.h"
 
+class AnimationManager;
+
 class SnakeBlock: public ColoredBlock {
 public:
 	SnakeBlock(Point3 pos, int color, bool pushable, bool gravitable, int ends, bool weak);
@@ -72,7 +74,7 @@ public:
 
 class SnakePuller {
 public:
-    SnakePuller(MoveProcessor*, RoomMap*, DeltaFrame*,
+    SnakePuller(MoveProcessor*, RoomMap*, DeltaFrame*, AnimationManager*,
                 std::vector<GameObject*>& moving_blocks,
                 std::set<SnakeBlock*>& link_add_check,
                 std::vector<GameObject*>& fall_check);
@@ -84,6 +86,7 @@ private:
 	MoveProcessor* move_processor_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
+	AnimationManager* anims_;
 	std::vector<SnakeBlock*> snakes_to_pull_{};
     std::vector<GameObject*>& moving_blocks_;
     std::set<SnakeBlock*>& link_add_check_;

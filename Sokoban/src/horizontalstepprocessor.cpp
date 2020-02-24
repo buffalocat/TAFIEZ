@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "horizontalstepprocessor.h"
 
+#include "animationmanager.h"
 #include "roommap.h"
 
 #include "player.h"
@@ -10,10 +11,12 @@
 
 #include "snakeblock.h"
 
-HorizontalStepProcessor::HorizontalStepProcessor(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame, Player* player, Point3 dir,
+HorizontalStepProcessor::HorizontalStepProcessor(MoveProcessor* mp,
+	RoomMap* map, DeltaFrame* delta_frame, Player* player, AnimationManager* anims, Point3 dir,
 	std::vector<GameObject*>& fall_check, std::vector<GameObject*>& moving_blocks) :
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
-	move_processor_{ mp }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
+	move_processor_{ mp }, anims_{ anims },
+	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, dir_{ dir } {}
 
 HorizontalStepProcessor::~HorizontalStepProcessor() {
 	for (auto sb : moving_snakes_) {
@@ -277,7 +280,8 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	for (auto sb : moving_snakes_) {
 		sb->break_blocked_links_horizontal(fall_check_, map_, delta_frame_, dir_);
 	}
-	SnakePuller snake_puller{ move_processor_, map_, delta_frame_, moving_blocks_, link_add_check, fall_check_ };
+	SnakePuller snake_puller{ move_processor_, map_, delta_frame_, anims_,
+		moving_blocks_, link_add_check, fall_check_ };
 	for (auto sb : moving_snakes_) {
 		sb->collect_maybe_confused_neighbors(map_, link_add_check);
 		snake_puller.prepare_pull(sb);
@@ -286,8 +290,12 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	// In this section of code, the map can't be viewed
 	auto forward_moving_blocks = moving_blocks_;
 	// TODO: put animation code somewhere else, if possible?
-	for (auto* block : forward_moving_blocks) {
-		block->set_linear_animation(dir_);
+	Direction dir_name = point_to_dir(dir_);
+	if (anims_) {
+		for (auto* block : forward_moving_blocks) {
+			anims_->set_linear_animation(dir_name, block);
+		}
+		anims_->set_linear_animation_frames();
 	}
 	snake_puller.perform_pulls();
 	map_->batch_shift(std::move(forward_moving_blocks), dir_, true, delta_frame_);

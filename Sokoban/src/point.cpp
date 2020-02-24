@@ -43,6 +43,10 @@ Point3 operator-(const Point3& p) {
     return {-p.x, -p.y, -p.z};
 }
 
+Point3::operator glm::vec3() const {
+	return glm::vec3(x, y, z);
+}
+
 FPoint3 operator+(const Point3& p, const FPoint3& q) {
     return {p.x + q.x, p.y + q.y, p.z + q.z};
 }
@@ -69,6 +73,10 @@ Point3 operator*(const int a, const Point3& p) {
 
 FPoint3 operator*(const double a, const FPoint3& p) {
     return {a*p.x, a*p.y, a*p.z};
+}
+
+FPoint3::operator glm::vec3() const {
+	return glm::vec3(x, y, z);
 }
 
 std::ostream& operator<<(std::ostream& os, const Point2& p) {

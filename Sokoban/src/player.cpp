@@ -235,7 +235,7 @@ PlayerState Player::state() {
 }
 
 void Player::draw(GraphicsManager* gfx) {
-    FPoint3 p = real_pos();
+	FPoint3 p{ real_pos() };
 	auto* player_model = &gfx->cube;
 	float z_offset = 0.0f;
 	float side = 0.6f;
@@ -249,7 +249,7 @@ void Player::draw(GraphicsManager* gfx) {
 		}
 		z_offset = -0.2f;
 		side = 0.5f;
-		windshield_model->push_instance(glm::vec3(p.x, p.y, p.z), glm::vec3(1.0f, 1.0f, 1.0f), BlockTexture::Darker, car_->parent_->color());
+		windshield_model->push_instance(glm::vec3(p), glm::vec3(1.0f), BlockTexture::Darker, car_->parent_->color());
 	}
 	// Fallthrough
 	case PlayerState::Free:

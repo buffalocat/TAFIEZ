@@ -111,6 +111,7 @@ void GraphicsManager::set_state(GraphicsState state) {
 }
 
 void GraphicsManager::update() {
+	// Handle state transitions
 	switch (state_) {
 	case GraphicsState::FadeIn:
 		shadow_ = (double)(state_counter_) / FADE_IN_FRAMES;
@@ -129,6 +130,7 @@ void GraphicsManager::update() {
 		}
 		break;
 	}
+	// Perform all animation updates
 	anims_->update();
 }
 

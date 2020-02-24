@@ -7,6 +7,7 @@
 class Player;
 class GameObject;
 class PlayingState;
+class AnimationManager;
 class Room;
 class RoomMap;
 class DeltaFrame;
@@ -59,7 +60,6 @@ public:
     ~MoveProcessor();
 
 	bool update();
-	void abort();
 
 	void set_standing_door();
 	void reset_player_jump();
@@ -88,6 +88,7 @@ public:
 	void set_initializer_state();
 
 	PlayingState* playing_state_;
+	AnimationManager* anims_;
 	RoomMap* map_;
 	DeltaFrame* delta_frame_;
 	Player* player_;

@@ -11,6 +11,7 @@ class Player;
 class RoomMap;
 class DeltaFrame;
 class MoveProcessor;
+class AnimationManager;
 
 enum class PushResult {
 	Blocked,
@@ -22,7 +23,7 @@ using PushCompPair = std::pair<PushComponent*, PushComponent*>;
 
 class HorizontalStepProcessor {
 public:
-    HorizontalStepProcessor(MoveProcessor* mp, RoomMap*, DeltaFrame*, Player*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
+    HorizontalStepProcessor(MoveProcessor*, RoomMap*, DeltaFrame*, Player*, AnimationManager*, Point3, std::vector<GameObject*>&, std::vector<GameObject*>&);
     ~HorizontalStepProcessor();
 
     void run();
@@ -52,6 +53,7 @@ private:
     std::vector<GameObject*>& fall_check_;
 
 	MoveProcessor* move_processor_;
+	AnimationManager* anims_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
 	Player* player_;

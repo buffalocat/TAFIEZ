@@ -20,7 +20,7 @@ void RealPlayingState::start_from_map(std::string starting_map) {
 	load_room(starting_map, true);
 	activate_room(starting_map);
 	move_camera_to_player(true);
-	room_->map()->set_initial_state_on_start();
+	room_->map()->set_initial_state_on_start(this);
 }
 
 bool RealPlayingState::load_room(std::string name, bool use_default_player) {

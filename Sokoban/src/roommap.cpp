@@ -5,6 +5,7 @@
 #include "gameobjectarray.h"
 #include "gameobject.h"
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 #include "wall.h"
 #include "delta.h"
 #include "snakeblock.h"
@@ -20,6 +21,7 @@
 #include "clearflag.h"
 #include "door.h"
 #include "car.h"
+#include "incinerator.h"
 #include "savefile.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
@@ -430,10 +432,10 @@ void RoomStateInitializer::operator()(int id) {
 	}
 }
 
-void RoomMap::set_initial_state_on_start() {
+void RoomMap::set_initial_state_on_start(PlayingState* state) {
 	if (!inited_) {
 		DeltaFrame df{};
-		MoveProcessor mp = MoveProcessor(nullptr, this, &df, nullptr, false);
+		MoveProcessor mp = MoveProcessor(state, this, &df, nullptr, false);
 		set_initial_state(false, &df, &mp);
 		while (!mp.update()) {}
 	}
@@ -466,6 +468,34 @@ void RoomMap::set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveP
 	mp->perform_switch_checks(false);
 	inited_ = true;
 	delta_frame->push(std::make_unique<MapInitDelta>(this));
+}
+
+struct AnimationInitializer {
+	void operator()(int id);
+
+	GameObjectArray& obj_array;
+	RoomMap* map;
+	AnimationManager* anims;
+};
+
+void AnimationInitializer::operator()(int id) {
+	GameObject* obj = obj_array[id];
+	if (auto* mod = obj->modifier()) {
+		if (auto* inc = dynamic_cast<Incinerator*>(mod)) {
+			if (inc->state()) {
+				anims->receive_signal(AnimationSignal::IncineratorOn, obj, nullptr);
+			}
+		} else if (dynamic_cast<ClearFlag*>(mod)) {
+			anims->receive_signal(AnimationSignal::FlagExists, obj, nullptr);
+		}
+	}
+}
+
+void RoomMap::initialize_animation(AnimationManager* anims) {
+	GameObjIDFunc state_initializer = AnimationInitializer{ obj_array_, this, anims };
+	for (auto& layer : layers_) {
+		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
+	}
 }
 
 struct SnakeInitializer {
@@ -609,6 +639,7 @@ MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
 MotionDelta::~MotionDelta() {}
 
 void MotionDelta::revert() {
+	obj_->dpos_ = {};
 	map_->shift(obj_, -dpos_, false, nullptr);
 }
 
@@ -619,6 +650,9 @@ BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, R
 BatchMotionDelta::~BatchMotionDelta() {}
 
 void BatchMotionDelta::revert() {
+	for (auto* obj : objs_) {
+		obj->dpos_ = {};
+	}
 	map_->batch_shift(objs_, -dpos_, false, nullptr);
 }
 

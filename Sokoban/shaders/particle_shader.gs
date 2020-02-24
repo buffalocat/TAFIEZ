@@ -14,13 +14,14 @@ out vec2 TexCoord;
 out vec4 Color;
 
 uniform float texScale;
+uniform float aspectRatio;
 uniform mat4 Proj;
 
 void main()
 {
   vec4 Q = gl_in[0].gl_Position;
   vec4 P = Proj * Q;
-  vec2 s = vertex[0].Scale;
+  vec2 s = vertex[0].Scale * vec2(1, aspectRatio);
   Color = vertex[0].Color;
   
 	gl_Position = vec4(P.x - s.x, P.y - s.y, P.zw);

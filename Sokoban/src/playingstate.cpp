@@ -39,9 +39,10 @@ void PlayingState::main_loop() {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
 	handle_input();
-	room_->draw_at_player(player_doa(), true, false, false);
-	// Draw stuff
+	// Update Graphics State and Animations
 	gfx_->update();
+	// Draw stuff
+	room_->draw_at_player(player_doa(), true, false, false);
 	gfx_->draw_objects();
 	gfx_->draw_particles();
 	text_->draw();
@@ -72,9 +73,9 @@ void PlayingState::handle_input() {
 				input_cooldown = UNDO_COOLDOWN_FINAL;
 			}
 			if (move_processor_) {
-				move_processor_->abort();
 				move_processor_.reset(nullptr);
 				delta_frame_->revert();
+				gfx_->anims_->abort_move();
 				delta_frame_ = std::make_unique<DeltaFrame>();
 				move_camera_to_player(true);
 			} else if (undo_stack_->non_empty()) {
@@ -199,6 +200,7 @@ bool PlayingState::activate_room(std::string name) {
 	proom->changed = true;
 	Room* new_room = proom->room.get();
 	if (room_ != new_room) {
+		gfx_->anims_->reset_particles();
 		new_room->zone_label_->init();
 		text_->toggle_string_drawer(new_room->zone_label_.get(), true);
 		// Remove the old labels (if there's more cleanup than this, it should be its own method)
@@ -209,6 +211,7 @@ bool PlayingState::activate_room(std::string name) {
 			}
 		}
 		room_ = new_room;
+		room_->map()->initialize_animation(gfx_->anims_.get());
 	}
 	return true;
 }

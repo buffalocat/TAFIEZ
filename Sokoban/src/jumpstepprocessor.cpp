@@ -5,11 +5,12 @@
 #include "player.h"
 #include "car.h"
 #include "snakeblock.h"
+#include "animationmanager.h"
 
-JumpStepProcessor::JumpStepProcessor(RoomMap* map, DeltaFrame* delta_frame, Player* player,
+JumpStepProcessor::JumpStepProcessor(RoomMap* map, DeltaFrame* delta_frame, Player* player, AnimationManager* anims,
 	std::vector<GameObject*>& fall_check, std::vector<GameObject*>& moving_blocks) :
 	fall_check_{ fall_check }, moving_blocks_{ moving_blocks },
-	map_{ map }, delta_frame_{ delta_frame }, player_{ player } {}
+	map_{ map }, delta_frame_{ delta_frame }, player_{ player }, anims_{ anims } {}
 
 JumpStepProcessor::~JumpStepProcessor() {}
 
@@ -109,8 +110,11 @@ void JumpStepProcessor::perform_jump() {
 	// In this section of code, the map can't be viewed
 	auto forward_moving_blocks = moving_blocks_;
 	// TODO: put animation code somewhere else, if possible?
-	for (auto* block : forward_moving_blocks) {
-		block->set_linear_animation({ 0,0,1 });
+	if (anims_) {
+		for (auto* block : forward_moving_blocks) {
+			anims_->set_linear_animation(Direction::Up, block);
+		}
+		anims_->set_linear_animation_frames();
 	}
 	map_->batch_shift(std::move(forward_moving_blocks), { 0,0,1 }, true, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE

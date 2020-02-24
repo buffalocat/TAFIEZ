@@ -9,7 +9,6 @@
 #include "delta.h"
 #include "mapfile.h"
 #include "objectmodifier.h"
-#include "animation.h"
 #include "moveprocessor.h"
 
 #include "component.h"
@@ -23,15 +22,13 @@ Sticky operator &(Sticky a, Sticky b) {
 
 // id_ begins in an "inconsistent" state - it *must* be set by the GameObjectArray
 GameObject::GameObject(Point3 pos, bool pushable, bool gravitable) :
-	pos_{ pos },
-	pushable_{ pushable }, gravitable_{ gravitable } {}
+	pos_{ pos }, pushable_{ pushable }, gravitable_{ gravitable } {}
 
 GameObject::~GameObject() {}
 
 // Copy Constructor creates trivial unique_ptr members
 GameObject::GameObject(const GameObject& obj) :
-	pos_{ obj.pos_ },
-	pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ } {}
+	pos_{ obj.pos_ }, pushable_{ obj.pushable_ }, gravitable_{ obj.gravitable_ } {}
 
 std::string GameObject::to_str() {
 	std::string mod_str{ "" };
@@ -101,26 +98,6 @@ ObjectModifier* GameObject::modifier() {
 	return modifier_.get();
 }
 
-void GameObject::reset_animation() {
-	animation_.reset(nullptr);
-}
-
-void GameObject::set_linear_animation(Point3 d) {
-	animation_ = std::make_unique<LinearAnimation>(d);
-}
-
-bool GameObject::update_animation() {
-	if (animation_ && animation_->update()) {
-		animation_.reset(nullptr);
-		return true;
-	}
-	return false;
-}
-
-void GameObject::shift_pos_from_animation() {
-	pos_ = animation_->shift_pos(pos_);
-}
-
 void GameObject::abstract_shift(Point3 dpos, DeltaFrame* delta_frame) {
 	if (!(dpos == Point3{})) {
 		pos_ += dpos;
@@ -131,14 +108,6 @@ void GameObject::abstract_shift(Point3 dpos, DeltaFrame* delta_frame) {
 void GameObject::abstract_put(Point3 pos, DeltaFrame* delta_frame) {
 	delta_frame->push(std::make_unique<AbstractPutDelta>(this, pos_));
 	pos_ = pos;
-}
-
-FPoint3 GameObject::real_pos() {
-	if (animation_) {
-		return pos_ + animation_->dpos();
-	} else {
-		return pos_;
-	}
 }
 
 // NOTE: these can be static_casts as long as the code using them is careful
@@ -186,6 +155,10 @@ void GameObject::collect_special_links(std::vector<GameObject*>& to_check) {
 }
 int GameObject::color() {
 	return NO_COLOR;
+}
+
+FPoint3 GameObject::real_pos() {
+	return pos_ + dpos_;
 }
 
 Block::Block(Point3 pos, bool pushable, bool gravitable) :
