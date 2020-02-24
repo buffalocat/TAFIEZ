@@ -58,6 +58,7 @@ struct ParticleVertex {
 	glm::vec4 Color;
 };
 
+
 class Particle {
 public:
 	Particle();
@@ -69,20 +70,6 @@ public:
 
 using ParticleVector = std::vector<std::unique_ptr<Particle>>;
 
-class FireParticle: public Particle {
-public:
-	FireParticle(glm::vec3 center, ParticleTexture type, double range, double size, RandDouble& rand);
-	virtual ~FireParticle();
-
-	void get_vertex(std::vector<ParticleVertex>&);
-	bool update();
-	
-private:
-	glm::vec3 pos_, vel_;
-	glm::vec2 tex_, size_;
-	int life_;
-};
-
 
 class ParticleSource {
 public:
@@ -93,15 +80,30 @@ public:
 
 using SourceMap = std::map<GameObject*, ParticleSource*>;
 
-class EmberSource: public ParticleSource {
+
+class FireParticle : public Particle {
 public:
-	EmberSource(GameObject* parent, SourceMap& source_map);
+	FireParticle(glm::vec3 center, ParticleTexture type, double range, double size, RandDouble& rand);
+	virtual ~FireParticle();
+
+	void get_vertex(std::vector<ParticleVertex>&);
+	bool update();
+
+private:
+	glm::vec3 pos_, vel_;
+	glm::vec2 tex_, size_;
+	int life_;
+};
+
+
+class EmberSource : public ParticleSource {
+public:
+	EmberSource(GameObject* parent, bool active);
 	virtual ~EmberSource();
 	bool update(RandDouble& rand, ParticleVector& particles);
 
 	GameObject* parent_;
-	SourceMap& source_map_;
-	bool supported_ = true;
+	bool active_;
 };
 
 
@@ -116,6 +118,33 @@ public:
 };
 
 
+class DoorVortexParticle : public Particle {
+public:
+	DoorVortexParticle(glm::vec3 center, RandDouble& rand);
+	virtual ~DoorVortexParticle();
+
+	void get_vertex(std::vector<ParticleVertex>&);
+	bool update();
+
+private:
+	glm::vec3 c_;
+	double dz_;
+	double rad_;
+	double theta_;
+};
+
+
+class DoorVortexSource : public ParticleSource {
+public:
+	DoorVortexSource(GameObject* parent, bool active);
+	virtual ~DoorVortexSource();
+	bool update(RandDouble& rand, ParticleVector& particles);
+
+	GameObject* parent_;
+	bool active_;
+};
+
+
 class AnimationManager {
 public:
 	AnimationManager(Shader* shader);
@@ -125,6 +154,8 @@ public:
 	void abort_move();
 	void reset_particles();
 	void render_particles(glm::vec3 view_dir);
+	void create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source);
+
 	
 	void set_linear_animation(Direction dir, GameObject* obj);
 	void set_linear_animation_frames();

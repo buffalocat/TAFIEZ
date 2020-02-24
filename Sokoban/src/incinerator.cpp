@@ -48,6 +48,11 @@ void Incinerator::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 void Incinerator::apply_state_change(RoomMap*, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
 		mp->alerted_incinerators_.push_back(this);
+		if (state()) {
+			mp->anims_->receive_signal(AnimationSignal::IncineratorOn, parent_, delta_frame);
+		} else {
+			mp->anims_->receive_signal(AnimationSignal::IncineratorOff, parent_, delta_frame);
+		}
 	}
 }
 

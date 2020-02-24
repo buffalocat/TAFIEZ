@@ -4,6 +4,7 @@
 #include "mapfile.h"
 #include "gameobject.h"
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 
 #include "texture_constants.h"
 
@@ -87,6 +88,15 @@ void Door::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 		mp->plan_door_move(this);
 	}
 }
+
+void Door::apply_state_change(RoomMap*, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	if (data_ && state()) {
+		mp->anims_->receive_signal(AnimationSignal::DoorOn, parent_, delta_frame);
+	} else {
+		mp->anims_->receive_signal(AnimationSignal::DoorOff, parent_, delta_frame);
+	}
+}
+
 
 void Door::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	Switchable::setup_on_put(map, delta_frame, real);

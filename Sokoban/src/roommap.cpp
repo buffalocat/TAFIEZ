@@ -482,11 +482,12 @@ void AnimationInitializer::operator()(int id) {
 	GameObject* obj = obj_array[id];
 	if (auto* mod = obj->modifier()) {
 		if (auto* inc = dynamic_cast<Incinerator*>(mod)) {
-			if (inc->state()) {
-				anims->receive_signal(AnimationSignal::IncineratorOn, obj, nullptr);
-			}
-		} else if (dynamic_cast<ClearFlag*>(mod)) {
-			anims->receive_signal(AnimationSignal::FlagExists, obj, nullptr);
+			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, inc->state()));
+		} else if (auto* flag = dynamic_cast<ClearFlag*>(mod)) {
+			//TODO: make this a flag thing
+			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, flag));
+		} else if (auto* door = dynamic_cast<Door*>(mod)) {
+			anims->create_bound_source(obj, std::make_unique<DoorVortexSource>(obj, door->data_ && door->state()));
 		}
 	}
 }

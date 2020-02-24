@@ -37,6 +37,7 @@ public:
 	bool usable();
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
 	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
@@ -46,8 +47,7 @@ public:
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 	unsigned int door_id_;
-
-private:
+	
 	std::unique_ptr<DoorData> data_{};
 };
 

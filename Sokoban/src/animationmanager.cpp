@@ -14,7 +14,7 @@ Particle::~Particle() {}
 
 const int FIRE_PART_MAX_LIFE = 60;
 
-FireParticle::FireParticle(glm::vec3 c, ParticleTexture type, double range, double size, RandDouble& rand): Particle() {
+FireParticle::FireParticle(glm::vec3 c, ParticleTexture type, double range, double size, RandDouble& rand) : Particle() {
 	pos_ = glm::vec3(c.x + range * (rand() - 0.5), c.y + range * (rand() - 0.5), c.z + 0.5);
 	vel_ = glm::vec3(0.01 * (rand() - 0.5), 0.01 * (rand() - 0.5), 0.01 + 0.004 * rand());
 	tex_ = tex_to_vec(type);
@@ -23,7 +23,6 @@ FireParticle::FireParticle(glm::vec3 c, ParticleTexture type, double range, doub
 }
 
 FireParticle::~FireParticle() {}
-
 
 void FireParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
 	float rl = life_ / (float)FIRE_PART_MAX_LIFE;
@@ -50,30 +49,25 @@ ParticleSource::ParticleSource() {}
 ParticleSource::~ParticleSource() {}
 
 
-EmberSource::EmberSource(GameObject* parent, SourceMap& source_map) : ParticleSource(),
-	parent_{ parent }, source_map_{ source_map } {
-	source_map[parent] = this;
-}
+EmberSource::EmberSource(GameObject* parent, bool active) : ParticleSource(),
+parent_{ parent }, active_{ active } {}
 
-EmberSource::~EmberSource() {
-	source_map_.erase(parent_);
-}
+EmberSource::~EmberSource() {}
 
 bool EmberSource::update(RandDouble& rand, ParticleVector& particles) {
-	if (rand() > 0.8) {
-		particles.push_back(std::make_unique<FireParticle>(glm::vec3(parent_->real_pos()), ParticleTexture::SolidSquare, 0.8, 0.05, rand));
+	if (active_) {
+		if (rand() > 0.8) {
+			particles.push_back(std::make_unique<FireParticle>(glm::vec3(parent_->real_pos()), ParticleTexture::SolidSquare, 0.8, 0.05, rand));
+		}
 	}
-	if (!supported_) {
-		return true;
-	}
-	return !supported_;
+	return false;
 }
 
 
 const int FLAME_SOURCE_MAX_LIFE = 8;
 
 FlameSource::FlameSource(GameObject* parent) : ParticleSource(),
-	parent_{ parent }, life_{ FLAME_SOURCE_MAX_LIFE } {}
+parent_{ parent }, life_{ FLAME_SOURCE_MAX_LIFE } {}
 
 FlameSource::~FlameSource() {}
 
@@ -84,6 +78,50 @@ bool FlameSource::update(RandDouble& rand, ParticleVector& particles) {
 		particles.push_back(std::make_unique<FireParticle>(shifted_center, ParticleTexture::SolidSquare, 1.0, 0.15 + 0.1 * rand(), rand));
 	}
 	return --life_ <= 0;
+}
+
+
+const double DOOR_PART_RAD_RATE = 0.01;
+const double DOOR_PART_Z_RATE = 0.01;
+const double DOOR_PART_THETA_RATE = 0.02;
+
+DoorVortexParticle::DoorVortexParticle(glm::vec3 c, RandDouble& rand) : Particle(),
+c_{ c }	{
+	rad_ = 0.5 + 0.3 * rand();
+	dz_ = 0.6 + 0.2 * rand();
+	theta_ = rand() * 6.28318530718; // 2pi 
+}
+
+DoorVortexParticle::~DoorVortexParticle() {}
+
+void DoorVortexParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
+	vertices.push_back(ParticleVertex{
+		glm::vec3(c_.x + rad_ * cos(theta_), c_.y + rad_ * sin(theta_), c_.z + dz_),
+		tex_to_vec(ParticleTexture::SolidSquare),
+		glm::vec2(0.05f),
+		glm::vec4(0.8f, 0.5f, 0.9f, 0.5f) });
+}
+
+bool DoorVortexParticle::update() {
+	rad_ -= DOOR_PART_RAD_RATE;
+	dz_ -= DOOR_PART_Z_RATE;
+	theta_ += DOOR_PART_THETA_RATE;
+	return rad_ <= 0.3 || dz_ <= 0.5;
+}
+
+
+DoorVortexSource::DoorVortexSource(GameObject* parent, bool active) : ParticleSource(),
+parent_{ parent }, active_{ active } {}
+
+DoorVortexSource::~DoorVortexSource() {}
+
+bool DoorVortexSource::update(RandDouble& rand, ParticleVector& particles) {
+	if (active_) {
+		if (rand() > 0.95) {
+			particles.push_back(std::make_unique<DoorVortexParticle>(glm::vec3(parent_->real_pos()), rand));
+		}
+	}
+	return false;
 }
 
 
@@ -176,6 +214,11 @@ void AnimationManager::reset_particles() {
 	source_map_.clear();
 }
 
+void AnimationManager::create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source) {
+	source_map_[obj] = source.get();
+	sources_.push_back(std::move(source));
+}
+
 void AnimationManager::render_particles(glm::vec3 view_dir) {
 	std::vector<ParticleVertex> vertices{};
 	for (auto& particle : particles_) {
@@ -202,9 +245,8 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	switch (signal) {
 	case AnimationSignal::IncineratorOn:
 	{
-		auto* ember_source = dynamic_cast<EmberSource*>(source_map_[obj]);
-		if (!ember_source) {
-			sources_.push_back(std::make_unique<EmberSource>(obj, source_map_));
+		if (auto* ember_source = dynamic_cast<EmberSource*>(source_map_[obj])) {
+			ember_source->active_ = true;
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOff, obj));
 			}
@@ -214,7 +256,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	case AnimationSignal::IncineratorOff:
 	{
 		if (auto* ember_source = dynamic_cast<EmberSource*>(source_map_[obj])) {
-			ember_source->supported_ = false;
+			ember_source->active_ = false;
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOn, obj));
 			}
@@ -224,6 +266,26 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	case AnimationSignal::IncineratorBurn:
 		sources_.push_back(std::make_unique<FlameSource>(obj));
 		break;
+	case AnimationSignal::DoorOn:
+	{
+		if (auto* door_source = dynamic_cast<DoorVortexSource*>(source_map_[obj])) {
+			door_source->active_ = true;
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOff, obj));
+			}
+		}
+		break;
+	}
+	case AnimationSignal::DoorOff:
+	{
+		if (auto* door_source = dynamic_cast<DoorVortexSource*>(source_map_[obj])) {
+			door_source->active_ = false;
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOn, obj));
+			}
+		}
+		break;
+	}
 	}
 }
 

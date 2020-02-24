@@ -266,7 +266,6 @@ void MoveProcessor::run_incinerators() {
 	std::set<SnakeBlock*> snake_check{};
 	for (auto* inc : alerted_incinerators_) {
 		if (inc->state()) {
-			anims_->receive_signal(AnimationSignal::IncineratorOn, inc->parent_, delta_frame_);
 			Point3 pos_above = inc->pos_above();
 			if (GameObject* above = map_->view(pos_above)) {
 				if (above->id_ == GENERIC_WALL_ID) {
@@ -281,8 +280,6 @@ void MoveProcessor::run_incinerators() {
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
 			}
-		} else {
-			anims_->receive_signal(AnimationSignal::IncineratorOff, inc->parent_, delta_frame_);
 		}
 	}
 	for (auto* sb : snake_check) {
