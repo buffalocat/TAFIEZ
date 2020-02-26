@@ -13,7 +13,7 @@ struct QueuedSound {
 	int power;
 	ALuint buffer;
 
-	QueuedSound(const char* file_name, ALCdevice* device_);
+	QueuedSound(const char* file_name);
 };
 
 class SoundManager {

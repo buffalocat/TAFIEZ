@@ -7,39 +7,17 @@
 #include <Windows.h>
 
 
-QueuedSound::QueuedSound(const char* file_name, ALCdevice* device) : power{ 0 } {
+QueuedSound::QueuedSound(const char* file_name) : power{ 0 } {
 	std::string full_file = "resources/sounds/";
 	full_file = full_file + file_name;
-	buffer = alutCreateBufferFromFile("switch_on.wav");
-	auto buffer1 = alutCreateBufferHelloWorld();
-	auto buffer2 = alutCreateBufferWaveform(ALUT_WAVEFORM_SINE, 440, 0, 1);
-	auto buffer0 = alutCreateBufferFromFile("switch_on.wav");
-	auto error = alcGetError(device);
-	std::cout << (_alutSanityCheck() == AL_TRUE) << std::endl;
-	if (error != AL_NO_ERROR) {
-		std::cout << error << std::endl;
-	}
-	buffer = buffer2;
+	buffer = alutCreateBufferFromFile(full_file.c_str());
 }
 
 
 SoundManager::SoundManager() {
-	device_ = alcOpenDevice(nullptr);
-	context_ = alcCreateContext(device_, nullptr);
-	alcMakeContextCurrent(context_);
-	alutInitWithoutContext(nullptr, nullptr);
-	queued_sounds_.push_back({ "switch_on.wav", device_ });
-	queued_sounds_.push_back({ "switch_off.wav", device_ });
-	auto buffer_0 = alutCreateBufferHelloWorld();
-	auto buffer = alutCreateBufferFromFile("resources/sounds/switch_on.wav");
-	auto error = alGetError();
-	if (error != AL_NO_ERROR) {
-		std::cout << error << std::endl;
-	}
-	ALuint source;
-	alGenSources(1, &source);
-	alSourcei(source, AL_BUFFER, 1);
-	alSourcePlay(source);
+	alutInit(nullptr, nullptr);
+	queued_sounds_.push_back({ "switch_on.wav" });
+	queued_sounds_.push_back({ "switch_off.wav" });
 }
 
 SoundManager::~SoundManager() {
