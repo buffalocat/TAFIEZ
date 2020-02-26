@@ -23,7 +23,7 @@ public:
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-    void check_send_signal(RoomMap*, DeltaFrame*);
+    bool check_send_signal(RoomMap*, DeltaFrame*);
     bool should_toggle(RoomMap*);
 
     void setup_on_put(RoomMap*, DeltaFrame*, bool real);

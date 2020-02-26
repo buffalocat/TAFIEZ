@@ -5,6 +5,7 @@
 #include "animationmanager.h"
 #include "fontmanager.h"
 #include "stringdrawer.h"
+#include "soundmanager.h"
 
 #include "gameobject.h"
 #include "savefile.h"

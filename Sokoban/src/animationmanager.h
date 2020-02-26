@@ -9,6 +9,7 @@
 enum class Direction;
 enum class ParticleTexture;
 class GameObject;
+class SoundManager;
 
 enum class AnimationSignal {
 	NONE,
@@ -17,8 +18,8 @@ enum class AnimationSignal {
 	IncineratorBurn,
 	DoorOn,
 	DoorOff,
-	SwitchPress,
-	SwitchRelease,
+	SwitchOn,
+	SwitchOff,
 	GateUp,
 	GateDown,
 	LinkBreak,
@@ -168,6 +169,7 @@ private:
 	std::array<std::vector<GameObject*>, 6> linear_animations_{};
 	std::vector<std::unique_ptr<ParticleSource>> sources_{};
 	std::vector<std::unique_ptr<Particle>> particles_{};
+	std::unique_ptr<SoundManager> sounds_{};
 
 	int linear_animation_frames_ = -1;
 

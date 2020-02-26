@@ -6,6 +6,7 @@
 #include "gameobject.h"
 #include "common_constants.h"
 #include "texture_constants.h"
+#include "soundmanager.h"
 
 Particle::Particle() {}
 
@@ -137,7 +138,8 @@ double RandDouble::operator()() {
 	return dist_(engine_);
 }
 
-AnimationManager::AnimationManager(Shader* shader) : particle_shader_{ shader } {
+AnimationManager::AnimationManager(Shader* shader) :
+	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() } {
 	initialize_particle_shader();
 }
 
@@ -196,6 +198,8 @@ void AnimationManager::update() {
 		[this](auto& p) { return p->update(rand_, particles_); }), sources_.end());
 	particles_.erase(std::remove_if(particles_.begin(), particles_.end(),
 		[](auto& p) { return p->update(); }), particles_.end());
+	// Run sound engine
+	sounds_->flush_sounds();
 }
 
 void AnimationManager::abort_move() {
@@ -286,6 +290,12 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		}
 		break;
 	}
+	case AnimationSignal::SwitchOn:
+		sounds_->queue_sound(SoundName::SwitchOn);
+		break;
+	case AnimationSignal::SwitchOff:
+		sounds_->queue_sound(SoundName::SwitchOff);
+		break;
 	}
 }
 

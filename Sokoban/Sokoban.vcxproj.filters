@@ -277,6 +277,9 @@
     <ClInclude Include="src\animationmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\soundmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -509,6 +512,9 @@
     </ClCompile>
     <ClCompile Include="src\common_enums.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\soundmanager.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

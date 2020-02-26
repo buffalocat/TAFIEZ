@@ -6,6 +6,8 @@
 #include "roommap.h"
 #include "delta.h"
 #include "graphicsmanager.h"
+#include "moveprocessor.h"
+#include "animationmanager.h"
 #include "texture_constants.h"
 
 
@@ -33,14 +35,16 @@ void PressSwitch::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
     parent->set_modifier(std::make_unique<PressSwitch>(parent, b[0], b[1], b[2]));
 }
 
-void PressSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
+bool PressSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
     if (active_ && persistent_) {
-        return;
+        return false;
     }
     if (should_toggle(map)) {
         delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
         toggle();
+		return true;
     }
+	return false;
 }
 
 bool PressSwitch::should_toggle(RoomMap* map) {
@@ -49,7 +53,13 @@ bool PressSwitch::should_toggle(RoomMap* map) {
 
 void PressSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
-		check_send_signal(map, delta_frame);
+		if (check_send_signal(map, delta_frame)) {
+			if (active_) {
+				mp->anims_->receive_signal(AnimationSignal::SwitchOn, parent_, nullptr);
+			} else {
+				mp->anims_->receive_signal(AnimationSignal::SwitchOff, parent_, nullptr);
+			}
+		}
 	}
 }
 
