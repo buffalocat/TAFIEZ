@@ -54,8 +54,7 @@ const int PARTICLE_TEXTURE_ATLAS_SIZE = 4;
 enum class ParticleTexture {
 	SolidSquare = 0,
 	BlurDisk = 1,
-	Square = 2,
-	Circle = 3,
+	Diamond = 2,
 };
 
 glm::vec2 tex_to_vec(ParticleTexture tex_id);

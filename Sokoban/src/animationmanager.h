@@ -132,6 +132,7 @@ private:
 	double dz_;
 	double rad_;
 	double theta_;
+	int life_;
 };
 
 
@@ -143,6 +144,34 @@ public:
 
 	GameObject* parent_;
 	bool active_;
+};
+
+
+class PoofParticle : public Particle {
+public:
+	PoofParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand);
+	~PoofParticle();
+
+	void get_vertex(std::vector<ParticleVertex>&);
+	bool update();
+
+private:
+	glm::vec3 pos_, vel_;
+	glm::vec4 color_;
+	float size_;
+	int life_;
+};
+
+
+class PoofSource : public ParticleSource {
+public:
+	PoofSource(GameObject* obj);
+	~PoofSource();
+	bool update(RandDouble& rand, ParticleVector& particles);
+
+private:
+	glm::vec3 pos_;
+	glm::vec4 color_;
 };
 
 

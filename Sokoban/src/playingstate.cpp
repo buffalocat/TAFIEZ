@@ -44,6 +44,7 @@ void PlayingState::main_loop() {
 	gfx_->update();
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
+	gfx_->pre_rendering();
 	gfx_->draw_objects();
 	gfx_->draw_particles();
 	text_->draw();

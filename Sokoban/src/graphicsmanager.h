@@ -46,6 +46,7 @@ public:
 	void set_PV(glm::mat4, glm::mat4);
 	void set_light_source(glm::vec3);
 
+	void pre_rendering();
 	void draw_objects();
 	void draw_particles();
 	void post_rendering();

@@ -18,6 +18,7 @@ SoundManager::SoundManager() {
 	alutInit(nullptr, nullptr);
 	queued_sounds_.push_back({ "switch_on.wav" });
 	queued_sounds_.push_back({ "switch_off.wav" });
+	queued_sounds_.push_back({ "snip3.wav" });
 }
 
 SoundManager::~SoundManager() {

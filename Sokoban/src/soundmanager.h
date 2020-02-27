@@ -7,6 +7,7 @@
 enum class SoundName {
 	SwitchOn = 0,
 	SwitchOff = 1,
+	SnakeSplit = 2,
 };
 
 struct QueuedSound {

@@ -6,6 +6,7 @@
 #include "gameobject.h"
 #include "common_constants.h"
 #include "texture_constants.h"
+#include "color_constants.h"
 #include "soundmanager.h"
 
 Particle::Particle() {}
@@ -56,7 +57,7 @@ parent_{ parent }, active_{ active } {}
 EmberSource::~EmberSource() {}
 
 bool EmberSource::update(RandDouble& rand, ParticleVector& particles) {
-	if (active_) {
+	if (parent_->tangible_ && active_) {
 		if (rand() > 0.8) {
 			particles.push_back(std::make_unique<FireParticle>(glm::vec3(parent_->real_pos()), ParticleTexture::SolidSquare, 0.8, 0.05, rand));
 		}
@@ -83,14 +84,16 @@ bool FlameSource::update(RandDouble& rand, ParticleVector& particles) {
 
 
 const double DOOR_PART_RAD_RATE = 0.01;
-const double DOOR_PART_Z_RATE = 0.01;
+const double DOOR_PART_Z_RATE = 0.002;
 const double DOOR_PART_THETA_RATE = 0.02;
+const int DOOR_PART_MAX_LIFE = 30;
 
 DoorVortexParticle::DoorVortexParticle(glm::vec3 c, RandDouble& rand) : Particle(),
 c_{ c }	{
-	rad_ = 0.5 + 0.3 * rand();
-	dz_ = 0.6 + 0.2 * rand();
-	theta_ = rand() * 6.28318530718; // 2pi 
+	rad_ = 0.7;
+	dz_ = 0.6;
+	theta_ = rand() * 6.28318530718; // 2pi
+	life_ = 0;
 }
 
 DoorVortexParticle::~DoorVortexParticle() {}
@@ -100,14 +103,15 @@ void DoorVortexParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
 		glm::vec3(c_.x + rad_ * cos(theta_), c_.y + rad_ * sin(theta_), c_.z + dz_),
 		tex_to_vec(ParticleTexture::SolidSquare),
 		glm::vec2(0.05f),
-		glm::vec4(0.8f, 0.5f, 0.9f, 0.5f) });
+		glm::vec4(0.8f, 0.5f, 0.9f, float(life_) / DOOR_PART_MAX_LIFE) });
 }
 
 bool DoorVortexParticle::update() {
 	rad_ -= DOOR_PART_RAD_RATE;
 	dz_ -= DOOR_PART_Z_RATE;
 	theta_ += DOOR_PART_THETA_RATE;
-	return rad_ <= 0.3 || dz_ <= 0.5;
+	++life_;
+	return rad_ <= 0.3 || dz_ <= 0.5 || life_ >= DOOR_PART_MAX_LIFE;
 }
 
 
@@ -117,13 +121,58 @@ parent_{ parent }, active_{ active } {}
 DoorVortexSource::~DoorVortexSource() {}
 
 bool DoorVortexSource::update(RandDouble& rand, ParticleVector& particles) {
-	if (active_) {
-		if (rand() > 0.95) {
+	if (parent_->tangible_ && active_) {
+		if (rand() > 0.80) {
 			particles.push_back(std::make_unique<DoorVortexParticle>(glm::vec3(parent_->real_pos()), rand));
 		}
 	}
 	return false;
 }
+
+
+const int POOF_PART_MAX_LIFE = 24;
+
+PoofParticle::PoofParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand): Particle() {
+	color_ = glm::vec4((float)(0.5 + 0.4 * rand())) * color;
+	glm::vec3 dir = glm::vec3(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
+	pos_ = center + glm::vec3(0.5f) * dir;
+	vel_ = glm::vec3(0.04f) * dir;
+	size_ = (float)(0.15 + 0.25 * rand());
+	life_ = 20 + (int)(4 * rand());
+}
+
+PoofParticle::~PoofParticle() {}
+
+void PoofParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
+	color_.w = life_ / (float)POOF_PART_MAX_LIFE + 0.4f;
+	vertices.push_back(ParticleVertex{
+		pos_,
+		tex_to_vec(ParticleTexture::Diamond),
+		glm::vec2(size_),
+		color_ });
+}
+
+bool PoofParticle::update() {
+	pos_ += vel_;
+	--life_;
+	return life_ <= 0;
+}
+
+
+PoofSource::PoofSource(GameObject* obj) {
+	pos_ = glm::vec3(obj->real_pos());
+	color_ = COLOR_VECTORS[obj->color()];
+}
+
+PoofSource::~PoofSource() {}
+
+bool PoofSource::update(RandDouble& rand, ParticleVector& particles) {
+	for (int i = 0; i < 20; ++i) {
+		particles.push_back(std::make_unique<PoofParticle>(pos_, color_, rand));
+	}
+	return true;
+}
+
 
 
 RandDouble::RandDouble() {
@@ -295,6 +344,10 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	case AnimationSignal::SwitchOff:
 		sounds_->queue_sound(SoundName::SwitchOff);
+		break;
+	case AnimationSignal::SnakeSplit:
+		sounds_->queue_sound(SoundName::SnakeSplit);
+		sources_.push_back(std::make_unique<PoofSource>(obj));
 		break;
 	}
 }

@@ -2,6 +2,7 @@
 #include "snakeblock.h"
 
 #include "graphicsmanager.h"
+#include "moveprocessor.h"
 #include "animationmanager.h"
 #include "texture_constants.h"
 
@@ -434,6 +435,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 				cur->reset_internal_state();
 				// The split succeeded
 				if (sticky_comp.empty()) {
+					move_processor_->anims_->receive_signal(AnimationSignal::SnakeSplit, cur, nullptr);
 					std::vector<SnakeBlock*> links = cur->links_;
 					// Listeners will get alerted during snake pulling anyway
 					map_->take_from_map(cur, true, false, delta_frame_);

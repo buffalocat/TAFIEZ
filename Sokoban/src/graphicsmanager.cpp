@@ -171,12 +171,17 @@ void GraphicsManager::set_light_source(glm::vec3 light_source) {
 	light_source_ = light_source;
 }
 
-void GraphicsManager::draw_objects() {
-	instanced_shader_.use();
-	glBindTexture(GL_TEXTURE_2D, atlas_);
+void GraphicsManager::pre_rendering() {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	glClearColor(0.0f, 0.7f, 0.9f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+}
+
+void GraphicsManager::draw_objects() {
+	instanced_shader_.use();
+	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
