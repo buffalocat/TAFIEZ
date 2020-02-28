@@ -827,3 +827,11 @@ void CyclePlayerDelta::revert() {
 	cycle_->index_ = index_;
 	cycle_->dead_index_ = dead_index_;
 }
+
+WallDestructionDelta::WallDestructionDelta(Point3 pos, RoomMap* room_map) : Delta(), pos_{ pos }, map_{ room_map } {}
+
+WallDestructionDelta::~WallDestructionDelta() {}
+
+void WallDestructionDelta::revert() {
+	map_->at(pos_) = GENERIC_WALL_ID;
+}

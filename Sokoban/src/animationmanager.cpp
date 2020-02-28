@@ -76,7 +76,7 @@ FlameSource::~FlameSource() {}
 bool FlameSource::update(RandDouble& rand, ParticleVector& particles) {
 	FPoint3 p = parent_->real_pos();
 	for (int i = 0; i < 3; ++i) {
-		glm::vec3 shifted_center = glm::vec3(p.x, p.y, p.z - rand());
+		glm::vec3 shifted_center = glm::vec3(p.x, p.y, p.z + rand());
 		particles.push_back(std::make_unique<FireParticle>(shifted_center, ParticleTexture::SolidSquare, 1.0, 0.15 + 0.1 * rand(), rand));
 	}
 	return --life_ <= 0;

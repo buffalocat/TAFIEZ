@@ -167,6 +167,19 @@ private:
 };
 
 
+class WallDestructionDelta : public Delta {
+public:
+	WallDestructionDelta(Point3 pos, RoomMap* map);
+	~WallDestructionDelta();
+
+	void revert();
+
+private:
+	Point3 pos_;
+	RoomMap* map_;
+};
+
+
 class ObjArrayPushDelta : public Delta {
 public:
 	ObjArrayPushDelta(GameObject* obj, RoomMap* map);

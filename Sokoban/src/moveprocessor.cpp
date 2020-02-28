@@ -268,15 +268,16 @@ void MoveProcessor::run_incinerators() {
 		if (inc->state()) {
 			Point3 pos_above = inc->pos_above();
 			if (GameObject* above = map_->view(pos_above)) {
+				anims_->receive_signal(AnimationSignal::IncineratorBurn, inc->parent_, nullptr);
 				if (above->id_ == GENERIC_WALL_ID) {
 					map_->clear(pos_above);
+					delta_frame_->push(std::make_unique<WallDestructionDelta>(pos_above, map_));
 				} else {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
 						sb->collect_all_viable_neighbors(map_, snake_check);
 					}
 					map_->take_from_map(above, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
-					anims_->receive_signal(AnimationSignal::IncineratorBurn, above, nullptr);
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
 			}
