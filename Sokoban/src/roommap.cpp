@@ -484,8 +484,7 @@ void AnimationInitializer::operator()(int id) {
 		if (auto* inc = dynamic_cast<Incinerator*>(mod)) {
 			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, inc->state()));
 		} else if (auto* flag = dynamic_cast<ClearFlag*>(mod)) {
-			//TODO: make this a flag thing
-			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, flag));
+			anims->create_bound_source(obj, std::make_unique<FlagSparkleSource>(flag));
 		} else if (auto* door = dynamic_cast<Door*>(mod)) {
 			anims->create_bound_source(obj, std::make_unique<DoorVortexSource>(obj, door->data_ && door->state()));
 		}

@@ -10,6 +10,7 @@ enum class Direction;
 enum class ParticleTexture;
 class GameObject;
 class SoundManager;
+class ClearFlag;
 
 enum class AnimationSignal {
 	NONE,
@@ -123,7 +124,6 @@ class DoorVortexParticle : public Particle {
 public:
 	DoorVortexParticle(glm::vec3 center, RandDouble& rand);
 	virtual ~DoorVortexParticle();
-
 	void get_vertex(std::vector<ParticleVertex>&);
 	bool update();
 
@@ -147,11 +147,36 @@ public:
 };
 
 
-class PoofParticle : public Particle {
+class FlagSparkle : public Particle {
 public:
-	PoofParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand);
-	~PoofParticle();
+	FlagSparkle(glm::vec3 pos, glm::vec3 vel, glm::vec3 color);
+	~FlagSparkle();
+	bool update();
+	void get_vertex(std::vector<ParticleVertex>&);
 
+private:
+	glm::vec3 pos_, vel_;
+	glm::vec3 color_;
+	int life_;
+	bool fading_;
+};
+
+class FlagSparkleSource : public ParticleSource {
+public:
+	FlagSparkleSource(ClearFlag* flag);
+	~FlagSparkleSource();
+	bool update(RandDouble& rand, ParticleVector& particles);
+
+private:
+	glm::vec3 pos_;
+	glm::vec3 color_;
+};
+
+
+class SnakeSplitParticle : public Particle {
+public:
+	SnakeSplitParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand);
+	~SnakeSplitParticle();
 	void get_vertex(std::vector<ParticleVertex>&);
 	bool update();
 
@@ -163,10 +188,10 @@ private:
 };
 
 
-class PoofSource : public ParticleSource {
+class SnakeSplitSource : public ParticleSource {
 public:
-	PoofSource(GameObject* obj);
-	~PoofSource();
+	SnakeSplitSource(GameObject* obj);
+	~SnakeSplitSource();
 	bool update(RandDouble& rand, ParticleVector& particles);
 
 private:

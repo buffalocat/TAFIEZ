@@ -8,6 +8,7 @@
 #include "texture_constants.h"
 #include "color_constants.h"
 #include "soundmanager.h"
+#include "clearflag.h"
 
 Particle::Particle() {}
 
@@ -130,9 +131,55 @@ bool DoorVortexSource::update(RandDouble& rand, ParticleVector& particles) {
 }
 
 
+const int FLAG_SPARKLE_MAX_LIFE = 40;
+
+FlagSparkle::FlagSparkle(glm::vec3 pos, glm::vec3 vel, glm::vec3 color) : Particle(),
+pos_{ pos }, vel_{ vel }, color_{ color }, life_{ 0 }, fading_{ false } {}
+
+FlagSparkle::~FlagSparkle() {}
+
+bool FlagSparkle::update() {
+	if (fading_) {
+		--life_;
+	} else {
+		++life_;
+		fading_ = (life_ == FLAG_SPARKLE_MAX_LIFE);
+	}
+	pos_ += vel_;
+	return life_ == 0;
+}
+
+void FlagSparkle::get_vertex(std::vector<ParticleVertex>& vertices) {
+	vertices.push_back(ParticleVertex{
+		pos_,
+		tex_to_vec(ParticleTexture::Diamond),
+		glm::vec2(0.10f),
+		glm::vec4(color_, float(life_) / FLAG_SPARKLE_MAX_LIFE) });
+}
+
+FlagSparkleSource::FlagSparkleSource(ClearFlag* flag) {
+	pos_ = glm::vec3(flag->parent_->real_pos());
+	glm::vec4 c = COLOR_VECTORS[flag->color()];
+	color_ = glm::vec3(c.x, c.y, c.z);
+}
+
+FlagSparkleSource::~FlagSparkleSource() {}
+
+bool FlagSparkleSource::update(RandDouble& rand, ParticleVector& particles) {
+	if (rand() > 0.95) {
+		glm::vec3 d(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
+		particles.push_back(std::make_unique<FlagSparkle>(
+			pos_ + glm::vec3(0.6f) * d + glm::vec3(0,0,1.2f),
+			glm::vec3(0.01f) * d,
+			glm::vec3(0.8f) * color_));
+	}
+	return false;
+}
+
+
 const int POOF_PART_MAX_LIFE = 24;
 
-PoofParticle::PoofParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand): Particle() {
+SnakeSplitParticle::SnakeSplitParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand): Particle() {
 	color_ = glm::vec4((float)(0.5 + 0.4 * rand())) * color;
 	glm::vec3 dir = glm::vec3(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
 	pos_ = center + glm::vec3(0.5f) * dir;
@@ -141,9 +188,9 @@ PoofParticle::PoofParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand):
 	life_ = 20 + (int)(4 * rand());
 }
 
-PoofParticle::~PoofParticle() {}
+SnakeSplitParticle::~SnakeSplitParticle() {}
 
-void PoofParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
+void SnakeSplitParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
 	color_.w = life_ / (float)POOF_PART_MAX_LIFE + 0.4f;
 	vertices.push_back(ParticleVertex{
 		pos_,
@@ -152,27 +199,26 @@ void PoofParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
 		color_ });
 }
 
-bool PoofParticle::update() {
+bool SnakeSplitParticle::update() {
 	pos_ += vel_;
 	--life_;
 	return life_ <= 0;
 }
 
 
-PoofSource::PoofSource(GameObject* obj) {
+SnakeSplitSource::SnakeSplitSource(GameObject* obj) {
 	pos_ = glm::vec3(obj->real_pos());
 	color_ = COLOR_VECTORS[obj->color()];
 }
 
-PoofSource::~PoofSource() {}
+SnakeSplitSource::~SnakeSplitSource() {}
 
-bool PoofSource::update(RandDouble& rand, ParticleVector& particles) {
+bool SnakeSplitSource::update(RandDouble& rand, ParticleVector& particles) {
 	for (int i = 0; i < 20; ++i) {
-		particles.push_back(std::make_unique<PoofParticle>(pos_, color_, rand));
+		particles.push_back(std::make_unique<SnakeSplitParticle>(pos_, color_, rand));
 	}
 	return true;
 }
-
 
 
 RandDouble::RandDouble() {
@@ -347,8 +393,13 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	case AnimationSignal::SnakeSplit:
 		sounds_->queue_sound(SoundName::SnakeSplit);
-		sources_.push_back(std::make_unique<PoofSource>(obj));
+		sources_.push_back(std::make_unique<SnakeSplitSource>(obj));
 		break;
+	case AnimationSignal::FlagExists:
+	{
+		auto* flag = dynamic_cast<ClearFlag*>(obj->modifier());
+		sources_.push_back(std::make_unique<FlagSparkleSource>(flag));
+	}
 	}
 }
 

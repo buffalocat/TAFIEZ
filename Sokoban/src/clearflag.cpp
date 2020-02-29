@@ -86,7 +86,7 @@ void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
 }
 
-void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
+int ClearFlag::color() {
 	int color = GOLD;
 	if (collected_) {
 		color = RED;
@@ -99,7 +99,11 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 	} else if (!real_) {
 		color = PURPLE;
 	}
-	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f), BlockTexture::Blank, color);
+	return color;
+}
+
+void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
+	gfx->flag.push_instance(glm::vec3(p.x, p.y, p.z + 1.0f), glm::vec3(1.0f), BlockTexture::Blank, color());
 }
 
 

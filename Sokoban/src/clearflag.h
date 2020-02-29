@@ -20,6 +20,7 @@ public:
 	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 
+	int color();
 	void draw(GraphicsManager*, FPoint3);
 
 	bool real_;
