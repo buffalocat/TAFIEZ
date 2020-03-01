@@ -27,7 +27,8 @@
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	int width, int height, int depth) :
 	obj_array_{ obj_array }, state_{ state },
-	width_{ width }, height_{ height }, depth_{ depth } {
+	width_{ width }, height_{ height }, depth_{ depth },
+	player_cycle_{ std::make_unique<PlayerCycle>() } {
 	if (auto* ps = dynamic_cast<PlayingState*>(state)) {
 		global_ = ps->global_.get();
 	}

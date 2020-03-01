@@ -175,14 +175,14 @@ private:
 
 class SnakeSplitParticle : public Particle {
 public:
-	SnakeSplitParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand);
+	SnakeSplitParticle(glm::vec3 center, glm::vec3 color, RandDouble& rand);
 	~SnakeSplitParticle();
 	void get_vertex(std::vector<ParticleVertex>&);
 	bool update();
 
 private:
 	glm::vec3 pos_, vel_;
-	glm::vec4 color_;
+	glm::vec3 color_;
 	float size_;
 	int life_;
 };
@@ -196,7 +196,7 @@ public:
 
 private:
 	glm::vec3 pos_;
-	glm::vec4 color_;
+	glm::vec3 color_;
 };
 
 

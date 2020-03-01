@@ -5,6 +5,7 @@
 #include "room.h"
 #include "roommap.h"
 #include "door.h"
+#include "graphicsmanager.h"
 
 DoorSelectState::DoorSelectState(GameState* parent, Room* room, Point3 cam_pos, unsigned int* exit_door_id):
 EditorBaseState(parent), room_ {room}, cam_pos_ {cam_pos}, exit_door_id_{exit_door_id} {}
@@ -45,6 +46,11 @@ void DoorSelectState::main_loop() {
     }
 	ImGui::Text("Press escape to return.");
     ImGui::End();
+
+	gfx_->set_state(GraphicsState::None);
+	gfx_->pre_rendering();
+	gfx_->draw_objects();
+	gfx_->post_rendering();
 }
 
 void DoorSelectState::handle_left_click(Point3 pos) {

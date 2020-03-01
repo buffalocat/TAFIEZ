@@ -113,7 +113,8 @@ public:
 
 	bool inited_ = false;
 
-	std::unique_ptr<PlayerCycle> player_cycle_{ std::make_unique<PlayerCycle>() };
+	std::unique_ptr<PlayerCycle> player_cycle_;
+
 	std::vector<AutoBlock*> autos_{};
 	std::vector<PuppetBlock*> puppets_{};
 	std::vector<Car*> moved_cars_{};

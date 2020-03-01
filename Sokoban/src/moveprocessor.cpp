@@ -136,11 +136,16 @@ bool MoveProcessor::try_color_change() {
 	if (!car->cycle_color(false)) {
 		return false;
 	}
-	if (auto snake = dynamic_cast<SnakeBlock*>(car->parent_)) {
-		for (auto broken_link : snake->remove_wrong_color_links(delta_frame_)) {
-			broken_link->check_add_local_links(map_, delta_frame_);
+	if (auto sb = dynamic_cast<SnakeBlock*>(car->parent_)) {
+		sb->remove_wrong_color_links(delta_frame_);
+		Point3 pos = sb->pos_;
+		// Adjacent snakes of either color could form links now!
+		// So we'll just check all directions
+		for (Point3 dir : H_DIRECTIONS) {
+			if (auto* adj_sb = dynamic_cast<SnakeBlock*>(map_->view(pos + dir))) {
+				adj_sb->check_add_local_links(map_, delta_frame_);
+			}
 		}
-		snake->check_add_local_links(map_, delta_frame_);
 	}
 	state_ = MoveStep::ColorChange;
 	frames_ = COLOR_CHANGE_MOVEMENT_FRAMES;

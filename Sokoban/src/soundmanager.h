@@ -5,9 +5,7 @@
 #include <alc.h>
 
 enum class SoundName {
-	SwitchOn = 0,
-	SwitchOff = 1,
-	SnakeSplit = 2,
+	SnakeSplit = 0,
 };
 
 struct QueuedSound {

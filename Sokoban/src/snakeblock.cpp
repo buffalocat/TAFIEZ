@@ -312,12 +312,10 @@ bool SnakeBlock::has_settled_link() {
 	return false;
 }
 
-std::vector<SnakeBlock*> SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
+void SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_frame) {
 	auto links_copy = links_;
-	std::vector<SnakeBlock*> removed_links {};
 	for (auto link : links_copy) {
 		if (color_ != link->color_) {
-			removed_links.push_back(link);
 			if (delta_frame) {
 				remove_link(link, delta_frame);
 			} else {
@@ -325,7 +323,6 @@ std::vector<SnakeBlock*> SnakeBlock::remove_wrong_color_links(DeltaFrame* delta_
 			}
 		}
 	}
-	return removed_links;
 }
 
 // Call when a group of snake blocks becomes intangible, in particular for door movement

@@ -177,26 +177,25 @@ bool FlagSparkleSource::update(RandDouble& rand, ParticleVector& particles) {
 }
 
 
-const int POOF_PART_MAX_LIFE = 24;
+const int SNAKE_SPLIT_PART_MAX_LIFE = 36;
 
-SnakeSplitParticle::SnakeSplitParticle(glm::vec3 center, glm::vec4 color, RandDouble& rand): Particle() {
-	color_ = glm::vec4((float)(0.5 + 0.4 * rand())) * color;
+SnakeSplitParticle::SnakeSplitParticle(glm::vec3 center, glm::vec3 color, RandDouble& rand): Particle() {
+	color_ = glm::vec3((float)(0.5 + 0.4 * rand())) * color;
 	glm::vec3 dir = glm::vec3(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
 	pos_ = center + glm::vec3(0.5f) * dir;
 	vel_ = glm::vec3(0.04f) * dir;
 	size_ = (float)(0.15 + 0.25 * rand());
-	life_ = 20 + (int)(4 * rand());
+	life_ = 30 + (int)(6 * rand());
 }
 
 SnakeSplitParticle::~SnakeSplitParticle() {}
 
 void SnakeSplitParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
-	color_.w = life_ / (float)POOF_PART_MAX_LIFE + 0.4f;
 	vertices.push_back(ParticleVertex{
 		pos_,
 		tex_to_vec(ParticleTexture::Diamond),
 		glm::vec2(size_),
-		color_ });
+		glm::vec4(color_, (float)life_ / (float)SNAKE_SPLIT_PART_MAX_LIFE) });
 }
 
 bool SnakeSplitParticle::update() {
@@ -208,7 +207,8 @@ bool SnakeSplitParticle::update() {
 
 SnakeSplitSource::SnakeSplitSource(GameObject* obj) {
 	pos_ = glm::vec3(obj->real_pos());
-	color_ = COLOR_VECTORS[obj->color()];
+	glm::vec4 c = COLOR_VECTORS[obj->color()];
+	color_ = glm::vec3(c.x, c.y, c.z);
 }
 
 SnakeSplitSource::~SnakeSplitSource() {}
@@ -386,10 +386,10 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	}
 	case AnimationSignal::SwitchOn:
-		sounds_->queue_sound(SoundName::SwitchOn);
+		//sounds_->queue_sound(SoundName::SwitchOn);
 		break;
 	case AnimationSignal::SwitchOff:
-		sounds_->queue_sound(SoundName::SwitchOff);
+		//sounds_->queue_sound(SoundName::SwitchOff);
 		break;
 	case AnimationSignal::SnakeSplit:
 		sounds_->queue_sound(SoundName::SnakeSplit);
