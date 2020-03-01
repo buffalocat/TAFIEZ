@@ -249,7 +249,13 @@ double GeneralCameraContext::tilt(FPoint3 pos) {
 }
 
 double GeneralCameraContext::rotation(FPoint3 pos) {
-	return rot_;
+	if (flags_ & CAM_FLAGS::CIRC_CAMERA) {
+		double dx = (pos.x - (rect_.xa + rect_.xb) / 2.0);
+		double dy = -(pos.y - (rect_.ya + rect_.yb) / 2.0);
+		return atan2(dx*dx*dx, dy*dy*dy);
+	} else {
+		return rot_;
+	}
 }
 
 void GeneralCameraContext::shift_by(Point3 d, int width, int height) {

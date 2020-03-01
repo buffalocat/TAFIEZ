@@ -51,7 +51,7 @@ public:
 
 private:
 	unsigned int flags = 0;
-	bool null_area = false, named_area = true, has_null_child = true, free_cam = false;
+	bool null_area = false, named_area = true, has_null_child = true, free_cam = false, circ_cam = false;
 	PaddingMode pad_mode = PaddingMode::Uniform;
 	RadiusMode rad_mode = RadiusMode::Default;
 	PositionMode x_pos_mode = PositionMode::Free, y_pos_mode = PositionMode::Free;
@@ -93,6 +93,8 @@ void GeneralContextData::unpack_flags() {
 	named_area = flags & CAM_FLAGS::NAMED_AREA;
 	has_null_child = flags & CAM_FLAGS::HAS_NULL_CHILD;
 	free_cam = flags & CAM_FLAGS::FREE_CAM;
+	circ_cam = flags & CAM_FLAGS::CIRC_CAMERA;
+
 	if (flags & CAM_FLAGS::PAD_UNIFORM) {
 		pad_mode = PaddingMode::Uniform;
 	} else if (flags & CAM_FLAGS::PAD_XY) {
@@ -136,6 +138,7 @@ void GeneralContextData::pack_flags() {
 		(named_area * CAM_FLAGS::NAMED_AREA) |
 		(has_null_child * CAM_FLAGS::HAS_NULL_CHILD) |
 		(free_cam * CAM_FLAGS::FREE_CAM) |
+		(circ_cam * CAM_FLAGS::CIRC_CAMERA) |
 		(tilt_custom * CAM_FLAGS::TILT_CUSTOM) |
 		(rot_custom * CAM_FLAGS::ROT_CUSTOM);
 	switch (pad_mode) {
@@ -287,7 +290,6 @@ void CameraTab::main_loop(EditorRoom* eroom) {
 }
 
 void GeneralContextData::editor_options() {
-	
 	if (named_area) {
 		ImGui::Text("Level Name (context label)");
 	} else {
@@ -314,9 +316,13 @@ void GeneralContextData::editor_options() {
 	ImGui::Checkbox("Named Area##CAMERA", &named_area);
 	ImGui::Checkbox("Has Null Child##CAMERA", &has_null_child);
 	ImGui::Checkbox("Free-cam Area##CAMERA", &free_cam);
+	ImGui::Checkbox("Circ-cam Area##CAMERA", &circ_cam);
 
 	if (free_cam) {
 		tilt_custom = false;
+		rot_custom = false;
+	}
+	if (circ_cam) {
 		rot_custom = false;
 	}
 
@@ -345,19 +351,18 @@ void GeneralContextData::editor_options() {
 	}
 
 	ImGui::Separator();
-	if (!free_cam) {
-		ImGui::Checkbox("Custom Tilt##CAMERA", &tilt_custom);
-		if (tilt_custom) {
-			ImGui::InputDouble("Tilt##CAMERA", &tilt);
-		} else {
-			tilt = DEFAULT_CAM_TILT;
-		}
-		ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
-		if (rot_custom) {
-			ImGui::InputDouble("Rotation##CAMERA", &rot);
-		} else {
-			rot = DEFAULT_CAM_ROTATION;
-		}
+
+	ImGui::Checkbox("Custom Tilt##CAMERA", &tilt_custom);
+	if (tilt_custom) {
+		ImGui::InputDouble("Tilt##CAMERA", &tilt);
+	} else {
+		tilt = DEFAULT_CAM_TILT;
+	}
+	ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
+	if (rot_custom) {
+		ImGui::InputDouble("Rotation##CAMERA", &rot);
+	} else {
+		rot = DEFAULT_CAM_ROTATION;
 	}
 
 	FloatRect vis = { rect.xa - pad.left, rect.ya - pad.top, rect.xb + pad.right, rect.yb + pad.bottom };

@@ -37,6 +37,8 @@ namespace CAM_FLAGS {
 		// Use custom tilt? rotation?
 		TILT_CUSTOM = 1 << 18,
 		ROT_CUSTOM = 1 << 19,
+		// Special
+		CIRC_CAMERA = 1 << 20,
 	};
 };
 
