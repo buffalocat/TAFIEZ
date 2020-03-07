@@ -119,13 +119,64 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	}
 }
 
+bool Car::update_animation(PlayingState*) {
+	if (animation_time_ > 0) {
+		--animation_time_;
+		return false;
+	} else {
+		reset_animation();
+		return true;
+	}
+}
+
+void Car::reset_animation() {
+	animation_state_ = CarAnimationState::None;
+	if (animation_player_) {
+		animation_player_->animation_car_ = nullptr;
+		animation_player_ = nullptr;
+	}
+	animation_time_ = 0;
+}
+
+const float WINDSHIELD_HEIGHTS[MAX_CAR_ANIMATION_FRAMES] = { 0.1f, 0.3f, 0.7f, 0.9f };
+
 void Car::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (int color = next_color()) {
-		ModelInstancer& model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
-		model.push_instance(glm::vec3(p), glm::vec3(1.01f), BlockTexture::Blank, color);
+		ModelInstancer& squares_model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
+		squares_model.push_instance(glm::vec3(p), glm::vec3(1.01f), BlockTexture::Blank, color);
 	}
-	if (player_ && !player_->tangible_) {
-		//TODO: Draw the player in the car? somehow
+	switch (type_) {
+	case CarType::Normal:
+	case CarType::Hover:
+	{
+		ModelInstancer& windshield_model = parent_->is_snake() ? gfx->windshield_diamond : gfx->windshield;
+		float windshield_height;
+		switch (animation_state_) {
+		case CarAnimationState::None:
+			windshield_height = player_ ? 1.0f : 0.0f;
+			break;
+		case CarAnimationState::Riding:
+			windshield_height = 1.0f - WINDSHIELD_HEIGHTS[animation_time_];
+			break;
+		case CarAnimationState::Unriding:
+			windshield_height = WINDSHIELD_HEIGHTS[animation_time_];
+			break;
+		}
+		if (windshield_height > 0) {
+			windshield_model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5 + windshield_height / 2.0), glm::vec3(1.0f, 1.0f, windshield_height), BlockTexture::Darker, parent_->color());
+		}
+		break;
+	}
+	case CarType::Convertible:
+	{
+		Player* player = animation_player_ ? animation_player_ : player_;
+		if (player) {
+			player->draw(gfx);
+		}
+		break;
+	}
+	default:
+		break;
 	}
 }
 

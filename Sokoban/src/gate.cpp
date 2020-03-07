@@ -9,6 +9,7 @@
 #include "delta.h"
 
 #include "moveprocessor.h"
+#include "animationmanager.h"
 #include "graphicsmanager.h"
 #include "texture_constants.h"
 
@@ -66,12 +67,12 @@ bool Gate::can_set_state(bool state, RoomMap* map) {
 
 void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (body_) {
-		// Add animation
 		bool cur_state = state();
 		if (cur_state && !body_->tangible_) {
 			mp->push_rising_gate(this);
 		} else if (!cur_state && body_->tangible_) {
 			map->take_from_map(body_, true, true, delta_frame);
+			mp->anims_->receive_signal(AnimationSignal::GateDown, parent_, delta_frame);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });
 			if (above && above->gravitable_) {
 				mp->add_to_fall_check(above);
@@ -80,8 +81,29 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 	}
 }
 
-void Gate::raise_gate(RoomMap* map, DeltaFrame* delta_frame) {
+void Gate::raise_gate(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	map->put_in_map(body_, true, true, delta_frame);
+	mp->anims_->receive_signal(AnimationSignal::GateUp, parent_, delta_frame);
+}
+
+bool Gate::update_animation(PlayingState*) {
+	if (animation_time_ > 0) {
+		--animation_time_;
+		return false;
+	} else {
+		animation_state_ = GateAnimationState::None;
+		return true;
+	}
+}
+
+void Gate::start_raise_animation() {
+	animation_state_ = GateAnimationState::Raise;
+	animation_time_ = MAX_GATE_ANIMATION_FRAMES;
+}
+
+void Gate::start_lower_animation() {
+	animation_state_ = GateAnimationState::Lower;
+	animation_time_ = MAX_GATE_ANIMATION_FRAMES;
 }
 
 void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
@@ -123,6 +145,9 @@ void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
 	BlockTexture tex = persistent_ ? BlockTexture::GateBasePersistent : BlockTexture::GateBase;
 	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.7f, 0.7f, 0.1f), tex, color_);
+	if (animation_state_ == GateAnimationState::Lower) {
+		body_->draw(gfx);
+	}
 }
 
 std::unique_ptr<ObjectModifier> Gate::duplicate(GameObject* parent, RoomMap* map, DeltaFrame* delta_frame) {

@@ -9,6 +9,7 @@ class FontManager;
 class AnimationManager;
 class Animation;
 class StringDrawer;
+class PlayingState;
 
 class ProtectedStringDrawer {
 public:
@@ -46,10 +47,11 @@ public:
 	void set_PV(glm::mat4, glm::mat4);
 	void set_light_source(glm::vec3);
 
-	void pre_rendering();
+	void pre_object_rendering();
 	void draw_objects();
-	void draw_particles();
+	void pre_particle_rendering();
 	void post_rendering();
+	glm::vec3 view_dir();
 
 	DynamicInstancer cube{ "resources/uniform_cube.obj" };
 	DynamicInstancer top_cube{ "resources/top_cube.obj" };
@@ -70,15 +72,18 @@ public:
 	DynamicInstancer square_3{ "resources/square_3.obj" };
 
 	std::unique_ptr<FontManager> fonts_{};
-	std::unique_ptr<AnimationManager> anims_{};
 
 	glm::mat4 proj_, view_;
 	glm::vec3 light_source_;
 	double shadow_;
 
+	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };
+	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
+	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
+	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
+
 private:
 	GLFWwindow* window_;
-	std::vector<Animation*> animations;
 
 	GLuint atlas_;
 
@@ -90,11 +95,6 @@ private:
 
 	GraphicsState state_ = GraphicsState::None;
 	int state_counter_ = 0;
-
-	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };	
-	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
-	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
-	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
 
 	void load_texture_atlas();
 };

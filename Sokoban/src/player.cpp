@@ -50,9 +50,9 @@ int Player::color() {
 		return active_ ? ORANGE : LIGHT_ORANGE;
 		break;
 	case PlayerState::RidingNormal:
+	case PlayerState::RidingHidden:
 		return active_ ? (gravitable_ ? SALMON : GREEN) : (gravitable_ ? LIGHT_PINK : LIGHT_GREEN);
 		break;
-	case PlayerState::RidingHidden:
 	default:	
 		return NO_COLOR;
 		break;
@@ -234,29 +234,46 @@ PlayerState Player::state() {
 	return state_;
 }
 
+const float PLAYER_DEFAULT_SCALE = 0.6f;
+const float PLAYER_RIDING_SCALE = 0.5f;
+const float PLAYER_RIDING_SNAKE_SCALE = 0.4f;
+
 void Player::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
 	auto* player_model = &gfx->cube;
 	float z_offset = 0.0f;
-	float side = 0.6f;
-	switch (state_) {
-	case PlayerState::RidingNormal:
-	{
-		auto* windshield_model = &gfx->windshield;
-		if (auto* snake = dynamic_cast<SnakeBlock*>(car_->parent_)) {
-			player_model = &gfx->diamond;
-			windshield_model = &gfx->windshield_diamond;
+	float scale = PLAYER_DEFAULT_SCALE;
+	Car* car = animation_car_ ? animation_car_ : car_;
+	if (car) {
+		float t;
+		switch (car->animation_state_) {
+		case CarAnimationState::None:
+		default:
+			t = 1;
+			break;
+		case CarAnimationState::Riding:
+			t = (1 - car->animation_time_ / (float)MAX_CAR_ANIMATION_FRAMES);
+			break;
+		case CarAnimationState::Unriding:
+			t = car->animation_time_ / (float)MAX_CAR_ANIMATION_FRAMES;
+			break;
 		}
-		z_offset = -0.2f;
-		side = 0.5f;
-		windshield_model->push_instance(glm::vec3(p), glm::vec3(1.0f), BlockTexture::Darker, car_->parent_->color());
+		switch (car->type_) {
+		case CarType::Convertible:
+			z_offset = -0.7f * t;
+			break;
+		case CarType::Normal:
+			z_offset = -0.2f * t;
+			break;
+		}
+		if (car->parent_->is_snake()) {
+			scale = PLAYER_RIDING_SNAKE_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
+			player_model = &gfx->diamond;
+		} else {
+			scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
+		}
 	}
-	// Fallthrough
-	case PlayerState::Free:
-	case PlayerState::Bound:
-		player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(side, side, side), BlockTexture::Edges, color());
-		break;
-	}
+	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(scale), BlockTexture::Edges, color());
 }
 
 FPoint3 Player::cam_pos() {

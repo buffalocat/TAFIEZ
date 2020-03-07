@@ -30,7 +30,7 @@ MoveProcessor::MoveProcessor(PlayingState* playing_state, RoomMap* map, DeltaFra
 	playing_state_{ playing_state }, map_{ map }, delta_frame_{ delta_frame }, player_{ player }, anims_{}, animated_{ animated } {
 	set_standing_door();
 	if (playing_state) {
-		anims_ = playing_state->gfx_->anims_.get();
+		anims_ = playing_state->anims_.get();
 	}
 }
 
@@ -163,6 +163,13 @@ bool MoveProcessor::try_toggle_riding() {
 	frames_ = TOGGLE_RIDING_MOVEMENT_FRAMES;
 	fall_check_.push_back(player_);
 	if (Car* car = player_->car_bound(map_)) {
+		if (car->player_) {
+			anims_->receive_signal(AnimationSignal::CarRide, car->parent_, delta_frame_);
+		} else {
+			car->animation_player_ = player_;
+			player_->animation_car_ = car;
+			anims_->receive_signal(AnimationSignal::CarUnride, car->parent_, delta_frame_);
+		}
 		map_->activate_listeners_at(car->pos());
 		fall_check_.push_back(car->parent_);
 	}
@@ -313,7 +320,7 @@ void MoveProcessor::raise_gates() {
 			fall_check_.push_back(corrupt.get());
 			map_->create_in_map(std::move(corrupt), true, delta_frame_);
 		} else {
-			vec[0]->raise_gate(map_, delta_frame_);
+			vec[0]->raise_gate(map_, delta_frame_, this);
 		}
 	}
 	rising_gates_.clear();

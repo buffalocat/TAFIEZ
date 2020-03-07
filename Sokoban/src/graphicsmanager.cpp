@@ -31,7 +31,6 @@ ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer
 GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	window_{ window } {
 	fonts_ = std::make_unique<FontManager>(&text_shader_);
-	anims_ = std::make_unique<AnimationManager>(&particle_shader_);
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
@@ -130,8 +129,6 @@ void GraphicsManager::update() {
 		}
 		break;
 	}
-	// Perform all animation updates
-	anims_->update();
 }
 
 bool GraphicsManager::in_animation() {
@@ -171,12 +168,24 @@ void GraphicsManager::set_light_source(glm::vec3 light_source) {
 	light_source_ = light_source;
 }
 
-void GraphicsManager::pre_rendering() {
+void GraphicsManager::pre_object_rendering() {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	glClearColor(0.0f, 0.7f, 0.9f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+}
+
+void GraphicsManager::pre_particle_rendering() {
+	particle_shader_.use();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	particle_shader_.setMat4("Proj", proj_);
+	particle_shader_.setMat4("View", view_);
+}
+
+glm::vec3 GraphicsManager::view_dir() {
+	return glm::vec3(view_[0][2], view_[1][2], view_[2][2]);
 }
 
 void GraphicsManager::draw_objects() {
@@ -206,15 +215,6 @@ void GraphicsManager::draw_objects() {
 	square_1.draw();
 	square_2.draw();
 	square_3.draw();
-}
-
-void GraphicsManager::draw_particles() {
-	particle_shader_.use();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	particle_shader_.setMat4("Proj", proj_);
-	particle_shader_.setMat4("View", view_);
-	anims_->render_particles(glm::vec3(view_[0][2], view_[1][2], view_[2][2]));
 }
 
 void GraphicsManager::post_rendering() {

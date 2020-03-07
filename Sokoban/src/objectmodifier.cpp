@@ -64,6 +64,14 @@ void ObjectModifier::destroy(MoveProcessor*, CauseOfDeath) {}
 
 void ObjectModifier::undestroy() {}
 
+void ObjectModifier::signal_animation(AnimationManager*, DeltaFrame*) {}
+
+bool ObjectModifier::update_animation(PlayingState*) {
+	return true;
+}
+
+void ObjectModifier::reset_animation() {}
+
 void ObjectModifier::map_callback(RoomMap*, DeltaFrame*, MoveProcessor*) {}
 
 void ObjectModifier::collect_special_links(std::vector<GameObject*>&) {}

@@ -48,7 +48,7 @@ void Incinerator::map_callback(RoomMap*, DeltaFrame*, MoveProcessor* mp) {
 void Incinerator::apply_state_change(RoomMap*, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
 		mp->alerted_incinerators_.push_back(this);
-		mp->anims_->receive_signal(AnimationSignal::IncineratorChange, parent_, delta_frame);
+		signal_animation(mp->anims_, mp->delta_frame_);
 	}
 }
 
@@ -61,6 +61,18 @@ void Incinerator::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real)
 void Incinerator::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	Switchable::cleanup_on_take(map, delta_frame, real);
 	map->remove_listener(this, pos_above());
+}
+
+void Incinerator::destroy(MoveProcessor* mp, CauseOfDeath) {
+	signal_animation(mp->anims_, mp->delta_frame_);
+}
+
+void Incinerator::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
+	if (parent_->tangible_ && state()) {
+		anims->receive_signal(AnimationSignal::IncineratorOn, parent_, delta_frame);
+	} else {
+		anims->receive_signal(AnimationSignal::IncineratorOff, parent_, delta_frame);
+	}
 }
 
 void Incinerator::draw(GraphicsManager* gfx, FPoint3 p) {

@@ -5,15 +5,14 @@
 
 class DynamicInstancer;
 
-
 struct FlagSigil {
 	glm::vec3 center;
 	double radius;
 	int phase, period;
+	int index;
 	int charge = 0;
-	bool charging = false;
 
-	void update(bool signal);
+	void update(bool signal, int total);
 	void draw(DynamicInstancer* model, FPoint3 p, int orientation, int time);
 };
 
@@ -33,7 +32,7 @@ public:
 	bool can_set_state(bool state, RoomMap*);
 
 	void init_draw_constants();
-	void update_animation();
+	bool update_animation(PlayingState*);
 	void draw(GraphicsManager*, FPoint3);
 
 	void place_walls(RoomMap*);
@@ -41,6 +40,9 @@ public:
 	void spawn_sigils();
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void destroy(MoveProcessor* mp, CauseOfDeath);
+	void signal_animation(AnimationManager*, DeltaFrame*);
+	void reset_animation();
 
 	void get_gate_dims(int* width, int* height);
 	void get_gate_extremes(Point3& a, Point3& b);
@@ -53,7 +55,7 @@ public:
 	glm::vec3 center_;
 	glm::vec3 scale_;
 	std::vector<FlagSigil> sigils_{};
-	int time_ = 0;
+	int animation_time_ = 0;
 };
 
 

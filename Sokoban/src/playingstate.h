@@ -6,6 +6,7 @@
 
 class GameObjectArray;
 class GraphicsManager;
+class AnimationManager;
 class FontManager;
 class StringDrawer;
 class Room;
@@ -58,6 +59,7 @@ public:
 	virtual void world_reset();
 
 	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
+	std::unique_ptr<AnimationManager> anims_;
 
 protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};

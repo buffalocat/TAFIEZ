@@ -41,6 +41,8 @@ public:
 
 	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 	void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
+	void destroy(MoveProcessor*, CauseOfDeath);
+	void signal_animation(AnimationManager*, DeltaFrame*);
 
     void draw(GraphicsManager*, FPoint3);
 

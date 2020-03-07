@@ -11,6 +11,8 @@
 #include "texture_constants.h"
 #include "wall.h"
 #include "modelinstancer.h"
+#include "playingstate.h"
+#include "savefile.h"
 
 FlagGate::FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed) :
 	Switchable(parent, count, false, false, false, false),
@@ -52,13 +54,24 @@ bool FlagGate::can_set_state(bool, RoomMap*) {
 }
 
 void FlagGate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	mp->anims_->receive_signal(AnimationSignal::FlagGateUp, parent_, delta_frame);
 	if (!walls_placed_) {
 		place_walls(map);
 		walls_placed_ = true;
 	}
 	if (!down_) {
 		spawn_sigils();
+	}
+}
+
+void FlagGate::destroy(MoveProcessor* mp, CauseOfDeath) {
+	signal_animation(mp->anims_, mp->delta_frame_);
+}
+
+void FlagGate::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
+	if (parent_->tangible_ && !down_) {
+		anims->receive_signal(AnimationSignal::FlagGateOn, parent_, delta_frame);
+	} else {
+		anims->receive_signal(AnimationSignal::FlagGateOff, parent_, delta_frame);
 	}
 }
 
@@ -172,33 +185,33 @@ void FlagGate::spawn_sigils() {
 	}
 	switch (num_flags_) {
 	case 1:
-		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1 });
+		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0, 1 });
 		break;
 	case 2:
 		for (int i = 0; i < 2; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.5, 80 * i, 80 * 2 });
+			sigils_.push_back(FlagSigil{ center_, 0.5, 80 * i, 80 * 2, i, 2 });
 		}
 		break;
 	case 4:
 		for (int i = 0; i < 4; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.75, 60 * i, 60 * 4 });
+			sigils_.push_back(FlagSigil{ center_, 0.75, 60 * i, 60 * 4, i, 4 });
 		}
 		break;
 	case 8:
-		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1 });
+		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0, 8 });
 		for (int i = 0; i < 7; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7 });
+			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1, 8 });
 		}
 		break;
 	case 32:
 		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3 });
+			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
 		}
 		for (int i = 0; i < 11; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11 });
+			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i+3, 32 });
 		}
 		for (int i = 0; i < 18; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i+14, 32 });
 		}
 		break;
 	default:
@@ -206,23 +219,36 @@ void FlagGate::spawn_sigils() {
 	}
 }
 
-const int FLAG_GATE_MAX_TIME = 720 * 11;
+const int FLAG_GATE_MAX_TIME = 15840; // LCM of all relevant periods
 
-void FlagGate::update_animation() {
-	++time_;
-	if (time_ == FLAG_GATE_MAX_TIME) {
-		time_ = 0;
+bool FlagGate::update_animation(PlayingState* playing_state) {
+	++animation_time_;
+	if (animation_time_ == FLAG_GATE_MAX_TIME) {
+		animation_time_ = 0;
 	}
-	for (auto& sigil : sigils_) {
-		sigil.update(false);
+	if (state()) {
+		int flag_count = playing_state->global_->clear_flag_total_;
+		int cur_count = flag_count;
+		for (auto& sigil : sigils_) {
+			sigil.update(cur_count > 0, flag_count);
+			--cur_count;
+		}
+	} else {
+		for (auto& sigil : sigils_) {
+			sigil.update(false, 0);
+		}
 	}
+	return false;
+}
+
+void FlagGate::reset_animation() {
+	animation_time_ = 0;
 }
 
 void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (down_) {
 		return;
 	}
-	update_animation();
 	gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::Edges, parent_->color());
 	DynamicInstancer* sigil_model;
 	switch (orientation_) {
@@ -241,15 +267,15 @@ void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 		break;
 	}
 	for (auto& sigil : sigils_) {
-		sigil.draw(sigil_model, p, orientation_, time_);
+		sigil.draw(sigil_model, p, orientation_, animation_time_);
 	}
 }
 
-const int MAX_FLAG_SIGIL_CHARGE = 8;
+const int MAX_FLAG_SIGIL_CHARGE = 30;
+const int FLAG_SIGIL_DELAY = 8;
 
-void FlagSigil::update(bool signal) {
-	charging = signal;
-	if (charging && charge < MAX_FLAG_SIGIL_CHARGE) {
+void FlagSigil::update(bool charging, int total) {
+	if (charging && charge < FLAG_SIGIL_DELAY * total + MAX_FLAG_SIGIL_CHARGE) {
 		++charge;
 	} else if (!charging && charge > 0) {
 		--charge;
@@ -274,7 +300,7 @@ void FlagSigil::draw(DynamicInstancer* model, FPoint3 p, int orientation, int ti
 		pos += center + glm::vec3{ 0.51, radius*cos(t), radius*sin(t) };
 		break;
 	}
-	float value = (float)charge / MAX_FLAG_SIGIL_CHARGE;
+	float value = std::min(std::max((charge - FLAG_SIGIL_DELAY * index), 0), MAX_FLAG_SIGIL_CHARGE) / (float)MAX_FLAG_SIGIL_CHARGE;
 	glm::vec4 color = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f) * glm::vec4(1 - value) + COLOR_VECTORS[GOLD] * glm::vec4(value);
 	model->push_instance(pos, glm::vec3(0.6f), tex, color);
 }

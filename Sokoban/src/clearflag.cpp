@@ -3,7 +3,9 @@
 
 #include "gameobject.h"
 #include "mapfile.h"
+#include "moveprocessor.h"
 #include "graphicsmanager.h"
+#include "animationmanager.h"
 #include "texture_constants.h"
 #include "roommap.h"
 #include "player.h"
@@ -84,8 +86,17 @@ void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 
 void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
-	if (real) {
+}
 
+void ClearFlag::destroy(MoveProcessor* mp, CauseOfDeath) {
+	signal_animation(mp->anims_, mp->delta_frame_);
+}
+
+void ClearFlag::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
+	if (parent_->tangible_) {
+		anims->receive_signal(AnimationSignal::FlagOn, parent_, delta_frame);
+	} else {
+		anims->receive_signal(AnimationSignal::FlagOff, parent_, delta_frame);
 	}
 }
 

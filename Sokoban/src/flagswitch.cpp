@@ -52,13 +52,7 @@ bool FlagSwitch::should_toggle(RoomMap* map) {
 
 void FlagSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
-		if (check_send_signal(map, delta_frame)) {
-			if (active_) {
-				mp->anims_->receive_signal(AnimationSignal::FlagSwitchOn, parent_, nullptr);
-			} else {
-				mp->anims_->receive_signal(AnimationSignal::FlagSwitchOff, parent_, nullptr);
-			}
-		}
+		check_send_signal(map, delta_frame);
 	}
 }
 

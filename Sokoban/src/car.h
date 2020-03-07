@@ -14,6 +14,14 @@ enum class CarType {
 	Binding = 4,
 };
 
+enum class CarAnimationState {
+	None,
+	Riding,
+	Unriding,
+};
+
+const int MAX_CAR_ANIMATION_FRAMES = 4;
+
 class Car: public ObjectModifier {
 public:
     Car(GameObject* parent, CarType type, ColorCycle color_cycle);
@@ -40,6 +48,8 @@ public:
 	void setup_on_put(RoomMap*, DeltaFrame*, bool real);
 	void destroy(MoveProcessor*, CauseOfDeath);
 
+	bool update_animation(PlayingState*);
+	void reset_animation();
 	void draw(GraphicsManager* gfx, FPoint3 p);
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
@@ -48,6 +58,11 @@ public:
     ColorCycle color_cycle_;
 
 	Player* player_{};
+	
+	// The player currently in the car for animation purposes
+	Player* animation_player_;
+	CarAnimationState animation_state_ = CarAnimationState::None;
+	int animation_time_ = 0;
 };
 
 #endif // CAR_H

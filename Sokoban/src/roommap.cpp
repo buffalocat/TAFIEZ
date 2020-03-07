@@ -490,15 +490,7 @@ void AnimationInitializer::operator()(int id) {
 	GameObject* obj = obj_array[id];
 	//TODO: Make sure animation objects are handled correctly upon room exit/reentry/undestruction!
 	if (auto* mod = obj->modifier()) {
-		if (auto* inc = dynamic_cast<Incinerator*>(mod)) {
-			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, inc->state()));
-		} else if (auto* flag = dynamic_cast<ClearFlag*>(mod)) {
-			anims->create_bound_source(obj, std::make_unique<FlagSparkleSource>(flag));
-		} else if (auto* door = dynamic_cast<Door*>(mod)) {
-			anims->create_bound_source(obj, std::make_unique<DoorVortexSource>(obj, door->data_ && door->state()));
-		} else if (auto* flag_gate = dynamic_cast<FlagGate*>(mod)) {
-			//TODO: add
-		}
+		mod->signal_animation(anims, nullptr);
 	}
 }
 

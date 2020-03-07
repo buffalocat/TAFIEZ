@@ -54,11 +54,7 @@ bool PressSwitch::should_toggle(RoomMap* map) {
 void PressSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_) {
 		if (check_send_signal(map, delta_frame)) {
-			if (active_) {
-				mp->anims_->receive_signal(AnimationSignal::SwitchOn, parent_, nullptr);
-			} else {
-				mp->anims_->receive_signal(AnimationSignal::SwitchOff, parent_, nullptr);
-			}
+			signal_animation(mp->anims_, mp->delta_frame_);
 		}
 	}
 }
@@ -72,6 +68,18 @@ void PressSwitch::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real)
 void PressSwitch::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	Switch::cleanup_on_take(map, delta_frame, real);
     map->remove_listener(this, pos_above());
+}
+
+void PressSwitch::destroy(MoveProcessor* mp, CauseOfDeath) {
+	signal_animation(mp->anims_, mp->delta_frame_);
+}
+
+void PressSwitch::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
+	if (parent_->tangible_ && active_) {
+		anims->receive_signal(AnimationSignal::SwitchOn, parent_, delta_frame);
+	} else {
+		anims->receive_signal(AnimationSignal::SwitchOff, parent_, delta_frame);
+	}
 }
 
 void PressSwitch::draw(GraphicsManager* gfx, FPoint3 p) {

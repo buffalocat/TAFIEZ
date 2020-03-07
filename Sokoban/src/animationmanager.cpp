@@ -8,7 +8,13 @@
 #include "texture_constants.h"
 #include "color_constants.h"
 #include "soundmanager.h"
+
+#include "car.h"
 #include "clearflag.h"
+#include "door.h"
+#include "flaggate.h"
+#include "incinerator.h"
+#include "gate.h"
 
 Particle::Particle() {}
 
@@ -52,18 +58,16 @@ ParticleSource::ParticleSource() {}
 ParticleSource::~ParticleSource() {}
 
 
-EmberSource::EmberSource(GameObject* parent, bool active) : ParticleSource(),
-parent_{ parent }, active_{ active } {}
+EmberSource::EmberSource(GameObject* parent) : ParticleSource(),
+parent_{ parent } {}
 
 EmberSource::~EmberSource() {}
 
 bool EmberSource::update(RandDouble& rand, ParticleVector& particles) {
-	if (parent_->tangible_ && active_) {
-		if (rand() > 0.8) {
-			particles.push_back(std::make_unique<FireParticle>(glm::vec3(parent_->real_pos()), ParticleTexture::SolidSquare, 0.8, 0.05, rand));
-		}
+	if (rand() > 0.8) {
+		particles.push_back(std::make_unique<FireParticle>(glm::vec3(parent_->real_pos()), ParticleTexture::SolidSquare, 0.8, 0.05, rand));
 	}
-	return false;
+	return !active_;
 }
 
 
@@ -116,18 +120,16 @@ bool DoorVortexParticle::update() {
 }
 
 
-DoorVortexSource::DoorVortexSource(GameObject* parent, bool active) : ParticleSource(),
-parent_{ parent }, active_{ active } {}
+DoorVortexSource::DoorVortexSource(GameObject* parent) : ParticleSource(),
+parent_{ parent } {}
 
 DoorVortexSource::~DoorVortexSource() {}
 
 bool DoorVortexSource::update(RandDouble& rand, ParticleVector& particles) {
-	if (parent_->tangible_ && active_) {
-		if (rand() > 0.80) {
-			particles.push_back(std::make_unique<DoorVortexParticle>(glm::vec3(parent_->real_pos()), rand));
-		}
+	if (rand() > 0.80) {
+		particles.push_back(std::make_unique<DoorVortexParticle>(glm::vec3(parent_->real_pos()), rand));
 	}
-	return false;
+	return !active_;
 }
 
 
@@ -157,21 +159,20 @@ void FlagSparkle::get_vertex(std::vector<ParticleVertex>& vertices) {
 		glm::vec4(color_, float(life_) / FLAG_SPARKLE_MAX_LIFE) });
 }
 
-FlagSparkleSource::FlagSparkleSource(ClearFlag* flag) {
-	pos_ = glm::vec3(flag->parent_->real_pos());
-	glm::vec4 c = COLOR_VECTORS[flag->color()];
-	color_ = glm::vec3(c.x, c.y, c.z);
-}
+FlagSparkleSource::FlagSparkleSource(ClearFlag* flag): ParticleSource(),
+	flag_{ flag } {}
 
 FlagSparkleSource::~FlagSparkleSource() {}
 
 bool FlagSparkleSource::update(RandDouble& rand, ParticleVector& particles) {
 	if (rand() > 0.95) {
 		glm::vec3 d(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
+		glm::vec4 c = COLOR_VECTORS[flag_->color()];
+		glm::vec3 color = glm::vec3(c.x, c.y, c.z);
 		particles.push_back(std::make_unique<FlagSparkle>(
-			pos_ + glm::vec3(0.6f) * d + glm::vec3(0,0,1.2f),
+			glm::vec3(flag_->parent_->real_pos()) + glm::vec3(0.6f) * d + glm::vec3(0,0,1.2f),
 			glm::vec3(0.01f) * d,
-			glm::vec3(0.8f) * color_));
+			glm::vec3(0.8f) * color));
 	}
 	return false;
 }
@@ -234,11 +235,8 @@ double RandDouble::operator()() {
 }
 
 
-SpecialDrawer::SpecialDrawer() {}
-
-
-AnimationManager::AnimationManager(Shader* shader) :
-	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() } {
+AnimationManager::AnimationManager(Shader* shader, PlayingState* state) :
+	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() }, state_{ state } {
 	initialize_particle_shader();
 }
 
@@ -292,6 +290,12 @@ void AnimationManager::update() {
 			}
 		}
 	}
+	// Update other animation
+	for (auto* mod : static_animated_objects_) {
+		mod->update_animation(state_);
+	}
+	temp_animated_objects_.erase(std::remove_if(temp_animated_objects_.begin(), temp_animated_objects_.end(),
+		[this](auto& p) { return p->update_animation(state_); }), temp_animated_objects_.end());
 	// Update particles and remove dead ones
 	sources_.erase(std::remove_if(sources_.begin(), sources_.end(),
 		[this](auto& p) { return p->update(rand_, particles_); }), sources_.end());
@@ -309,9 +313,21 @@ void AnimationManager::abort_move() {
 		}
 	}
 	// Cancel any particles/text that shouldn't exist...?
+	for (auto* mod : temp_animated_objects_) {
+		mod->reset_animation();
+	}
+	temp_animated_objects_.clear();
 }
 
-void AnimationManager::reset_particles() {
+void AnimationManager::reset() {
+	for (auto* mod : static_animated_objects_) {
+		mod->reset_animation();
+	}
+	static_animated_objects_.clear();
+	for (auto* mod : temp_animated_objects_) {
+		mod->reset_animation();
+	}
+	temp_animated_objects_.clear();
 	sources_.clear();
 	particles_.clear();
 	source_map_.clear();
@@ -348,8 +364,9 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	switch (signal) {
 	case AnimationSignal::IncineratorOn:
 	{
-		if (auto* ember_source = dynamic_cast<EmberSource*>(source_map_[obj])) {
-			ember_source->active_ = true;
+		auto* inc = static_cast<Incinerator*>(obj->modifier());
+		if (!source_map_.count(obj)) {
+			create_bound_source(obj, std::make_unique<EmberSource>(obj));
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOff, obj));
 			}
@@ -358,8 +375,10 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	}
 	case AnimationSignal::IncineratorOff:
 	{
-		if (auto* ember_source = dynamic_cast<EmberSource*>(source_map_[obj])) {
-			ember_source->active_ = false;
+		if (source_map_.count(obj)) {
+			auto* source = static_cast<EmberSource*>(source_map_[obj]);
+			source->active_ = false;
+			source_map_.erase(obj);
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOn, obj));
 			}
@@ -371,20 +390,23 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	case AnimationSignal::DoorOn:
 	{
-		if (auto* door_source = dynamic_cast<DoorVortexSource*>(source_map_[obj])) {
-			door_source->active_ = true;
+		auto* door = static_cast<Door*>(obj->modifier());
+		if (!source_map_.count(obj)) {
+			create_bound_source(obj, std::make_unique<DoorVortexSource>(obj));
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOff, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::DoorOff, obj));
 			}
 		}
 		break;
 	}
 	case AnimationSignal::DoorOff:
 	{
-		if (auto* door_source = dynamic_cast<DoorVortexSource*>(source_map_[obj])) {
-			door_source->active_ = false;
+		if (source_map_.count(obj)) {
+			auto* source = static_cast<DoorVortexSource*>(source_map_[obj]);
+			source->active_ = false;
+			source_map_.erase(obj);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOn, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::DoorOn, obj));
 			}
 		}
 		break;
@@ -399,14 +421,83 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		sounds_->queue_sound(SoundName::SnakeSplit);
 		sources_.push_back(std::make_unique<SnakeSplitSource>(obj));
 		break;
-	case AnimationSignal::FlagExists:
+	case AnimationSignal::FlagOn:
 	{
-		auto* flag = dynamic_cast<ClearFlag*>(obj->modifier());
-		sources_.push_back(std::make_unique<FlagSparkleSource>(flag));
+		auto* flag = static_cast<ClearFlag*>(obj->modifier());
+		if (!source_map_.count(obj)) {
+			create_bound_source(obj, std::make_unique<FlagSparkleSource>(flag));
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagOff, obj));
+			}
+		}
+		break;
+	}
+	case AnimationSignal::FlagOff:
+	{
+		if (source_map_.count(obj)) {
+			auto* source = static_cast<FlagSparkleSource*>(source_map_[obj]);
+			source->active_ = false;
+			source_map_.erase(obj);
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagOn, obj));
+			}
+		}
+		break;
+	}
+	case AnimationSignal::FlagGateOn:
+	{
+		auto* flag_gate = obj->modifier();
+		if (!static_animated_objects_.count(flag_gate)) {
+			static_animated_objects_.insert(flag_gate);
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagGateOff, obj));
+			}
+		}
+		break;
+	}
+	case AnimationSignal::FlagGateOff:
+	{
+		auto* flag_gate = obj->modifier();
+		if (static_animated_objects_.count(flag_gate)) {
+			static_animated_objects_.erase(flag_gate);
+			if (delta_frame) {
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagGateOn, obj));
+			}
+		}
+		break;
+	}
+	case AnimationSignal::GateUp:
+	{
+		auto* gate = static_cast<Gate*>(obj->modifier());
+		gate->start_raise_animation();
+		temp_animated_objects_.push_back(gate);
+		break;
+	}
+	case AnimationSignal::GateDown:
+	{
+		auto* gate = static_cast<Gate*>(obj->modifier());
+		gate->start_lower_animation();
+		temp_animated_objects_.push_back(gate);
+		break;
+	}
+	case AnimationSignal::CarRide:
+	{
+		auto* car = static_cast<Car*>(obj->modifier());
+		temp_animated_objects_.push_back(car);
+		car->animation_state_ = CarAnimationState::Riding;
+		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
+		break;
+	}
+	case AnimationSignal::CarUnride:
+	{
+		auto* car = static_cast<Car*>(obj->modifier());
+		temp_animated_objects_.push_back(car);
+		car->animation_state_ = CarAnimationState::Unriding;
+		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
+		break;
 	}
 	}
 }
-
 
 AnimationSignalDelta::AnimationSignalDelta(AnimationManager* anims, AnimationSignal signal, GameObject* obj) :
 	Delta(), anims_{ anims }, signal_{ signal }, obj_{ obj } {}

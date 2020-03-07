@@ -13,34 +13,33 @@ class SoundManager;
 class ClearFlag;
 class GraphicsManager;
 class ObjectModifier;
+class PlayingState;
 
 enum class AnimationSignal {
 	NONE,
+	// Modifier Updates
 	IncineratorOn,
 	IncineratorOff,
-	IncineratorChange,
 	DoorOn,
 	DoorOff,
 	SwitchOn,
 	SwitchOff,
 	GateUp,
 	GateDown,
-	FlagExists,
-	FlagActive,
-	FlagInactive,
-	FlagCollect,
-	SignOn,
-	SignOff,
+	FlagOn,
+	FlagOff,
 	FlagSwitchOn,
 	FlagSwitchOff,
-	FlagGateUp,
-	FlagGateDown,
+	FlagGateOn,
+	FlagGateOff,
+	SignOn,
+	SignOff,
+	// Other Actions
+	FlagCollect,
 	ColorChange,
 	Jump,
 	CarRide,
 	CarUnride,
-	ConvertibleRide,
-	ConvertibleUnride,
 	ColorBind,
 	ColorUnbind,
 	LinkBreak,
@@ -107,12 +106,12 @@ private:
 
 class EmberSource : public ParticleSource {
 public:
-	EmberSource(GameObject* parent, bool active);
+	EmberSource(GameObject* parent);
 	virtual ~EmberSource();
 	bool update(RandDouble& rand, ParticleVector& particles);
 
 	GameObject* parent_;
-	bool active_;
+	bool active_ = true;
 };
 
 
@@ -145,12 +144,12 @@ private:
 
 class DoorVortexSource : public ParticleSource {
 public:
-	DoorVortexSource(GameObject* parent, bool active);
+	DoorVortexSource(GameObject* parent);
 	virtual ~DoorVortexSource();
 	bool update(RandDouble& rand, ParticleVector& particles);
 
 	GameObject* parent_;
-	bool active_;
+	bool active_ = true;
 };
 
 
@@ -174,9 +173,8 @@ public:
 	~FlagSparkleSource();
 	bool update(RandDouble& rand, ParticleVector& particles);
 
-private:
-	glm::vec3 pos_;
-	glm::vec3 color_;
+	ClearFlag* flag_;
+	bool active_ = true;
 };
 
 
@@ -207,23 +205,14 @@ private:
 };
 
 
-class SpecialDrawer {
-public:
-	SpecialDrawer();
-	virtual ~SpecialDrawer() = 0;
-
-	virtual void draw(GraphicsManager*) = 0;
-};
-
-
 class AnimationManager {
 public:
-	AnimationManager(Shader* shader);
+	AnimationManager(Shader* shader, PlayingState* state);
 	~AnimationManager();
 
 	void update();
 	void abort_move();
-	void reset_particles();
+	void reset();
 	void render_particles(glm::vec3 view_dir);
 	void create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source);
 
@@ -237,14 +226,15 @@ public:
 private:
 	// "Keyed" on Direction (minus 1)
 	std::array<std::vector<GameObject*>, 6> linear_animations_{};
-	std::vector<std::unique_ptr<SpecialDrawer>> special_drawers_{};
+	std::set<ObjectModifier*> static_animated_objects_{};
+	std::vector<ObjectModifier*> temp_animated_objects_{};
 	std::vector<std::unique_ptr<ParticleSource>> sources_{};
 	std::vector<std::unique_ptr<Particle>> particles_{};
 	std::unique_ptr<SoundManager> sounds_{};
+	PlayingState* state_;
 
 	int linear_animation_frames_ = -1;
 
-	std::map<ObjectModifier*, SpecialDrawer*> special_map_{};
 	std::map<GameObject*, ParticleSource*> source_map_{};
 
 	Shader* particle_shader_;

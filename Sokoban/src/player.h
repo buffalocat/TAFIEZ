@@ -54,6 +54,9 @@ public:
 
 	bool active_ = false;
 
+	// The car the player is currently riding for animation purposes
+	Car* animation_car_{};
+
 private:
 	void set_bound();
 

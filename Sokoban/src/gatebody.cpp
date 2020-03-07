@@ -94,10 +94,24 @@ void GateBody::collect_special_links(std::vector<GameObject*>& to_check) {
 	}
 }
 
+const double GATE_ANIMATION_HEIGHTS[MAX_GATE_ANIMATION_FRAMES] = { 0.1, 0.3, 0.7, 0.9 };
+
 void GateBody::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
-	// TODO: make this depend on the state animation
 	double height = 1.0f;
+	if (gate_) {
+		switch (gate_->animation_state_) {
+		case GateAnimationState::Lower:
+			height = GATE_ANIMATION_HEIGHTS[gate_->animation_time_];
+			break;
+		case GateAnimationState::Raise:
+			height = 1 - GATE_ANIMATION_HEIGHTS[gate_->animation_time_];
+			break;
+		default:
+			height = 1.0f;
+			break;
+		}
+	}
 	BlockTexture tex = corrupt_ ? BlockTexture::GateBodyCorrupt :
 		(persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody);
 	ModelInstancer& model = snake_ ? gfx->top_diamond : gfx->top_cube;

@@ -12,6 +12,8 @@ class MoveProcessor;
 class MapFileI;
 class MapFileO;
 class GraphicsManager;
+class AnimationManager;
+class PlayingState;
 class PlayingGlobalData;
 class EditorGlobalData;
 class Room;
@@ -52,6 +54,9 @@ public:
 	virtual void cleanup_on_editor_destruction(EditorGlobalData* global);
 	virtual void destroy(MoveProcessor*, CauseOfDeath);
 	virtual void undestroy();
+	virtual void signal_animation(AnimationManager*, DeltaFrame*);
+	virtual bool update_animation(PlayingState*);
+	virtual void reset_animation();
 
     // Every type of Modifier can have at most one callback function for map listeners
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
