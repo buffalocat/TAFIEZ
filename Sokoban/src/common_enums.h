@@ -38,6 +38,8 @@ enum class ModCode {
 	PermanentSwitch = 9,
 	FloorSign = 10,
 	Incinerator = 11,
+	FlagGate = 12,
+	FlagSwitch = 13,
 };
 
 // This is useless for now, but we'll keep it anyway

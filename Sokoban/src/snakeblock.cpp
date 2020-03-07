@@ -501,7 +501,11 @@ void SnakePuller::perform_pulls() {
 			moving_blocks_.push_back(cur);
 			Point3 dir = next->pos_ - cur->pos_;
 			if (anims_) {
-				anims_->set_linear_animation(point_to_dir(dir), cur);
+				auto dir_name = point_to_dir(dir);
+				anims_->set_linear_animation(dir_name, cur);
+				if (auto* sub = cur->get_subordinate_object()) {
+					anims_->set_linear_animation(dir_name, sub);
+				}
 			}
 			map_->shift(cur, dir, true, delta_frame_);
 			cur = next;

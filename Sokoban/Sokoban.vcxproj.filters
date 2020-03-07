@@ -37,9 +37,6 @@
     <Filter Include="Source Files\Move Processing">
       <UniqueIdentifier>{62ebdd7e-e1a7-462f-b1ac-920b25678aa3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="constants">
-      <UniqueIdentifier>{2d2e22d9-7855-4b66-9fe2-30dd85747b7d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{c3fa030b-f894-4acf-8c52-439be43404fe}</UniqueIdentifier>
     </Filter>
@@ -70,17 +67,8 @@
     <ClInclude Include="src\car.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\color_constants.h">
-      <Filter>constants</Filter>
-    </ClInclude>
     <ClInclude Include="src\colorcycle.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common_constants.h">
-      <Filter>constants</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common_enums.h">
-      <Filter>constants</Filter>
     </ClInclude>
     <ClInclude Include="src\component.h">
       <Filter>Header Files</Filter>
@@ -232,9 +220,6 @@
     <ClInclude Include="src\testplayingstate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\texture_constants.h">
-      <Filter>constants</Filter>
-    </ClInclude>
     <ClInclude Include="src\vertexlayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -278,6 +263,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\soundmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flaggate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flagswitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\color_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common_enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\texture_constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -515,6 +518,15 @@
     </ClCompile>
     <ClCompile Include="src\soundmanager.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flaggate.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flagswitch.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\globalflagconstants.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

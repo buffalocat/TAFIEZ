@@ -37,6 +37,13 @@ bool Car::valid_parent(GameObject* obj) {
 	return dynamic_cast<ColoredBlock*>(obj);
 }
 
+GameObject* Car::get_subordinate_object() {
+	if (player_ && !player_->tangible_) {
+		return player_;
+	}
+	return nullptr;
+}
+
 BlockTexture Car::texture() {
 	switch (type_) {
 	case CarType::Locked:
@@ -51,12 +58,6 @@ BlockTexture Car::texture() {
 		return BlockTexture::BindingCar;
 	default:
 		return BlockTexture::Default;
-	}
-}
-
-void Car::shift_internal_pos(Point3 d) {
-	if (player_ && !player_->tangible_) {
-		player_->shift_internal_pos(d);
 	}
 }
 
@@ -119,10 +120,12 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 }
 
 void Car::draw(GraphicsManager* gfx, FPoint3 p) {
-	// TODO: Add rotated six_squares!!!
 	if (int color = next_color()) {
 		ModelInstancer& model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
 		model.push_instance(glm::vec3(p), glm::vec3(1.01f), BlockTexture::Blank, color);
+	}
+	if (player_ && !player_->tangible_) {
+		//TODO: Draw the player in the car? somehow
 	}
 }
 

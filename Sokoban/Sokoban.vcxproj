@@ -198,6 +198,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\animationmanager.h" />
+    <ClInclude Include="src\flaggate.h" />
+    <ClInclude Include="src\flagswitch.h" />
     <ClInclude Include="src\fpstimer.h" />
     <ClInclude Include="src\incinerator.h" />
     <ClInclude Include="src\jumpstepprocessor.h" />
@@ -331,7 +333,10 @@
     </ClCompile>
     <ClCompile Include="src\animationmanager.cpp" />
     <ClCompile Include="src\common_enums.cpp" />
+    <ClCompile Include="src\flaggate.cpp" />
+    <ClCompile Include="src\flagswitch.cpp" />
     <ClCompile Include="src\fpstimer.cpp" />
+    <ClCompile Include="src\globalflagconstants.cpp" />
     <ClCompile Include="src\incinerator.cpp" />
     <ClCompile Include="src\jumpstepprocessor.cpp" />
     <ClCompile Include="src\floorsign.cpp" />

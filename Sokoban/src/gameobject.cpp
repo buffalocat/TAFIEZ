@@ -59,13 +59,6 @@ Point3 GameObject::shifted_pos(Point3 d) {
 	return pos_ + d;
 }
 
-void GameObject::shift_internal_pos(Point3 d) {
-	pos_ += d;
-	if (modifier_) {
-		modifier_->shift_internal_pos(d);
-	}
-}
-
 void GameObject::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
 	if (modifier_) {
 		modifier_->setup_on_put(map, delta_frame, real);
@@ -153,6 +146,14 @@ void GameObject::collect_special_links(std::vector<GameObject*>& to_check) {
 		modifier_->collect_special_links(to_check);
 	}
 }
+
+GameObject* GameObject::get_subordinate_object() {
+	if (modifier_) {
+		return modifier_->get_subordinate_object();
+	}
+	return nullptr;
+}
+
 int GameObject::color() {
 	return NO_COLOR;
 }

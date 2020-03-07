@@ -36,10 +36,17 @@ enum class BlockTexture {
 	GateBodyCorrupt,
 	Incinerator,
 	
+	FlagSigil = 129,
+
+	FlagSwitch0 = 80,
+	FlagSwitch1,
+	FlagSwitch2,
+	FlagSwitch3,
+
 	// Other Single-Size
-	Blank = 64,
-	Darker = 65,
-	Wall = 66,
+	Blank = 96,
+	Darker = 97,
+	Wall = 98,
 };
 
 BlockTexture operator |(BlockTexture a, BlockTexture b);

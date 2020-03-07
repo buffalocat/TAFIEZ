@@ -233,6 +233,10 @@ double RandDouble::operator()() {
 	return dist_(engine_);
 }
 
+
+SpecialDrawer::SpecialDrawer() {}
+
+
 AnimationManager::AnimationManager(Shader* shader) :
 	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() } {
 	initialize_particle_shader();

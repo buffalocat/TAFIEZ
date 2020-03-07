@@ -47,10 +47,11 @@ void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	parent->set_modifier(std::move(gate));
 }
 
-void Gate::shift_internal_pos(Point3 d) {
+GameObject* Gate::get_subordinate_object() {
 	if (body_ && !state()) {
-		body_->shift_internal_pos(d);
+		return body_;
 	}
+	return nullptr;
 }
 
 void Gate::collect_special_links(std::vector<GameObject*>& to_check) {
@@ -83,13 +84,8 @@ void Gate::raise_gate(RoomMap* map, DeltaFrame* delta_frame) {
 	map->put_in_map(body_, true, true, delta_frame);
 }
 
-// TODO: put the abstract_shift in a better place than this!!!
 void Gate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (parent_->tangible_ && body_) {
-		Point3 dpos = body_->update_gate_pos(delta_frame);
-		if (!state()) {
-			body_->abstract_shift(dpos, delta_frame);
-		}
 		check_waiting(map, delta_frame, mp);
 	}
 }

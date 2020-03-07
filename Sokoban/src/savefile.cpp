@@ -2,6 +2,7 @@
 #include "savefile.h"
 
 #include "common_constants.h"
+#include "globalflagconstants.h"
 #include "room.h"
 #include "roommap.h"
 #include "player.h"
@@ -71,10 +72,16 @@ PlayingGlobalData::~PlayingGlobalData() {}
 void PlayingGlobalData::load_flags(std::filesystem::path path) {
 	auto flag_file_path = path / "global.sav";
 	if (std::filesystem::exists(flag_file_path)) {
+		flags_.clear();
 		auto flag_file = MapFileI(flag_file_path);
 		unsigned int num_flags = flag_file.read_uint32();
 		for (unsigned int i = 0; i < num_flags; ++i) {
 			flags_.insert(flag_file.read_uint32());
+		}
+		for (auto f : FLAG_COLLECT_FLAGS) {
+			if (flags_.count(f)) {
+				++clear_flag_total_;
+			}
 		}
 	}
 }
@@ -97,6 +104,16 @@ void PlayingGlobalData::remove_flag(unsigned int flag) {
 
 bool PlayingGlobalData::has_flag(unsigned int flag) {
 	return flags_.count(flag);
+}
+
+void PlayingGlobalData::collect_clear_flag(char zone) {
+	flags_.insert(get_clear_flag_code(zone));
+	++clear_flag_total_;
+}
+
+void PlayingGlobalData::uncollect_clear_flag(char zone) {
+	flags_.erase(get_clear_flag_code(zone));
+	--clear_flag_total_;
 }
 
 

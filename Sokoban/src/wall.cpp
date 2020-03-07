@@ -70,8 +70,13 @@ void ArtWall::draw(GraphicsManager* gfx) {
 	ModelInstancer* model;
 	switch (flavor_) {
 	case 0:
-	default:
 		model = &gfx->cube_edges;
+		break;
+	case 1:
+		// Invisible Wall
+		return;
+	default:
+		return;
 	}
 	model->push_instance(glm::vec3(p), glm::vec3(1.0f), BlockTexture::Blank, GREY_VECTORS[p.z % NUM_GREYS]);
 	if (modifier_) {

@@ -22,6 +22,7 @@
 #include "door.h"
 #include "car.h"
 #include "incinerator.h"
+#include "flaggate.h"
 #include "savefile.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
@@ -189,6 +190,9 @@ void RoomMap::clear(Point3 pos) {
 void RoomMap::shift(GameObject* obj, Point3 dpos, bool activate_listeners, DeltaFrame* delta_frame) {
 	take_from_map(obj, false, activate_listeners, nullptr);
 	obj->pos_ += dpos;
+	if (auto* sub = obj->get_subordinate_object()) {
+		sub->pos_ += dpos;
+	}
 	put_in_map(obj, false, activate_listeners, nullptr);
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
@@ -199,6 +203,9 @@ void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, bool activ
 	for (auto obj : objs) {
 		take_from_map(obj, false, activate_listeners, nullptr);
 		obj->pos_ += dpos;
+		if (auto* sub = obj->get_subordinate_object()) {
+			sub->pos_ += dpos;
+		}
 		put_in_map(obj, false, activate_listeners, nullptr);
 	}
 	if (delta_frame) {
@@ -320,7 +327,7 @@ struct ObjectShifter {
 
 void ObjectShifter::operator()(unsigned int id) {
 	if (id > GENERIC_WALL_ID) {
-		obj_array[id]->shift_internal_pos(dpos);
+		obj_array[id]->pos_ += dpos;
 	}
 }
 
@@ -481,6 +488,7 @@ struct AnimationInitializer {
 
 void AnimationInitializer::operator()(int id) {
 	GameObject* obj = obj_array[id];
+	//TODO: Make sure animation objects are handled correctly upon room exit/reentry/undestruction!
 	if (auto* mod = obj->modifier()) {
 		if (auto* inc = dynamic_cast<Incinerator*>(mod)) {
 			anims->create_bound_source(obj, std::make_unique<EmberSource>(obj, inc->state()));
@@ -488,6 +496,8 @@ void AnimationInitializer::operator()(int id) {
 			anims->create_bound_source(obj, std::make_unique<FlagSparkleSource>(flag));
 		} else if (auto* door = dynamic_cast<Door*>(mod)) {
 			anims->create_bound_source(obj, std::make_unique<DoorVortexSource>(obj, door->data_ && door->state()));
+		} else if (auto* flag_gate = dynamic_cast<FlagGate*>(mod)) {
+			//TODO: add
 		}
 	}
 }
@@ -555,7 +565,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 			}
 			collect_flag();
 			if (global_) {
-				global_->add_flag(clear_id_);
+				global_->collect_clear_flag(zone_);
 			}
 		}
 	}
@@ -574,7 +584,7 @@ void RoomMap::uncollect_flag(int req) {
 		pair.first->collected_ = false;
 	}
 	if (global_) {
-		global_->remove_flag(clear_id_);
+		global_->uncollect_clear_flag(zone_);
 	}
 }
 
@@ -640,7 +650,6 @@ MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
 MotionDelta::~MotionDelta() {}
 
 void MotionDelta::revert() {
-	obj_->dpos_ = {};
 	map_->shift(obj_, -dpos_, false, nullptr);
 }
 
@@ -651,9 +660,6 @@ BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, R
 BatchMotionDelta::~BatchMotionDelta() {}
 
 void BatchMotionDelta::revert() {
-	for (auto* obj : objs_) {
-		obj->dpos_ = {};
-	}
 	map_->batch_shift(objs_, -dpos_, false, nullptr);
 }
 

@@ -18,7 +18,7 @@ public:
     void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
-    void shift_internal_pos(Point3 d);
+	GameObject* get_subordinate_object();
 
     void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
     void collect_special_links(std::vector<GameObject*>&);

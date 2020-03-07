@@ -41,10 +41,11 @@ public:
 	void remove_flag(unsigned int flag);
 	bool has_flag(unsigned int flag);
 
-private:
+	void collect_clear_flag(char zone);
+	void uncollect_clear_flag(char zone);
+
 	std::set<unsigned int> flags_{};
-	// Useful information about the flag set
-	unsigned int clear_flag_total_ = 0;
+	int clear_flag_total_ = 0;
 };
 
 class SaveFile {

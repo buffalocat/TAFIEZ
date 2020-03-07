@@ -29,6 +29,8 @@
 #include "permanentswitch.h"
 #include "floorsign.h"
 #include "incinerator.h"
+#include "flaggate.h"
+#include "flagswitch.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -306,6 +308,8 @@ void Room::read_objects(MapFileI& file) {
 			CASE_MODCODE(PermanentSwitch);
 			CASE_MODCODE(FloorSign);
 			CASE_MODCODE(Incinerator);
+			CASE_MODCODE(FlagGate);
+			CASE_MODCODE(FlagSwitch);
 		case ModCode::NONE:
 			break;
 		}

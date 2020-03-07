@@ -36,8 +36,10 @@ void Mesh::setup_mesh() {
 }
 
 void Mesh::draw_instanced(unsigned int instance_count) {
-	glBindVertexArray(VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0, instance_count);
+	if (instance_count) {
+		glBindVertexArray(VAO);
+		glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0, instance_count);
+	}
 }
 
 void Mesh::draw_single() {

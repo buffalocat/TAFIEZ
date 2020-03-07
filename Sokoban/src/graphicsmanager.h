@@ -51,7 +51,6 @@ public:
 	void draw_particles();
 	void post_rendering();
 
-	// These must be drawn (in a batch) in draw_world()
 	DynamicInstancer cube{ "resources/uniform_cube.obj" };
 	DynamicInstancer top_cube{ "resources/top_cube.obj" };
 	DynamicInstancer six_squares{ "resources/six_squares.obj" };
@@ -64,6 +63,11 @@ public:
 
 	DynamicInstancer cube_edges{ "resources/cube_edges.obj" };
 	DynamicInstancer flag{ "resources/flag.obj" };
+	
+	DynamicInstancer square_0{ "resources/square_0.obj" };
+	DynamicInstancer square_1{ "resources/square_1.obj" };
+	DynamicInstancer square_2{ "resources/square_2.obj" };
+	DynamicInstancer square_3{ "resources/square_3.obj" };
 
 	std::unique_ptr<FontManager> fonts_{};
 	std::unique_ptr<AnimationManager> anims_{};

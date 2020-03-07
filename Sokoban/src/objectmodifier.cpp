@@ -22,6 +22,9 @@ bool ObjectModifier::valid_parent(GameObject* obj) {
 	return dynamic_cast<Block*>(obj);
 }
 
+GameObject* ObjectModifier::get_subordinate_object() {
+	return nullptr;
+}
 
 Point3 ObjectModifier::pos() {
     return parent_->pos_;
@@ -30,8 +33,6 @@ Point3 ObjectModifier::pos() {
 Point3 ObjectModifier::shifted_pos(Point3 d) {
     return parent_->pos_ + d;
 }
-
-void ObjectModifier::shift_internal_pos(Point3 d) {}
 
 Point3 ObjectModifier::pos_above() {
     return parent_->pos_ + Point3{0,0,1};

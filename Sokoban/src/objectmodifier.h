@@ -34,11 +34,12 @@ public:
 	virtual bool valid_parent(GameObject*);
 	GameObject* parent_;
 
+	virtual GameObject* get_subordinate_object();
+
 	virtual void draw(GraphicsManager*, FPoint3);
 
     Point3 pos();
     Point3 shifted_pos(Point3 d);
-    virtual void shift_internal_pos(Point3 d);
     Point3 pos_above(); // A convenience function often needed by Modifiers
     bool pushable();
     bool gravitable();

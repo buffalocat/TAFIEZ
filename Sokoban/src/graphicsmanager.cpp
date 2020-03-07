@@ -200,6 +200,12 @@ void GraphicsManager::draw_objects() {
 
 	cube_edges.draw();
 	flag.draw();
+
+	// These can be transparent
+	square_0.draw();
+	square_1.draw();
+	square_2.draw();
+	square_3.draw();
 }
 
 void GraphicsManager::draw_particles() {

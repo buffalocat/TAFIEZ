@@ -36,7 +36,6 @@ public:
     virtual void relation_serialize(MapFileO& file);
 
     Point3 shifted_pos(Point3 d);
-    void shift_internal_pos(Point3 d);
     void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
 	void abstract_put(Point3 pos, DeltaFrame* delta_frame);
 
@@ -58,6 +57,8 @@ public:
 	virtual bool has_sticky_neighbor(RoomMap*);
 	virtual void collect_sticky_links(RoomMap*, Sticky, std::vector<GameObject*>& links);
 	virtual void collect_special_links(std::vector<GameObject*>& links);
+
+	GameObject* get_subordinate_object();
 
 	ObjectModifier* modifier();
 	virtual int color();

@@ -22,6 +22,8 @@
 #include "permanentswitch.h"
 #include "floorsign.h"
 #include "incinerator.h"
+#include "flaggate.h"
+#include "flagswitch.h"
 
 #include "colorcycle.h"
 
@@ -41,6 +43,8 @@ static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
 static FloorSign model_floor_sign{ nullptr, "", false };
 static Incinerator model_incinerator{ nullptr, 0, false, true, false };
+static FlagGate model_flag_gate{ nullptr, 1, 0, 0, false, false };
+static FlagSwitch model_flag_switch{ nullptr, false, 0 };
 
 static ColorCycle model_color_cycle{};
 
@@ -91,6 +95,8 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::RadioButton("PermanentSwitch##MOD_object", &mod_code, ModCode::PermanentSwitch);
 		ImGui::RadioButton("FloorSign##MOD_object", &mod_code, ModCode::FloorSign);
 		ImGui::RadioButton("Incinerator##MOD_object", &mod_code, ModCode::Incinerator);
+		ImGui::RadioButton("Flag Gate##MOD_object", &mod_code, ModCode::FlagGate);
+		ImGui::RadioButton("Flag Switch##MOD_object", &mod_code, ModCode::FlagSwitch);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -181,6 +187,21 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		Incinerator* incinerator = mod ? static_cast<Incinerator*>(mod) : &model_incinerator;
 		ImGui::Checkbox("Persistent?##MOD_INCINERATOR_persistent", &incinerator->persistent_);
 		ImGui::Checkbox("Active by Default?##MOD_INCINERATOR_default", &incinerator->default_);
+		break;
+	}
+	case ModCode::FlagGate:
+	{
+		ImGui::Text("Flag Gate");
+		FlagGate* flag_gate = mod ? static_cast<FlagGate*>(mod) : &model_flag_gate;
+		ImGui::InputInt("Num Flags##MOD_FLAGGATE_num_flags", &flag_gate->num_flags_);
+		ImGui::InputInt("Orientation##MOD_FLAGGATE_orientation", &flag_gate->orientation_);
+		break;
+	}
+	case ModCode::FlagSwitch:
+	{
+		ImGui::Text("Flag Switch");
+		FlagSwitch* flag_switch = mod ? static_cast<FlagSwitch*>(mod) : &model_flag_switch;
+		ImGui::InputInt("Orientation##MOD_FLAGSWITCH_orientation", &flag_switch->orientation_);
 		break;
 	}
 	// Trivial objects
@@ -280,6 +301,13 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	case ModCode::Incinerator:
 		mod = std::make_unique<Incinerator>(model_incinerator);
+		break;
+	case ModCode::FlagGate:
+		mod = std::make_unique<FlagGate>(model_flag_gate);
+		break;
+	case ModCode::FlagSwitch:
+		mod = std::make_unique<FlagSwitch>(model_flag_switch);
+		break;
 	}
 	if (!mod->valid_parent(obj)) {
 		return;

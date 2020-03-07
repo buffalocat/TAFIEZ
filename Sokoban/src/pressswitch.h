@@ -16,12 +16,12 @@ public:
     PressSwitch(GameObject* parent, int color, bool persistent, bool active);
     virtual ~PressSwitch();
 
-	void make_str(std::string&);
-    ModCode mod_code();
-    void serialize(MapFileO& file);
+	virtual void make_str(std::string&);
+    virtual ModCode mod_code();
+    virtual void serialize(MapFileO& file);
     static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
-    void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
+    virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
     bool check_send_signal(RoomMap*, DeltaFrame*);
     bool should_toggle(RoomMap*);
@@ -29,14 +29,11 @@ public:
     void setup_on_put(RoomMap*, DeltaFrame*, bool real);
     void cleanup_on_take(RoomMap*, DeltaFrame*, bool real);
 
-    void draw(GraphicsManager*, FPoint3);
+    virtual void draw(GraphicsManager*, FPoint3);
 
-    std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
+    virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
-protected:
     int color_;
-
-    friend class ModifierTab;
 };
 
 #endif // PRESSSWITCH_H

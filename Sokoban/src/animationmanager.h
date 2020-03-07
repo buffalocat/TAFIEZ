@@ -11,34 +11,43 @@ enum class ParticleTexture;
 class GameObject;
 class SoundManager;
 class ClearFlag;
+class GraphicsManager;
+class ObjectModifier;
 
 enum class AnimationSignal {
 	NONE,
 	IncineratorOn,
 	IncineratorOff,
-	IncineratorBurn,
+	IncineratorChange,
 	DoorOn,
 	DoorOff,
 	SwitchOn,
 	SwitchOff,
 	GateUp,
 	GateDown,
-	LinkBreak,
-	SnakeSplit,
 	FlagExists,
-	FlagActivate,
-	FlagDeactivate,
+	FlagActive,
+	FlagInactive,
 	FlagCollect,
-	DoorEnter,
-	DoorExit,
+	SignOn,
+	SignOff,
+	FlagSwitchOn,
+	FlagSwitchOff,
+	FlagGateUp,
+	FlagGateDown,
+	ColorChange,
+	Jump,
 	CarRide,
 	CarUnride,
 	ConvertibleRide,
 	ConvertibleUnride,
 	ColorBind,
 	ColorUnbind,
-	SignOn,
-	SignOff,
+	LinkBreak,
+	SnakeSplit,
+	DoorEnter,
+	DoorExit,
+	IncineratorBurn,
 };
 
 class RandDouble {
@@ -79,8 +88,6 @@ public:
 	virtual ~ParticleSource();
 	virtual bool update(RandDouble& rand, ParticleVector& particles) = 0;
 };
-
-using SourceMap = std::map<GameObject*, ParticleSource*>;
 
 
 class FireParticle : public Particle {
@@ -200,6 +207,15 @@ private:
 };
 
 
+class SpecialDrawer {
+public:
+	SpecialDrawer();
+	virtual ~SpecialDrawer() = 0;
+
+	virtual void draw(GraphicsManager*) = 0;
+};
+
+
 class AnimationManager {
 public:
 	AnimationManager(Shader* shader);
@@ -221,13 +237,15 @@ public:
 private:
 	// "Keyed" on Direction (minus 1)
 	std::array<std::vector<GameObject*>, 6> linear_animations_{};
+	std::vector<std::unique_ptr<SpecialDrawer>> special_drawers_{};
 	std::vector<std::unique_ptr<ParticleSource>> sources_{};
 	std::vector<std::unique_ptr<Particle>> particles_{};
 	std::unique_ptr<SoundManager> sounds_{};
 
 	int linear_animation_frames_ = -1;
 
-	SourceMap source_map_{};
+	std::map<ObjectModifier*, SpecialDrawer*> special_map_{};
+	std::map<GameObject*, ParticleSource*> source_map_{};
 
 	Shader* particle_shader_;
 	GLuint particle_VAO_, particle_VBO_, atlas_;

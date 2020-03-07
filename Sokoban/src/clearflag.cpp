@@ -40,7 +40,7 @@ void ClearFlag::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	parent->set_modifier(std::move(cf));
 }
 
-std::unique_ptr<ObjectModifier> ClearFlag::duplicate(GameObject* parent, RoomMap* map, DeltaFrame*) {
+std::unique_ptr<ObjectModifier> ClearFlag::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {
 	auto dup = std::make_unique<ClearFlag>(*this);
 	dup->parent_ = parent;
 	return std::move(dup);
@@ -84,6 +84,9 @@ void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 
 void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	map->remove_listener(this, pos_above());
+	if (real) {
+
+	}
 }
 
 int ClearFlag::color() {

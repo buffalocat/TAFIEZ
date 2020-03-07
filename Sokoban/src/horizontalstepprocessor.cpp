@@ -286,17 +286,19 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 		sb->collect_maybe_confused_neighbors(map_, link_add_check);
 		snake_puller.prepare_pull(sb);
 	}
-	// MAP BECOMES INCONSISTENT HERE (potential ID overlap)
 	// In this section of code, the map can't be viewed
 	auto forward_moving_blocks = moving_blocks_;
-	// TODO: put animation code somewhere else, if possible?
 	Direction dir_name = point_to_dir(dir_);
 	if (anims_) {
-		for (auto* block : forward_moving_blocks) {
-			anims_->set_linear_animation(dir_name, block);
+		for (auto* obj : forward_moving_blocks) {
+			anims_->set_linear_animation(dir_name, obj);
+			if (auto* sub = obj->get_subordinate_object()) {
+				anims_->set_linear_animation(dir_name, sub);
+			}
 		}
 		anims_->set_linear_animation_frames();
 	}
+	// MAP BECOMES INCONSISTENT HERE (potential ID overlap)
 	snake_puller.perform_pulls();
 	map_->batch_shift(std::move(forward_moving_blocks), dir_, true, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE

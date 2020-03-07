@@ -217,7 +217,6 @@ void MoveProcessor::collect_adj_fall_checks(GameObject* obj) {
 }
 
 void MoveProcessor::try_fall_step() {
-	moving_blocks_.clear();
 	if (!fall_check_.empty()) {
 		FallStepProcessor(this, map_, delta_frame_, std::move(fall_check_)).run(false);
 		fall_check_.clear();
@@ -501,12 +500,6 @@ void MoveProcessor::ext_door_exit() {
 	door_state_ = DoorState::ExtSucceeded;
 	state_ = MoveStep::PostDoorInit;
 	playing_state_->gfx_->set_state(GraphicsState::FadeIn);
-}
-
-// NOTE: could be dangerous if repeated calls are made
-// Either make sure this doesn't happen, or check for presence here.
-void MoveProcessor::add_to_moving_blocks(GameObject* obj) {
-	moving_blocks_.push_back(obj);
 }
 
 void MoveProcessor::add_to_fall_check(GameObject* obj) {

@@ -26,9 +26,9 @@ public:
 
 	bool valid_parent(GameObject*);
 
-	virtual BlockTexture texture();
+	GameObject* get_subordinate_object();
 
-	void shift_internal_pos(Point3 d);
+	virtual BlockTexture texture();
 
     bool cycle_color(bool undo);
 	int next_color();
