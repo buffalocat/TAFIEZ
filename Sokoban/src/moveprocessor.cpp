@@ -132,10 +132,12 @@ bool MoveProcessor::try_color_change() {
 	if (!car) {
 		return false;
 	}
-	collect_adj_fall_checks(car->parent_);
-	if (!car->cycle_color(false)) {
+	if (!car->is_multi_color()) {
 		return false;
 	}
+	anims_->receive_signal(AnimationSignal::ColorChange, car->parent_, delta_frame_);
+	collect_adj_fall_checks(car->parent_);
+	car->cycle_color(false);
 	if (auto sb = dynamic_cast<SnakeBlock*>(car->parent_)) {
 		sb->remove_wrong_color_links(delta_frame_);
 		Point3 pos = sb->pos_;

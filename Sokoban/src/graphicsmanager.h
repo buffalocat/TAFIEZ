@@ -66,6 +66,7 @@ public:
 	DynamicInstancer cube_edges{ "resources/cube_edges.obj" };
 	DynamicInstancer flag{ "resources/flag.obj" };
 	
+	DynamicInstancer square_flat{ "resources/square_flat.obj" };
 	DynamicInstancer square_0{ "resources/square_0.obj" };
 	DynamicInstancer square_1{ "resources/square_1.obj" };
 	DynamicInstancer square_2{ "resources/square_2.obj" };

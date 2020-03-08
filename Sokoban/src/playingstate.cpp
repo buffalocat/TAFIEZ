@@ -83,7 +83,7 @@ void PlayingState::handle_input() {
 			if (move_processor_) {
 				move_processor_.reset(nullptr);
 				delta_frame_->revert();
-				anims_->abort_move();
+				anims_->reset_temp();
 				delta_frame_ = std::make_unique<DeltaFrame>();
 				move_camera_to_player(true);
 			} else if (undo_stack_->non_empty()) {
@@ -216,6 +216,7 @@ bool PlayingState::activate_room(std::string name) {
 			text_->toggle_string_drawer(room_->zone_label_.get(), false);
 			if (auto* context_label = room_->context_label_.get()) {
 				text_->toggle_string_drawer(context_label, false);
+				room_->should_update_label_ = true;
 			}
 		}
 		room_ = new_room;

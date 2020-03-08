@@ -143,6 +143,8 @@ bool SnakeBlock::moving_push_comp() {
 	}
 }
 
+const float SNAKE_LINK_DRAW_DIST[] = { 0.15f, 0.25f, 0.35f };
+
 void SnakeBlock::draw(GraphicsManager* gfx) {
 	BlockTexture tex;
 	if (weak_) {
@@ -167,9 +169,13 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	for (auto link : links_) {
 		// TODO: FIX
 		FPoint3 q{ link->real_pos() };
-		FPoint3 d{ q.x - p.x, q.y - p.y, 0 };
-		gfx->cube.push_instance(glm::vec3(p.x + 0.2f*d.x, p.y + 0.2f*d.y, p.z + 0.5f),
-			glm::vec3(0.1f + 0.2f*abs(d.x), 0.1f + 0.2f*abs(d.y), 0.2), BlockTexture::Blank, BLACK);
+		float dx = float(q.x - p.x);
+		float dy = float(q.y - p.y);
+		float scale = 0.1f * (2 - fabs(dx) - fabs(dy));
+		for (int i = 0; i < 3; ++i) {
+			gfx->square_flat.push_instance(glm::vec3(p.x + SNAKE_LINK_DRAW_DIST[i] * dx, p.y + SNAKE_LINK_DRAW_DIST[i] * dy, p.z + 0.55f),
+				glm::vec3(scale), BlockTexture::Blank, BLACK);
+		}
 	}
 	if (modifier_) {
 		modifier()->draw(gfx, p);

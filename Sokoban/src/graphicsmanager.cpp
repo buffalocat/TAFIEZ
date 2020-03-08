@@ -210,6 +210,8 @@ void GraphicsManager::draw_objects() {
 	cube_edges.draw();
 	flag.draw();
 
+	square_flat.draw();
+
 	// These can be transparent
 	square_0.draw();
 	square_1.draw();

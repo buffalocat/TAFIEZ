@@ -224,6 +224,55 @@ bool SnakeSplitSource::update(RandDouble& rand, ParticleVector& particles) {
 }
 
 
+const int COLOR_SHELL_PART_MAX_LIFE = 16;
+
+
+ColorShellParticle::ColorShellParticle(glm::vec3 center, glm::vec3 color, RandDouble& rand) :
+	Particle(), color_{ color } {
+	color_ = glm::vec3((float)(0.5 + 0.4 * rand())) * color;
+	glm::vec3 dir = glm::vec3(rand() - 0.5f, rand() - 0.5f, rand() - 0.5f);
+	float len = glm::length(dir);
+	if (len > 0.0) {
+		dir = dir * glm::vec3(1.0f / len);
+	}
+	pos_ = center + glm::vec3(0.7f) * dir;
+	vel_ = glm::vec3(0.01f) * dir;
+	life_ = COLOR_SHELL_PART_MAX_LIFE;
+}
+
+ColorShellParticle::~ColorShellParticle() {}
+
+void ColorShellParticle::get_vertex(std::vector<ParticleVertex>& vertices) {
+	vertices.push_back(ParticleVertex{
+		pos_,
+		tex_to_vec(ParticleTexture::SolidSquare),
+		glm::vec2(0.1f),
+		glm::vec4(color_, (float)life_ / (float)COLOR_SHELL_PART_MAX_LIFE) });
+}
+
+bool ColorShellParticle::update() {
+	pos_ += vel_;
+	--life_;
+	return life_ <= 0;
+}
+
+
+ColorShellSource::ColorShellSource(GameObject* obj) {
+	pos_ = glm::vec3(obj->real_pos());
+	glm::vec4 c = COLOR_VECTORS[obj->color()];
+	color_ = glm::vec3(c.x, c.y, c.z);
+}
+
+ColorShellSource::~ColorShellSource() {}
+
+bool ColorShellSource::update(RandDouble& rand, ParticleVector& particles) {
+	for (int i = 0; i < 50; ++i) {
+		particles.push_back(std::make_unique<ColorShellParticle>(pos_, color_, rand));
+	}
+	return true;
+}
+
+
 RandDouble::RandDouble() {
 	std::random_device rd;
 	engine_ = std::mt19937_64(rd());
@@ -313,7 +362,7 @@ void AnimationManager::update() {
 	sounds_->flush_sounds();
 }
 
-void AnimationManager::abort_move() {
+void AnimationManager::reset_temp() {
 	// Cancel linear animation
 	for (int i = 0; i < 6; ++i) {
 		for (auto* obj : linear_animations_[i]) {
@@ -325,6 +374,7 @@ void AnimationManager::abort_move() {
 		mod->reset_animation();
 	}
 	temp_animated_objects_.clear();
+	fall_trails_.clear();
 }
 
 void AnimationManager::reset() {
@@ -450,6 +500,9 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	case AnimationSignal::SnakeSplit:
 		sounds_->queue_sound(SoundName::SnakeSplit);
 		sources_.push_back(std::make_unique<SnakeSplitSource>(obj));
+		break;
+	case AnimationSignal::ColorChange:
+		sources_.push_back(std::make_unique<ColorShellSource>(obj));
 		break;
 	case AnimationSignal::FlagOn:
 	{

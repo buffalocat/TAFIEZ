@@ -205,6 +205,31 @@ private:
 };
 
 
+class ColorShellParticle : public Particle {
+public:
+	ColorShellParticle(glm::vec3 center, glm::vec3 color, RandDouble& rand);
+	~ColorShellParticle();
+	void get_vertex(std::vector<ParticleVertex>&);
+	bool update();
+
+private:
+	glm::vec3 pos_, vel_;
+	glm::vec3 color_;
+	int life_;
+};
+
+class ColorShellSource : public ParticleSource {
+public:
+	ColorShellSource(GameObject* obj);
+	~ColorShellSource();
+	bool update(RandDouble& rand, ParticleVector& particles);
+
+private:
+	glm::vec3 pos_;
+	glm::vec3 color_;
+};
+
+
 struct FallTrail {
 	Point3 base;
 	int height;
@@ -219,7 +244,7 @@ public:
 	~AnimationManager();
 
 	void update();
-	void abort_move();
+	void reset_temp();
 	void reset();
 	void draw_fall_trails();
 	void render_particles();

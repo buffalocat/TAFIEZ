@@ -38,7 +38,8 @@ public:
 
 	virtual BlockTexture texture();
 
-    bool cycle_color(bool undo);
+	bool is_multi_color();
+    void cycle_color(bool undo);
 	int next_color();
 
 	void handle_movement(RoomMap*, DeltaFrame*, MoveProcessor*);

@@ -441,13 +441,16 @@ void RoomMap::set_initial_state_on_start(PlayingState* state) {
 		DeltaFrame df{};
 		MoveProcessor mp = MoveProcessor(state, this, &df, nullptr, false);
 		set_initial_state(false, &df, &mp);
-		while (!mp.update()) {}
+		while (!mp.update());
+		state->anims_->reset_temp();
 	}
 }
 
 void RoomMap::set_initial_state_after_door(DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (!inited_) {
 		set_initial_state(false, delta_frame, mp);
+		while (!mp->update());
+		mp->anims_->reset_temp();
 	}
 }
 

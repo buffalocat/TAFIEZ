@@ -67,11 +67,14 @@ void Car::collect_special_links(std::vector<GameObject*>& to_check) {
     }
 }
 
-bool Car::cycle_color(bool undo) {
+bool Car::is_multi_color() {
+	return color_cycle_.size_ > 0;
+}
+
+void Car::cycle_color(bool undo) {
 	if (auto* cb = dynamic_cast<ColoredBlock*>(parent_)) {
-		return color_cycle_.cycle(&cb->color_, undo);
+		color_cycle_.cycle(&cb->color_, undo);
 	}
-	return false;
 }
 
 int Car::next_color() {
