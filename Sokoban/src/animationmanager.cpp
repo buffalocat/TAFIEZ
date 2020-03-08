@@ -99,7 +99,7 @@ DoorVortexParticle::DoorVortexParticle(glm::vec3 c, RandDouble& rand) : Particle
 c_{ c }	{
 	rad_ = 0.7;
 	dz_ = 0.6;
-	theta_ = rand() * 6.28318530718; // 2pi
+	theta_ = rand() * TWO_PI;
 	life_ = 0;
 }
 
@@ -286,8 +286,9 @@ double RandDouble::operator()() {
 }
 
 
-AnimationManager::AnimationManager(Shader* shader, PlayingState* state) :
-	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() }, state_{ state }, gfx_{ state->gfx_ } {
+AnimationManager::AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas) :
+	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() },
+	state_{ state }, gfx_{ state->gfx_ }, particle_atlas_{ particle_atlas } {
 	initialize_particle_shader();
 }
 
@@ -314,15 +315,6 @@ void AnimationManager::initialize_particle_shader() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void*)offsetof(ParticleVertex, Size));
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void*)offsetof(ParticleVertex, Color));
-
-	glGenTextures(1, &atlas_);
-	glBindTexture(GL_TEXTURE_2D, atlas_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	int width, height, channels;
-	unsigned char *texture_data = stbi_load("resources/particles.png", &width, &height, &channels, STBI_rgb_alpha);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
-	stbi_image_free(texture_data);
 }
 
 void AnimationManager::update() {
@@ -425,7 +417,7 @@ void AnimationManager::render_particles() {
 	}
 	std::sort(vertices.begin(), vertices.end(), [this](ParticleVertex a, ParticleVertex b) {
 		return glm::dot((a.Position - b.Position), view_dir_) < 0; });
-	glBindTexture(GL_TEXTURE_2D, atlas_);
+	glBindTexture(GL_TEXTURE_2D, particle_atlas_);
 	glBindVertexArray(particle_VAO_);
 	glBindBuffer(GL_ARRAY_BUFFER, particle_VBO_);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ParticleVertex), vertices.data(), GL_STATIC_DRAW);

@@ -5,39 +5,36 @@ class StringDrawer;
 class Font;
 class PlayingState;
 
-template <class State>
-using MenuCallback = void(State::*)();
+using MenuCallback = std::function<void(void)>;
 
-template <class State>
 struct MenuEntry {
-
 	std::unique_ptr<StringDrawer> text;
-	MenuCallback<State> callback;
+	MenuCallback callback;
 };
 
-template <class State>
 class Menu {
 public:
 	Menu(GLFWwindow* window, Font* font);
 	~Menu();
 
-	void push_entry(std::string label, MenuCallback<State> callback);
+	void push_entry(std::string label, MenuCallback callback);
 
-	void handle_input(State* game_state);
+	void handle_input(GameState* game_state);
+	void update();
 	void draw();
 
 private:
 	GLFWwindow* window_;
 	Font* font_;
-	std::vector<MenuEntry<State>> entries_{};
+	std::vector<MenuEntry> entries_{};
 	int num_entries_ = 0;
 	int current_ = 0;
 
 	float scale_ = 1.0f;
 	float top_ = 0.4f;
 	float v_space_ = 0.2f;
-	int inactive_color_ = BLUE;
-	int active_color_ = GOLD;
+	glm::vec4 inactive_color_, active_color_;
+	int time_;
 };
 
 class PauseState : public GameState {
@@ -57,6 +54,6 @@ private:
 	void quit_playing();
 
 	PlayingState* playing_state_;
-	Menu<PauseState> menu_;
+	std::unique_ptr<Menu> menu_;
 };
 

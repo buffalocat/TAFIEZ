@@ -17,19 +17,19 @@ public:
 	Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size);
 	~Font();
 
-	void prepare_rendering();
 	void init_glyphs(int font_size);
 	void render_glyphs();
-	void generate_string_verts(const char* text, float x, float y, float sx, float sy, std::vector<TextVertex>& text_verts, float* width);
+	void generate_string_verts(const char* text, float x, float y, float sx, float sy,
+		std::vector<TextVertex>& text_verts, float* width, float* height);
 
 	GLuint tex_;
 	Shader* shader_;
+	unsigned int font_size_;
 
 private:
 	GlyphPos glyphs_[128];
 	FT_Face face_;
 	unsigned int tex_width_, tex_height_;
-	unsigned int font_size_;
 };
 
 class FontManager {

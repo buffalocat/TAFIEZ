@@ -32,7 +32,7 @@ PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 	room{ std::move(arg_room) } {}
 
 PlayingState::PlayingState(GameState* parent) : GameState(parent) {
-	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this);
+	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this, text_->ui_atlas_);
 }
 
 PlayingState::~PlayingState() {}
@@ -220,7 +220,7 @@ bool PlayingState::activate_room(std::string name) {
 			}
 		}
 		room_ = new_room;
-		room_->map()->initialize_animation(anims_.get());
+		room_->map()->set_initial_state(this);
 	}
 	return true;
 }
@@ -316,7 +316,7 @@ void PlayingState::set_death_text() {
 		}
 		death_message_ = std::make_unique<IndependentStringDrawer>(
 			text_->fonts_->get_font(Fonts::ABEEZEE, 108),
-			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, 0.0f, 4);
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, DEATH_STRING_HEIGHT, 4, 0.0f);
 		text_->toggle_string_drawer(death_message_.get(), true);
 	}
 	static DeathState current_death_state = DeathState::Alive;
@@ -344,7 +344,7 @@ void PlayingState::set_death_text() {
 		}
 		death_submessage_ = std::make_unique<IndependentStringDrawer>(
 			text_->fonts_->get_font(Fonts::ABEEZEE, 48),
-			glm::vec4(0.8, 0.1, 0.2, 1.0), death_substr, -0.2f, 4);
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_substr, DEATH_SUBSTRING_HEIGHT, 4, 0.0f);
 		text_->toggle_string_drawer(death_submessage_.get(), true);
 	}
 }

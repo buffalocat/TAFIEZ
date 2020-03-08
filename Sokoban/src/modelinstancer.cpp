@@ -57,20 +57,8 @@ void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture 
 	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
 }
 
-DynamicInstancer::DynamicInstancer(std::string path) : ModelInstancer(path) {}
-
-DynamicInstancer::~DynamicInstancer() {}
-
-void DynamicInstancer::draw() {
+void ModelInstancer::draw() {
 	fill_buffer();
 	model_.draw_instanced((unsigned int)instances_.size());
 	instances_.clear();
-}
-
-StaticInstancer::StaticInstancer(std::string path) : ModelInstancer(path) {}
-
-StaticInstancer::~StaticInstancer() {}
-
-void StaticInstancer::draw() {
-	model_.draw_instanced((unsigned int)instances_.size());
 }

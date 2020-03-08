@@ -79,8 +79,6 @@ bool MoveProcessor::update() {
 			perform_switch_checks(false);
 			break;
 		case MoveStep::PostDoorInit:
-			map_->set_initial_state_after_door(delta_frame_, this);
-			// fallthrough
 		case MoveStep::ToggleRiding:
 		case MoveStep::FirstLoadInit:
 		case MoveStep::PreFallSwitch:

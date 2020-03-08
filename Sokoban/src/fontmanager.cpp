@@ -95,7 +95,8 @@ void Font::init_glyphs(int font_size) {
 
 void Font::render_glyphs() {}
 
-void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy, std::vector<TextVertex>& text_verts, float* width) {
+void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy,
+	std::vector<TextVertex>& text_verts, float* width, float* height) {
 	sx *= 2.0f / SCREEN_WIDTH;
 	sy *= 2.0f / SCREEN_HEIGHT;
 	float su = 1.0f / tex_width_;
@@ -110,10 +111,12 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 	const char* line_end = text;
 	const char* p;
 
+	int lines = 0;
 	// Stop when we've reached a null character
 	while (*line_end) {
 		float cur_width = 0;
-		
+		y -= font_size_ * sy;
+
 		// Stop this group at a null character *or* newline
 		for (p = line_start; *p && (*p != '\n'); p++) {
 			cur_width += glyphs_[*p].advance_x;
@@ -129,7 +132,7 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 			GlyphPos glyph = glyphs_[*p];
 
 			float x2 = line_x + glyph.left_bear * sx;
-			float y2 = -y - glyph.top_bear * sy;
+			float y2 = y + glyph.top_bear * sy;
 			float w = glyph.width * sx;
 			float h = glyph.height * sy;
 
@@ -139,10 +142,10 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 			float dv = glyph.height * sv;
 
 			TextVertex box[4] = {
-				TextVertex{{x2, -y2}, {u, v}},
-				TextVertex{{x2 + w, -y2}, {u + du, v}},
-				TextVertex{{x2, -y2 - h}, {u, v + dv}},
-				TextVertex{{x2 + w, -y2 - h}, {u + du, v + dv}},
+				TextVertex{{x2, y2}, {u, v}},
+				TextVertex{{x2 + w, y2}, {u + du, v}},
+				TextVertex{{x2, y2 - h}, {u, v + dv}},
+				TextVertex{{x2 + w, y2 - h}, {u + du, v + dv}},
 			};
 			for (int i : {0, 1, 2, 2, 1, 3}) {
 				text_verts.push_back(box[i]);
@@ -151,6 +154,7 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 			y += glyph.advance_y * sy;
 		}
 		line_start = line_end + 1;
-		y -= font_size_ * sy;
+		++lines;
 	}
+	*height = (float)font_size_ * sy * lines;
 }

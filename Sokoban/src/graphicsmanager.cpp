@@ -232,16 +232,19 @@ void GraphicsManager::post_rendering() {
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-
-void prepare_text_rendering(Shader* text_shader) {
-	text_shader->use();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-}
-
-
 TextRenderer::TextRenderer(FontManager* fonts) :
-	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {}
+	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {
+	ui_shader_.use();
+	ui_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
+	glGenTextures(1, &ui_atlas_);
+	glBindTexture(GL_TEXTURE_2D, ui_atlas_);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	int width, height, channels;
+	unsigned char *texture_data = stbi_load("resources/particles.png", &width, &height, &channels, STBI_rgb_alpha);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+	stbi_image_free(texture_data);
+}
 
 // These StringDrawers are self-owning, so we have to kill them here
 TextRenderer::~TextRenderer() {
@@ -253,13 +256,19 @@ TextRenderer::~TextRenderer() {
 }
 
 void TextRenderer::draw() {
+	update_drawers();
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	draw_ui();
+	draw_text();
+}
+
+void TextRenderer::update_drawers() {
 	std::vector<ProtectedStringDrawer> new_drawers{};
-	prepare_text_rendering(text_shader_);
 	for (auto& p : string_drawers_) {
 		if (p.alive_) {
 			if (p.drawer_->active_) {
 				p.drawer_->update();
-				p.drawer_->render();
 				new_drawers.push_back(std::move(p));
 			} else {
 				p.drawer_->cleanup();
@@ -267,8 +276,20 @@ void TextRenderer::draw() {
 		}
 	}
 	string_drawers_ = std::move(new_drawers);
-	if (auto error = glGetError()) {
-		std::cout << "Error detected after draw! " << error << std::endl;
+}
+
+void TextRenderer::draw_ui() {
+	ui_shader_.use();
+	glBindTexture(GL_TEXTURE_2D, ui_atlas_);
+	for (auto& p : string_drawers_) {
+		p.drawer_->render_bg(&ui_shader_);
+	}
+}
+
+void TextRenderer::draw_text() {
+	text_shader_->use();
+	for (auto& p : string_drawers_) {
+		p.drawer_->render();
 	}
 }
 

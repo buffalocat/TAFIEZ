@@ -382,7 +382,7 @@ bool Camera::update_label() {
 	std::string label = context_->area_name();
 	if (active_label_ != label) {
 		active_label_ = label;
-		return !label.empty();
+		return true;
 	}
 	return false;
 }

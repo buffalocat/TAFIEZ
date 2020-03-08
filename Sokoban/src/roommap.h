@@ -61,10 +61,8 @@ public:
     void extend_by(Point3 d);
     void shift_by(Point3 d);
 
-	void set_initial_state_on_start(PlayingState* state);
-	void set_initial_state_after_door(DeltaFrame* delta_frame, MoveProcessor* mp);
 	void set_initial_state_in_editor();
-    void set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveProcessor* mp);
+    void set_initial_state(PlayingState* playing_state);
     void reset_local_state();
 
 	void initialize_animation(AnimationManager* anims);

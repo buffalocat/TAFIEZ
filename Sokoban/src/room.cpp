@@ -96,10 +96,16 @@ void Room::draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool
 
 void Room::update_room_label() {
 	if (should_update_label_) {
-		context_label_ = std::make_unique<RoomLabelDrawer>(
-			gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
-			camera_->active_label_, 0.65f);
-		state_->text_->toggle_string_drawer(context_label_.get(), true);
+		if (camera_->active_label_.empty()) {
+			if (context_label_) {
+				context_label_->force_fade();
+			}
+		} else {
+			context_label_ = std::make_unique<RoomLabelDrawer>(
+				gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
+				camera_->active_label_, LEVEL_STRING_HEIGHT, LEVEL_STRING_BG_OPACITY);
+			state_->text_->toggle_string_drawer(context_label_.get(), true);
+		}
 		should_update_label_ = false;
 	}
 }
@@ -184,7 +190,7 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			map_->zone_ = file.read_byte();
 			zone_label_ = std::make_unique<RoomLabelDrawer>(
 				gfx_->fonts_->get_font(Fonts::ABEEZEE, 108), COLOR_VECTORS[BRIGHT_PURPLE],
-				std::string("Zone ") + map_->zone_, 0.8f);
+				std::string("Zone ") + map_->zone_, ZONE_STRING_HEIGHT, ZONE_STRING_BG_OPACITY);
 			break;
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();

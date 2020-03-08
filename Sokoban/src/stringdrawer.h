@@ -2,15 +2,30 @@
 
 struct TextVertex;
 class Font;
+class Shader;
+
+extern const float ZONE_STRING_HEIGHT;
+extern const float LEVEL_STRING_HEIGHT;
+extern const float SIGN_STRING_HEIGHT;
+extern const float DEATH_STRING_HEIGHT;
+extern const float DEATH_SUBSTRING_HEIGHT;
+
+extern const float ZONE_STRING_BG_OPACITY;
+extern const float LEVEL_STRING_BG_OPACITY;
+extern const float SIGN_STRING_BG_OPACITY;
+
+extern const int FLOOR_SIGN_FADE_FRAMES;
 
 class StringDrawer {
 public:
 	StringDrawer(Font* font, glm::vec4 color,
-		std::string label, float x, float y, float sx, float sy);
+		std::string label, float x, float y, float sx, float sy, float bg);
 	virtual ~StringDrawer();
 
+	void generate_bg_verts(float x, float y, float font_height);
 	void set_color(int color);
 	void set_color(glm::vec4 color);
+	void render_bg(Shader* shader);
 	void render();
 
 	virtual void update();
@@ -23,16 +38,20 @@ public:
 
 protected:
 	std::vector<TextVertex> vertices_{};
+	std::vector<TextVertex> bg_vertices_{};
 	glm::vec4 color_;
+	glm::vec4 bg_color_;
 	Shader* shader_;
 	GLuint VAO_, VBO_, tex_;
-	float width_;
+	GLuint bg_VAO_, bg_VBO_;
+	float width_, height_;
+	float opacity_, bg_;
 	bool* alive_ptr_{};
 };
 
 class IndependentStringDrawer : public StringDrawer {
 public:
-	IndependentStringDrawer(Font* font, glm::vec4 color, std::string label, float y, int fade_frames);
+	IndependentStringDrawer(Font* font, glm::vec4 color, std::string label, float y, int fade_frames, float bg);
 	~IndependentStringDrawer();
 
 	void own_self(std::unique_ptr<StringDrawer> self);
@@ -50,10 +69,11 @@ private:
 
 class RoomLabelDrawer : public StringDrawer {
 public:
-	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y);
+	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y, float bg);
 	~RoomLabelDrawer();
 
 	void init();
+	void force_fade();
 	void update();
 
 private:

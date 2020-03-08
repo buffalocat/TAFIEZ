@@ -3,7 +3,7 @@
 
 #include "switchable.h"
 
-class DynamicInstancer;
+class ModelInstancer;
 
 struct FlagSigil {
 	glm::vec3 center;
@@ -13,7 +13,7 @@ struct FlagSigil {
 	int charge = 0;
 
 	void update(bool signal, int total);
-	void draw(DynamicInstancer* model, FPoint3 p, int orientation, int time);
+	void draw(ModelInstancer* model, FPoint3 p, int orientation, int time);
 };
 
 

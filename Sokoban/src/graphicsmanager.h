@@ -53,24 +53,26 @@ public:
 	void post_rendering();
 	glm::vec3 view_dir();
 
-	DynamicInstancer cube{ "resources/uniform_cube.obj" };
-	DynamicInstancer top_cube{ "resources/top_cube.obj" };
-	DynamicInstancer six_squares{ "resources/six_squares.obj" };
-	DynamicInstancer windshield{ "resources/windshield.obj" };
+	ModelInstancer cube{ "resources/uniform_cube.obj" };
+	ModelInstancer top_cube{ "resources/top_cube.obj" };
+	ModelInstancer six_squares{ "resources/six_squares.obj" };
+	ModelInstancer windshield{ "resources/windshield.obj" };
 
-	DynamicInstancer diamond{ "resources/diamond.obj" };
-	DynamicInstancer top_diamond{ "resources/top_diamond.obj" };
-	DynamicInstancer six_squares_diamond{ "resources/six_squares_diamond.obj" };
-	DynamicInstancer windshield_diamond{ "resources/windshield_diamond.obj" };
+	ModelInstancer diamond{ "resources/diamond.obj" };
+	ModelInstancer top_diamond{ "resources/top_diamond.obj" };
+	ModelInstancer six_squares_diamond{ "resources/six_squares_diamond.obj" };
+	ModelInstancer windshield_diamond{ "resources/windshield_diamond.obj" };
 
-	DynamicInstancer cube_edges{ "resources/cube_edges.obj" };
-	DynamicInstancer flag{ "resources/flag.obj" };
+	ModelInstancer cube_edges{ "resources/cube_edges.obj" };
+	ModelInstancer flag{ "resources/flag.obj" };
 	
-	DynamicInstancer square_flat{ "resources/square_flat.obj" };
-	DynamicInstancer square_0{ "resources/square_0.obj" };
-	DynamicInstancer square_1{ "resources/square_1.obj" };
-	DynamicInstancer square_2{ "resources/square_2.obj" };
-	DynamicInstancer square_3{ "resources/square_3.obj" };
+	// Horizontal square, facing up
+	ModelInstancer square_flat{ "resources/square_flat.obj" };
+	// Vertical squares, facing each of the cardinal directions
+	ModelInstancer square_0{ "resources/square_0.obj" };
+	ModelInstancer square_1{ "resources/square_1.obj" };
+	ModelInstancer square_2{ "resources/square_2.obj" };
+	ModelInstancer square_3{ "resources/square_3.obj" };
 
 	std::unique_ptr<FontManager> fonts_{};
 
@@ -100,21 +102,25 @@ private:
 	void load_texture_atlas();
 };
 
-void prepare_text_rendering(Shader* text_shader);
-
 class TextRenderer {
 public:
 	TextRenderer(FontManager* fonts);
 	~TextRenderer();
 
 	void draw();
+	void update_drawers();
+	void draw_ui();
+	void draw_text();
 
 	void toggle_string_drawer(StringDrawer* drawer, bool active);
 
 	FontManager* fonts_;
 	std::vector<ProtectedStringDrawer> string_drawers_{};
 
+	GLuint ui_atlas_;
+
 private:
+	Shader ui_shader_{ Shader("shaders/ui_shader.vs", "shaders/ui_shader.fs") };
 	Shader* text_shader_{};
 };
 

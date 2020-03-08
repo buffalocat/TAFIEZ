@@ -250,7 +250,7 @@ void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 		return;
 	}
 	gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::Edges, parent_->color());
-	DynamicInstancer* sigil_model;
+	ModelInstancer* sigil_model;
 	switch (orientation_) {
 	case 0:
 	default:
@@ -282,10 +282,10 @@ void FlagSigil::update(bool charging, int total) {
 	}
 }
 
-void FlagSigil::draw(DynamicInstancer* model, FPoint3 p, int orientation, int time) {
+void FlagSigil::draw(ModelInstancer* model, FPoint3 p, int orientation, int time) {
 	glm::vec3 pos(p);
 	BlockTexture tex = BlockTexture::FlagSigil;
-	double t = 6.28318530718 * (time + phase) / (double)period;
+	double t = TWO_PI * (time + phase) / (double)period;
 	switch (orientation) {
 	case 0:
 		pos += center + glm::vec3{ -radius*cos(t), 0.51, radius*sin(t) };

@@ -436,45 +436,32 @@ void RoomStateInitializer::operator()(int id) {
 	}
 }
 
-void RoomMap::set_initial_state_on_start(PlayingState* state) {
-	if (!inited_) {
-		DeltaFrame df{};
-		MoveProcessor mp = MoveProcessor(state, this, &df, nullptr, false);
-		set_initial_state(false, &df, &mp);
-		while (!mp.update());
-		state->anims_->reset_temp();
-	}
-}
-
-void RoomMap::set_initial_state_after_door(DeltaFrame* delta_frame, MoveProcessor* mp) {
-	if (!inited_) {
-		set_initial_state(false, delta_frame, mp);
-		while (!mp->update());
-		mp->anims_->reset_temp();
-	}
-}
 
 void RoomMap::set_initial_state_in_editor() {
-	DeltaFrame df{};
-	MoveProcessor mp = MoveProcessor(nullptr, this, &df, nullptr, false);
-	set_initial_state(true, &df, &mp);
+	set_initial_state(nullptr);
 }
 
-void RoomMap::set_initial_state(bool editor_mode, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, mp, this, delta_frame };
+void RoomMap::set_initial_state(PlayingState* playing_state) {
+	if (inited_) {
+		return;
+	}
+	DeltaFrame df{};
+	MoveProcessor mp = MoveProcessor(playing_state, this, &df, nullptr, false);
+	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, &mp, this, &df };
 	for (auto& layer : layers_) {
 		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
 	}
 	// In editor mode, don't check switches or gravity.
-	if (editor_mode) {
+	if (!playing_state) {
 		return;
 	}
 	for (auto& sig : signalers_) {
-		sig->check_send_initial(this, delta_frame, mp);
+		sig->check_send_initial(this, &df, &mp);
 	}
-	mp->perform_switch_checks(false);
+	mp.perform_switch_checks(false);
 	inited_ = true;
-	delta_frame->push(std::make_unique<MapInitDelta>(this));
+	while (!mp.update());
+	initialize_animation(playing_state->anims_.get());
 }
 
 struct AnimationInitializer {
@@ -487,7 +474,6 @@ struct AnimationInitializer {
 
 void AnimationInitializer::operator()(int id) {
 	GameObject* obj = obj_array[id];
-	//TODO: Make sure animation objects are handled correctly upon room exit/reentry/undestruction!
 	if (auto* mod = obj->modifier()) {
 		mod->signal_animation(anims, nullptr);
 	}
@@ -498,6 +484,7 @@ void RoomMap::initialize_animation(AnimationManager* anims) {
 	for (auto& layer : layers_) {
 		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
 	}
+	anims->reset_temp();
 }
 
 struct SnakeInitializer {

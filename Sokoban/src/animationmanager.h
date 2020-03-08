@@ -240,7 +240,7 @@ struct FallTrail {
 
 class AnimationManager {
 public:
-	AnimationManager(Shader* shader, PlayingState* state);
+	AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas);
 	~AnimationManager();
 
 	void update();
@@ -275,7 +275,7 @@ private:
 
 	Shader* particle_shader_;
 	GraphicsManager* gfx_;
-	GLuint particle_VAO_, particle_VBO_, atlas_;
+	GLuint particle_VAO_, particle_VBO_, particle_atlas_;
 	RandDouble rand_{};
 
 	void initialize_particle_shader();

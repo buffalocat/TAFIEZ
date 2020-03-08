@@ -69,13 +69,11 @@ void FloorSign::toggle_active(TextRenderer* text, DeltaFrame* delta_frame) {
 	}
 }
 
-const int SIGN_FADE_FRAMES = 4;
-
 void FloorSign::set_text_state(bool state, TextRenderer* text) {
 	if (state) {
 		auto drawer = std::make_unique<IndependentStringDrawer>(
 			text->fonts_->get_font(Fonts::ABEEZEE, 36),
-			glm::vec4(0.6, 0.3, 0.4, 1.0), content_, 0.5f, SIGN_FADE_FRAMES);
+			COLOR_VECTORS[DARK_SALMON], content_, SIGN_STRING_HEIGHT, FLOOR_SIGN_FADE_FRAMES, SIGN_STRING_BG_OPACITY);
 		drawer_instance_ = drawer.get();
 		drawer_instance_->own_self(std::move(drawer));
 		text->string_drawers_.push_back(ProtectedStringDrawer(drawer_instance_));
@@ -101,7 +99,7 @@ void FloorSign::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 
 void FloorSign::draw(GraphicsManager* gfx, FPoint3 p) {
 	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
-	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Sign, glm::vec4(0.6, 0.3, 0.4, 1.0));
+	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Sign, DARK_SALMON);
 }
 
 
