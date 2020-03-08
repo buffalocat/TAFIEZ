@@ -205,6 +205,14 @@ private:
 };
 
 
+struct FallTrail {
+	Point3 base;
+	int height;
+	int opacity;
+	int color;
+};
+
+
 class AnimationManager {
 public:
 	AnimationManager(Shader* shader, PlayingState* state);
@@ -213,15 +221,17 @@ public:
 	void update();
 	void abort_move();
 	void reset();
-	void render_particles(glm::vec3 view_dir);
+	void draw_fall_trails();
+	void render_particles();
 	void create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source);
 
-	
 	void set_linear_animation(Direction dir, GameObject* obj);
 	void set_linear_animation_frames();
-	void make_fall_trail(GameObject* obj, int height);
+	void make_fall_trail(GameObject*, int height, int drop);
 
 	void receive_signal(AnimationSignal signal, GameObject* obj, DeltaFrame*);
+
+	glm::vec3 view_dir_{};
 
 private:
 	// "Keyed" on Direction (minus 1)
@@ -230,6 +240,7 @@ private:
 	std::vector<ObjectModifier*> temp_animated_objects_{};
 	std::vector<std::unique_ptr<ParticleSource>> sources_{};
 	std::vector<std::unique_ptr<Particle>> particles_{};
+	std::vector<FallTrail> fall_trails_;
 	std::unique_ptr<SoundManager> sounds_{};
 	PlayingState* state_;
 
@@ -238,6 +249,7 @@ private:
 	std::map<GameObject*, ParticleSource*> source_map_{};
 
 	Shader* particle_shader_;
+	GraphicsManager* gfx_;
 	GLuint particle_VAO_, particle_VBO_, atlas_;
 	RandDouble rand_{};
 

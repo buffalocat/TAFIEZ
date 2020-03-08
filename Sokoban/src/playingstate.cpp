@@ -49,8 +49,10 @@ void PlayingState::main_loop() {
 	room_->draw_at_player(player_doa(), true, false, false);
 	gfx_->pre_object_rendering();
 	gfx_->draw_objects();
+	anims_->view_dir_ = gfx_->view_dir();
+	anims_->draw_fall_trails();
 	gfx_->pre_particle_rendering();
-	anims_->render_particles(gfx_->view_dir());
+	anims_->render_particles();
 	text_->draw();
 	gfx_->post_rendering();
 	// If a move is not currently happening, try to push the current DeltaFrame

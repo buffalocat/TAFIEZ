@@ -7,6 +7,7 @@ class RoomMap;
 class DeltaFrame;
 class SnakeBlock;
 class MoveProcessor;
+class AnimationManager;
 
 class FallStepProcessor {
 public:
@@ -28,6 +29,7 @@ private:
 	MoveProcessor* move_processor_;
     RoomMap* map_;
     DeltaFrame* delta_frame_;
+	AnimationManager* anims_;
     int layers_fallen_ = 0;
 };
 

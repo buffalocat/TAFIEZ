@@ -306,10 +306,6 @@ void RoomMap::draw(GraphicsManager* gfx, double angle) {
 	for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
 		it->apply_to_rect_with_pos(MapRect{ 0, 0, width_, height_ }, drawer);
 	}
-	// TODO: draw walls!
-	effects_->sort_by_distance(angle);
-	effects_->update();
-	effects_->draw(gfx);
 }
 
 void RoomMap::draw_layer(GraphicsManager* gfx, int z) {
@@ -584,10 +580,6 @@ void RoomMap::free_unbound_players(DeltaFrame* delta_frame) {
 	for (auto* player : player_cycle_->players_) {
 		player->validate_state(this, delta_frame);
 	}
-}
-
-void RoomMap::make_fall_trail(GameObject* block, int height, int drop) {
-	effects_->push_trail(block, height, drop);
 }
 
 TextRenderer* RoomMap::text_renderer() {

@@ -60,7 +60,7 @@ public:
 	Player* player_{};
 	
 	// The player currently in the car for animation purposes
-	Player* animation_player_;
+	Player* animation_player_{};
 	CarAnimationState animation_state_ = CarAnimationState::None;
 	int animation_time_ = 0;
 };

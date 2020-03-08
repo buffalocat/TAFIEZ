@@ -236,7 +236,6 @@ PlayerState Player::state() {
 
 const float PLAYER_DEFAULT_SCALE = 0.6f;
 const float PLAYER_RIDING_SCALE = 0.5f;
-const float PLAYER_RIDING_SNAKE_SCALE = 0.4f;
 
 void Player::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
@@ -267,11 +266,9 @@ void Player::draw(GraphicsManager* gfx) {
 			break;
 		}
 		if (car->parent_->is_snake()) {
-			scale = PLAYER_RIDING_SNAKE_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
 			player_model = &gfx->diamond;
-		} else {
-			scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
 		}
+		scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
 	}
 	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(scale), BlockTexture::Edges, color());
 }

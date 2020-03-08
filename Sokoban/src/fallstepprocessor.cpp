@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "fallstepprocessor.h"
 
+#include "moveprocessor.h"
+#include "animationmanager.h"
 #include "component.h"
 #include "gameobject.h"
 #include "roommap.h"
@@ -10,7 +12,7 @@
 // Move fall_check directly from MoveProcessor into FallStepProcessor
 FallStepProcessor::FallStepProcessor(MoveProcessor* mp, RoomMap* map, DeltaFrame* delta_frame, std::vector<GameObject*>&& fall_check):
 	fall_check_ {fall_check},
-	move_processor_{ mp }, map_ {map}, delta_frame_ {delta_frame} {}
+	move_processor_{ mp }, map_{ map }, delta_frame_{ delta_frame }, anims_{ mp->anims_ } {}
 
 FallStepProcessor::~FallStepProcessor() {}
 
@@ -175,12 +177,12 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
     for (GameObject* block : comp->blocks_) {
         if (block->pos_.z >= 0) {
             // TODO: put the responsibility of making fall trails in a better place
-            map_->make_fall_trail(block, layers_fallen_, 0);
+            anims_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
             map_->put_in_map(block, false, true, nullptr);
         } else {
             // NOTE: magic number for trail size
-            map_->make_fall_trail(block, layers_fallen_, 10);
+			anims_->make_fall_trail(block, layers_fallen_, 10);
             block->pos_ += {0,0,layers_fallen_};
 			// Listeners only have to get activated once
             map_->put_in_map(block, false, true, nullptr);

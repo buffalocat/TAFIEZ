@@ -95,8 +95,6 @@ public:
     void alert_activated_listeners(DeltaFrame*, MoveProcessor*);
 	void handle_moved_cars(MoveProcessor*);
 
-    void make_fall_trail(GameObject*, int height, int drop);
-
 	std::vector<Door*>& door_group(unsigned int id);
 	std::vector<Player*>& player_list();
 
@@ -133,10 +131,6 @@ private:
 	std::vector<std::unique_ptr<Signaler>> signalers_{};
 
 	std::set<ObjectModifier*> activated_listeners_{};
-
-    // TODO: find more appropriate place for this
-    std::unique_ptr<Effects> effects_ = std::make_unique<Effects>();
-
 
     // For providing direct signaler access
     friend class SwitchTab;

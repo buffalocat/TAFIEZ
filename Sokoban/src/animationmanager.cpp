@@ -3,6 +3,8 @@
 
 #include <stb_image.h>
 
+#include "playingstate.h"
+#include "graphicsmanager.h"
 #include "gameobject.h"
 #include "common_constants.h"
 #include "texture_constants.h"
@@ -236,7 +238,7 @@ double RandDouble::operator()() {
 
 
 AnimationManager::AnimationManager(Shader* shader, PlayingState* state) :
-	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() }, state_{ state } {
+	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() }, state_{ state }, gfx_{ state->gfx_ } {
 	initialize_particle_shader();
 }
 
@@ -296,6 +298,12 @@ void AnimationManager::update() {
 	}
 	temp_animated_objects_.erase(std::remove_if(temp_animated_objects_.begin(), temp_animated_objects_.end(),
 		[this](auto& p) { return p->update_animation(state_); }), temp_animated_objects_.end());
+	// Update fall trails
+	for (auto& trail : fall_trails_) {
+		--trail.opacity;
+	}
+	fall_trails_.erase(std::remove_if(fall_trails_.begin(), fall_trails_.end(),
+		[](FallTrail t) {return t.opacity == 0; }), fall_trails_.end());
 	// Update particles and remove dead ones
 	sources_.erase(std::remove_if(sources_.begin(), sources_.end(),
 		[this](auto& p) { return p->update(rand_, particles_); }), sources_.end());
@@ -338,13 +346,35 @@ void AnimationManager::create_bound_source(GameObject* obj, std::unique_ptr<Part
 	sources_.push_back(std::move(source));
 }
 
-void AnimationManager::render_particles(glm::vec3 view_dir) {
+const unsigned int FALL_TRAIL_OPACITY = 8;
+const double FALL_TRAIL_MAX_OPACITY = 10.0;
+const double FALL_TRAIL_MAX_WIDTH = 16.0;
+
+void AnimationManager::make_fall_trail(GameObject* block, int height, int drop) {
+	fall_trails_.push_back({ block->pos_ + Point3{0,0,height}, height + drop, FALL_TRAIL_OPACITY, block->color() });
+}
+
+void AnimationManager::draw_fall_trails() {
+	std::sort(fall_trails_.begin(), fall_trails_.end(), [this](FallTrail a, FallTrail b) {
+		return glm::dot(glm::vec3(a.base - b.base), view_dir_) < 0; });
+	for (auto& trail : fall_trails_) {
+		glm::vec4 color = COLOR_VECTORS[trail.color];
+		color.w = (float)(trail.opacity / FALL_TRAIL_MAX_OPACITY);
+		Point3 base = trail.base;
+		gfx_->cube.push_instance(glm::vec3(base.x, base.y, base.z + 0.5f - trail.height / 2.0f),
+			glm::vec3(trail.opacity / FALL_TRAIL_MAX_WIDTH, trail.opacity / FALL_TRAIL_MAX_WIDTH, trail.height),
+			BlockTexture::Blank, color);
+	}
+	gfx_->cube.draw();
+}
+
+void AnimationManager::render_particles() {
 	std::vector<ParticleVertex> vertices{};
 	for (auto& particle : particles_) {
 		particle->get_vertex(vertices);
 	}
-	std::sort(vertices.begin(), vertices.end(), [view_dir](ParticleVertex a, ParticleVertex b) {
-		return glm::dot((a.Position - b.Position), view_dir) < 0; });
+	std::sort(vertices.begin(), vertices.end(), [this](ParticleVertex a, ParticleVertex b) {
+		return glm::dot((a.Position - b.Position), view_dir_) < 0; });
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glBindVertexArray(particle_VAO_);
 	glBindBuffer(GL_ARRAY_BUFFER, particle_VBO_);
@@ -495,6 +525,14 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		car->animation_state_ = CarAnimationState::Unriding;
 		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
 		break;
+	}
+	case AnimationSignal::DoorEnter:
+	{
+
+	}
+	case AnimationSignal::DoorExit:
+	{
+
 	}
 	}
 }
