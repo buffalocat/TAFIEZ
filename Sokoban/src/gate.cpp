@@ -73,6 +73,7 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 		} else if (!cur_state && body_->tangible_) {
 			map->take_from_map(body_, true, true, delta_frame);
 			mp->anims_->receive_signal(AnimationSignal::GateDown, parent_, delta_frame);
+			mp->add_to_fall_check(parent_);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });
 			if (above && above->gravitable_) {
 				mp->add_to_fall_check(above);
