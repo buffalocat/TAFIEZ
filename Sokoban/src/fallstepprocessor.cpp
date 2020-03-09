@@ -176,7 +176,6 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
     std::vector<GameObject*> live_blocks {};
     for (GameObject* block : comp->blocks_) {
         if (block->pos_.z >= 0) {
-            // TODO: put the responsibility of making fall trails in a better place
             anims_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
             map_->put_in_map(block, false, true, nullptr);
@@ -191,6 +190,11 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
         }
     }
     if (!live_blocks.empty() && delta_frame_) {
+		for (auto* block : live_blocks) {
+			if (auto* sub = block->get_subordinate_object()) {
+				sub->pos_ += {0, 0, -layers_fallen_};
+			}
+		}
         delta_frame_->push(std::make_unique<BatchMotionDelta>(std::move(live_blocks), Point3{0,0,-layers_fallen_}, map_));
     }
 }

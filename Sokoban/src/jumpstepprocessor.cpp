@@ -108,15 +108,15 @@ void JumpStepProcessor::perform_jump() {
 	}
 	// MAP BECOMES INCONSISTENT HERE (potential ID overlap)
 	// In this section of code, the map can't be viewed
-	auto forward_moving_blocks = moving_blocks_;
+	auto jumping_blocks = moving_blocks_;
 	// TODO: put animation code somewhere else, if possible?
 	if (anims_) {
-		for (auto* block : forward_moving_blocks) {
+		for (auto* block : jumping_blocks) {
 			anims_->set_linear_animation(Direction::Up, block);
 		}
 		anims_->set_linear_animation_frames();
 	}
-	map_->batch_shift(std::move(forward_moving_blocks), { 0,0,1 }, true, delta_frame_);
+	map_->batch_shift(std::move(jumping_blocks), { 0,0,1 }, true, delta_frame_);
 	// MAP BECOMES CONSISTENT AGAIN HERE
 	for (auto sb : link_add_check) {
 		sb->check_add_local_links(map_, delta_frame_);
