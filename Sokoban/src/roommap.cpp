@@ -189,10 +189,7 @@ void RoomMap::clear(Point3 pos) {
 
 void RoomMap::shift(GameObject* obj, Point3 dpos, bool activate_listeners, DeltaFrame* delta_frame) {
 	take_from_map(obj, false, activate_listeners, nullptr);
-	obj->pos_ += dpos;
-	if (auto* sub = obj->get_subordinate_object()) {
-		sub->pos_ += dpos;
-	}
+	obj->abstract_shift(dpos);
 	put_in_map(obj, false, activate_listeners, nullptr);
 	if (delta_frame) {
 		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
@@ -202,10 +199,7 @@ void RoomMap::shift(GameObject* obj, Point3 dpos, bool activate_listeners, Delta
 void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, bool activate_listeners, DeltaFrame* delta_frame) {
 	for (auto obj : objs) {
 		take_from_map(obj, false, activate_listeners, nullptr);
-		obj->pos_ += dpos;
-		if (auto* sub = obj->get_subordinate_object()) {
-			sub->pos_ += dpos;
-		}
+		obj->abstract_shift(dpos);
 		put_in_map(obj, false, activate_listeners, nullptr);
 	}
 	if (delta_frame) {
@@ -323,7 +317,7 @@ struct ObjectShifter {
 
 void ObjectShifter::operator()(unsigned int id) {
 	if (id > GENERIC_WALL_ID) {
-		obj_array[id]->pos_ += dpos;
+		obj_array[id]->abstract_shift(dpos);
 	}
 }
 
@@ -436,32 +430,28 @@ void RoomStateInitializer::operator()(int id) {
 	}
 }
 
-
-void RoomMap::set_initial_state_in_editor() {
-	set_initial_state(nullptr);
-}
-
 void RoomMap::set_initial_state(PlayingState* playing_state) {
-	if (inited_) {
-		return;
+	if (!inited_) {
+		DeltaFrame df{};
+		MoveProcessor mp = MoveProcessor(playing_state, this, &df, nullptr, false);
+		GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, &mp, this, &df };
+		for (auto& layer : layers_) {
+			layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
+		}
+		// In editor mode, don't check switches or gravity.
+		if (!playing_state) {
+			return;
+		}
+		for (auto& sig : signalers_) {
+			sig->check_send_initial(this, &df, &mp);
+		}
+		mp.perform_switch_checks(false);
+		inited_ = true;
+		while (!mp.update());
 	}
-	DeltaFrame df{};
-	MoveProcessor mp = MoveProcessor(playing_state, this, &df, nullptr, false);
-	GameObjIDFunc state_initializer = RoomStateInitializer{ obj_array_, &mp, this, &df };
-	for (auto& layer : layers_) {
-		layer.apply_to_rect(MapRect{ 0,0,width_,height_ }, state_initializer);
+	if (playing_state) {
+		initialize_animation(playing_state->anims_.get());
 	}
-	// In editor mode, don't check switches or gravity.
-	if (!playing_state) {
-		return;
-	}
-	for (auto& sig : signalers_) {
-		sig->check_send_initial(this, &df, &mp);
-	}
-	mp.perform_switch_checks(false);
-	inited_ = true;
-	while (!mp.update());
-	initialize_animation(playing_state->anims_.get());
 }
 
 struct AnimationInitializer {

@@ -15,6 +15,7 @@ extern const float LEVEL_STRING_BG_OPACITY;
 extern const float SIGN_STRING_BG_OPACITY;
 
 extern const int FLOOR_SIGN_FADE_FRAMES;
+extern const int DEATH_STRING_FADE_FRAMES;
 
 class StringDrawer {
 public:

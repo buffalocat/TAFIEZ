@@ -173,7 +173,7 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 		float dy = float(q.y - p.y);
 		float scale = 0.1f * (2 - fabs(dx) - fabs(dy));
 		for (int i = 0; i < 3; ++i) {
-			gfx->square_flat.push_instance(glm::vec3(p.x + SNAKE_LINK_DRAW_DIST[i] * dx, p.y + SNAKE_LINK_DRAW_DIST[i] * dy, p.z + 0.55f),
+			gfx->square_flat.push_instance(glm::vec3(p.x + SNAKE_LINK_DRAW_DIST[i] * dx, p.y + SNAKE_LINK_DRAW_DIST[i] * dy, p.z + 0.58f),
 				glm::vec3(scale), BlockTexture::Blank, BLACK);
 		}
 	}

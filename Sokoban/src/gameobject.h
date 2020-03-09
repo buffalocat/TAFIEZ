@@ -36,7 +36,7 @@ public:
     virtual void relation_serialize(MapFileO& file);
 
     Point3 shifted_pos(Point3 d);
-    void abstract_shift(Point3 dpos, DeltaFrame* delta_frame);
+    void abstract_shift(Point3 dpos);
 	void abstract_put(Point3 pos, DeltaFrame* delta_frame);
 
     virtual void setup_on_put(RoomMap*, DeltaFrame*, bool real);

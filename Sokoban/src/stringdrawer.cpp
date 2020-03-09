@@ -17,6 +17,7 @@ const float LEVEL_STRING_BG_OPACITY = 0.7f;
 const float SIGN_STRING_BG_OPACITY = 0.7f;
 
 const int FLOOR_SIGN_FADE_FRAMES = 12;
+const int DEATH_STRING_FADE_FRAMES = 4;
 
 
 StringDrawer::StringDrawer(Font* font, glm::vec4 color,
@@ -142,7 +143,7 @@ void StringDrawer::kill_instance() {
 
 
 IndependentStringDrawer::IndependentStringDrawer(Font* font, glm::vec4 color, std::string label, float y, int fade_frames, float bg) :
-	StringDrawer(font, color, label, 0, y, 1, 1, bg), fade_frames_{ std::max(1, fade_frames) } {}
+	StringDrawer(font, color, label, 0, y, 1, 1, bg), fade_frames_{ fade_frames } {}
 
 IndependentStringDrawer::~IndependentStringDrawer() {}
 
@@ -160,7 +161,7 @@ void IndependentStringDrawer::update() {
 			++fade_counter_;
 		}
 	}
-	opacity_ = (float)fade_counter_ / (float)FLOOR_SIGN_FADE_FRAMES;
+	opacity_ = (float)fade_counter_ / (float)fade_frames_;
 }
 
 void IndependentStringDrawer::kill_instance() {

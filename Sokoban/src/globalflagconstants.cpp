@@ -40,6 +40,11 @@ const unsigned int FLAG_COLLECT_FLAGS[36] = {
 	1367301943,
 };
 
+const unsigned int FATE_SIGNALER_CHOICE[2] = {
+	2641701143,
+	2202838590,
+};
+
 unsigned int get_clear_flag_code(char zone) {
 	if ('0' <= zone && zone <= '9') {
 		return FLAG_COLLECT_FLAGS[(zone - '0') + 26];

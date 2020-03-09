@@ -316,7 +316,7 @@ void PlayingState::set_death_text() {
 		}
 		death_message_ = std::make_unique<IndependentStringDrawer>(
 			text_->fonts_->get_font(Fonts::ABEEZEE, 108),
-			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, DEATH_STRING_HEIGHT, 4, 0.0f);
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, DEATH_STRING_HEIGHT, DEATH_STRING_FADE_FRAMES, 0.0f);
 		text_->toggle_string_drawer(death_message_.get(), true);
 	}
 	static DeathState current_death_state = DeathState::Alive;
@@ -344,7 +344,7 @@ void PlayingState::set_death_text() {
 		}
 		death_submessage_ = std::make_unique<IndependentStringDrawer>(
 			text_->fonts_->get_font(Fonts::ABEEZEE, 48),
-			glm::vec4(0.8, 0.1, 0.2, 1.0), death_substr, DEATH_SUBSTRING_HEIGHT, 4, 0.0f);
+			glm::vec4(0.8, 0.1, 0.2, 1.0), death_substr, DEATH_SUBSTRING_HEIGHT, DEATH_STRING_FADE_FRAMES, 0.0f);
 		text_->toggle_string_drawer(death_submessage_.get(), true);
 	}
 }

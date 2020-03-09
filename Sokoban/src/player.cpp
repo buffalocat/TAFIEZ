@@ -262,6 +262,7 @@ void Player::draw(GraphicsManager* gfx) {
 			z_offset = -0.7f * t;
 			break;
 		case CarType::Normal:
+		case CarType::Hover:
 			z_offset = -0.2f * t;
 			break;
 		}

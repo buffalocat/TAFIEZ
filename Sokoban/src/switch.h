@@ -34,6 +34,7 @@ protected:
     std::vector<Signaler*> signalers_;
 
     friend class ModifierTab;
+	friend class FateSignaler;
 };
 
 

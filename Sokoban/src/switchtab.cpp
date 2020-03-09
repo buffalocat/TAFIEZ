@@ -93,6 +93,11 @@ void SwitchTab::main_loop(EditorRoom* eroom) {
 		ImGui::RadioButton("Parity Signaler##SWITCH", &sig_type_, SignalerType::Parity);
 	}
 
+	if (dynamic_cast<FateSignaler*>(selected_sig)) {
+		ImGui::Text("Can't edit Fate Signaler.");
+		return;
+	}
+
 	const static int MAX_LABEL_LENGTH = 64;
 	static char label_buf[MAX_LABEL_LENGTH] = "";
 	if (inspect_mode_) {

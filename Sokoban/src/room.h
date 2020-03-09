@@ -67,6 +67,7 @@ private:
     void read_door_dest(MapFileI& file);
     void read_threshold_signaler(MapFileI& file);
 	void read_parity_signaler(MapFileI& file);
+	void read_fate_signaler(MapFileI& file);
     void read_wall_runs(MapFileI& file);
 };
 

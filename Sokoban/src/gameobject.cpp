@@ -91,10 +91,10 @@ ObjectModifier* GameObject::modifier() {
 	return modifier_.get();
 }
 
-void GameObject::abstract_shift(Point3 dpos, DeltaFrame* delta_frame) {
-	if (!(dpos == Point3{})) {
-		pos_ += dpos;
-		delta_frame->push(std::make_unique<AbstractShiftDelta>(this, dpos));
+void GameObject::abstract_shift(Point3 dpos) {
+	pos_ += dpos;
+	if (auto* sub = get_subordinate_object()) {
+		sub->pos_ += dpos;
 	}
 }
 

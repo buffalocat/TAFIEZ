@@ -42,17 +42,17 @@ protected:
 class ThresholdSignaler : public Signaler {
 public:
 	ThresholdSignaler(std::string label, int count, int threshold);
-	~ThresholdSignaler();
+	virtual ~ThresholdSignaler();
 
-	void serialize(MapFileO& file);
+	virtual void serialize(MapFileO& file);
 
 	void push_switchable(Switchable*, bool mutual, int index);
 	void remove_switchable(Switchable*, int index);
 
-	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
+	virtual void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-private:
+protected:
 	std::vector<Switchable*> switchables_{};
 	int threshold_;
 
@@ -80,6 +80,14 @@ private:
 	friend class SwitchTab;
 };
 
+class FateSignaler : public ThresholdSignaler {
+public:
+	FateSignaler(std::string label, int count, int threshold);
+	~FateSignaler();
+
+	void serialize(MapFileO& file);
+	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
+};
 
 class SignalerCountDelta : public Delta {
 public:
