@@ -534,6 +534,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	{
 		auto* flag_gate = obj->modifier();
 		if (static_animated_objects_.count(flag_gate)) {
+
 			static_animated_objects_.erase(flag_gate);
 			if (delta_frame) {
 				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagGateOn, obj));

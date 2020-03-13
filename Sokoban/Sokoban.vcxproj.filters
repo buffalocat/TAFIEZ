@@ -283,6 +283,9 @@
     <ClInclude Include="src\texture_constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -527,6 +530,9 @@
     </ClCompile>
     <ClCompile Include="src\globalflagconstants.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu.cpp">
+      <Filter>Source Files\Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

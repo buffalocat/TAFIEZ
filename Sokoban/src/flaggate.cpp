@@ -12,6 +12,7 @@
 #include "wall.h"
 #include "modelinstancer.h"
 #include "playingstate.h"
+#include "room.h"
 #include "savefile.h"
 
 FlagGate::FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed) :
@@ -63,12 +64,22 @@ void FlagGate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor
 	}
 }
 
+void FlagGate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
+	signal_animation(mp->anims_, mp->delta_frame_);
+	if (!down_ && state() && mp->playing_state_->global_->clear_flag_total_ >= num_flags_) {
+		remove_walls(map, delta_frame);
+		animation_state_ = FlagGateAnimationState::Charging;
+		stored_delta_frame_ = delta_frame;
+		mp->playing_state_->mandatory_wait_ = true;
+	}
+}
+
 void FlagGate::destroy(MoveProcessor* mp, CauseOfDeath) {
 	signal_animation(mp->anims_, mp->delta_frame_);
 }
 
 void FlagGate::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
-	if (parent_->tangible_ && !down_) {
+	if (parent_->tangible_) {
 		anims->receive_signal(AnimationSignal::FlagGateOn, parent_, delta_frame);
 	} else {
 		anims->receive_signal(AnimationSignal::FlagGateOff, parent_, delta_frame);
@@ -162,19 +173,19 @@ void FlagGate::init_draw_constants() {
 	switch (orientation_) {
 	case 0:
 		center_ = glm::vec3((width - 1) / 2.0, 0.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(width, 1, height);
+		scale_ = glm::vec3(width, 1.01f, height);
 		break;
 	case 1:
 		center_ = glm::vec3(0.0, (width - 1) / 2.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(1, width, height);
+		scale_ = glm::vec3(1.01f, width, height);
 		break;
 	case 2:
 		center_ = glm::vec3(- (width - 1) / 2.0, 0.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(width, 1, height);
+		scale_ = glm::vec3(width, 1.01f, height);
 		break;
 	case 3:
 		center_ = glm::vec3(0.0, - (width - 1) / 2.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(1, width, height);
+		scale_ = glm::vec3(1.01f, width, height);
 		break;
 	}
 }
@@ -220,59 +231,109 @@ void FlagGate::spawn_sigils() {
 }
 
 const int FLAG_GATE_MAX_TIME = 15840; // LCM of all relevant periods
+const int FLAG_GATE_SHRINK_TIME = 30;
+const int MAX_FLAG_SIGIL_CHARGE = 30;
+const int FLAG_SIGIL_DELAY = 8;
 
 bool FlagGate::update_animation(PlayingState* playing_state) {
-	++animation_time_;
-	if (animation_time_ == FLAG_GATE_MAX_TIME) {
-		animation_time_ = 0;
-	}
-	if (state()) {
-		int flag_count = playing_state->global_->clear_flag_total_;
-		int cur_count = flag_count;
-		for (auto& sigil : sigils_) {
-			sigil.update(cur_count > 0, flag_count);
-			--cur_count;
+	switch (animation_state_) {
+	case FlagGateAnimationState::Charging:
+		if (sigils_[sigils_.size() - 1].charge == FLAG_SIGIL_DELAY * num_flags_ + MAX_FLAG_SIGIL_CHARGE) {
+			animation_state_ = FlagGateAnimationState::Fade;
+			break;
 		}
-	} else {
+		// Fallthrough
+	case FlagGateAnimationState::Default:
+	{
+		++cycle_time_;
+		if (cycle_time_ == FLAG_GATE_MAX_TIME) {
+			cycle_time_ = 0;
+		}
+		if (state()) {
+			int flag_count = playing_state->global_->clear_flag_total_;
+			int cur_count = flag_count;
+			for (auto& sigil : sigils_) {
+				sigil.update(cur_count > 0, flag_count);
+				--cur_count;
+			}
+		} else {
+			for (auto& sigil : sigils_) {
+				sigil.update(false, 0);
+			}
+		}
+		break;
+	}
+	case FlagGateAnimationState::Fade:
 		for (auto& sigil : sigils_) {
 			sigil.update(false, 0);
+			--sigil.opacity;
 		}
+		if (sigils_[0].opacity == 0) {
+			animation_state_ = FlagGateAnimationState::Shrink;
+			int height, width;
+			get_gate_dims(&width, &height);
+			animation_timer_ = FLAG_GATE_SHRINK_TIME * height;
+		}
+		break;
+	case FlagGateAnimationState::Shrink:
+		--animation_timer_;
+		if (animation_timer_ == 0) {
+			playing_state->mandatory_wait_ = false;
+			animation_state_ = FlagGateAnimationState::Default;
+			down_ = true;
+			playing_state->delta_frame_->push(std::make_unique<FlagGateOpenDelta>(this));
+			signal_animation(playing_state->anims_.get(), playing_state->delta_frame_.get());
+		}
+	default:
+		break;
 	}
 	return false;
 }
 
 void FlagGate::reset_animation() {
-	animation_time_ = 0;
+	cycle_time_ = 0;
 }
 
 void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (down_) {
+		glm::vec3 center = glm::vec3(center_.x, center_.y, 0.5f * (1.0f + 0.05f));
+		glm::vec3 scale = glm::vec3(scale_.x, scale_.y, 0.05f);
+		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::Edges, parent_->color());
 		return;
 	}
-	gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::Edges, parent_->color());
-	ModelInstancer* sigil_model;
-	switch (orientation_) {
-	case 0:
-	default:
-		sigil_model = &gfx->square_0;
-		break;
-	case 1:
-		sigil_model = &gfx->square_1;
-		break;
-	case 2:
-		sigil_model = &gfx->square_2;
-		break;
-	case 3:
-		sigil_model = &gfx->square_3;
-		break;
-	}
-	for (auto& sigil : sigils_) {
-		sigil.draw(sigil_model, p, orientation_, animation_time_);
+	switch (animation_state_) {
+	case FlagGateAnimationState::Default:
+	case FlagGateAnimationState::Charging:
+	case FlagGateAnimationState::Fade:
+	{
+		gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::Edges, parent_->color());
+		ModelInstancer* sigil_model;
+		switch (orientation_) {
+		case 0:
+		default:
+			sigil_model = &gfx->square_0;
+			break;
+		case 1:
+			sigil_model = &gfx->square_1;
+			break;
+		case 2:
+			sigil_model = &gfx->square_2;
+			break;
+		case 3:
+			sigil_model = &gfx->square_3;
+			break;
+		}
+		for (auto& sigil : sigils_) {
+			sigil.draw(sigil_model, p, orientation_, cycle_time_);
+		}
+	} break;
+	case FlagGateAnimationState::Shrink:
+		float shrink_factor = (float)animation_timer_ / (float)FLAG_GATE_SHRINK_TIME;
+		glm::vec3 center = glm::vec3(center_.x, center_.y, 0.5f * (1.0f + shrink_factor));
+		glm::vec3 scale = glm::vec3(scale_.x, scale_.y, shrink_factor);
+		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::Edges, parent_->color());
 	}
 }
-
-const int MAX_FLAG_SIGIL_CHARGE = 30;
-const int FLAG_SIGIL_DELAY = 8;
 
 void FlagSigil::update(bool charging, int total) {
 	if (charging && charge < FLAG_SIGIL_DELAY * total + MAX_FLAG_SIGIL_CHARGE) {
@@ -302,5 +363,20 @@ void FlagSigil::draw(ModelInstancer* model, FPoint3 p, int orientation, int time
 	}
 	float value = std::min(std::max((charge - FLAG_SIGIL_DELAY * index), 0), MAX_FLAG_SIGIL_CHARGE) / (float)MAX_FLAG_SIGIL_CHARGE;
 	glm::vec4 color = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f) * glm::vec4(1 - value) + COLOR_VECTORS[GOLD] * glm::vec4(value);
+	color.w = (float)opacity / (float)MAX_FLAG_SIGIL_OPACITY;
 	model->push_instance(pos, glm::vec3(0.6f), tex, color);
 }
+
+
+FlagGateOpenDelta::FlagGateOpenDelta(FlagGate* fg) : Delta(), fg_{ fg } {}
+
+FlagGateOpenDelta::~FlagGateOpenDelta() {}
+
+void FlagGateOpenDelta::revert() {
+	fg_->down_ = false;
+	for (auto& sigil : fg_->sigils_) {
+		sigil.charge = 0;
+		sigil.opacity = MAX_FLAG_SIGIL_OPACITY;
+	}
+}
+

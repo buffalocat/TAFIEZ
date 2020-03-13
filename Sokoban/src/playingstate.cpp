@@ -41,7 +41,9 @@ void PlayingState::main_loop() {
 	if (!move_processor_) {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
-	handle_input();
+	if (!mandatory_wait_) {
+		handle_input();
+	}
 	// Update Graphics State and Animations
 	gfx_->update();
 	anims_->update();

@@ -45,10 +45,29 @@ const unsigned int FATE_SIGNALER_CHOICE[2] = {
 	2202838590,
 };
 
-unsigned int get_clear_flag_code(char zone) {
+
+const unsigned int MISC_GLOBAL_FLAGS[static_cast<int>(MiscGlobalFlags::COUNT)] = {
+	841293067,
+	3565400062,
+	2679708926,
+	3263730501,
+	706432533,
+};
+
+
+int get_clear_flag_index(char zone) {
 	if ('0' <= zone && zone <= '9') {
-		return FLAG_COLLECT_FLAGS[(zone - '0') + 26];
+		return (zone - '0') + 26;
 	} else {
-		return FLAG_COLLECT_FLAGS[zone - 'A'];
+		return zone - 'A';
 	}
+}
+
+
+unsigned int get_clear_flag_code(char zone) {
+	return FLAG_COLLECT_FLAGS[get_clear_flag_index(zone)];
+}
+
+unsigned int get_misc_flag(MiscGlobalFlags flag) {
+	return MISC_GLOBAL_FLAGS[static_cast<int>(flag)];
 }

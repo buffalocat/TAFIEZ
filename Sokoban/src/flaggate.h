@@ -2,6 +2,9 @@
 #define FLAGGATE_H
 
 #include "switchable.h"
+#include "delta.h"
+
+const int MAX_FLAG_SIGIL_OPACITY = 60;
 
 class ModelInstancer;
 
@@ -11,9 +14,18 @@ struct FlagSigil {
 	int phase, period;
 	int index;
 	int charge = 0;
+	int opacity = MAX_FLAG_SIGIL_OPACITY;
 
 	void update(bool signal, int total);
 	void draw(ModelInstancer* model, FPoint3 p, int orientation, int time);
+};
+
+
+enum class FlagGateAnimationState {
+	Default,
+	Charging,
+	Fade,
+	Shrink,
 };
 
 
@@ -40,6 +52,8 @@ public:
 	void spawn_sigils();
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
+	void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
+
 	void destroy(MoveProcessor* mp, CauseOfDeath);
 	void signal_animation(AnimationManager*, DeltaFrame*);
 	void reset_animation();
@@ -55,7 +69,24 @@ public:
 	glm::vec3 center_;
 	glm::vec3 scale_;
 	std::vector<FlagSigil> sigils_{};
-	int animation_time_ = 0;
+	int cycle_time_ = 0;
+	FlagGateAnimationState animation_state_ = FlagGateAnimationState::Default;
+	int animation_timer_ = 0;
+
+private:
+	DeltaFrame* stored_delta_frame_{};
+};
+
+
+class FlagGateOpenDelta: public Delta{
+public:
+	FlagGateOpenDelta(FlagGate* fg);
+	~FlagGateOpenDelta();
+
+	void revert();
+
+private:
+	FlagGate* fg_;
 };
 
 

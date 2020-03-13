@@ -58,18 +58,21 @@ public:
 	virtual void make_subsave();
 	virtual void world_reset();
 
+	bool mandatory_wait_ = false;
+
 	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
 	std::unique_ptr<AnimationManager> anims_;
 
+	Room* room_{};
+	std::unique_ptr<DeltaFrame> delta_frame_{};
+
 protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
-	Room* room_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
 
 private:
 	std::unique_ptr<MoveProcessor> move_processor_{};
-	std::unique_ptr<DeltaFrame> delta_frame_{};
 
 	std::unique_ptr<StringDrawer> death_message_{};
 	std::unique_ptr<StringDrawer> death_submessage_{};

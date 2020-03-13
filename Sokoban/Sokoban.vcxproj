@@ -204,6 +204,7 @@
     <ClInclude Include="src\incinerator.h" />
     <ClInclude Include="src\jumpstepprocessor.h" />
     <ClInclude Include="src\floorsign.h" />
+    <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\soundmanager.h" />
     <ClInclude Include="src\stringdrawer.h" />
     <ClInclude Include="src\permanentswitch.h" />
@@ -340,6 +341,7 @@
     <ClCompile Include="src\incinerator.cpp" />
     <ClCompile Include="src\jumpstepprocessor.cpp" />
     <ClCompile Include="src\floorsign.cpp" />
+    <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\permanentswitch.cpp" />
     <ClCompile Include="src\pausestate.cpp" />
     <ClCompile Include="src\roomtab.cpp" />
