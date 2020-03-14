@@ -118,8 +118,11 @@ void ObjectTab::object_tab_options(EditorRoom* eroom) {
 	case ObjCode::GateBody:
 	{
 		ImGui::Text("GateBody");
-		Point3 p_pos = static_cast<GateBody*>(obj)->gate_pos();
-		ImGui::Text("See parent Gate at (%d,%d,%d)", p_pos.x, p_pos.y, p_pos.z);
+		auto* gate_body = static_cast<GateBody*>(obj);
+		if (auto* gate = gate_body->gate_) {
+			Point3 p_pos = gate->pos();
+			ImGui::Text("See parent Gate at (%d,%d,%d)", p_pos.x, p_pos.y, p_pos.z);
+		}
 		break;
 	}
 	case ObjCode::Player:

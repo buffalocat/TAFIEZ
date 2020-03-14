@@ -2,7 +2,6 @@
 #define GATEBODY_H
 
 #include "pushblock.h"
-#include "delta.h"
 
 class Gate;
 class MoveProcessor;
@@ -24,7 +23,6 @@ public:
 
 	Point3 gate_pos();
 	void set_gate(Gate*);
-	Point3 update_gate_pos(DeltaFrame*);
 
 	void destroy(MoveProcessor*, CauseOfDeath);
 	void undestroy();
@@ -32,27 +30,12 @@ public:
 	void collect_special_links(std::vector<GameObject*>&);
 
 	void draw(GraphicsManager*);
+	Gate* gate_;
 
 private:
-	Gate* gate_;
-	Point3 gate_pos_;
 	bool snake_;
 	bool persistent_;
 	bool corrupt_;
-
-	friend class GatePosDelta;
-};
-
-
-class GatePosDelta : public Delta {
-public:
-	GatePosDelta(GateBody* gate_body, Point3 dpos);
-	~GatePosDelta();
-	void revert();
-
-private:
-	GateBody* gate_body_;
-	Point3 dpos_;
 };
 
 #endif // GATEBODY_H

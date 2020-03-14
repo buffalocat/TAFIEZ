@@ -70,10 +70,9 @@ protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
-
-private:
 	std::unique_ptr<MoveProcessor> move_processor_{};
 
+private:
 	std::unique_ptr<StringDrawer> death_message_{};
 	std::unique_ptr<StringDrawer> death_submessage_{};
 	void set_death_text();

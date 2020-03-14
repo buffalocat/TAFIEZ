@@ -9,7 +9,7 @@
 #include "graphicsmanager.h"
 #include "fontmanager.h"
 
-constexpr bool EDITOR_ENABLED = true;
+constexpr bool EDITOR_ENABLED = false;
 
 MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {}
 
@@ -71,8 +71,8 @@ void FileSelectState::create_menu() {
 	menu_ = std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
 	if (save_files_[save_index_]->exists_) {
 		menu_->push_entry("Continue", [this]() { continue_file(); });
-		menu_->push_entry("Load Save", [this]() {});
-		menu_->push_entry("Delete File", [this]() {});
+//		menu_->push_entry("Load Save", [this]() {});
+//		menu_->push_entry("Delete File", [this]() {});
 	} else {
 		menu_->push_entry("New File", [this]() { new_file(); });
 	}
@@ -88,6 +88,7 @@ void FileSelectState::new_file() {
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
 	playing_state->play_from_map(NEW_FILE_START_MAP);
+	queue_quit();
 }
 
 void FileSelectState::continue_file() {
@@ -95,4 +96,5 @@ void FileSelectState::continue_file() {
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
 	playing_state->play_from_loaded_subsave();
+	queue_quit();
 }

@@ -15,10 +15,11 @@
 #include "room.h"
 #include "savefile.h"
 
-FlagGate::FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed) :
+FlagGate::FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed, bool down) :
 	Switchable(parent, count, false, false, false, false),
-	num_flags_{ num_flags }, orientation_{ orientation }, walls_placed_{ walls_placed } {
+	num_flags_{ num_flags }, orientation_{ orientation }, walls_placed_{ walls_placed }, down_{ down } {
 	init_draw_constants();
+	spawn_sigils();
 }
 
 FlagGate::~FlagGate() {}
@@ -34,13 +35,13 @@ ModCode FlagGate::mod_code() {
 }
 
 void FlagGate::serialize(MapFileO& file) {
-	file << num_flags_ << orientation_ << count_ << active_ << walls_placed_;
+	file << num_flags_ << orientation_ << count_ << active_ << walls_placed_ << down_;
 }
 
 void FlagGate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
-	unsigned char b[5];
-	file.read(b, 5);
-	auto fg = std::make_unique<FlagGate>(parent, b[0], b[1], b[2], b[3], b[4]);
+	unsigned char b[6];
+	file.read(b, 6);
+	auto fg = std::make_unique<FlagGate>(parent, b[0], b[1], b[2], b[3], b[4], b[5]);
 	parent->set_modifier(std::move(fg));
 }
 
@@ -58,9 +59,6 @@ void FlagGate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor
 	if (!walls_placed_) {
 		place_walls(map);
 		walls_placed_ = true;
-	}
-	if (!down_) {
-		spawn_sigils();
 	}
 }
 

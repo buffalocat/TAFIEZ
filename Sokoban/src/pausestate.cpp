@@ -17,7 +17,7 @@ playing_state_{ static_cast<PlayingState*>(parent) },
 menu_{ std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72)) } {
 	menu_->push_entry("Unpause", [this]() { unpause(); });
 	if (dynamic_cast<RealPlayingState*>(parent)) {
-		menu_->push_entry("Save Game", [this]() { playing_state_->make_subsave(); });
+		//menu_->push_entry("Save Game", [this]() { playing_state_->make_subsave(); });
 		if (playing_state_->global_->has_flag(get_misc_flag(MiscGlobalFlags::WorldResetLearned))) {
 			menu_->push_entry("World Reset", [this]() { world_reset(); });
 		}
@@ -56,9 +56,6 @@ void PauseState::save() {
 void PauseState::quit_playing() {
 	queue_quit();
 	playing_state_->queue_quit();
-	if (dynamic_cast<RealPlayingState*>(playing_state_)) {
-		playing_state_->parent_->queue_quit();
-	}
 }
 
 void PauseState::world_reset() {

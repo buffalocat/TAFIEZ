@@ -42,7 +42,7 @@ static ClearFlag model_clear_flag{ nullptr, 1, true, false, false, '!' };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
 static FloorSign model_floor_sign{ nullptr, "", false };
 static Incinerator model_incinerator{ nullptr, 0, false, true, false };
-static FlagGate model_flag_gate{ nullptr, 1, 0, 0, false, false };
+static FlagGate model_flag_gate{ nullptr, 1, 0, 0, false, false, false };
 static FlagSwitch model_flag_switch{ nullptr, false, 0 };
 
 static ColorCycle model_color_cycle{};

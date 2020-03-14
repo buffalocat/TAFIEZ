@@ -260,7 +260,23 @@ EditorRoom* EditorState::reload(EditorRoom* eroom) {
 
 void EditorState::load_save_cycle() {
 	for (auto& path : std::filesystem::directory_iterator(MAPS_MAIN)) {
-		load_room_from_path(path);
+		auto path_name = path.path().string();
+		auto ext = ".map";
+		if (path_name.size() < 4) {
+			continue;
+		}
+		auto it = path_name.end() - 4;
+		bool is_map = true;
+		for (int i = 0; i < 4; ++i) {
+			if (*it != ext[i]) {
+				is_map = false;
+				break;
+			}
+			++it;
+		}
+		if (is_map) {
+			load_room_from_path(path);
+		}
 	}
 	commit_all();
 	queue_quit();

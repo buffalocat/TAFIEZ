@@ -31,7 +31,7 @@ enum class FlagGateAnimationState {
 
 class FlagGate : public Switchable {
 public:
-	FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed);
+	FlagGate(GameObject* parent, int num_flags, int orientation, int count, bool active, bool walls_placed, bool down);
 	~FlagGate();
 
 	void make_str(std::string&);
@@ -64,7 +64,7 @@ public:
 	int num_flags_;
 	int orientation_;
 	bool walls_placed_;
-	bool down_ = false;
+	bool down_;
 	// Animation/Drawing members
 	glm::vec3 center_;
 	glm::vec3 scale_;

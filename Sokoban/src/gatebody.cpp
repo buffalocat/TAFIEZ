@@ -51,28 +51,18 @@ bool GateBody::relation_check() {
 void GateBody::relation_serialize(MapFileO& file) {
 	file << MapCode::GateBaseLocation;
 	file << pos_;
-	file << gate_pos_;
+	file << gate_->pos();
 }
 
 Point3 GateBody::gate_pos() {
-	return gate_pos_;
+	return gate_->pos();
 }
 
 void GateBody::set_gate(Gate* gate) {
 	gate_ = gate;
 	if (gate) {
 		gate->body_ = this;
-		gate_pos_ = gate->pos();
 	}
-}
-
-Point3 GateBody::update_gate_pos(DeltaFrame* delta_frame) {
-	Point3 dpos = gate_->pos() - gate_pos_;
-	if (!(dpos == Point3{})) {
-		delta_frame->push(std::make_unique<GatePosDelta>(this, dpos));
-		gate_pos_ = gate_->pos();
-	}
-	return dpos;
 }
 
 void GateBody::destroy(MoveProcessor* mp, CauseOfDeath death) {
@@ -121,14 +111,4 @@ void GateBody::draw(GraphicsManager* gfx) {
 	if (!gate_) {
 		draw_force_indicators(model, p, 0.75f);
 	}
-}
-
-
-GatePosDelta::GatePosDelta(GateBody* gate_body, Point3 dpos) :
-	gate_body_{ gate_body }, dpos_{ dpos } {}
-
-GatePosDelta::~GatePosDelta() {}
-
-void GatePosDelta::revert() {
-	gate_body_->gate_pos_ -= dpos_;
 }
