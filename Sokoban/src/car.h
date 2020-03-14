@@ -52,6 +52,8 @@ public:
 	bool update_animation(PlayingState*);
 	void reset_animation();
 	void draw(GraphicsManager* gfx, FPoint3 p);
+	void draw_squished(GraphicsManager*, FPoint3 p, float scale);
+
 
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 	

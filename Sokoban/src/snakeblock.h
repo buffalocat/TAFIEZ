@@ -5,6 +5,7 @@
 #include "delta.h"
 
 class AnimationManager;
+enum class BlockTexture;
 
 class SnakeBlock: public ColoredBlock {
 public:
@@ -22,6 +23,7 @@ public:
 
 	bool is_snake();
 	Sticky sticky();
+	BlockTexture get_block_texture();
 
     void collect_sticky_links(RoomMap*, Sticky sticky_level, std::vector<GameObject*>& links);
 
@@ -43,6 +45,7 @@ public:
     bool can_link(SnakeBlock*);
 
     void draw(GraphicsManager*);
+	void draw_squished(GraphicsManager*, FPoint3 p, float scale);
 
     bool available();
     bool confused(RoomMap*);

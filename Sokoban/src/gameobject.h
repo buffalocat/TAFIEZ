@@ -65,6 +65,7 @@ public:
 	FPoint3 real_pos();
 
 	virtual void draw(GraphicsManager*) = 0;
+	virtual void draw_squished(GraphicsManager*, FPoint3 p, float scale);
 
 	std::unique_ptr<ObjectModifier> modifier_{};
 	Component* comp_;

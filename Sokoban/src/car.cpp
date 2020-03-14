@@ -183,6 +183,46 @@ void Car::draw(GraphicsManager* gfx, FPoint3 p) {
 	}
 }
 
+void Car::draw_squished(GraphicsManager* gfx, FPoint3 p, float scale) {
+	if (int color = next_color()) {
+		ModelInstancer& squares_model = parent_->is_snake() ? gfx->six_squares_diamond : gfx->six_squares;
+		squares_model.push_instance(glm::vec3(p), glm::vec3(scale, scale, 1.01f), BlockTexture::Blank, color);
+	}
+	switch (type_) {
+	case CarType::Normal:
+	case CarType::Hover:
+	{
+		ModelInstancer& windshield_model = parent_->is_snake() ? gfx->windshield_diamond : gfx->windshield;
+		float windshield_height;
+		switch (animation_state_) {
+		case CarAnimationState::None:
+			windshield_height = player_ ? 1.0f : 0.0f;
+			break;
+		case CarAnimationState::Riding:
+			windshield_height = 1.0f - WINDSHIELD_HEIGHTS[animation_time_];
+			break;
+		case CarAnimationState::Unriding:
+			windshield_height = WINDSHIELD_HEIGHTS[animation_time_];
+			break;
+		}
+		if (windshield_height > 0) {
+			windshield_model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5 + windshield_height / 2.0), glm::vec3(scale, scale, windshield_height), BlockTexture::Darker, parent_->color());
+		}
+		break;
+	}
+	case CarType::Convertible:
+	{
+		Player* player = animation_player_ ? animation_player_ : player_;
+		if (player) {
+			player->draw_squished(gfx, p, scale);
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
+
 std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map, DeltaFrame* delta_frame) {
     auto dup = std::make_unique<Car>(*this);
     dup->parent_ = parent;

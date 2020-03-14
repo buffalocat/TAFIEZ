@@ -3,6 +3,8 @@
 
 #include "gameobject.h"
 
+enum class BlockTexture;
+
 class PushBlock: public ColoredBlock {
 public:
     PushBlock(Point3 pos, int color, bool pushable, bool gravitable, Sticky sticky);
@@ -19,8 +21,10 @@ public:
 	bool has_sticky_neighbor(RoomMap*);
 
     virtual void draw(GraphicsManager*);
+    void draw_squished(GraphicsManager*, FPoint3 p, float scale);
 
     Sticky sticky();
+	BlockTexture get_block_texture();
 
     Sticky sticky_;
 };

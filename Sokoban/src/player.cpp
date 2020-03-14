@@ -274,6 +274,42 @@ void Player::draw(GraphicsManager* gfx) {
 	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(scale), BlockTexture::Edges, color());
 }
 
+void Player::draw_squished(GraphicsManager* gfx, FPoint3 p, float squish_scale) {
+	auto* player_model = &gfx->cube;
+	float z_offset = 0.0f;
+	float scale = PLAYER_DEFAULT_SCALE;
+	Car* car = animation_car_ ? animation_car_ : car_;
+	if (car) {
+		float t;
+		switch (car->animation_state_) {
+		case CarAnimationState::None:
+		default:
+			t = 1;
+			break;
+		case CarAnimationState::Riding:
+			t = (1 - car->animation_time_ / (float)MAX_CAR_ANIMATION_FRAMES);
+			break;
+		case CarAnimationState::Unriding:
+			t = car->animation_time_ / (float)MAX_CAR_ANIMATION_FRAMES;
+			break;
+		}
+		switch (car->type_) {
+		case CarType::Convertible:
+			z_offset = -0.7f * t;
+			break;
+		case CarType::Normal:
+		case CarType::Hover:
+			z_offset = -0.2f * t;
+			break;
+		}
+		if (car->parent_->is_snake()) {
+			player_model = &gfx->diamond;
+		}
+		scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
+	}
+	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(squish_scale * scale, squish_scale * scale, scale), BlockTexture::Edges, color());
+}
+
 FPoint3 Player::cam_pos() {
 	switch (state_) {
 	case PlayerState::RidingNormal:

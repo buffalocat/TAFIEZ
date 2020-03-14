@@ -47,6 +47,7 @@ public:
     virtual void collect_special_links(std::vector<GameObject*>& links);
 
     void draw(GraphicsManager*);
+	void draw_squished(GraphicsManager*, FPoint3 p, float scale);
 
 	PlayerState state();
 

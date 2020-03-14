@@ -238,6 +238,12 @@ struct FallTrail {
 };
 
 
+struct DoorSquish {
+	GameObject* obj;
+	FPoint3 pos;
+};
+
+
 class AnimationManager {
 public:
 	AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas);
@@ -265,11 +271,13 @@ private:
 	std::vector<ObjectModifier*> temp_animated_objects_{};
 	std::vector<std::unique_ptr<ParticleSource>> sources_{};
 	std::vector<std::unique_ptr<Particle>> particles_{};
-	std::vector<FallTrail> fall_trails_;
+	std::vector<FallTrail> fall_trails_{};
+	std::vector<DoorSquish> door_entering_objects_{};
 	std::unique_ptr<SoundManager> sounds_{};
 	PlayingState* state_;
 
 	int linear_animation_frames_ = -1;
+	int door_squish_frames_ = 0;
 
 	std::map<GameObject*, ParticleSource*> source_map_{};
 

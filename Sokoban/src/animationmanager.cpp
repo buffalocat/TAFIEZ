@@ -317,6 +317,8 @@ void AnimationManager::initialize_particle_shader() {
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void*)offsetof(ParticleVertex, Color));
 }
 
+const int MAX_DOOR_SQUISH_FRAMES = 8;
+
 void AnimationManager::update() {
 	// Update linear animation
 	if (linear_animation_frames_ > 0) {
@@ -331,6 +333,16 @@ void AnimationManager::update() {
 			for (int i = 0; i < 6; ++i) {
 				linear_animations_[i].clear();
 			}
+		}
+	}
+	// Update door squishing
+	if (door_squish_frames_ > 0) {
+		--door_squish_frames_;
+		for (auto& p : door_entering_objects_) {
+			p.obj->draw_squished(gfx_, p.pos, (float)door_squish_frames_ / (float)MAX_DOOR_SQUISH_FRAMES);
+		}
+		if (door_squish_frames_ == 0) {
+			door_entering_objects_.clear();
 		}
 	}
 	// Update other animation
@@ -574,7 +586,8 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	}
 	case AnimationSignal::DoorEnter:
 	{
-
+		door_entering_objects_.push_back({ obj, obj->real_pos() });
+		door_squish_frames_ = MAX_DOOR_SQUISH_FRAMES;
 	}
 	case AnimationSignal::DoorExit:
 	{

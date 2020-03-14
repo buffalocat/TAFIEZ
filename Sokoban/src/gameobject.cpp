@@ -162,6 +162,10 @@ FPoint3 GameObject::real_pos() {
 	return pos_ + dpos_;
 }
 
+void GameObject::draw_squished(GraphicsManager*, FPoint3 p, float scale) {}
+
+
+
 Block::Block(Point3 pos, bool pushable, bool gravitable) :
 	GameObject(pos, pushable, gravitable) {}
 

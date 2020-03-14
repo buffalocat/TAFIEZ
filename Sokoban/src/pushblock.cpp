@@ -47,7 +47,7 @@ void PushBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vec
     if (sticky_condition != Sticky::None) {
         for (Point3 d : DIRECTIONS) {
             PushBlock* adj = dynamic_cast<PushBlock*>(map->view(pos_ + d));
-            if (adj && adj->color() == color() && ((adj->sticky_ & sticky_condition) != Sticky::None)) {
+            if (adj && adj->color_ == color_ && ((adj->sticky_ & sticky_condition) != Sticky::None)) {
                 links.push_back(adj);
             }
         }
@@ -57,7 +57,7 @@ void PushBlock::collect_sticky_links(RoomMap* map, Sticky sticky_level, std::vec
 bool PushBlock::has_sticky_neighbor(RoomMap* map) {
 	for (Point3 d : H_DIRECTIONS) {
 		if (PushBlock* adj = dynamic_cast<PushBlock*>(map->view(pos_ + d))) {
-			if ((adj->color() == color()) && static_cast<bool>(adj->sticky() & sticky())) {
+			if ((adj->color_ == color_) && static_cast<bool>(adj->sticky() & sticky())) {
 				return true;
 			}
 		}
@@ -69,32 +69,41 @@ Sticky PushBlock::sticky() {
     return sticky_;
 }
 
-void PushBlock::draw(GraphicsManager* gfx) {
-	FPoint3 p{ real_pos() };
-    BlockTexture tex {BlockTexture::Blank};
-    switch (sticky_) {
-    case Sticky::None:
-        tex = BlockTexture::Edges;
-        break;
-    case Sticky::WeakBlock:
-        tex = BlockTexture::BrokenEdges;
-        break;
-    case Sticky::StrongBlock:
-        tex = BlockTexture::LightEdges;
-        break;
-    case Sticky::SemiBlock:
-        tex = BlockTexture::Corners;
-        break;
-    }
+BlockTexture PushBlock::get_block_texture() {
+	BlockTexture tex{ BlockTexture::Blank };
+	switch (sticky_) {
+	case Sticky::None:
+		tex = BlockTexture::Edges;
+		break;
+	case Sticky::WeakBlock:
+		tex = BlockTexture::BrokenEdges;
+		break;
+	case Sticky::StrongBlock:
+		tex = BlockTexture::LightEdges;
+		break;
+	case Sticky::SemiBlock:
+		tex = BlockTexture::Corners;
+		break;
+	}
 	if (modifier_) {
 		tex = tex | modifier_->texture();
 	}
-	gfx->cube.push_instance(glm::vec3(p), glm::vec3(1.0f), tex, color());
+	return tex;
+}
+
+void PushBlock::draw(GraphicsManager* gfx) {
+	FPoint3 p{ real_pos() };
+	gfx->cube.push_instance(glm::vec3(p), glm::vec3(1.0f), get_block_texture(), color_);
     draw_force_indicators(gfx->cube, p, 1.1f);
-	if (auto* car = dynamic_cast<Car*>(modifier())) {
-		
-	}
     if (modifier_) {
         modifier()->draw(gfx, p);
     }
+}
+
+void PushBlock::draw_squished(GraphicsManager* gfx, FPoint3 p, float scale) {
+	gfx->cube.push_instance(glm::vec3(p), glm::vec3(scale, scale, 1.0f), get_block_texture(), color_);
+	draw_force_indicators(gfx->cube, p, scale * 1.1f);
+	if (auto* car = dynamic_cast<Car*>(modifier_.get())) {
+		car->draw_squished(gfx, p, scale);
+	}
 }

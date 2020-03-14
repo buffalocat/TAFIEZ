@@ -362,6 +362,7 @@ void MoveProcessor::try_door_entry() {
 			door_state_ = DoorState::AwaitingExtExit;
 		}
 		for (auto& obj : door_travelling_objs_) {
+			anims_->receive_signal(AnimationSignal::DoorEnter, obj.raw, delta_frame_);
 			map_->take_from_map(obj.raw, true, true, delta_frame_);
 			collect_adj_fall_checks(obj.raw);
 		}
@@ -389,6 +390,7 @@ void MoveProcessor::place_door_travelling_objects() {
 			GameObject* obj = dto.raw;
 			obj->abstract_put(exit_pos + dto.rel_pos, delta_frame_);
 			map_->put_in_map(obj, true, true, delta_frame_);
+			anims_->receive_signal(AnimationSignal::DoorExit, obj, delta_frame_);
 			fall_check_.push_back(obj);
 			if (auto* snake = dynamic_cast<SnakeBlock*>(obj)) {
 				moved_snakes.push_back(snake);
@@ -400,15 +402,17 @@ void MoveProcessor::place_door_travelling_objects() {
 			Point3 exit_pos = exit_door->pos();
 			for (auto& dto : door_travelling_objs_) {
 				GameObject* obj = dto.raw;
-				auto dup = obj->duplicate(map_, delta_frame_);
+				auto dup_unique = obj->duplicate(map_, delta_frame_);
+				auto* dup = dup_unique.get();
 				dup->abstract_put(exit_pos + dto.rel_pos, delta_frame_);
-				fall_check_.push_back(dup.get());
-				if (auto* snake = dynamic_cast<SnakeBlock*>(dup.get())) {
+				fall_check_.push_back(dup);
+				if (auto* snake = dynamic_cast<SnakeBlock*>(dup)) {
 					moved_snakes.push_back(snake);
-				} else if (auto* player = dynamic_cast<Player*>(dup.get())) {
+				} else if (auto* player = dynamic_cast<Player*>(dup)) {
 					new_players.push_back(player);
 				}
-				map_->create_in_map(std::move(dup), true, delta_frame_);
+				map_->create_in_map(std::move(dup_unique), true, delta_frame_);
+				anims_->receive_signal(AnimationSignal::DoorExit, dup, delta_frame_);
 			}
 		}
 		// Make sure to move everything before destroying the originals
@@ -501,7 +505,6 @@ void MoveProcessor::ext_door_exit() {
 	map_ = dest_room_->map();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	place_door_travelling_objects();
-	//TODO: delay this until we're back in the playing state (just flip a "Snap Camera" flag!)
 	playing_state_->move_camera_to_player(true);
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;

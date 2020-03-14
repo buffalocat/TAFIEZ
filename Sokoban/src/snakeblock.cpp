@@ -143,9 +143,7 @@ bool SnakeBlock::moving_push_comp() {
 	}
 }
 
-const float SNAKE_LINK_DRAW_DIST[] = { 0.15f, 0.25f, 0.35f };
-
-void SnakeBlock::draw(GraphicsManager* gfx) {
+BlockTexture SnakeBlock::get_block_texture() {
 	BlockTexture tex;
 	if (weak_) {
 		if (ends_ == 1) {
@@ -163,11 +161,17 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	if (modifier_) {
 		tex = tex | modifier_->texture();
 	}
+	return tex;
+}
+
+
+const float SNAKE_LINK_DRAW_DIST[] = { 0.15f, 0.25f, 0.35f };
+
+void SnakeBlock::draw(GraphicsManager* gfx) {
 	FPoint3 p{ real_pos() };
-	gfx->diamond.push_instance(glm::vec3(p), glm::vec3(1.0f), tex, color_);
+	gfx->diamond.push_instance(glm::vec3(p), glm::vec3(1.0f), get_block_texture(), color_);
 	draw_force_indicators(gfx->diamond, p, 1.1f);
 	for (auto link : links_) {
-		// TODO: FIX
 		FPoint3 q{ link->real_pos() };
 		float dx = float(q.x - p.x);
 		float dy = float(q.y - p.y);
@@ -179,6 +183,14 @@ void SnakeBlock::draw(GraphicsManager* gfx) {
 	}
 	if (modifier_) {
 		modifier()->draw(gfx, p);
+	}
+}
+
+void SnakeBlock::draw_squished(GraphicsManager* gfx, FPoint3 p, float scale) {
+	gfx->diamond.push_instance(glm::vec3(p), glm::vec3(scale, scale, 1.0f), get_block_texture(), color_);
+	draw_force_indicators(gfx->diamond, p, scale * 1.1f);
+	if (auto* car = dynamic_cast<Car*>(modifier_.get())) {
+		car->draw_squished(gfx, p, scale);
 	}
 }
 
@@ -222,7 +234,7 @@ void SnakeBlock::remove_link_one_way_undoable(SnakeBlock* sb, DeltaFrame* delta_
 
 bool SnakeBlock::can_link(SnakeBlock* snake) {
 	return available() && snake->available() &&
-		(color() == snake->color()) && (pos_.z == snake->pos_.z) &&
+		(color_ == snake->color_) && (pos_.z == snake->pos_.z) &&
 		(abs(pos_.x - snake->pos_.x) + abs(pos_.y - snake->pos_.y) == 1) &&
 		!in_links(snake);
 }
@@ -234,7 +246,7 @@ bool SnakeBlock::check_add_local_links(RoomMap* map, DeltaFrame* delta_frame) {
 	bool added = false;
 	for (auto& d : H_DIRECTIONS) {
 		auto snake = dynamic_cast<SnakeBlock*>(map->view(shifted_pos(d)));
-		if (snake && color() == snake->color() && snake->available() && !in_links(snake) && !snake->confused(map)) {
+		if (snake && color_ == snake->color_ && snake->available() && !in_links(snake) && !snake->confused(map)) {
 			add_link(snake, delta_frame);
 			added = true;
 		}
