@@ -25,7 +25,6 @@
 #include "autoblock.h"
 #include "puppetblock.h"
 #include "clearflag.h"
-#include "worldresetkey.h"
 #include "permanentswitch.h"
 #include "floorsign.h"
 #include "incinerator.h"
@@ -257,6 +256,11 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 		case MapCode::ActivePlayerPos:
 			init_data->active_player = dynamic_cast<Player*>(map_->view(file.read_point3()));
 			break;
+		case MapCode::LearningPanel:
+			if (auto* sign = dynamic_cast<FloorSign*>(map_->view(file.read_point3())->modifier())) {
+				sign->learn_flag_ = file.read_uint32();
+			}
+			break;
 		case MapCode::End:
 			reading_file = false;
 			break;
@@ -313,7 +317,6 @@ void Room::read_objects(MapFileI& file) {
 			CASE_MODCODE(AutoBlock);
 			CASE_MODCODE(PuppetBlock);
 			CASE_MODCODE(ClearFlag);
-			CASE_MODCODE(WorldResetKey);
 			CASE_MODCODE(PermanentSwitch);
 			CASE_MODCODE(FloorSign);
 			CASE_MODCODE(Incinerator);

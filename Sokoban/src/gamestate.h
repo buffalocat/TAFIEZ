@@ -20,13 +20,13 @@ public:
 	GraphicsManager* gfx_{};
 	std::unique_ptr<TextRenderer> text_{};
 	GLFWwindow* window_{};
+	std::unique_ptr<GameState> parent_{};
 
 protected:
 	GameState(GameState* parent);
 
 private:
 	void defer_to_parent();
-	std::unique_ptr<GameState> parent_{};
 	std::unique_ptr<GameState>* current_state_ptr_{};
 	bool can_escape_quit_ = true;
 	bool queued_quit_ = false;

@@ -298,7 +298,7 @@ void EditorState::begin_test() {
         return;
     }
 	save_room(active_room_, false);
-    auto playing_state_unique = std::make_unique<TestPlayingState>(this);
+    auto playing_state_unique = std::make_unique<TestPlayingState>(this, std::make_unique<PlayingGlobalData>());
 	auto playing_state = playing_state_unique.get();
     create_child(std::move(playing_state_unique));
 	playing_state->init(active_room_->room->name());

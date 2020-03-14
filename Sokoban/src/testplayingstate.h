@@ -5,10 +5,11 @@
 #include "point.h"
 
 class FontManager;
+class PlayingGlobalData;
 
 class TestPlayingState: public PlayingState {
 public:
-    TestPlayingState(GameState* parent);
+    TestPlayingState(GameState* parent, std::unique_ptr<PlayingGlobalData> global);
     virtual ~TestPlayingState();
 
 	void init(std::string map_name);
@@ -17,6 +18,7 @@ public:
 	bool load_room(std::string, bool use_default_player);
 
 private:
+	std::unique_ptr<PlayingGlobalData> global_unique_;
 };
 
 #endif // TESTPLAYINGSTATE_H

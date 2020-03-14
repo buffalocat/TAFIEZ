@@ -31,7 +31,7 @@ RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	width_{ width }, height_{ height }, depth_{ depth },
 	player_cycle_{ std::make_unique<PlayerCycle>() } {
 	if (auto* ps = dynamic_cast<PlayingState*>(state)) {
-		global_ = ps->global_.get();
+		global_ = ps->global_;
 	}
 	for (int z = 0; z < depth; ++z) {
 		layers_.push_back(MapLayer(this, width_, height_, z));
@@ -556,7 +556,7 @@ void RoomMap::uncollect_flag(int req) {
 	}
 }
 
-void RoomMap::free_unbound_players(DeltaFrame* delta_frame) {
+void RoomMap::validate_players(DeltaFrame* delta_frame) {
 	for (auto* player : player_cycle_->players_) {
 		player->validate_state(this, delta_frame);
 	}

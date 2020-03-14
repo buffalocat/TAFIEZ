@@ -3,22 +3,40 @@
 
 #include "gamestate.h"
 
-enum class Menu {
-	Top,
-	New,
-	Load,
-	Delete,
-};
+class Menu;
+class SaveFile;
 
 class MainMenuState: public GameState {
 public:
-	MainMenuState();
     MainMenuState(GameState* parent);
     ~MainMenuState();
     void main_loop();
+	void init_menu();
+
+	void open_file_select();
+	void draw();
 
 private:
-	Menu menu_type_;
+	std::unique_ptr<Menu> menu_;
+};
+
+
+class FileSelectState : public GameState {
+public:
+	FileSelectState(GameState* parent);
+	~FileSelectState();
+	void main_loop();
+	void load_save_info();
+	void create_menu();
+	void draw();
+
+	void new_file();
+	void continue_file();
+
+private:
+	int save_index_ = 0;
+	std::unique_ptr<Menu> menu_{};
+	std::vector<std::unique_ptr<SaveFile>> save_files_{};
 };
 
 #endif // MAINMENUSTATE_H

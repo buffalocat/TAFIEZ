@@ -9,18 +9,18 @@ class FontManager;
 
 class RealPlayingState: public PlayingState {
 public:
-    RealPlayingState(std::unique_ptr<SaveFile> save, GameState* parent);
-    virtual ~RealPlayingState();
+    RealPlayingState(SaveFile*, GameState* parent);
+    ~RealPlayingState();
 
-	void start_from_map(std::string starting_map);
+	void play_from_map(std::string starting_map);
 	bool load_room(std::string name, bool use_default_player);
 	void make_subsave();
-	void load_most_recent_subsave();
+	void play_from_loaded_subsave();
 
 	void world_reset();
 
 private:
-	std::unique_ptr<SaveFile> savefile_;
+	SaveFile* savefile_;
 };
 
 

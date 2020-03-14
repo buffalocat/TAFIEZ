@@ -9,6 +9,7 @@
 #include "realplayingstate.h"
 #include "testplayingstate.h"
 #include "menu.h"
+#include "globalflagconstants.h"
 
 
 PauseState::PauseState(GameState* parent) : GameState(parent),
@@ -17,7 +18,7 @@ menu_{ std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72
 	menu_->push_entry("Unpause", [this]() { unpause(); });
 	if (dynamic_cast<RealPlayingState*>(parent)) {
 		menu_->push_entry("Save Game", [this]() { playing_state_->make_subsave(); });
-		if (playing_state_->global_->has_flag(WORLD_RESET_GLOBAL_ID)) {
+		if (playing_state_->global_->has_flag(get_misc_flag(MiscGlobalFlags::WorldResetLearned))) {
 			menu_->push_entry("World Reset", [this]() { world_reset(); });
 		}
 		menu_->push_entry("Quit Game", [this]() { quit_playing(); });
@@ -47,12 +48,20 @@ void PauseState::unpause() {
 	queue_quit();
 }
 
+void PauseState::save() {
+	playing_state_->make_subsave();
+	queue_quit();
+}
+
 void PauseState::quit_playing() {
 	queue_quit();
 	playing_state_->queue_quit();
+	if (dynamic_cast<RealPlayingState*>(playing_state_)) {
+		playing_state_->parent_->queue_quit();
+	}
 }
 
 void PauseState::world_reset() {
 	playing_state_->world_reset();
-	unpause();
+	queue_quit();
 }

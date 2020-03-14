@@ -31,7 +31,8 @@ const Point3 MOVEMENT_DIRS[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { -1, 0, 0 }, { 0, -
 PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 	room{ std::move(arg_room) } {}
 
-PlayingState::PlayingState(GameState* parent) : GameState(parent) {
+PlayingState::PlayingState(GameState* parent, PlayingGlobalData* global) :
+	GameState(parent), global_{ global } {
 	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this, text_->ui_atlas_);
 }
 
@@ -232,7 +233,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	std::string name = path.stem().string();
 	auto room = std::make_unique<Room>(this, name);
 	RoomInitData init_data{};
-	room->load_from_file(*objs_, file, global_.get(), &init_data);
+	room->load_from_file(*objs_, file, global_, &init_data);
 	if (use_default_player) {
 		room->map()->player_cycle_->set_active_player(init_data.default_player);
 	} else {
@@ -250,6 +251,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 			room->map()->remove_from_object_array(car->parent_);
 		}
 	}
+	room->map()->validate_players(nullptr);
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }
 

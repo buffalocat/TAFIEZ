@@ -36,7 +36,7 @@ struct PlayingRoom {
 
 class PlayingState : public GameState {
 public:
-	PlayingState(GameState* parent);
+	PlayingState(GameState* parent, PlayingGlobalData* global);
 	virtual ~PlayingState();
 
 	void main_loop();
@@ -60,8 +60,8 @@ public:
 
 	bool mandatory_wait_ = false;
 
-	std::unique_ptr<PlayingGlobalData> global_{ std::make_unique<PlayingGlobalData>() };
-	std::unique_ptr<AnimationManager> anims_;
+	PlayingGlobalData* global_{};
+	std::unique_ptr<AnimationManager> anims_{};
 
 	Room* room_{};
 	std::unique_ptr<DeltaFrame> delta_frame_{};

@@ -278,6 +278,10 @@ void TextRenderer::update_drawers() {
 	string_drawers_ = std::move(new_drawers);
 }
 
+void TextRenderer::reset() {
+	string_drawers_.clear();
+}
+
 void TextRenderer::draw_ui() {
 	ui_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, ui_atlas_);

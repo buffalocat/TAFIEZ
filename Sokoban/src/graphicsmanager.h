@@ -109,6 +109,7 @@ public:
 
 	void draw();
 	void update_drawers();
+	void reset();
 	void draw_ui();
 	void draw_text();
 

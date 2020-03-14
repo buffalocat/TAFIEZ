@@ -5,78 +5,94 @@
 #include "editorstate.h"
 #include "realplayingstate.h"
 #include "savefile.h"
+#include "menu.h"
+#include "graphicsmanager.h"
+#include "fontmanager.h"
 
-MainMenuState::MainMenuState() : GameState(), menu_type_{ Menu::Top } {}
+constexpr bool EDITOR_ENABLED = true;
 
-MainMenuState::MainMenuState(GameState* parent) : GameState(parent), menu_type_{ Menu::Top } {}
+MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {}
 
 MainMenuState::~MainMenuState() {}
 
-void MainMenuState::main_loop() {
-	bool p_open = true;
-	if (!ImGui::Begin("Main Menu Window##MAINMENU", &p_open)) {
-		ImGui::End();
-		return;
+void MainMenuState::init_menu() {
+	menu_ = std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
+	if (EDITOR_ENABLED) {
+		menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
 	}
+	menu_->push_entry("Select File", [this]() { open_file_select(); });
+	menu_->push_entry("Quit", [this]() { queue_quit(); });
+}
 
-	switch (menu_type_) {
-	case Menu::Top:
-		if (ImGui::Button("Open Editor##MAINMENU")) {
-			create_child(std::make_unique<EditorState>(this));
+void MainMenuState::main_loop() {
+	menu_->update();
+	menu_->handle_input(this);
+	draw();
+}
+
+void MainMenuState::open_file_select() {
+	create_child(std::make_unique<FileSelectState>(this));
+}
+
+void MainMenuState::draw() {
+	menu_->draw();
+}
+
+
+const int MAX_SAVE_FILES = 7;
+
+FileSelectState::FileSelectState(GameState* parent) : GameState(parent) {
+	load_save_info();
+	create_menu();
+}
+
+FileSelectState::~FileSelectState() {}
+
+void FileSelectState::main_loop() {
+	menu_->update();
+	menu_->handle_input(this);
+	draw();
+}
+
+void FileSelectState::load_save_info() {
+	for (int i = 0; i < MAX_SAVE_FILES; ++i) {
+		std::string cur_name = std::to_string(i + 1);
+		auto cur_file = std::make_unique<SaveFile>(cur_name);
+		cur_file->create_save_dir();
+		cur_file->load_meta();
+		if (cur_file->exists_) {
+			cur_file->load_most_recent_subsave();
 		}
-		if (ImGui::Button("Start New File##MAINMENU")) {
-			menu_type_ = Menu::New;
-		}
-		if (ImGui::Button("Load File##MAINMENU")) {
-			menu_type_ = Menu::Load;
-		}
-		if (ImGui::Button("Delete File##MAINMENU")) {
-			menu_type_ = Menu::Delete;
-		}
-		break;
-	case Menu::New:
-		if (ImGui::Button("Start New Game on File 1##MAINMENU")) {
-			auto savefile_dir = "1";
-			auto savefile = std::make_unique<SaveFile>(savefile_dir);
-			if (savefile->create()) {
-				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile), this);
-				auto playing_state = playing_state_unique.get();
-				create_child(std::move(playing_state_unique));
-				playing_state->start_from_map(NEW_FILE_START_MAP);
-			} else {
-				std::cout << "That file already exists! Load it or delete it!" << std::endl;
-			}
-		}
-		if (ImGui::Button("Back##MAINMENU")) {
-			menu_type_ = Menu::Top;
-		}
-		break;
-	case Menu::Load:
-		if (ImGui::Button("Load Game from File 1##MAINMENU")) {
-			auto savefile_dir = "1";
-			auto savefile = std::make_unique<SaveFile>(savefile_dir);
-			if (savefile->load_meta()) {
-				auto playing_state_unique = std::make_unique<RealPlayingState>(std::move(savefile), this);
-				auto playing_state = playing_state_unique.get();
-				create_child(std::move(playing_state_unique));
-				playing_state->load_most_recent_subsave();
-			} else {
-				std::cout << "That doesn't exist!!" << std::endl;
-			}
-		}
-		if (ImGui::Button("Back##MAINMENU")) {
-			menu_type_ = Menu::Top;
-		}
-		break;
-	case Menu::Delete:
-		if (ImGui::Button("Delete Save File 1?##MAINMENU")) {
-			// Delete the file (ARE YOU SURE??)
-			std::filesystem::remove_all(std::filesystem::path("saves") / "1");
-		}
-		if (ImGui::Button("Back##MAINMENU")) {
-			menu_type_ = Menu::Top;
-		}
-		break;
-	}    
-    ImGui::End();
+		save_files_.push_back(std::move(cur_file));
+	}
+}
+
+void FileSelectState::create_menu() {
+	menu_ = std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
+	if (save_files_[save_index_]->exists_) {
+		menu_->push_entry("Continue", [this]() { continue_file(); });
+		menu_->push_entry("Load Save", [this]() {});
+		menu_->push_entry("Delete File", [this]() {});
+	} else {
+		menu_->push_entry("New File", [this]() { new_file(); });
+	}
+	menu_->push_entry("Return to Main Menu", [this]() { queue_quit(); });
+}
+
+void FileSelectState::draw() {
+	menu_->draw();
+}
+
+void FileSelectState::new_file() {
+	auto playing_state_unique = std::make_unique<RealPlayingState>(save_files_[save_index_].get(), this);
+	auto playing_state = playing_state_unique.get();
+	create_child(std::move(playing_state_unique));
+	playing_state->play_from_map(NEW_FILE_START_MAP);
+}
+
+void FileSelectState::continue_file() {
+	auto playing_state_unique = std::make_unique<RealPlayingState>(save_files_[save_index_].get(), this);
+	auto playing_state = playing_state_unique.get();
+	create_child(std::move(playing_state_unique));
+	playing_state->play_from_loaded_subsave();
 }

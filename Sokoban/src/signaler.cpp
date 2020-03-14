@@ -188,7 +188,7 @@ void FateSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, Move
 	bool state = count_ >= threshold_;
 	if (state != (prev_count_ >= threshold_)) {
 		if (switches_.size() == 2) {
-			auto* globals = mp->playing_state_->global_.get();
+			auto* globals = mp->playing_state_->global_;
 			// Check for the fate flag
 			if (globals->has_flag(FATE_SIGNALER_CHOICE[0])) {
 				switches_[1]->remove_signaler(this);

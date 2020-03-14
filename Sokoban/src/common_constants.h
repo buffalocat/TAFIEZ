@@ -8,7 +8,6 @@ const int MAX_COLOR_CYCLE = 5;
 const unsigned int MAX_LONG_STRING_SIZE = 4096;
 
 extern const unsigned int GENERIC_WALL_ID;
-extern const unsigned int WORLD_RESET_GLOBAL_ID;
 
 extern const Point3 DIRECTIONS[6];
 extern const Point3 H_DIRECTIONS[4];

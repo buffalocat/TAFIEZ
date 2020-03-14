@@ -305,5 +305,5 @@ void HorizontalStepProcessor::perform_horizontal_step() {
 	for (auto sb : link_add_check) {
 		sb->check_add_local_links(map_, delta_frame_);
 	}
-	map_->free_unbound_players(delta_frame_);
+	map_->validate_players(delta_frame_);
 }

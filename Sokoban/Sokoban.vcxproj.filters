@@ -480,9 +480,6 @@
     <ClCompile Include="..\include\glad\glad.c">
       <Filter>External Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\worldresetkey.cpp">
-      <Filter>Source Files\Object Modifiers</Filter>
-    </ClCompile>
     <ClCompile Include="src\pressswitch.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>

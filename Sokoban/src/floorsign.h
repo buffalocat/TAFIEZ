@@ -15,6 +15,8 @@ public:
 
 	void serialize(MapFileO& file);
 	static void deserialize(MapFileI& file, RoomMap*, GameObject* parent);
+	bool relation_check();
+	void relation_serialize(MapFileO& file);
 
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
@@ -27,6 +29,8 @@ public:
 	void toggle_active(TextRenderer* text, DeltaFrame* delta_frame);
 
 	void draw(GraphicsManager* gfx, FPoint3 pos);
+
+	unsigned int learn_flag_ = 0;
 
 private:
 	std::string content_;
@@ -47,5 +51,17 @@ public:
 private:
 	FloorSign* sign_;
 	TextRenderer* text_;
+};
+
+class LearnFlagDelta : public Delta {
+public:
+	LearnFlagDelta(FloorSign* sign, unsigned int flag, PlayingGlobalData* global);
+	~LearnFlagDelta();
+	void revert();
+
+private:
+	FloorSign* sign_;
+	unsigned int flag_;
+	PlayingGlobalData* global_;
 };
 

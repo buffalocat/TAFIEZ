@@ -36,36 +36,40 @@ void Menu::handle_input(GameState* game_state) {
 		return;
 	}
 	entries_[current_].text->set_color(inactive_color_);
-	static int input_cooldown = 0;
-	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
-		if (input_cooldown == 0) {
-			--current_;
-			if (current_ < 0) {
-				current_ += num_entries_;
-			}
-			time_ = 0;
-			input_cooldown = MAX_MENU_COOLDOWN;
-		} else {
-			--input_cooldown;
+	if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
+		if (can_select_) {
+			can_select_ = false;
+			(entries_[current_].callback)();
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		if (input_cooldown == 0) {
-			++current_;
-			if (current_ >= num_entries_) {
-				current_ -= num_entries_;
-			}
-			entries_[current_].text->set_color(active_color_);
-			input_cooldown = MAX_MENU_COOLDOWN;
-		} else {
-			--input_cooldown;
-		}
-	} else if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
-		input_cooldown = MAX_MENU_COOLDOWN;
-		(entries_[current_].callback)();
 	} else {
-		input_cooldown = 0;
+		can_select_ = true;
+		if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+			if (input_cooldown_ == 0) {
+				--current_;
+				if (current_ < 0) {
+					current_ += num_entries_;
+				}
+				time_ = 0;
+				input_cooldown_ = MAX_MENU_COOLDOWN;
+			} else {
+				--input_cooldown_;
+			}
+		} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			if (input_cooldown_ == 0) {
+				++current_;
+				if (current_ >= num_entries_) {
+					current_ -= num_entries_;
+				}
+				time_ = 0;
+				input_cooldown_ = MAX_MENU_COOLDOWN;
+			} else {
+				--input_cooldown_;
+			}
+		} else {
+			input_cooldown_ = 0;
+		}
 	}
-	glm::vec4 cur_color = active_color_ * glm::vec4((float)(0.85f + 0.3f * cos(time_ * TWO_PI  / (float)MENU_CYCLE_TIME)));
+	glm::vec4 cur_color = active_color_ * glm::vec4((float)(0.85f + 0.2f * sin(time_ * TWO_PI  / (float)MENU_CYCLE_TIME)));
 	cur_color.w = 1.0f;
 	entries_[current_].text->set_color(cur_color);
 }

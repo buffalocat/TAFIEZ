@@ -5,12 +5,14 @@
 
 GameState::GameState() {}
 
-GameState::GameState(GameState* parent) :
-	parent_{},
-	gfx_{ parent->gfx_ },
-	text_{ std::make_unique<TextRenderer>(parent->gfx_->fonts_.get()) },
-	window_{ parent->window_ },	
-	current_state_ptr_{ parent->current_state_ptr_ } {}
+GameState::GameState(GameState* parent): parent_{} {
+	if (parent) {
+		gfx_ = parent->gfx_;
+		text_ = std::make_unique<TextRenderer>(gfx_->fonts_.get());
+		window_ = parent->window_;
+		current_state_ptr_ = parent->current_state_ptr_;
+	}
+}
 
 GameState::~GameState() {}
 

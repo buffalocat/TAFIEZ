@@ -36,6 +36,8 @@ private:
 	float v_space_ = 0.2f;
 	glm::vec4 inactive_color_, active_color_;
 	int time_;
+	int input_cooldown_ = 0;
+	bool can_select_ = false;
 };
 
 #endif //SOKOBAN_MENU_H

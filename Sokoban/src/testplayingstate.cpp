@@ -6,8 +6,10 @@
 #include "roommap.h"
 #include "player.h"
 #include "car.h"
+#include "savefile.h"
 
-TestPlayingState::TestPlayingState(GameState* parent) : PlayingState(parent) {}
+TestPlayingState::TestPlayingState(GameState* parent, std::unique_ptr<PlayingGlobalData> global):
+	PlayingState(parent, global.get()), global_unique_{ std::move(global) } {}
 
 TestPlayingState::~TestPlayingState() {}
 

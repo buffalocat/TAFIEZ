@@ -34,7 +34,7 @@ enum class ModCode {
 	AutoBlock = 5,
 	PuppetBlock = 6,
 	ClearFlag = 7,
-	WorldResetKey = 8,
+	// 8 Unused
 	PermanentSwitch = 9,
 	FloorSign = 10,
 	Incinerator = 11,

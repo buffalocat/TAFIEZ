@@ -18,7 +18,6 @@
 #include "autoblock.h"
 #include "puppetblock.h"
 #include "clearflag.h"
-#include "worldresetkey.h"
 #include "permanentswitch.h"
 #include "floorsign.h"
 #include "incinerator.h"
@@ -91,7 +90,6 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::RadioButton("AutoBlock##MOD_object", &mod_code, ModCode::AutoBlock);
 		ImGui::RadioButton("PuppetBlock##MOD_object", &mod_code, ModCode::PuppetBlock);
 		ImGui::RadioButton("ClearFlag##MOD_object", &mod_code, ModCode::ClearFlag);
-		ImGui::RadioButton("WorldResetKey##MOD_object", &mod_code, ModCode::WorldResetKey);
 		ImGui::RadioButton("PermanentSwitch##MOD_object", &mod_code, ModCode::PermanentSwitch);
 		ImGui::RadioButton("FloorSign##MOD_object", &mod_code, ModCode::FloorSign);
 		ImGui::RadioButton("Incinerator##MOD_object", &mod_code, ModCode::Incinerator);
@@ -207,7 +205,6 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 	// Trivial objects
 	case ModCode::AutoBlock:
 	case ModCode::PuppetBlock:
-	case ModCode::WorldResetKey:
 		break;
 	}
 }
@@ -289,9 +286,6 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	case ModCode::ClearFlag:
 		mod = std::make_unique<ClearFlag>(model_clear_flag);
-		break;
-	case ModCode::WorldResetKey:
-		mod = std::make_unique<WorldResetKey>(obj);
 		break;
 	case ModCode::PermanentSwitch:
 		mod = std::make_unique<PermanentSwitch>(model_perm_switch);

@@ -54,7 +54,6 @@ const int MAX_UNDO_DEPTH = 1 << 16;
 const int FAST_MAP_MOVE = 10;
 
 const unsigned int GENERIC_WALL_ID = 1;
-const unsigned int WORLD_RESET_GLOBAL_ID = 145342541;
 
 // NOTE: the order matters here, for serialization reasons!
 const Point3 DIRECTIONS[6] = { {-1,0,0}, {0,-1,0}, {1,0,0}, {0,1,0}, {0,0,1}, {0,0,-1} };
@@ -65,8 +64,8 @@ const int MAX_ROOM_DIMS = 255;
 const std::filesystem::path MAPS_MAIN = std::filesystem::path("maps") / "main";
 const std::filesystem::path MAPS_TEMP = std::filesystem::path("maps") / "temp";
 
-const std::string NEW_FILE_START_MAP = "story1";
-const std::string WORLD_RESET_START_MAP = "story2";
+const std::string NEW_FILE_START_MAP = "T";
+const std::string WORLD_RESET_START_MAP = "HA";
 
 const std::string Fonts::KALAM_BOLD = "resources/kalam/Kalam-Bold.ttf";
 const std::string Fonts::ABEEZEE = "resources/abeezee/ABeeZee-Regular.otf";

@@ -379,17 +379,15 @@ void AnimationManager::reset_temp() {
 	}
 	temp_animated_objects_.clear();
 	fall_trails_.clear();
+	door_entering_objects_.clear();
 }
 
 void AnimationManager::reset() {
+	reset_temp();
 	for (auto* mod : static_animated_objects_) {
 		mod->reset_animation();
 	}
 	static_animated_objects_.clear();
-	for (auto* mod : temp_animated_objects_) {
-		mod->reset_animation();
-	}
-	temp_animated_objects_.clear();
 	sources_.clear();
 	particles_.clear();
 	source_map_.clear();

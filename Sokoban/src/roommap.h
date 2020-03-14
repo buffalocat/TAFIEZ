@@ -76,7 +76,7 @@ public:
 	void collect_flag();
 	void uncollect_flag(int req);
 
-	void free_unbound_players(DeltaFrame*);
+	void validate_players(DeltaFrame*);
 
 	void add_door(Door* door);
 	void remove_door(Door* door);

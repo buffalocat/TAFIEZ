@@ -35,7 +35,6 @@ void EditorGlobalData::load_flags(std::filesystem::path path) {
 		// We have no file to read; start off with the *truly* global flags
 		// These aren't bound to any particular room, and never change (this list should not get very long)
 		flags_[0] = "";
-		flags_[WORLD_RESET_GLOBAL_ID] = "";
 	}
 }
 
@@ -118,16 +117,14 @@ void PlayingGlobalData::uncollect_clear_flag(char zone) {
 
 
 SaveFile::SaveFile(std::string base) :
-	base_ {std::filesystem::path("saves") / base} {}
+	base_ {std::filesystem::path("saves") / base},
+	global_{ std::make_unique<PlayingGlobalData>() } {}
 
 SaveFile::~SaveFile() {}
 
-bool SaveFile::create() {
-	if (std::filesystem::exists(base_)) {
-		return false;
-	} else {
+void SaveFile::create_save_dir() {
+	if (!std::filesystem::exists(base_)) {
 		std::filesystem::create_directory(base_);
-		return true;
 	}
 }
 
@@ -150,27 +147,28 @@ void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>&
 	save_meta();
 }
 
-void SaveFile::load_subsave(unsigned int subsave_index, std::string* cur_room_name) {
+void SaveFile::load_subsave(unsigned int subsave_index) {
 	cur_subsave_ = subsave_index;
 	auto subsave_path = base_ / std::to_string(subsave_index);
 	global_->load_flags(subsave_path);
-	load_room_data(subsave_path, cur_room_name);
+	load_room_data(subsave_path);
 }
 
-void SaveFile::load_most_recent_subsave(std::string* cur_room_name) {
-	load_subsave(cur_subsave_, cur_room_name);
+void SaveFile::load_most_recent_subsave() {
+	load_subsave(cur_subsave_);
 }
 
-bool SaveFile::load_meta() {
+void SaveFile::load_meta() {
 	auto meta_path = base_ / "meta.sav";
 	if (!std::filesystem::exists(meta_path)) {
-		return false;
+		return;
 	}
 	std::ifstream meta_file{};
 	meta_file.open(meta_path, std::ios::in);
 	meta_file >> cur_subsave_ >> next_subsave_;
 	meta_file.close();
-	return true;
+	exists_ = true;
+	return;
 }
 
 void SaveFile::save_meta() {
@@ -181,7 +179,7 @@ void SaveFile::save_meta() {
 	meta_file.close();
 }
 
-void SaveFile::load_room_data(std::filesystem::path subsave_path, std::string* cur_room_name) {
+void SaveFile::load_room_data(std::filesystem::path subsave_path) {
 	auto room_data_path = subsave_path / "rooms.sav";
 	std::ifstream room_data_file{};
 	room_data_file.open(room_data_path, std::ios::in);
@@ -193,7 +191,7 @@ void SaveFile::load_room_data(std::filesystem::path subsave_path, std::string* c
 		room_data_file >> room_name >> subsave_index;
 		room_subsave_[room_name] = subsave_index;
 	}
-	room_data_file >> *cur_room_name;
+	room_data_file >> cur_room_name_;
 	room_data_file.close();
 }
 
@@ -205,6 +203,7 @@ void SaveFile::save_room_data(std::filesystem::path subsave_path, std::string cu
 	for (auto& p : room_subsave_) {
 		room_data_file << p.first << " " << p.second << " ";
 	}
+	cur_room_name_ = cur_room_name;
 	room_data_file << cur_room_name;
 	room_data_file.close();
 }

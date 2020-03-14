@@ -53,20 +53,22 @@ public:
 	SaveFile(std::string base);
 	~SaveFile();
 
-	bool create();
-	bool load_meta();
+	void create_save_dir();
+	void load_meta();
 	std::filesystem::path get_path(std::string, bool* from_main);
 	void make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>& loaded_rooms, std::string const& cur_room_name);
-	void load_subsave(unsigned int subsave_index, std::string* cur_room_name);
-	void load_most_recent_subsave(std::string* cur_room_name);
+	void load_subsave(unsigned int subsave_index);
+	void load_most_recent_subsave();
 
 	void world_reset();
 
-	GlobalData* global_{};
+	std::unique_ptr<PlayingGlobalData> global_{};
+	bool exists_ = false;
+	std::string cur_room_name_{};
 
 private:
 	void save_meta();
-	void load_room_data(std::filesystem::path subsave_path, std::string* cur_room_name);
+	void load_room_data(std::filesystem::path subsave_path);
 	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
 	void save_room(Room* room, std::filesystem::path path);
 
