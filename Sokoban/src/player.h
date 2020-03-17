@@ -58,12 +58,13 @@ public:
 	// The car the player is currently riding for animation purposes
 	Car* animation_car_{};
 
+	CauseOfDeath death_ = CauseOfDeath::None;
+
 private:
 	void set_bound();
 
 	Car* car_;
 	PlayerState state_;
-	CauseOfDeath death_ = CauseOfDeath::None;
 
 	friend class PlayerStateDelta;
 	friend class ObjectTab;

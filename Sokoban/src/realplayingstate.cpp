@@ -10,6 +10,7 @@
 #include "savefile.h"
 #include "mapfile.h"
 #include "delta.h"
+#include "player.h"
 
 RealPlayingState::RealPlayingState(SaveFile* savefile, GameState* parent) :
 	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {}
@@ -40,6 +41,9 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 }
 
 void RealPlayingState::make_subsave() {
+	if (player_doa()->death_ != CauseOfDeath::None) {
+		undo_stack_->pop();
+	}
 	savefile_->make_subsave(loaded_rooms_, active_room()->name());
 }
 

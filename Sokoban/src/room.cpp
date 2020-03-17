@@ -229,6 +229,8 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			auto* body = dynamic_cast<GateBody*>(map_->view(file.read_point3()));
 			auto* gate = dynamic_cast<Gate*>(map_->view(file.read_point3())->modifier());
 			body->set_gate(gate);
+			// Reset the gate's listener
+			gate->setup_on_put(map_.get(), nullptr, false);
 			break;
 		}
 		case MapCode::WallRuns:
