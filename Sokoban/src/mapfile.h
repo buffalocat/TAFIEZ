@@ -23,7 +23,8 @@ enum class MapCode {
 	DefaultCarPos = 17, // The position of the default starting car (optional)
 	ActivePlayerPos = 18, // The position of the active player
 	FateSignaler = 19,
-	LearningPanel = 20,
+	FloorSignFlag = 20,
+	DoorFlag = 21,
 	End = 255,
 };
 

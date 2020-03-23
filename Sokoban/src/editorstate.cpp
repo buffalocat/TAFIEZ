@@ -258,6 +258,10 @@ EditorRoom* EditorState::reload(EditorRoom* eroom) {
     return active_room_;
 }
 
+#include "globalflagconstants.h"
+#include "maplayer.h"
+#include "permanentswitch.h"
+
 void EditorState::load_save_cycle() {
 	for (auto& path : std::filesystem::directory_iterator(MAPS_MAIN)) {
 		auto path_name = path.path().string();

@@ -9,7 +9,7 @@
 #include "graphicsmanager.h"
 #include "fontmanager.h"
 
-constexpr bool EDITOR_ENABLED = false;
+constexpr bool EDITOR_ENABLED = true;
 
 MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {}
 

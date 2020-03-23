@@ -131,6 +131,7 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 			door->door_id_ = new_door_id;
 			room_map->add_door(door);
 		}
+		ImGui::InputScalarN("Flag on Entry (0 = None)##MOD_DOOR_flag", ImGuiDataType_U32, &door->map_flag_, 1);
 		break;
 	}
 	case ModCode::Gate:

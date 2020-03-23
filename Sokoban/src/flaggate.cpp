@@ -72,10 +72,6 @@ void FlagGate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MovePro
 	}
 }
 
-void FlagGate::destroy(MoveProcessor* mp, CauseOfDeath) {
-	signal_animation(mp->anims_, mp->delta_frame_);
-}
-
 void FlagGate::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
 	if (parent_->tangible_) {
 		anims->receive_signal(AnimationSignal::FlagGateOn, parent_, delta_frame);
@@ -211,6 +207,20 @@ void FlagGate::spawn_sigils() {
 		for (int i = 0; i < 7; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1, 8 });
 		}
+		for (auto& sigil : sigils_) {
+			sigil.lum = 0.0f;
+		}
+		break;
+	case 24: // TODO
+		for (int i = 0; i < 3; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
+		}
+		for (int i = 0; i < 11; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i + 3, 32 });
+		}
+		for (int i = 0; i < 18; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 32 });
+		}
 		break;
 	case 32:
 		for (int i = 0; i < 3; ++i) {
@@ -221,6 +231,17 @@ void FlagGate::spawn_sigils() {
 		}
 		for (int i = 0; i < 18; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i+14, 32 });
+		}
+		break;
+	case 36: // TODO
+		for (int i = 0; i < 3; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
+		}
+		for (int i = 0; i < 11; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i + 3, 32 });
+		}
+		for (int i = 0; i < 18; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 32 });
 		}
 		break;
 	default:
@@ -360,7 +381,7 @@ void FlagSigil::draw(ModelInstancer* model, FPoint3 p, int orientation, int time
 		break;
 	}
 	float value = std::min(std::max((charge - FLAG_SIGIL_DELAY * index), 0), MAX_FLAG_SIGIL_CHARGE) / (float)MAX_FLAG_SIGIL_CHARGE;
-	glm::vec4 color = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f) * glm::vec4(1 - value) + COLOR_VECTORS[GOLD] * glm::vec4(value);
+	glm::vec4 color = glm::vec4(lum, lum, lum, 1.0f) * glm::vec4(1 - value) + COLOR_VECTORS[GOLD] * glm::vec4(value);
 	color.w = (float)opacity / (float)MAX_FLAG_SIGIL_OPACITY;
 	model->push_instance(pos, glm::vec3(0.6f), tex, color);
 }

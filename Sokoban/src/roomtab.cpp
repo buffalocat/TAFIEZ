@@ -58,7 +58,7 @@ int zone_input_callback(ImGuiInputTextCallbackData* data) {
 			// Make uppercase
 			c &= 95;
 		}
-		if ((('0' <= c) && (c <= '9')) || (('A' <= c) && (c <= 'Z'))) {
+		if ((('0' <= c) && (c <= '9')) || (('A' <= c) && (c <= 'Z')) || (c == '?')) {
 			data->Buf[0] = c;
 			data->BufDirty = true;
 			return 1;

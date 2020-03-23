@@ -23,7 +23,7 @@ EditorGlobalData::EditorGlobalData() : GlobalData() {
 EditorGlobalData::~EditorGlobalData() {}
 
 void EditorGlobalData::load_flags(std::filesystem::path path) {
-	auto flag_file_path = path / "global.sav";
+	auto flag_file_path = path / "used_flags.sav";
 	if (std::filesystem::exists(flag_file_path)) {
 		auto flag_file = MapFileI(flag_file_path);
 		unsigned int num_flags = flag_file.read_uint32();
@@ -32,14 +32,37 @@ void EditorGlobalData::load_flags(std::filesystem::path path) {
 			flags_[flag] = flag_file.read_str();
 		}
 	} else {
-		// We have no file to read; start off with the *truly* global flags
-		// These aren't bound to any particular room, and never change (this list should not get very long)
+		// We have no file to read; start off with hardcoded global flags
 		flags_[0] = "";
+		for (auto f : FLAG_COLLECT_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : ZONE_ACCESSED_GLOBAL_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : HUB_ACCESSED_GLOBAL_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : HUB_ALT_ACCESSED_GLOBAL_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : X_ALT_ACCESSED_GLOBAL_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : FATE_SIGNALER_CHOICE) {
+			flags_[f] = "";
+		}
+		for (auto f : MISC_GLOBAL_FLAGS) {
+			flags_[f] = "";
+		}
+		for (auto f : UNUSED_FLAGS) {
+			flags_[f] = "";
+		}
 	}
 }
 
 void EditorGlobalData::save_flags(std::filesystem::path path) {
-	auto flag_file = MapFileO(path / "global.sav");
+	auto flag_file = MapFileO(path / "used_flags.sav");
 	flag_file.write_uint32((unsigned int)flags_.size());
 	for (auto pair : flags_) {
 		flag_file.write_uint32(pair.first);

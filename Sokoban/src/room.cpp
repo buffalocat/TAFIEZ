@@ -258,7 +258,7 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 		case MapCode::ActivePlayerPos:
 			init_data->active_player = dynamic_cast<Player*>(map_->view(file.read_point3()));
 			break;
-		case MapCode::LearningPanel:
+		case MapCode::FloorSignFlag:
 			if (auto* sign = dynamic_cast<FloorSign*>(map_->view(file.read_point3())->modifier())) {
 				sign->learn_flag_ = file.read_uint32();
 			}

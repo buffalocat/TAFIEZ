@@ -46,7 +46,7 @@ bool FloorSign::relation_check() {
 }
 
 void FloorSign::relation_serialize(MapFileO& file) {
-	file << MapCode::LearningPanel;
+	file << MapCode::FloorSignFlag;
 	file << pos();
 	file.write_uint32(learn_flag_);
 }

@@ -2,8 +2,6 @@
 #define GAMEOBJECTARRAY_H
 
 
-
-
 class GameObject;
 
 class GameObjectArray
@@ -17,7 +15,6 @@ public:
     void schedule_deletion(GameObject* obj);
 	void remove_deleted_objects();
 
-private:
 	std::vector<std::unique_ptr<GameObject>> array_{};
 	std::vector<GameObject*> to_delete_{};
 };

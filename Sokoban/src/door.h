@@ -49,6 +49,7 @@ public:
     std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 	unsigned int door_id_;
+	unsigned int map_flag_ = 0;
 	
 	std::unique_ptr<DoorData> data_{};
 };

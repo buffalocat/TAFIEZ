@@ -14,6 +14,7 @@ struct FlagSigil {
 	int phase, period;
 	int index;
 	int charge = 0;
+	float lum = 0.9f;
 	int opacity = MAX_FLAG_SIGIL_OPACITY;
 
 	void update(bool signal, int total);
@@ -54,7 +55,6 @@ public:
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void apply_state_change(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-	void destroy(MoveProcessor* mp, CauseOfDeath);
 	void signal_animation(AnimationManager*, DeltaFrame*);
 	void reset_animation();
 

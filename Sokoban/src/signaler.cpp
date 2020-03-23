@@ -185,30 +185,31 @@ void FateSignaler::serialize(MapFileO& file) {
 }
 
 void FateSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
-	bool state = count_ >= threshold_;
-	if (state != (prev_count_ >= threshold_)) {
-		if (switches_.size() == 2) {
-			auto* globals = mp->playing_state_->global_;
-			// Check for the fate flag
-			if (globals->has_flag(FATE_SIGNALER_CHOICE[0])) {
+	if (count_ == 1 && switches_.size() == 2) {
+		auto* globals = mp->playing_state_->global_;
+		// Check for the fate flag
+		if (globals->has_flag(FATE_SIGNALER_CHOICE[0])) {
+			switches_[1]->remove_signaler(this);
+			switches_.erase(switches_.begin() + 1);
+		} else if (globals->has_flag(FATE_SIGNALER_CHOICE[1])) {
+			switches_[0]->remove_signaler(this);
+			switches_.erase(switches_.begin());
+		} else {
+			// Set the fate flag
+			if (switches_[0]->active_) {
+				globals->add_flag(FATE_SIGNALER_CHOICE[0]);
 				switches_[1]->remove_signaler(this);
 				switches_.erase(switches_.begin() + 1);
-			} else if (globals->has_flag(FATE_SIGNALER_CHOICE[1])) {
+			} else { // switches_[1]->active_
+				globals->add_flag(FATE_SIGNALER_CHOICE[1]);
 				switches_[0]->remove_signaler(this);
 				switches_.erase(switches_.begin());
-			} else {
-				// Set the fate flag
-				if (switches_[0]->active_) {
-					globals->add_flag(FATE_SIGNALER_CHOICE[0]);
-					switches_[1]->remove_signaler(this);
-					switches_.erase(switches_.begin() + 1);
-				} else if (switches_[1]->active_) {
-					globals->add_flag(FATE_SIGNALER_CHOICE[1]);
-					switches_[0]->remove_signaler(this);
-					switches_.erase(switches_.begin());
-				}
 			}
 		}
+		count_ = switches_[0]->active_;
+	}
+	bool state = count_ >= threshold_;
+	if (state != (prev_count_ >= threshold_)) {
 		for (Switchable* obj : switchables_) {
 			obj->receive_signal(state, map, delta_frame, mp);
 		}

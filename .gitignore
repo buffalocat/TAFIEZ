@@ -49,7 +49,7 @@ Sokoban/maps/main/*
 !Sokoban/maps/temp/.keep
 
 # Editor Globals
-Sokoban/maps/global.sav
+Sokoban/maps/used_flags.sav
 
 # Resources
 !Sokoban/resources/*

@@ -65,17 +65,24 @@ void Door::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 }
 
 bool Door::relation_check() {
-    return (data_ != nullptr) && (data_->id > 0);
+	return true;
 }
 
 void Door::relation_serialize(MapFileO& file) {
-    file << MapCode::DoorDest;
-    file << parent_->pos_;
-    file.write_uint32(data_->id);
-	if (data_->dest == data_->start) {
-		file << std::string{};
-	} else {
-		file << data_->dest;
+	if ((data_ != nullptr) && (data_->id > 0)) {
+		file << MapCode::DoorDest;
+		file << parent_->pos_;
+		file.write_uint32(data_->id);
+		if (data_->dest == data_->start) {
+			file << std::string{};
+		} else {
+			file << data_->dest;
+		}
+	}
+	if (map_flag_ != 0) {
+		file << MapCode::DoorFlag;
+		file << pos();
+		file.write_uint32(map_flag_);
 	}
 }
 
