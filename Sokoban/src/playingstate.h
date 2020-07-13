@@ -15,10 +15,10 @@ class GameObject;
 class Player;
 class MoveProcessor;
 class PlayingGlobalData;
+class GlobalAnimation;
 
 class UndoStack;
 class DeltaFrame;
-class DoorMoveDelta;
 
 struct Point3;
 
@@ -42,6 +42,7 @@ public:
 	void main_loop();
 	void handle_input();
 	void create_move_processor(Player* player);
+	void update_global_animation();
 
 	Room* active_room();
 	bool activate_room(Room*);
@@ -62,6 +63,7 @@ public:
 
 	PlayingGlobalData* global_{};
 	std::unique_ptr<AnimationManager> anims_{};
+	std::unique_ptr<GlobalAnimation> global_anim_{};
 
 	Room* room_{};
 	std::unique_ptr<DeltaFrame> delta_frame_{};
@@ -77,7 +79,7 @@ private:
 	std::unique_ptr<StringDrawer> death_submessage_{};
 	void set_death_text();
 
-    friend DoorMoveDelta;
+    friend class DoorMoveDelta;
 };
 
 #endif // PLAYINGSTATE_H

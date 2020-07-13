@@ -71,6 +71,14 @@ enum class ParticleTexture {
 	TextboxBR = 26,
 	TextboxL = 36,
 	TextboxB = 38,
+
+	//Other
+	Camera = 40,
+	VertLine = 41,
+	HorLine = 48,
+	TeeLine = 49,
+	HorDashes = 56,
+	VertDashes = 57,
 };
 
 glm::vec2 tex_to_vec(ParticleTexture tex_id);

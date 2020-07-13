@@ -585,10 +585,11 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	{
 		door_entering_objects_.push_back({ obj, obj->real_pos() });
 		door_squish_frames_ = MAX_DOOR_SQUISH_FRAMES;
+		break;
 	}
 	case AnimationSignal::DoorExit:
 	{
-
+		break;
 	}
 	}
 }

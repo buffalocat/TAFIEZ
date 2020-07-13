@@ -75,16 +75,4 @@ private:
 };
 
 
-class GlobalFlagDelta : public Delta {
-public:
-	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
-	~GlobalFlagDelta();
-	void revert();
-
-private:
-	PlayingGlobalData* global_;
-	unsigned int flag_;
-};
-
-
 #endif // OBJECTMODIFIER_H

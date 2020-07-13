@@ -263,6 +263,11 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 				sign->learn_flag_ = file.read_uint32();
 			}
 			break;
+		case MapCode::DoorFlag:
+			if (auto* door = dynamic_cast<Door*>(map_->view(file.read_point3())->modifier())) {
+				door->map_flag_ = file.read_uint32();
+			}
+			break;
 		case MapCode::End:
 			reading_file = false;
 			break;

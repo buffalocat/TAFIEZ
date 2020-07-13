@@ -6,6 +6,7 @@
 #include "fontmanager.h"
 #include "stringdrawer.h"
 #include "soundmanager.h"
+#include "globalanimation.h"
 
 #include "gameobject.h"
 #include "savefile.h"
@@ -57,6 +58,7 @@ void PlayingState::main_loop() {
 	gfx_->pre_particle_rendering();
 	anims_->render_particles();
 	text_->draw();
+	update_global_animation();
 	gfx_->post_rendering();
 	// If a move is not currently happening, try to push the current DeltaFrame
 	// If it's trivial, nothing will happen
@@ -369,5 +371,13 @@ Player* PlayingState::player_doa() {
 		return player;
 	} else {
 		return pc->dead_player();
+	}
+}
+
+void PlayingState::update_global_animation() {
+	if (global_anim_) {
+		if (global_anim_->update()) {
+			global_anim_.reset();
+		}
 	}
 }

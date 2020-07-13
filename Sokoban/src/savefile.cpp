@@ -255,3 +255,13 @@ void SaveFile::world_reset() {
 	// "Forget" the locations of all room maps
 	room_subsave_.clear();
 }
+
+
+GlobalFlagDelta::GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag) :
+	Delta(), global_{ global }, flag_{ flag } {}
+
+GlobalFlagDelta::~GlobalFlagDelta() {}
+
+void GlobalFlagDelta::revert() {
+	global_->remove_flag(flag_);
+}

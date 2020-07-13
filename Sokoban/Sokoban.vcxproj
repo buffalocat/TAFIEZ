@@ -201,9 +201,11 @@
     <ClInclude Include="src\flaggate.h" />
     <ClInclude Include="src\flagswitch.h" />
     <ClInclude Include="src\fpstimer.h" />
+    <ClInclude Include="src\globalanimation.h" />
     <ClInclude Include="src\incinerator.h" />
     <ClInclude Include="src\jumpstepprocessor.h" />
     <ClInclude Include="src\floorsign.h" />
+    <ClInclude Include="src\mapdisplaystate.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\soundmanager.h" />
     <ClInclude Include="src\stringdrawer.h" />
@@ -337,10 +339,12 @@
     <ClCompile Include="src\flaggate.cpp" />
     <ClCompile Include="src\flagswitch.cpp" />
     <ClCompile Include="src\fpstimer.cpp" />
+    <ClCompile Include="src\globalanimation.cpp" />
     <ClCompile Include="src\globalflagconstants.cpp" />
     <ClCompile Include="src\incinerator.cpp" />
     <ClCompile Include="src\jumpstepprocessor.cpp" />
     <ClCompile Include="src\floorsign.cpp" />
+    <ClCompile Include="src\mapdisplaystate.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\permanentswitch.cpp" />
     <ClCompile Include="src\pausestate.cpp" />

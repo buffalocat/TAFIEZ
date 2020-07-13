@@ -85,13 +85,3 @@ ModDestructionDelta::~ModDestructionDelta() {}
 void ModDestructionDelta::revert() {
 	mod_->undestroy();
 }
-
-
-GlobalFlagDelta::GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag) :
-	Delta(), global_{ global }, flag_{ flag } {}
-
-GlobalFlagDelta::~GlobalFlagDelta() {}
-
-void GlobalFlagDelta::revert() {
-	global_->remove_flag(flag_);
-}

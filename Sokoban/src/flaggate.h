@@ -14,7 +14,7 @@ struct FlagSigil {
 	int phase, period;
 	int index;
 	int charge = 0;
-	float lum = 0.9f;
+	float lum = 0.0f;
 	int opacity = MAX_FLAG_SIGIL_OPACITY;
 
 	void update(bool signal, int total);

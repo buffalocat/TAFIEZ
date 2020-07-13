@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include "delta.h"
 
 struct PlayingRoom;
 class Room;
@@ -76,4 +77,15 @@ private:
 	std::map<std::string, unsigned int> room_subsave_{};
 	unsigned int cur_subsave_ = 0;
 	unsigned int next_subsave_ = 1;
+};
+
+class GlobalFlagDelta : public Delta {
+public:
+	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
+	~GlobalFlagDelta();
+	void revert();
+
+private:
+	PlayingGlobalData* global_;
+	unsigned int flag_;
 };

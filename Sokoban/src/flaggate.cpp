@@ -207,19 +207,19 @@ void FlagGate::spawn_sigils() {
 		for (int i = 0; i < 7; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1, 8 });
 		}
-		for (auto& sigil : sigils_) {
-			sigil.lum = 0.0f;
-		}
 		break;
 	case 24: // TODO
 		for (int i = 0; i < 3; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
 		}
-		for (int i = 0; i < 11; ++i) {
+		for (int i = 0; i < 8; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i + 3, 32 });
 		}
-		for (int i = 0; i < 18; ++i) {
+		for (int i = 0; i < 13; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 32 });
+		}
+		for (auto& sigil : sigils_) {
+			sigil.lum = 0.95f;
 		}
 		break;
 	case 32:
@@ -231,6 +231,9 @@ void FlagGate::spawn_sigils() {
 		}
 		for (int i = 0; i < 18; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i+14, 32 });
+		}
+		for (auto& sigil : sigils_) {
+			sigil.lum = 0.95f;
 		}
 		break;
 	case 36: // TODO

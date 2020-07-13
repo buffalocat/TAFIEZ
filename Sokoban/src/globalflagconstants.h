@@ -11,7 +11,15 @@ extern const unsigned int X_ALT_ACCESSED_GLOBAL_FLAGS[4]; // Do we show the X-al
 extern const unsigned int FATE_SIGNALER_CHOICE[2]; // Which way did the Fate Signaler go?
 extern const unsigned int UNUSED_FLAGS[200]; // Some flags to pick from later
 
-enum class MiscGlobalFlags {
+enum class HubCode {
+	Alpha,
+	Beta,
+	Gamma,
+	Delta,
+	Omega,
+};
+
+enum class MiscGlobalFlag {
 	CarControlsLearned,
 	UndoLearned,
 	WorldResetLearned,
@@ -20,11 +28,10 @@ enum class MiscGlobalFlags {
 	COUNT,
 };
 
-extern const unsigned int MISC_GLOBAL_FLAGS[static_cast<int>(MiscGlobalFlags::COUNT)];
+extern const unsigned int MISC_GLOBAL_FLAGS[static_cast<int>(MiscGlobalFlag::COUNT)];
 
-int get_clear_flag_index(char zone);
 unsigned int get_clear_flag_code(char zone);
 unsigned int get_zone_access_code(char zone);
-unsigned int get_misc_flag(MiscGlobalFlags flag);
+unsigned int get_misc_flag(MiscGlobalFlag flag);
 
 #endif //GLOBALFLAGCONSTANTS_H
