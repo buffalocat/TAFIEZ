@@ -16,7 +16,18 @@ QueuedSound::QueuedSound(const char* file_name) : power{ 0 } {
 
 SoundManager::SoundManager() {
 	alutInit(nullptr, nullptr);
-	queued_sounds_.push_back({ "snip3.wav" });
+	queued_sounds_.push_back({ "undo_click.wav" });
+	queued_sounds_.push_back({ "door_enter.wav" });
+	queued_sounds_.push_back({ "switch_on.wav" });
+	queued_sounds_.push_back({ "switch_off.wav" });
+	queued_sounds_.push_back({ "gate_up.wav" });
+	queued_sounds_.push_back({ "gate_down.wav" });
+	queued_sounds_.push_back({ "car_ride.wav" });
+	queued_sounds_.push_back({ "car_unride.wav" });
+	queued_sounds_.push_back({ "snip1.wav" });
+	queued_sounds_.push_back({ "flag_get.wav" });
+	queued_sounds_.push_back({ "sizzle.wav" });
+	queued_sounds_.push_back({ "color_change.wav" });
 }
 
 SoundManager::~SoundManager() {

@@ -3,8 +3,6 @@
 
 void clamp(int* n, int a, int b);
 
-struct glm::vec3;
-
 // Standard Points serialize their components as unsigned chars
 struct Point2 {
     int x;

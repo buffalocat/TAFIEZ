@@ -469,6 +469,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	}
 	case AnimationSignal::IncineratorBurn:
 		sources_.push_back(std::make_unique<FlameSource>(obj));
+		sounds_->queue_sound(SoundName::BurnBlock);
 		break;
 	case AnimationSignal::DoorOn:
 	{
@@ -505,6 +506,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	case AnimationSignal::ColorChange:
 		sources_.push_back(std::make_unique<ColorShellSource>(obj));
+		sounds_->queue_sound(SoundName::ColorChange);
 		break;
 	case AnimationSignal::FlagOn:
 	{
@@ -556,6 +558,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		auto* gate = static_cast<Gate*>(obj->modifier());
 		gate->start_raise_animation();
 		temp_animated_objects_.push_back(gate);
+		sounds_->queue_sound(SoundName::GateUp);
 		break;
 	}
 	case AnimationSignal::GateDown:
@@ -563,6 +566,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		auto* gate = static_cast<Gate*>(obj->modifier());
 		gate->start_lower_animation();
 		temp_animated_objects_.push_back(gate);
+		sounds_->queue_sound(SoundName::GateDown);
 		break;
 	}
 	case AnimationSignal::CarRide:
@@ -571,6 +575,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		temp_animated_objects_.push_back(car);
 		car->animation_state_ = CarAnimationState::Riding;
 		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
+		sounds_->queue_sound(SoundName::CarRide);
 		break;
 	}
 	case AnimationSignal::CarUnride:
@@ -579,16 +584,23 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		temp_animated_objects_.push_back(car);
 		car->animation_state_ = CarAnimationState::Unriding;
 		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
+		sounds_->queue_sound(SoundName::CarUnride);
 		break;
 	}
 	case AnimationSignal::DoorEnter:
 	{
 		door_entering_objects_.push_back({ obj, obj->real_pos() });
 		door_squish_frames_ = MAX_DOOR_SQUISH_FRAMES;
+		sounds_->queue_sound(SoundName::DoorEnter);
 		break;
 	}
 	case AnimationSignal::DoorExit:
 	{
+		break;
+	}
+	case AnimationSignal::FlagCollect:
+	{
+		sounds_->queue_sound(SoundName::FlagGet);
 		break;
 	}
 	}

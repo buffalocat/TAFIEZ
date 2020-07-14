@@ -5,7 +5,18 @@
 #include <alc.h>
 
 enum class SoundName {
-	SnakeSplit = 0,
+	UndoClick,
+	DoorEnter,
+	SwitchOn,
+	SwitchOff,
+	GateUp,
+	GateDown,
+	CarRide,
+	CarUnride,
+	SnakeSplit,
+	FlagGet,
+	BurnBlock,
+	ColorChange,
 };
 
 struct QueuedSound {
