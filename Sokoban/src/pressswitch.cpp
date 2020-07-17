@@ -75,10 +75,12 @@ void PressSwitch::destroy(MoveProcessor* mp, CauseOfDeath) {
 }
 
 void PressSwitch::signal_animation(AnimationManager* anims, DeltaFrame* delta_frame) {
-	if (parent_->tangible_ && active_) {
-		anims->receive_signal(AnimationSignal::SwitchOn, parent_, delta_frame);
-	} else {
-		anims->receive_signal(AnimationSignal::SwitchOff, parent_, delta_frame);
+	if (parent_->tangible_) {
+		if (active_) {
+			anims->receive_signal(AnimationSignal::SwitchOn, parent_, delta_frame);
+		} else {
+			anims->receive_signal(AnimationSignal::SwitchOff, parent_, delta_frame);
+		}
 	}
 }
 

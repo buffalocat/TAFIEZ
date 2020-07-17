@@ -11,6 +11,7 @@
 #include "mapfile.h"
 #include "delta.h"
 #include "player.h"
+#include "globalflagconstants.h"
 
 RealPlayingState::RealPlayingState(SaveFile* savefile, GameState* parent) :
 	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {}
@@ -57,6 +58,7 @@ void RealPlayingState::play_from_loaded_subsave() {
 
 void RealPlayingState::world_reset() {
 	// Forget all the maps we know
+	global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[int(HubCode::Alpha)]);
 	delta_frame_ = {};
 	loaded_rooms_.clear();
 	text_->reset();

@@ -40,6 +40,7 @@ enum class ModCode {
 	Incinerator = 11,
 	FlagGate = 12,
 	FlagSwitch = 13,
+	MapDisplay = 14,
 };
 
 // This is useless for now, but we'll keep it anyway

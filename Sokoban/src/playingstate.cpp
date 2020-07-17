@@ -52,9 +52,11 @@ void PlayingState::main_loop() {
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
 	gfx_->pre_object_rendering();
+	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	anims_->view_dir_ = gfx_->view_dir();
 	anims_->draw_fall_trails();
+	anims_->draw_special();
 	gfx_->pre_particle_rendering();
 	anims_->render_particles();
 	text_->draw();

@@ -58,11 +58,12 @@ const int PARTICLE_TEXTURE_ATLAS_SIZE = 8;
 
 // Reading off the texture atlas starting from top, left to right
 enum class ParticleTexture {
+	// Particles
 	SolidSquare = 0,
 	BlurDisk = 2,
 	Diamond = 4,
 
-	//Textbox
+	// Textbox
 	TextboxTL = 17,
 	TextboxTR = 18,
 	TextboxT = 20,
@@ -72,13 +73,27 @@ enum class ParticleTexture {
 	TextboxL = 36,
 	TextboxB = 38,
 
-	//Other
+	// Misc
 	Camera = 40,
+
+	// Map Symbols
 	VertLine = 41,
 	HorLine = 48,
 	TeeLine = 49,
 	HorDashes = 56,
 	VertDashes = 57,
+
+	GreySolid = 51,
+	GreyDashed = 52,
+	GoldSolid = 53,
+	GoldDashed = 54,
+	PinkSolid = 55,
+
+	Alpha = 59,
+	Beta = 60,
+	Gamma = 61,
+	Delta = 62,
+	Omega = 63,
 };
 
 glm::vec2 tex_to_vec(ParticleTexture tex_id);

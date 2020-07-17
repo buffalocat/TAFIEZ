@@ -39,6 +39,7 @@ namespace CAM_FLAGS {
 		ROT_CUSTOM = 1 << 19,
 		// Special
 		CIRC_CAMERA = 1 << 20,
+		CENTER_CUSTOM = 1 << 21,
 	};
 };
 
@@ -118,6 +119,7 @@ private:
 	FloatRect visible_;
 	Padding pad_;
 	FloatRect center_;
+	FPoint3 center_point_{ 0,0,0 };
 
 	friend class GeneralContextData; // A class to help create/edit contexts
 };

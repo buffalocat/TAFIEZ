@@ -4,6 +4,7 @@
 
 struct InstanceData;
 enum class BlockTexture;
+enum class ParticleTexture;
 
 class ModelInstancer {
 public:
@@ -11,6 +12,8 @@ public:
 	~ModelInstancer();
 	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, int color);
 	void push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture tex_id, glm::vec4 color);
+	void push_instance(glm::vec3 pos, glm::vec3 scale, ParticleTexture tex_id, int color);
+	void push_instance(glm::vec3 pos, glm::vec3 scale, ParticleTexture tex_id, glm::vec4 color);
 	void draw();
 	void set_instance_attributes(int VAO);
 protected:

@@ -17,6 +17,7 @@
 #include "flaggate.h"
 #include "incinerator.h"
 #include "gate.h"
+#include "mapdisplay.h"
 
 Particle::Particle() {}
 
@@ -363,7 +364,8 @@ void AnimationManager::update() {
 	particles_.erase(std::remove_if(particles_.begin(), particles_.end(),
 		[](auto& p) { return p->update(); }), particles_.end());
 	// Run sound engine
-	sounds_->flush_sounds();
+	sounds_->clean_sources();
+	sounds_->play_sounds();
 }
 
 void AnimationManager::reset_temp() {
@@ -388,6 +390,7 @@ void AnimationManager::reset() {
 		mod->reset_animation();
 	}
 	static_animated_objects_.clear();
+	map_display_ = nullptr;
 	sources_.clear();
 	particles_.clear();
 	source_map_.clear();
@@ -432,6 +435,12 @@ void AnimationManager::render_particles() {
 	glBindBuffer(GL_ARRAY_BUFFER, particle_VBO_);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ParticleVertex), vertices.data(), GL_STATIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, (GLsizei)vertices.size());
+}
+
+void AnimationManager::draw_special() {
+	if (map_display_) {
+		map_display_->draw_special(gfx_, particle_atlas_);
+	}
 }
 
 void AnimationManager::set_linear_animation(Direction dir, GameObject* obj) {
@@ -495,10 +504,10 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		break;
 	}
 	case AnimationSignal::SwitchOn:
-		//sounds_->queue_sound(SoundName::SwitchOn);
+		sounds_->queue_sound(SoundName::SwitchOn);
 		break;
 	case AnimationSignal::SwitchOff:
-		//sounds_->queue_sound(SoundName::SwitchOff);
+		sounds_->queue_sound(SoundName::SwitchOff);
 		break;
 	case AnimationSignal::SnakeSplit:
 		sounds_->queue_sound(SoundName::SnakeSplit);
@@ -553,12 +562,18 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		}
 		break;
 	}
+	case AnimationSignal::MapDisplay:
+	{
+		map_display_ = static_cast<MapDisplay*>(obj->modifier());
+		map_display_->init_sprites(state_);
+		break;
+	}
 	case AnimationSignal::GateUp:
 	{
 		auto* gate = static_cast<Gate*>(obj->modifier());
 		gate->start_raise_animation();
 		temp_animated_objects_.push_back(gate);
-		sounds_->queue_sound(SoundName::GateUp);
+		sounds_->queue_sound(SoundName::GateChange);
 		break;
 	}
 	case AnimationSignal::GateDown:
@@ -566,7 +581,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		auto* gate = static_cast<Gate*>(obj->modifier());
 		gate->start_lower_animation();
 		temp_animated_objects_.push_back(gate);
-		sounds_->queue_sound(SoundName::GateDown);
+		sounds_->queue_sound(SoundName::GateChange);
 		break;
 	}
 	case AnimationSignal::CarRide:
@@ -584,7 +599,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		temp_animated_objects_.push_back(car);
 		car->animation_state_ = CarAnimationState::Unriding;
 		car->animation_time_ = MAX_CAR_ANIMATION_FRAMES;
-		sounds_->queue_sound(SoundName::CarUnride);
+		sounds_->queue_sound(SoundName::CarRide);
 		break;
 	}
 	case AnimationSignal::DoorEnter:
@@ -601,6 +616,11 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	case AnimationSignal::FlagCollect:
 	{
 		sounds_->queue_sound(SoundName::FlagGet);
+		break;
+	}
+	case AnimationSignal::Jump:
+	{
+		sounds_->queue_sound(SoundName::Jump);
 		break;
 	}
 	}

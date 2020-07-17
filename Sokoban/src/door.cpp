@@ -10,6 +10,7 @@
 
 #include "roommap.h"
 #include "moveprocessor.h"
+#include "savefile.h"
 
 DoorData::DoorData(std::string start_room, std::string dest_room, unsigned int door_id) :
 	start{ start_room }, dest{ dest_room }, id{ door_id } {}
@@ -142,4 +143,10 @@ std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, De
 		dup->data_ = std::make_unique<DoorData>(*data_);
 	}
     return std::move(dup);
+}
+
+void Door::acquire_map_flag(PlayingGlobalData* global, DeltaFrame* delta_frame) {
+	if (map_flag_) {
+		global->add_flag_delta(map_flag_, delta_frame);
+	}
 }

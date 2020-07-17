@@ -151,6 +151,9 @@ void GeneralCameraContext::serialize(MapFileO& file) {
 	if (!(flags_ & CAM_FLAGS::RAD_AUTO)) {
 		file << rad_;
 	}
+	if (flags_ & CAM_FLAGS::CENTER_CUSTOM) {
+		file << center_point_;
+	}
 	if (flags_ & CAM_FLAGS::ROT_CUSTOM) {
 		file << rot_;
 	}
@@ -196,6 +199,9 @@ std::unique_ptr<CameraContext> GeneralCameraContext::deserialize(MapFileI& file)
 	if (flags & CAM_FLAGS::CENTER_USED) {
 		context->center_ = calc.compute_center_from_vis_rad(context->visible_, context->rad_);
 	}
+	if (flags & CAM_FLAGS::CENTER_CUSTOM) {
+		file >> context->center_point_;
+	}
 	if (flags & CAM_FLAGS::ROT_CUSTOM) {
 		file >> context->rot_;
 	}
@@ -227,6 +233,9 @@ std::string GeneralCameraContext::area_name() {
 
 FPoint3 GeneralCameraContext::center(FPoint3 pos) {
 	FPoint3 c = pos;
+	if (flags_ & CAM_FLAGS::CENTER_CUSTOM) {
+		return pos + center_point_;
+	}
 	if (flags_ & CAM_FLAGS::POS_CLAMP_X) {
 		c.x = std::min(std::max(c.x, center_.xa), center_.xb);
 	} else if (flags_ & CAM_FLAGS::POS_FIX_X) {

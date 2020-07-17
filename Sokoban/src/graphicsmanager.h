@@ -48,6 +48,8 @@ public:
 	void set_light_source(glm::vec3);
 
 	void pre_object_rendering();
+	void prepare_draw_objects();
+	void prepare_draw_objects_particle_atlas(GLuint atlas);
 	void draw_objects();
 	void pre_particle_rendering();
 	void post_rendering();

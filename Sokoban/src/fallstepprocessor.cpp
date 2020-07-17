@@ -3,6 +3,7 @@
 
 #include "moveprocessor.h"
 #include "animationmanager.h"
+#include "soundmanager.h"
 #include "component.h"
 #include "gameobject.h"
 #include "roommap.h"
@@ -44,6 +45,7 @@ bool FallStepProcessor::run(bool test) {
 	if (test) {
 		return true;
 	}
+
 	std::set<SnakeBlock*> snake_add_link_check{};
 	std::vector<SnakeBlock*> falling_snakes{};
     // Collect all falling snakes, and their adjacent maybe-confused snakes
@@ -104,6 +106,8 @@ bool FallStepProcessor::run(bool test) {
 			snake->check_add_local_links(map_, delta_frame_);
 		}
     }
+	auto fall_sound = some_blocks_landed_ ? SoundName::FallThud : SoundName::Fall;
+	anims_->sounds_->queue_sound(fall_sound);
     return true;
 }
 
@@ -179,6 +183,7 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
             anims_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
             map_->put_in_map(block, false, true, nullptr);
+			some_blocks_landed_ = true;
         } else {
             // NOTE: magic number for trail size
 			anims_->make_fall_trail(block, layers_fallen_, 10);

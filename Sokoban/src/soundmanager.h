@@ -9,14 +9,16 @@ enum class SoundName {
 	DoorEnter,
 	SwitchOn,
 	SwitchOff,
-	GateUp,
-	GateDown,
+	GateChange,
 	CarRide,
-	CarUnride,
 	SnakeSplit,
 	FlagGet,
 	BurnBlock,
 	ColorChange,
+	MoveHorizontal,
+	FallThud,
+	Fall,
+	Jump,
 };
 
 struct QueuedSound {
@@ -32,6 +34,8 @@ public:
 	~SoundManager();
 
 	void queue_sound(SoundName name);
+	void clean_sources();
+	void play_sounds();
 	void flush_sounds();
 
 private:

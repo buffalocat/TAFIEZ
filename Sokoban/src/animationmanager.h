@@ -14,6 +14,7 @@ class ClearFlag;
 class GraphicsManager;
 class ObjectModifier;
 class PlayingState;
+class MapDisplay;
 
 enum class AnimationSignal {
 	NONE,
@@ -34,6 +35,7 @@ enum class AnimationSignal {
 	FlagGateOff,
 	SignOn,
 	SignOff,
+	MapDisplay,
 	// Other Actions
 	FlagCollect,
 	ColorChange,
@@ -254,6 +256,7 @@ public:
 	void reset();
 	void draw_fall_trails();
 	void render_particles();
+	void draw_special();
 	void create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source);
 
 	void set_linear_animation(Direction dir, GameObject* obj);
@@ -264,6 +267,8 @@ public:
 
 	glm::vec3 view_dir_{};
 
+	std::unique_ptr<SoundManager> sounds_{};
+
 private:
 	// "Keyed" on Direction (minus 1)
 	std::array<std::vector<GameObject*>, 6> linear_animations_{};
@@ -273,11 +278,12 @@ private:
 	std::vector<std::unique_ptr<Particle>> particles_{};
 	std::vector<FallTrail> fall_trails_{};
 	std::vector<DoorSquish> door_entering_objects_{};
-	std::unique_ptr<SoundManager> sounds_{};
 	PlayingState* state_;
 
 	int linear_animation_frames_ = -1;
 	int door_squish_frames_ = 0;
+
+	MapDisplay* map_display_{};
 
 	std::map<GameObject*, ParticleSource*> source_map_{};
 

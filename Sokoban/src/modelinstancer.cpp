@@ -57,6 +57,14 @@ void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, BlockTexture 
 	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
 }
 
+void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, ParticleTexture tex_id, int color) {
+	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), COLOR_VECTORS[color] });
+}
+
+void ModelInstancer::push_instance(glm::vec3 pos, glm::vec3 scale, ParticleTexture tex_id, glm::vec4 color) {
+	instances_.push_back(InstanceData{ pos, scale, tex_to_vec(tex_id), color });
+}
+
 void ModelInstancer::draw() {
 	fill_buffer();
 	model_.draw_instanced((unsigned int)instances_.size());

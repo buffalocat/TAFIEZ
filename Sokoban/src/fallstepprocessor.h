@@ -31,6 +31,7 @@ private:
     DeltaFrame* delta_frame_;
 	AnimationManager* anims_;
     int layers_fallen_ = 0;
+	bool some_blocks_landed_ = false;
 };
 
 #endif // FALLSTEPPROCESSOR_H

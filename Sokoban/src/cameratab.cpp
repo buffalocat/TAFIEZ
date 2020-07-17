@@ -55,7 +55,8 @@ private:
 	PaddingMode pad_mode = PaddingMode::Uniform;
 	RadiusMode rad_mode = RadiusMode::Default;
 	PositionMode x_pos_mode = PositionMode::Free, y_pos_mode = PositionMode::Free;
-	bool tilt_custom = false, rot_custom = false;
+	bool tilt_custom = false, rot_custom = false, center_custom = false;
+	FPoint3 center{ 0,0,0 };
 
 	IntRect rect{ 0,0,0,0 };
 	int priority = 10;
@@ -86,6 +87,7 @@ void GeneralContextData::load_from_context(GeneralCameraContext* context) {
 	tilt = context->tilt_;
 	rot = context->rot_;
 	pad = context->pad_;
+	center = context->center_point_;
 }
 
 void GeneralContextData::unpack_flags() {
@@ -131,6 +133,7 @@ void GeneralContextData::unpack_flags() {
 	}
 	tilt_custom = flags & CAM_FLAGS::TILT_CUSTOM;
 	rot_custom = flags & CAM_FLAGS::ROT_CUSTOM;
+	center_custom = flags & CAM_FLAGS::CENTER_CUSTOM;
 }
 
 void GeneralContextData::pack_flags() {
@@ -140,7 +143,8 @@ void GeneralContextData::pack_flags() {
 		(free_cam * CAM_FLAGS::FREE_CAM) |
 		(circ_cam * CAM_FLAGS::CIRC_CAMERA) |
 		(tilt_custom * CAM_FLAGS::TILT_CUSTOM) |
-		(rot_custom * CAM_FLAGS::ROT_CUSTOM);
+		(rot_custom * CAM_FLAGS::ROT_CUSTOM) |
+		(center_custom * CAM_FLAGS::CENTER_CUSTOM);
 	switch (pad_mode) {
 	case PaddingMode::Uniform:
 		flags |= CAM_FLAGS::PAD_UNIFORM;
@@ -196,6 +200,7 @@ void GeneralContextData::write_to_context(GeneralCameraContext* context) {
 	context->rad_ = rad;
 	context->tilt_ = tilt;
 	context->rot_ = rot;
+	context->center_point_ = center;
 	context->pad_ = pad;
 }
 
@@ -318,10 +323,6 @@ void GeneralContextData::editor_options() {
 	ImGui::Checkbox("Free-cam Area##CAMERA", &free_cam);
 	ImGui::Checkbox("Circ-cam Area##CAMERA", &circ_cam);
 
-	if (free_cam) {
-		tilt_custom = false;
-		rot_custom = false;
-	}
 	if (circ_cam) {
 		rot_custom = false;
 	}
@@ -363,6 +364,18 @@ void GeneralContextData::editor_options() {
 		ImGui::InputDouble("Rotation##CAMERA", &rot);
 	} else {
 		rot = DEFAULT_CAM_ROTATION;
+	}
+	ImGui::Checkbox("Custom Rotation##CAMERA", &rot_custom);
+	if (rot_custom) {
+		ImGui::InputDouble("Rotation##CAMERA", &rot);
+	} else {
+		rot = DEFAULT_CAM_ROTATION;
+	}
+	ImGui::Checkbox("Custom Center##CAMERA", &center_custom);
+	if (center_custom) {
+		ImGui::InputDouble("Center X##CAMERA", &center.x);
+		ImGui::InputDouble("Center Y##CAMERA", &center.y);
+		ImGui::InputDouble("Center Z##CAMERA", &center.z);
 	}
 
 	FloatRect vis = { rect.xa - pad.left, rect.ya - pad.top, rect.xb + pad.right, rect.yb + pad.bottom };

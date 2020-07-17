@@ -23,6 +23,7 @@
 #include "incinerator.h"
 #include "flaggate.h"
 #include "flagswitch.h"
+#include "mapdisplay.h"
 
 #include "colorcycle.h"
 
@@ -95,6 +96,7 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::RadioButton("Incinerator##MOD_object", &mod_code, ModCode::Incinerator);
 		ImGui::RadioButton("Flag Gate##MOD_object", &mod_code, ModCode::FlagGate);
 		ImGui::RadioButton("Flag Switch##MOD_object", &mod_code, ModCode::FlagSwitch);
+		ImGui::RadioButton("Map Display##MOD_object", &mod_code, ModCode::MapDisplay);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -206,6 +208,7 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 	// Trivial objects
 	case ModCode::AutoBlock:
 	case ModCode::PuppetBlock:
+	case ModCode::MapDisplay:
 		break;
 	}
 }
@@ -302,6 +305,9 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	case ModCode::FlagSwitch:
 		mod = std::make_unique<FlagSwitch>(model_flag_switch);
+		break;
+	case ModCode::MapDisplay:
+		mod = std::make_unique<MapDisplay>(obj);
 		break;
 	}
 	if (!mod->valid_parent(obj)) {

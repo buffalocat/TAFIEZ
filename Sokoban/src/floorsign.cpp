@@ -72,8 +72,7 @@ void FloorSign::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	if (active_ != should_display_text) {
 		if (learn_flag_ != 0) {
 			PlayingGlobalData* global = mp->playing_state_->global_;
-			delta_frame->push(std::make_unique<LearnFlagDelta>(this, learn_flag_, global));
-			global->add_flag(learn_flag_);
+			global->add_flag_delta(learn_flag_, delta_frame);
 			learn_flag_ = 0;
 		}
 		toggle_active(map->text_renderer(), delta_frame);
@@ -129,15 +128,4 @@ SignToggleDelta::~SignToggleDelta() {}
 
 void SignToggleDelta::revert() {
 	sign_->toggle_active(text_, nullptr);
-}
-
-
-LearnFlagDelta::LearnFlagDelta(FloorSign* sign, unsigned int flag, PlayingGlobalData* global): Delta(),
-sign_{ sign }, flag_{ flag }, global_{ global } {}
-
-LearnFlagDelta::~LearnFlagDelta() {}
-
-void LearnFlagDelta::revert() {
-	sign_->learn_flag_ = flag_;
-	global_->remove_flag(flag_);
 }

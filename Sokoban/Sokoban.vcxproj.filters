@@ -286,10 +286,10 @@
     <ClInclude Include="src\menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mapdisplaystate.h">
+    <ClInclude Include="src\globalanimation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\globalanimation.h">
+    <ClInclude Include="src\mapdisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -537,11 +537,11 @@
     <ClCompile Include="src\menu.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
-    <ClCompile Include="src\mapdisplaystate.cpp">
-      <Filter>Source Files\Game States</Filter>
-    </ClCompile>
     <ClCompile Include="src\globalanimation.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapdisplay.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

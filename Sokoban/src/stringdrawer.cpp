@@ -14,7 +14,7 @@ const float DEATH_SUBSTRING_HEIGHT = -0.04f;
 
 const float ZONE_STRING_BG_OPACITY = 0.7f;
 const float LEVEL_STRING_BG_OPACITY = 0.7f;
-const float SIGN_STRING_BG_OPACITY = 0.7f;
+const float SIGN_STRING_BG_OPACITY = 0.85f;
 
 const int FLOOR_SIGN_FADE_FRAMES = 12;
 const int DEATH_STRING_FADE_FRAMES = 4;

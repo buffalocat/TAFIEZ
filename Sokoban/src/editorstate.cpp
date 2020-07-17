@@ -159,6 +159,7 @@ void EditorState::main_loop() {
 
 	gfx_->set_state(GraphicsState::None);
 	gfx_->pre_object_rendering();
+	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	gfx_->post_rendering();
 }

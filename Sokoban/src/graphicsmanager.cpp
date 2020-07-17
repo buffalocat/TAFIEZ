@@ -34,7 +34,6 @@ GraphicsManager::GraphicsManager(GLFWwindow* window) :
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
-	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Initialize frame buffer to hold all renders
 	glGenFramebuffers(1, &fbo_);
@@ -188,15 +187,27 @@ glm::vec3 GraphicsManager::view_dir() {
 	return glm::vec3(view_[0][2], view_[1][2], view_[2][2]);
 }
 
-void GraphicsManager::draw_objects() {
+void GraphicsManager::prepare_draw_objects() {
 	instanced_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-
+	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
 	instanced_shader_.setMat4("PV", proj_ * view_);
 	instanced_shader_.setVec3("lightSource", light_source_);
+}
 
+void GraphicsManager::prepare_draw_objects_particle_atlas(GLuint atlas) {
+	instanced_shader_.use();
+	glBindTexture(GL_TEXTURE_2D, atlas);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	instanced_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
+	instanced_shader_.setMat4("PV", proj_ * view_);
+	instanced_shader_.setVec3("lightSource", light_source_);
+}
+
+void GraphicsManager::draw_objects() {
 	cube.draw();
 	top_cube.draw();
 	six_squares.draw();

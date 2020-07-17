@@ -18,8 +18,10 @@
 #include "snakeblock.h"
 
 #include "playingstate.h"
+#include "savefile.h"
 #include "graphicsmanager.h"
 #include "animationmanager.h"
+#include "soundmanager.h"
 
 #include "horizontalstepprocessor.h"
 #include "fallstepprocessor.h"
@@ -118,6 +120,7 @@ bool MoveProcessor::try_move_horizontal(Point3 dir) {
 	if (moving_blocks_.empty()) {
 		return false;
 	}
+	anims_->sounds_->queue_sound(SoundName::MoveHorizontal);
 	state_ = MoveStep::Horizontal;
 	frames_ = HORIZONTAL_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
 	reset_player_jump();
@@ -192,6 +195,7 @@ bool MoveProcessor::try_jump() {
 		return false;
 	}
 	state_ = MoveStep::Jump;
+	anims_->receive_signal(AnimationSignal::Jump, player_, nullptr);
 	frames_ = JUMP_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
 	// If another player just jumped, that has to be reset
 	reset_player_jump();
@@ -460,6 +464,7 @@ void MoveProcessor::try_int_door_exit() {
 		return;
 	// Normal door motion
 	}
+	entry_door_->acquire_map_flag(playing_state_->global_, delta_frame_);
 	place_door_travelling_objects();
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::IntSucceeded;
@@ -504,6 +509,7 @@ void MoveProcessor::ext_door_exit() {
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
+	entry_door_->acquire_map_flag(playing_state_->global_, delta_frame_);
 	place_door_travelling_objects();
 	playing_state_->move_camera_to_player(true);
 	frames_ = FALL_MOVEMENT_FRAMES;

@@ -120,6 +120,15 @@ void PlayingGlobalData::add_flag(unsigned int flag) {
 	flags_.insert(flag);
 }
 
+void PlayingGlobalData::add_flag_delta(unsigned int flag, DeltaFrame* delta_frame) {
+	if (!flags_.count(flag)) {
+		flags_.insert(flag);
+		if (delta_frame) {
+			delta_frame->push(std::make_unique<GlobalFlagDelta>(this, flag));
+		}
+	}
+}
+
 void PlayingGlobalData::remove_flag(unsigned int flag) {
 	flags_.erase(flag);
 }
