@@ -30,6 +30,7 @@ enum class MiscGlobalFlag {
 
 extern const unsigned int MISC_GLOBAL_FLAGS[static_cast<int>(MiscGlobalFlag::COUNT)];
 
+int get_clear_flag_index(char zone);
 unsigned int get_clear_flag_code(char zone);
 unsigned int get_zone_access_code(char zone);
 unsigned int get_misc_flag(MiscGlobalFlag flag);

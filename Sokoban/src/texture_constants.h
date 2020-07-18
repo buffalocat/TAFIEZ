@@ -74,12 +74,12 @@ enum class ParticleTexture {
 	TextboxB = 38,
 
 	// Misc
-	Camera = 40,
+	Camera = 48,
 
 	// Map Symbols
-	VertLine = 41,
-	HorLine = 48,
-	TeeLine = 49,
+	VertLine = 49,
+	HorLine = 40,
+	TeeLine = 41,
 	HorDashes = 56,
 	VertDashes = 57,
 

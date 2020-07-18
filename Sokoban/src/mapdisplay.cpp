@@ -9,12 +9,19 @@
 
 #include "animationmanager.h"
 #include "graphicsmanager.h"
+#include "fontmanager.h"
 #include "texture_constants.h"
 
 
-MapDisplay::MapDisplay(GameObject* parent) : ObjectModifier(parent) {}
+MapDisplay::MapDisplay(GameObject* parent) : ObjectModifier(parent) {
+	glGenVertexArrays(1, &VAO_);
+	glGenBuffers(1, &VBO_);
+}
 
-MapDisplay::~MapDisplay() {}
+MapDisplay::~MapDisplay() {
+	glDeleteVertexArrays(1, &VAO_);
+	glDeleteBuffers(1, &VBO_);
+}
 
 void MapDisplay::make_str(std::string& str) {
 	str += "MapDisplay";
@@ -41,24 +48,46 @@ void MapDisplay::signal_animation(AnimationManager* anims, DeltaFrame*) {
 
 
 void MapDisplay::init_sprites(PlayingState* state) {
+	state_ = state;
 	global_ = state->global_;
 	sprites_.clear();
+	char_verts_.clear();
+	font_ = state->text_->fonts_->get_font(Fonts::ABEEZEE, 72);
+	parent_pos_ = glm::vec3(parent_->real_pos());
 	generate_map();
+	
+	glBindVertexArray(VAO_);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+	glBufferData(GL_ARRAY_BUFFER, char_verts_.size() * sizeof(TextVertex3), char_verts_.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TextVertex3), (void*)offsetof(TextVertex3, Position));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex3), (void*)offsetof(TextVertex3, TexCoords));
 }
 
 
 void MapDisplay::draw_special(GraphicsManager* gfx, GLuint atlas) {
-	auto pos = glm::vec3(parent_->pos_);
+	init_sprites(state_);
 	for (auto& sprite : sprites_) {
-		gfx->square_0.push_instance(pos + sprite.pos, glm::vec3(0.8f), sprite.tex, glm::vec4(1.0f));
+		gfx->square_0.push_instance(sprite.pos, glm::vec3(0.6f), sprite.tex, glm::vec4(1.0f));
 	}
 	gfx->prepare_draw_objects_particle_atlas(atlas);
 	gfx->draw_objects();
+	gfx->text_shader_spacial_.use();
+	gfx->text_shader_spacial_.setMat4("PV", gfx->PV_);
+	gfx->text_shader_spacial_.setVec4("color", COLOR_VECTORS[BLACK]);
+	glBindVertexArray(VAO_);
+	glBindTexture(GL_TEXTURE_2D, font_->tex_);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)char_verts_.size());
 }
 
 void MapDisplay::generate_map() {
-	pos_ = FPoint3{0, 0, 1.55f};
+	pos_ = glm::vec3(0, 1.54f, 0) + parent_pos_;
 	draw_zone('H', 0, 0);
+	pos_ = glm::vec3(-4, 1.54f, -3) + parent_pos_;
+	draw_zone('X', 0, 0);
+	pos_ = glm::vec3(4, 1.54f, 5) + parent_pos_;
+	draw_hub(HubCode::Omega, 0, 0);
 }
 
 bool MapDisplay::visited(char zone) {
@@ -66,25 +95,39 @@ bool MapDisplay::visited(char zone) {
 }
 
 void MapDisplay::draw_tex(ParticleTexture tex, float dx, float dy) {
-	sprites_.push_back({ glm::vec3(pos_.x + dx, pos_.z, pos_.y + dy), tex });
+	sprites_.push_back({ pos_ + glm::vec3(dx, -0.02, dy), tex });
+}
+
+void MapDisplay::draw_char(char c, float dx, float dy) {
+	font_->generate_spacial_char_verts(c,
+		pos_ + glm::vec3(dx, 0.02, dy),
+		glm::vec3(1, 0, 0),
+		glm::vec3(0, 0, 1),
+		0.004f, char_verts_);
 }
 
 bool MapDisplay::draw_zone(char zone, float dx, float dy) {
-	std::cout << zone << std::endl;
 	if (!visited(zone)) {
 		return false;
 	}
+	
+	// Draw connecting lines
 	if (zone == 'D' && visited('O')) {
 		draw_tex(ParticleTexture::TeeLine, 0, 1);
 		draw_tex(ParticleTexture::VertLine, 0, 0.5);
+		draw_tex(ParticleTexture::HorLine, -0.5, 1);
 		dx = -1;
-	}
-	if (zone == 'O' && visited('D')) {
+	} else if (zone == 'O' && visited('D')) {
+		draw_tex(ParticleTexture::HorLine, 0.5, 1);
 		dx = 1;
+	} else if (dx != 0) {
+		draw_tex(ParticleTexture::HorLine, dx/2, 0);
+	} else if (dy != 0) {
+		draw_tex(ParticleTexture::VertLine, 0, dy/2);
 	}
 
 	pos_.x += dx;
-	pos_.y += dy;
+	pos_.z += dy;
 	bool exits_done = true;
 
 	// Deliberately non short circuiting '&' in this switch
@@ -278,19 +321,29 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	} else {
 		tex = exits_done ? ParticleTexture::GreySolid : ParticleTexture::GreyDashed;
 	}
-	sprites_.push_back({ glm::vec3(pos_.x, pos_.z, pos_.y), tex });
+	sprites_.push_back({ pos_, tex });
+	draw_char(zone, 0, 0);
 	pos_.x -= dx;
-	pos_.y -= dy;
+	pos_.z -= dy;
 	return true;
 }
 
 bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
-	std::cout << int(hub) << std::endl;
 	if (!global_->has_flag(HUB_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)])) {
 		return false;
 	}
+	if (dx != 0) {
+		for (int i = 1; i < 4; ++i) {
+			draw_tex(ParticleTexture::HorLine, i * dx / 4, 0);
+		}
+	} else if (dy != 0) {
+		for(int i = 1; i < 4; ++i) {
+			draw_tex(ParticleTexture::VertLine, 0, i * dy / 4);
+		}
+	}
+
 	pos_.x += dx;
-	pos_.y += dy;
+	pos_.z += dy;
 	ParticleTexture tex;
 	switch (hub) {
 	case HubCode::Alpha: {
@@ -332,22 +385,27 @@ bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
 		break;
 	}
 	}
-	sprites_.push_back({ glm::vec3(pos_.x, pos_.z, pos_.y), tex });
+	sprites_.push_back({ pos_, tex });
 	pos_.x -= dx;
-	pos_.y -= dy;
+	pos_.z -= dy;
 	return true;
 }
 
 bool MapDisplay::draw_warp(HubCode hub, char zone, float dx, float dy) {
-	std::cout << int(hub) << zone << std::endl;
 	bool should_draw;
 	if (zone == 'H') {
 		should_draw = global_->has_flag(HUB_ALT_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)]);
 	} else { // zone == 'X'
-		should_draw = global_->has_flag(HUB_ALT_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)]);
+		should_draw = global_->has_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)]);
 	}
 	if (should_draw) {
-		sprites_.push_back({ glm::vec3(pos_.x + dx, pos_.z, pos_.y + dy), ParticleTexture::PinkSolid });
+		sprites_.push_back({ pos_ + glm::vec3(dx, 0, dy), ParticleTexture::PinkSolid });
+		if (dx != 0) {
+			draw_tex(ParticleTexture::HorDashes, dx / 2, 0);
+		} else if (dy != 0) {
+			draw_tex(ParticleTexture::VertDashes, 0, dy / 2);
+		}
+		draw_char(zone, dx, dy);
 	}
 	return should_draw;
 }

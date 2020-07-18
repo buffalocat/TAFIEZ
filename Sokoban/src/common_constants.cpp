@@ -67,5 +67,4 @@ const std::filesystem::path MAPS_TEMP = std::filesystem::path("maps") / "temp";
 const std::string NEW_FILE_START_MAP = "T";
 const std::string WORLD_RESET_START_MAP = "HA";
 
-const std::string Fonts::KALAM_BOLD = "resources/kalam/Kalam-Bold.ttf";
 const std::string Fonts::ABEEZEE = "resources/abeezee/ABeeZee-Regular.otf";

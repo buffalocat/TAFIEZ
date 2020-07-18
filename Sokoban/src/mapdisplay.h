@@ -9,10 +9,14 @@ enum class HubCode;
 class PlayingGlobalData;
 enum class ParticleTexture;
 
+class Font;
+struct TextVertex3;
+
 struct MapSprite {
 	glm::vec3 pos;
 	ParticleTexture tex;
 };
+
 
 class MapDisplay : public ObjectModifier {
 public:
@@ -34,13 +38,20 @@ public:
 	bool draw_hub(HubCode hub, float dx, float dy);
 	bool draw_warp(HubCode hub, char zone, float dx, float dy);
 	void draw_tex(ParticleTexture tex, float dx, float dy);
+	void draw_char(char c, float dx, float dy);
 
 	bool visited(char zone);
 
 private:
 	PlayingGlobalData* global_{};
 	std::vector<MapSprite> sprites_{};
-	FPoint3 pos_;
+	std::vector<TextVertex3> char_verts_{};
+	glm::vec3 parent_pos_;
+	glm::vec3 pos_;
+	Font* font_;
+	GLuint VAO_, VBO_;
+
+	PlayingState* state_{};
 };
 
 #endif //MAPDISPLAYSTATE_H

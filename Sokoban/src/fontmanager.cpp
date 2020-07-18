@@ -29,20 +29,22 @@ std::unique_ptr<Font> FontManager::make_font(std::string path, unsigned int font
 Font::Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size) :
 	shader_{ text_shader },
 	tex_width_{ 1 << 9 }, tex_height_{ 1 << 9 }, font_size_{ font_size } {
-	if (FT_New_Face(ft, path.c_str(), 0, &face_)) {
+	FT_Face face;
+	if (FT_New_Face(ft, path.c_str(), 0, &face)) {
 		std::cout << "Failed to load the font" << std::endl;
 	}
-	FT_Set_Pixel_Sizes(face_, 0, font_size);
-	init_glyphs(font_size);
+	FT_Set_Pixel_Sizes(face, 0, font_size);
+	init_glyphs(font_size, face);
+	FT_Done_Face(face);
 }
 
 Font::~Font() {
 	glDeleteTextures(1, &tex_);
 }
 
-void Font::init_glyphs(int font_size) {
+void Font::init_glyphs(int font_size, FT_Face face) {
 	// Figure out the size the texture has to be
-	auto* g = face_->glyph;
+	auto* g = face->glyph;
 
 	unsigned int left = 0;
 	unsigned int top = 0;
@@ -50,7 +52,7 @@ void Font::init_glyphs(int font_size) {
 	// Not every character is even in the font!
 	const char* good_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:,;'\"(!?)+-*/= ";
 	for (const char* c = good_characters; *c; ++c) {
-		if (FT_Load_Char(face_, *c, FT_LOAD_RENDER)) {
+		if (FT_Load_Char(face, *c, FT_LOAD_RENDER)) {
 			continue;
 		}
 		if (left + g->bitmap.width >= tex_width_) {
@@ -84,7 +86,7 @@ void Font::init_glyphs(int font_size) {
 
 	// Copy the glyphs into the texture
 	for (const char* c = good_characters; *c; ++c) {
-		if (FT_Load_Char(face_, *c, FT_LOAD_RENDER)) {
+		if (FT_Load_Char(face, *c, FT_LOAD_RENDER)) {
 			continue;
 		}
 		GlyphPos cur = glyphs_[*c];
@@ -93,8 +95,6 @@ void Font::init_glyphs(int font_size) {
 	}
 }
 
-void Font::render_glyphs() {}
-
 void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy,
 	std::vector<TextVertex>& text_verts, float* width, float* height) {
 	sx *= 2.0f / SCREEN_WIDTH;
@@ -102,9 +102,6 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 	float su = 1.0f / tex_width_;
 	float sv = 1.0f / tex_height_;
 
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	text_verts.reserve(6 * strlen(text));
 	const char* line_start = text;
@@ -158,3 +155,30 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 	}
 	*height = (float)font_size_ * sy * lines;
 }
+
+
+void Font::generate_spacial_char_verts(char c, glm::vec3 center, glm::vec3 nx, glm::vec3 ny, float scale,
+	std::vector<TextVertex3>& text_verts) {
+	GlyphPos glyph = glyphs_[c];
+	glm::vec3 vx = (scale * glyph.width) * nx;
+	glm::vec3 vy = (scale * glyph.height) * ny;
+	float su = 1.0f / tex_width_;
+	float sv = 1.0f / tex_height_;
+	float u = glyph.left * su;
+	float v = glyph.top * sv;
+	float du = glyph.width * su;
+	float dv = glyph.height * sv;
+	TextVertex3 box[4] = {
+		TextVertex3{center - vx + vy, {u, v}},
+		TextVertex3{center + vx + vy, {u + du, v}},
+		TextVertex3{center - vx - vy, {u, v + dv}},
+		TextVertex3{center + vx - vy, {u + du, v + dv}},
+	};
+	for (int i : {0, 1, 2, 2, 1, 3}) {
+		text_verts.push_back(box[i]);
+	}
+	for (int i : {0, 2, 1, 1, 2, 3}) {
+		text_verts.push_back(box[i]);
+	}
+}
+

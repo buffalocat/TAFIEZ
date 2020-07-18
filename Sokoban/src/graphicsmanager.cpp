@@ -161,6 +161,7 @@ void GraphicsManager::load_texture_atlas() {
 void GraphicsManager::set_PV(glm::mat4 proj, glm::mat4 view) {
 	proj_ = proj;
 	view_ = view;
+	PV_ = proj * view;
 }
 
 void GraphicsManager::set_light_source(glm::vec3 light_source) {
@@ -193,7 +194,7 @@ void GraphicsManager::prepare_draw_objects() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
-	instanced_shader_.setMat4("PV", proj_ * view_);
+	instanced_shader_.setMat4("PV", PV_);
 	instanced_shader_.setVec3("lightSource", light_source_);
 }
 
@@ -203,7 +204,7 @@ void GraphicsManager::prepare_draw_objects_particle_atlas(GLuint atlas) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	instanced_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
-	instanced_shader_.setMat4("PV", proj_ * view_);
+	instanced_shader_.setMat4("PV", PV_);
 	instanced_shader_.setVec3("lightSource", light_source_);
 }
 

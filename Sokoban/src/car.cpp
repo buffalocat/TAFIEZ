@@ -24,13 +24,24 @@ ModCode Car::mod_code() {
 
 void Car::serialize(MapFileO& file) {
     file << type_ << color_cycle_;
+	if (type_ == CarType::Convertible) {
+		file << (player_ != nullptr);
+	}
 }
 
-void Car::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void Car::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	CarType type = static_cast<CarType>(file.read_byte());
     ColorCycle color_cycle;
     file >> color_cycle;
-    parent->set_modifier(std::make_unique<Car>(parent, type, color_cycle));
+	auto car = std::make_unique<Car>(parent, type, color_cycle);
+	if (type == CarType::Convertible) {
+		if (file.read_byte()) {
+			auto riding_player = std::make_unique<Player>(parent->shifted_pos({ 0,0,1 }), PlayerState::RidingHidden);
+			riding_player->set_car(car.get());
+			map->push_to_object_array(std::move(riding_player), nullptr);
+		}
+	}
+	parent->set_modifier(std::move(car));
 }
 
 bool Car::valid_parent(GameObject* obj) {

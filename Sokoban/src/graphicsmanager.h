@@ -78,12 +78,13 @@ public:
 
 	std::unique_ptr<FontManager> fonts_{};
 
-	glm::mat4 proj_, view_;
+	glm::mat4 proj_, view_, PV_;
 	glm::vec3 light_source_;
 	double shadow_;
 
 	Shader instanced_shader_{ Shader("shaders/instanced_shader.vs", "shaders/instanced_shader.fs") };
 	Shader text_shader_{ Shader("shaders/text_shader.vs", "shaders/text_shader.fs") };
+	Shader text_shader_spacial_{ Shader("shaders/text_shader_spacial.vs", "shaders/text_shader.fs") };
 	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
 	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
 

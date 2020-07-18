@@ -257,8 +257,15 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			break;
 		}
 		case MapCode::ActivePlayerPos:
-			init_data->active_player = dynamic_cast<Player*>(map_->view(file.read_point3()));
+		{
+			GameObject* player_object = map_->view(file.read_point3());
+			if (auto active_player = dynamic_cast<Player*>(player_object)) {
+				init_data->active_player = active_player;
+			} else if (auto car = dynamic_cast<Car*>(player_object->modifier())) {
+				init_data->active_player = car->player_;
+			}
 			break;
+		}
 		case MapCode::FloorSignFlag:
 			if (auto* sign = dynamic_cast<FloorSign*>(map_->view(file.read_point3())->modifier())) {
 				sign->learn_flag_ = file.read_uint32();

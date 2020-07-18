@@ -6,6 +6,7 @@
 #include "room.h"
 #include "roommap.h"
 #include "player.h"
+#include "car.h"
 #include "playingstate.h"
 #include "mapfile.h"
 
@@ -255,7 +256,11 @@ void SaveFile::save_room(Room* room, std::filesystem::path path) {
 	room->write_to_file(file);
 	if (Player* active_player = room->map()->player_cycle_->current_player()) {
 		file << MapCode::ActivePlayerPos;
-		file << active_player->pos_;
+		if (active_player->tangible_) {
+			file << active_player->pos_;
+		} else {
+			file << active_player->car_riding()->pos();
+		}
 	}
 	file << MapCode::End;
 }

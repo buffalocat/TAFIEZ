@@ -26,6 +26,8 @@
 
 #include "common_constants.h"
 
+#include "globalflagconstants.h"
+
 const int MOVEMENT_KEYS[4] = { GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_UP, };
 const Point3 MOVEMENT_DIRS[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { -1, 0, 0 }, { 0, -1, 0 } };
 
@@ -191,6 +193,54 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
+	/*
+	auto zone_order = "HVCKFG7T2N0DO5AES4UQ69WZJ3LPYBMRI81X!";
+	if (glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS) {
+		static int hub_i = 0;
+		if (hub_i < 5) {
+			global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[hub_i]);
+			++hub_i;
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+	if (glfwGetKey(window_, GLFW_KEY_H) == GLFW_PRESS) {
+		static int visit_i = 0;
+		if (visit_i < 37) {
+			global_->add_flag(FLAG_COLLECT_FLAGS[get_clear_flag_index(zone_order[visit_i])]);
+			++visit_i;
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+	if (glfwGetKey(window_, GLFW_KEY_J) == GLFW_PRESS) {
+		static int flag_i = 0;
+		if (flag_i < 37) {
+			global_->add_flag(ZONE_ACCESSED_GLOBAL_FLAGS[get_clear_flag_index(zone_order[flag_i])]);
+			++flag_i;
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+	if (glfwGetKey(window_, GLFW_KEY_K) == GLFW_PRESS) {
+		static int x_alt_i = 0;
+		if (x_alt_i < 4) {
+			global_->add_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[x_alt_i]);
+			++x_alt_i;
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+	if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {
+		static int hub_alt_i = 0;
+		if (hub_alt_i < 5) {
+			global_->add_flag(HUB_ALT_ACCESSED_GLOBAL_FLAGS[hub_alt_i]);
+			++hub_alt_i;
+			input_cooldown = MAX_COOLDOWN;
+			return;
+		}
+	}
+	*/
 }
 
 void PlayingState::create_move_processor(Player* player) {

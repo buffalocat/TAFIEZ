@@ -5,6 +5,11 @@ struct TextVertex {
 	glm::vec2 TexCoords;
 };
 
+struct TextVertex3 {
+	glm::vec3 Position;
+	glm::vec2 TexCoords;
+};
+
 struct GlyphPos {
 	unsigned int left, top;
 	int left_bear, top_bear;
@@ -17,10 +22,11 @@ public:
 	Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size);
 	~Font();
 
-	void init_glyphs(int font_size);
-	void render_glyphs();
+	void init_glyphs(int font_size, FT_Face face);
 	void generate_string_verts(const char* text, float x, float y, float sx, float sy,
 		std::vector<TextVertex>& text_verts, float* width, float* height);
+	void generate_spacial_char_verts(char c, glm::vec3 center, glm::vec3 vx, glm::vec3 vy, float scale,
+		std::vector<TextVertex3>& text_verts);
 
 	GLuint tex_;
 	Shader* shader_;
@@ -28,7 +34,6 @@ public:
 
 private:
 	GlyphPos glyphs_[128];
-	FT_Face face_;
 	unsigned int tex_width_, tex_height_;
 };
 
