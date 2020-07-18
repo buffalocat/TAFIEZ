@@ -120,7 +120,7 @@ bool MoveProcessor::try_move_horizontal(Point3 dir) {
 	if (moving_blocks_.empty()) {
 		return false;
 	}
-	anims_->sounds_->queue_sound(SoundName::MoveHorizontal);
+	//anims_->sounds_->queue_sound(SoundName::MoveHorizontal);
 	state_ = MoveStep::Horizontal;
 	frames_ = HORIZONTAL_MOVEMENT_FRAMES - SWITCH_RESPONSE_FRAMES;
 	reset_player_jump();

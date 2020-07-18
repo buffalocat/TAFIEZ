@@ -55,7 +55,7 @@ void MapDisplay::init_sprites(PlayingState* state) {
 	font_ = state->text_->fonts_->get_font(Fonts::ABEEZEE, 72);
 	parent_pos_ = glm::vec3(parent_->real_pos());
 	generate_map();
-	
+
 	glBindVertexArray(VAO_);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_);
 	glBufferData(GL_ARRAY_BUFFER, char_verts_.size() * sizeof(TextVertex3), char_verts_.data(), GL_STATIC_DRAW);
@@ -91,6 +91,14 @@ void MapDisplay::generate_map() {
 }
 
 bool MapDisplay::visited(char zone) {
+	if (zone == 'X') {
+		for (int i = 0; i < 4; ++i) {
+			if (global_->has_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[i])) {
+				return true;
+			}
+			return false;
+		}
+	}
 	return global_->has_flag(get_zone_access_code(zone));
 }
 

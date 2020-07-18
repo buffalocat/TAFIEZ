@@ -95,9 +95,11 @@ void PlayingState::handle_input() {
 				anims_->reset_temp();
 				delta_frame_ = std::make_unique<DeltaFrame>();
 				move_camera_to_player(true);
+				anims_->sounds_->queue_sound(SoundName::UndoClick);
 			} else if (undo_stack_->non_empty()) {
 				undo_stack_->pop();
 				move_camera_to_player(true);
+				anims_->sounds_->queue_sound(SoundName::UndoClick);
 			}
 			gfx_->set_state(GraphicsState::None);
 			room_->map()->reset_local_state();

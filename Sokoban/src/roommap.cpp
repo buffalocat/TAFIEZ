@@ -6,6 +6,7 @@
 #include "gameobject.h"
 #include "graphicsmanager.h"
 #include "animationmanager.h"
+#include "soundmanager.h"
 #include "wall.h"
 #include "delta.h"
 #include "snakeblock.h"
@@ -532,6 +533,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 				delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this, clear_flag_req_));
 			}
 			collect_flag();
+
 			if (global_) {
 				global_->collect_clear_flag(zone_);
 			}
@@ -540,6 +542,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 }
 
 void RoomMap::collect_flag() {
+	static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
 	for (auto& pair : clear_flags_) {
 		pair.first->collected_ = true;
 	}
