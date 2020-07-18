@@ -15,6 +15,7 @@ struct TextVertex3;
 struct MapSprite {
 	glm::vec3 pos;
 	ParticleTexture tex;
+	int color;
 };
 
 
@@ -37,7 +38,7 @@ public:
 	bool draw_zone(char zone, float dx, float dy);
 	bool draw_hub(HubCode hub, float dx, float dy);
 	bool draw_warp(HubCode hub, char zone, float dx, float dy);
-	void draw_tex(ParticleTexture tex, float dx, float dy);
+	void draw_tex(ParticleTexture tex, float dx, float dy, float dz, int color);
 	void draw_char(char c, float dx, float dy);
 
 	bool visited(char zone);

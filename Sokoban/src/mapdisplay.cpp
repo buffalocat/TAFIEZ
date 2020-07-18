@@ -69,7 +69,7 @@ void MapDisplay::init_sprites(PlayingState* state) {
 void MapDisplay::draw_special(GraphicsManager* gfx, GLuint atlas) {
 	init_sprites(state_);
 	for (auto& sprite : sprites_) {
-		gfx->square_0.push_instance(sprite.pos, glm::vec3(0.6f), sprite.tex, glm::vec4(1.0f));
+		gfx->square_0.push_instance(sprite.pos, glm::vec3(0.6f), sprite.tex, sprite.color);
 	}
 	gfx->prepare_draw_objects_particle_atlas(atlas);
 	gfx->draw_objects();
@@ -102,8 +102,8 @@ bool MapDisplay::visited(char zone) {
 	return global_->has_flag(get_zone_access_code(zone));
 }
 
-void MapDisplay::draw_tex(ParticleTexture tex, float dx, float dy) {
-	sprites_.push_back({ pos_ + glm::vec3(dx, -0.02, dy), tex });
+void MapDisplay::draw_tex(ParticleTexture tex, float dx, float dy, float dz, int color) {
+	sprites_.push_back({ pos_ + glm::vec3(dx, dz, dy), tex, color });
 }
 
 void MapDisplay::draw_char(char c, float dx, float dy) {
@@ -121,17 +121,17 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	
 	// Draw connecting lines
 	if (zone == 'D' && visited('O')) {
-		draw_tex(ParticleTexture::TeeLine, 0, 1);
-		draw_tex(ParticleTexture::VertLine, 0, 0.5);
-		draw_tex(ParticleTexture::HorLine, -0.5, 1);
+		draw_tex(ParticleTexture::TeeLine, 0, 1, -0.02f, WHITE);
+		draw_tex(ParticleTexture::VertLine, 0, 0.5, -0.02f, WHITE);
+		draw_tex(ParticleTexture::HorLine, -0.5, 1, -0.02f, WHITE);
 		dx = -1;
 	} else if (zone == 'O' && visited('D')) {
-		draw_tex(ParticleTexture::HorLine, 0.5, 1);
+		draw_tex(ParticleTexture::HorLine, 0.5, 1, -0.02f, WHITE);
 		dx = 1;
 	} else if (dx != 0) {
-		draw_tex(ParticleTexture::HorLine, dx/2, 0);
+		draw_tex(ParticleTexture::HorLine, dx/2, 0, -0.02f, WHITE);
 	} else if (dy != 0) {
-		draw_tex(ParticleTexture::VertLine, 0, dy/2);
+		draw_tex(ParticleTexture::VertLine, 0, dy/2, -0.02f, WHITE);
 	}
 
 	pos_.x += dx;
@@ -323,13 +323,9 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 		break;
 	}
 	}
-	ParticleTexture tex;
-	if (global_->has_flag(get_clear_flag_code(zone))) {
-		tex = exits_done ? ParticleTexture::GoldSolid : ParticleTexture::GoldDashed;
-	} else {
-		tex = exits_done ? ParticleTexture::GreySolid : ParticleTexture::GreyDashed;
-	}
-	sprites_.push_back({ pos_, tex });
+	ParticleTexture tex = exits_done ? ParticleTexture::SolidBox : ParticleTexture::DashedBox;
+	int color = global_->has_flag(get_clear_flag_code(zone)) ? GOLD : LIGHT_GREY;
+	draw_tex(tex, 0, 0, 0, color);
 	draw_char(zone, 0, 0);
 	pos_.x -= dx;
 	pos_.z -= dy;
@@ -342,58 +338,67 @@ bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
 	}
 	if (dx != 0) {
 		for (int i = 1; i < 4; ++i) {
-			draw_tex(ParticleTexture::HorLine, i * dx / 4, 0);
+			draw_tex(ParticleTexture::HorLine, i * dx / 4, 0, -0.02f, WHITE);
 		}
 	} else if (dy != 0) {
 		for(int i = 1; i < 4; ++i) {
-			draw_tex(ParticleTexture::VertLine, 0, i * dy / 4);
+			draw_tex(ParticleTexture::VertLine, 0, i * dy / 4, -0.02f, WHITE);
 		}
 	}
 
 	pos_.x += dx;
 	pos_.z += dy;
-	ParticleTexture tex;
+	ParticleTexture letter_tex, box_tex;
+	bool exits_done;
+	int color;
 	switch (hub) {
 	case HubCode::Alpha: {
-		tex = ParticleTexture::Alpha;
-		draw_zone('V', -1, 0);
-		draw_zone('C', 0, 1);
-		draw_zone('K', 1, 0);
+		letter_tex = ParticleTexture::Alpha;
+		color = RED;
+		exits_done = draw_zone('V', -1, 0) &
+			draw_zone('C', 0, 1) &
+			draw_zone('K', 1, 0);
 		break;
 	}
 	case HubCode::Beta:
 	{
-		tex = ParticleTexture::Beta;
-		draw_zone('A', 0, 1);
-		draw_zone('E', 1, 0);
-		draw_zone('S', 0, -1);
+		letter_tex = ParticleTexture::Beta;
+		color = GREEN;
+		exits_done = draw_zone('A', 0, 1) &
+			draw_zone('E', 1, 0) &
+			draw_zone('S', 0, -1);
 		break;
 	}
 	case HubCode::Gamma:
 	{
-		tex = ParticleTexture::Gamma;
-		draw_zone('W', 1, 0);
-		draw_zone('Z', 0, -1);
-		draw_zone('L', -1, 0);
+		letter_tex = ParticleTexture::Gamma;
+		color = BLUE;
+		exits_done = draw_zone('W', 1, 0) &
+			draw_zone('Z', 0, -1) &
+			draw_zone('L', -1, 0);
 		break;
 	}
 	case HubCode::Delta:
 	{
-		tex = ParticleTexture::Delta;
-		draw_zone('P', 0, -1);
-		draw_zone('Y', -1, 0);
-		draw_zone('R', 0, 1);
+		letter_tex = ParticleTexture::Delta;
+		color = PURPLE;
+		exits_done = draw_zone('P', 0, -1) &
+			draw_zone('Y', -1, 0) &
+			draw_zone('R', 0, 1);
 		break;
 	}
 	case HubCode::Omega:
 	{
-		tex = ParticleTexture::Omega;
-		draw_zone('1', -1, 0);
-		draw_zone('!', 0, -1);
+		letter_tex = ParticleTexture::Omega;
+		color = GOLD;
+		exits_done = draw_zone('1', -1, 0) &
+			draw_zone('!', 0, -1);
 		break;
 	}
 	}
-	sprites_.push_back({ pos_, tex });
+	box_tex = exits_done ? ParticleTexture::SolidBox : ParticleTexture::DashedBox;
+	draw_tex(box_tex, 0, 0, 0, color);
+	draw_tex(letter_tex, 0, 0, 0.02f, WHITE);
 	pos_.x -= dx;
 	pos_.z -= dy;
 	return true;
@@ -407,11 +412,11 @@ bool MapDisplay::draw_warp(HubCode hub, char zone, float dx, float dy) {
 		should_draw = global_->has_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)]);
 	}
 	if (should_draw) {
-		sprites_.push_back({ pos_ + glm::vec3(dx, 0, dy), ParticleTexture::PinkSolid });
+		draw_tex(ParticleTexture::SolidBox, dx, dy, 0, PINK);
 		if (dx != 0) {
-			draw_tex(ParticleTexture::HorDashes, dx / 2, 0);
+			draw_tex(ParticleTexture::HorDashes, dx / 2, 0, -0.02f, WHITE);
 		} else if (dy != 0) {
-			draw_tex(ParticleTexture::VertDashes, 0, dy / 2);
+			draw_tex(ParticleTexture::VertDashes, 0, dy / 2, -0.02f, WHITE);
 		}
 		draw_char(zone, dx, dy);
 	}

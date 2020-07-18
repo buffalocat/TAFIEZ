@@ -83,11 +83,8 @@ enum class ParticleTexture {
 	HorDashes = 56,
 	VertDashes = 57,
 
-	GreySolid = 51,
-	GreyDashed = 52,
-	GoldSolid = 53,
-	GoldDashed = 54,
-	PinkSolid = 55,
+	SolidBox = 51,
+	DashedBox = 52,
 
 	Alpha = 59,
 	Beta = 60,
