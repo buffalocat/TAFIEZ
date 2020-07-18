@@ -24,6 +24,7 @@ public:
 	virtual ~StringDrawer();
 
 	void generate_bg_verts(float x, float y, float font_height);
+	void bind_bg_vbo();
 	void set_color(int color);
 	void set_color(glm::vec4 color);
 	void render_bg(Shader* shader);
@@ -70,12 +71,13 @@ private:
 
 class RoomLabelDrawer : public StringDrawer {
 public:
-	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y, float bg);
+	RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y, float bg, bool cam_icon);
 	~RoomLabelDrawer();
 
 	void init();
 	void force_fade();
 	void update();
+	void generate_cam_icon_verts();
 
 private:
 	unsigned int lifetime_;

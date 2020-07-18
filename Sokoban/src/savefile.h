@@ -43,7 +43,7 @@ public:
 	void remove_flag(unsigned int flag);
 	bool has_flag(unsigned int flag);
 
-	void collect_clear_flag(char zone);
+	void collect_clear_flag(char zone, DeltaFrame*);
 	void uncollect_clear_flag(char zone);
 
 	std::set<unsigned int> flags_{};
@@ -89,4 +89,15 @@ public:
 private:
 	PlayingGlobalData* global_;
 	unsigned int flag_;
+};
+
+class FlagCountDelta : public Delta {
+public:
+	FlagCountDelta(PlayingGlobalData* global, unsigned int count);
+	~FlagCountDelta();
+	void revert();
+
+private:
+	PlayingGlobalData* global_;
+	unsigned int count_;
 };

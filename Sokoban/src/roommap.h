@@ -73,7 +73,7 @@ public:
     void remove_signaler(Signaler*);
 
 	void check_clear_flag_collected(DeltaFrame*);
-	void collect_flag();
+	void collect_flag(bool real, DeltaFrame*);
 	void uncollect_flag(int req);
 
 	void validate_players(DeltaFrame*);
@@ -219,18 +219,6 @@ public:
 private:
 	RoomMap* map_;
 	int req_;
-};
-
-
-class MapInitDelta : public Delta {
-public:
-	MapInitDelta(RoomMap* map);
-	~MapInitDelta();
-
-	void revert();
-
-private:
-	RoomMap* map_;
 };
 
 

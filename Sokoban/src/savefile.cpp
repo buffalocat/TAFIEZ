@@ -138,9 +138,16 @@ bool PlayingGlobalData::has_flag(unsigned int flag) {
 	return flags_.count(flag);
 }
 
-void PlayingGlobalData::collect_clear_flag(char zone) {
-	flags_.insert(get_clear_flag_code(zone));
-	++clear_flag_total_;
+void PlayingGlobalData::collect_clear_flag(char zone, DeltaFrame* delta_frame) {
+	auto flag = get_clear_flag_code(zone);
+	if (!flags_.count(flag)) {
+		if (delta_frame) {
+			delta_frame->push(std::make_unique<GlobalFlagDelta>(this, flag));
+			delta_frame->push(std::make_unique<FlagCountDelta>(this, clear_flag_total_));
+		}
+		flags_.insert(get_clear_flag_code(zone));
+		++clear_flag_total_;
+	}
 }
 
 void PlayingGlobalData::uncollect_clear_flag(char zone) {
@@ -278,4 +285,14 @@ GlobalFlagDelta::~GlobalFlagDelta() {}
 
 void GlobalFlagDelta::revert() {
 	global_->remove_flag(flag_);
+}
+
+
+FlagCountDelta::FlagCountDelta(PlayingGlobalData* global, unsigned int count) :
+	Delta(), global_{ global }, count_{ count } {}
+
+FlagCountDelta::~FlagCountDelta() {}
+
+void FlagCountDelta::revert() {
+	global_->clear_flag_total_--;
 }

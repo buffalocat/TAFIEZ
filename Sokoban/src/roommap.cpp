@@ -91,11 +91,6 @@ void RoomMap::serialize(MapFileO& file) {
 
 	file << MapCode::Zone;
 	file << zone_;
-	if (clear_flag_req_ > 0) {
-		file << MapCode::ClearFlagRequirement;
-		file << clear_flag_req_;
-		file.write_uint32(clear_id_);
-	}
 	// Serialize layer types
 	std::vector<GameObject*> rel_check_objs{};
 	std::vector<ObjectModifier*> rel_check_mods{};
@@ -120,6 +115,12 @@ void RoomMap::serialize(MapFileO& file) {
 	file << MapCode::WallRuns;
 	for (auto& layer : layers_) {
 		layer.serialize_wall_runs(file);
+	}
+
+	if (clear_flag_req_ > 0) {
+		file << MapCode::ClearFlagRequirement;
+		file << clear_flag_req_;
+		file.write_uint32(clear_id_);
 	}
 }
 
@@ -452,6 +453,7 @@ void RoomMap::set_initial_state(PlayingState* playing_state) {
 	}
 	if (playing_state) {
 		initialize_animation(playing_state->anims_.get());
+		playing_state->anims_->sounds_->flush_sounds();
 	}
 }
 
@@ -529,20 +531,21 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 			total += pair.second;
 		}
 		if (total >= clear_flag_req_) {
-			if (delta_frame) {
-				delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this, clear_flag_req_));
-			}
-			collect_flag();
-
+			collect_flag(true, delta_frame);
 			if (global_) {
-				global_->collect_clear_flag(zone_);
+				global_->collect_clear_flag(zone_, delta_frame);
 			}
 		}
 	}
 }
 
-void RoomMap::collect_flag() {
-	static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
+void RoomMap::collect_flag(bool real, DeltaFrame* delta_frame) {
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this, clear_flag_req_));
+	}
+	if (real) {
+		static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
+	}
 	for (auto& pair : clear_flags_) {
 		pair.first->collected_ = true;
 	}
@@ -553,9 +556,6 @@ void RoomMap::uncollect_flag(int req) {
 	clear_flag_req_ = req;
 	for (auto& pair : clear_flags_) {
 		pair.first->collected_ = false;
-	}
-	if (global_) {
-		global_->uncollect_clear_flag(zone_);
 	}
 }
 
@@ -638,15 +638,6 @@ ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
 
 void ClearFlagCollectionDelta::revert() {
 	map_->uncollect_flag(req_);
-}
-
-
-MapInitDelta::MapInitDelta(RoomMap* map) : Delta(), map_{ map } {}
-
-MapInitDelta::~MapInitDelta() {}
-
-void MapInitDelta::revert() {
-	map_->inited_ = false;
 }
 
 

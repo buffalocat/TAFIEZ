@@ -144,6 +144,8 @@ public:
     double get_tilt();
     double get_rotation();
 
+	bool is_free();
+
 	bool update_label();
 
     void push_context(std::unique_ptr<CameraContext>);

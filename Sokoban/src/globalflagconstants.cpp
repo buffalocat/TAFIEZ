@@ -78,7 +78,7 @@ const unsigned int ZONE_ACCESSED_GLOBAL_FLAGS[NUM_ZONES] = {
 	476783426, // 7
 	3566209726, // 8
 	1490322265, // 9
-	2615727639, // ?
+	2615727639, // !
 };
 
 const unsigned int HUB_ACCESSED_GLOBAL_FLAGS[5] = {
@@ -123,7 +123,7 @@ int get_clear_flag_index(char zone) {
 		return zone - 'A';
 	} else if ('0' <= zone && zone <= '9') {
 		return (zone - '0') + 26;
-	} else { // Zone ?
+	} else { // Zone !
 		return 36;
 	}
 }

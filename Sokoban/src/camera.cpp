@@ -368,6 +368,10 @@ double Camera::get_rotation() {
 	return cur_rot_;
 }
 
+bool Camera::is_free() {
+	return context_->is_free();
+}
+
 bool Camera::update_context(Point3 vpos) {
 	auto* new_context = context_map_[vpos.x][vpos.y];
 	if (!new_context->is_null()) {

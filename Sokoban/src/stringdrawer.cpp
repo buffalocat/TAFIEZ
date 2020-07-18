@@ -39,8 +39,7 @@ StringDrawer::StringDrawer(Font* font, glm::vec4 color,
 		glGenVertexArrays(1, &bg_VAO_);
 		glBindVertexArray(bg_VAO_);
 		glGenBuffers(1, &bg_VBO_);
-		glBindBuffer(GL_ARRAY_BUFFER, bg_VBO_);
-		glBufferData(GL_ARRAY_BUFFER, bg_vertices_.size() * sizeof(TextVertex), bg_vertices_.data(), GL_STATIC_DRAW);
+		bind_bg_vbo();
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, Position));
 		glEnableVertexAttribArray(1);
@@ -54,6 +53,11 @@ StringDrawer::~StringDrawer() {
 	if (alive_ptr_) {
 		*alive_ptr_ = false;
 	}
+}
+
+void StringDrawer::bind_bg_vbo() {
+	glBindBuffer(GL_ARRAY_BUFFER, bg_VBO_);
+	glBufferData(GL_ARRAY_BUFFER, bg_vertices_.size() * sizeof(TextVertex), bg_vertices_.data(), GL_STATIC_DRAW);
 }
 
 const float FONT_TOP_FACTOR = -0.3f;
@@ -108,7 +112,7 @@ void StringDrawer::set_color(glm::vec4 color) {
 }
 
 void StringDrawer::render_bg(Shader* shader) {
-	if (bg_ > 0) {
+	if (bg_ > 0 && opacity_ > 0) {
 		glm::vec4 color = bg_color_;
 		color.w *= bg_ * std::min(2 * opacity_, 1.0f);
 		shader->setVec4("color", color);
@@ -118,12 +122,14 @@ void StringDrawer::render_bg(Shader* shader) {
 }
 
 void StringDrawer::render() {
-	glm::vec4 color = color_;
-	color.w = opacity_;
-	shader_->setVec4("color", color);
-	glBindVertexArray(VAO_);
-	glBindTexture(GL_TEXTURE_2D, tex_);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices_.size());
+	if (opacity_ > 0) {
+		glm::vec4 color = color_;
+		color.w = opacity_;
+		shader_->setVec4("color", color);
+		glBindVertexArray(VAO_);
+		glBindTexture(GL_TEXTURE_2D, tex_);
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices_.size());
+	}
 }
 
 void StringDrawer::update() {}
@@ -175,9 +181,13 @@ void IndependentStringDrawer::cleanup() {
 const unsigned int ROOM_LABEL_DISPLAY_FRAMES = 180;
 const unsigned int ROOM_LABEL_FADE_FRAMES = 20;
 
-RoomLabelDrawer::RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y, float bg) :
+RoomLabelDrawer::RoomLabelDrawer(Font* font, glm::vec4 color, std::string label, float y, float bg, bool cam_icon) :
 	StringDrawer(font, color, label, 0, y, 1, 1, bg),
-	lifetime_{ ROOM_LABEL_DISPLAY_FRAMES } {}
+	lifetime_{ ROOM_LABEL_DISPLAY_FRAMES } {
+	if (cam_icon) {
+		generate_cam_icon_verts();
+	}
+}
 
 RoomLabelDrawer::~RoomLabelDrawer() {}
 
@@ -202,4 +212,24 @@ void RoomLabelDrawer::update() {
 			opacity_ = 1;
 		}
 	}
+}
+
+void RoomLabelDrawer::generate_cam_icon_verts() {
+	glm::vec2 tex = tex_to_vec(ParticleTexture::Camera);
+	float u = tex.x;
+	float v = tex.y;
+	float x = -0.985f;
+	float y = 0.98f;
+	float h = 0.2f;
+	float w = 0.15f;
+	TextVertex box[4] = {
+		TextVertex{{x, y}, {u, v}},
+		TextVertex{{x + w, y}, {u + 1, v}},
+		TextVertex{{x, y - h}, {u, v + 1}},
+		TextVertex{{x + w, y - h}, {u + 1, v + 1}},
+	};
+	for (int i : {0, 1, 2, 2, 1, 3}) {
+		bg_vertices_.push_back(box[i]);
+	}
+	bind_bg_vbo();
 }

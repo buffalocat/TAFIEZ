@@ -103,7 +103,7 @@ void Room::update_room_label() {
 		} else {
 			context_label_ = std::make_unique<RoomLabelDrawer>(
 				gfx_->fonts_->get_font(Fonts::ABEEZEE, 72), COLOR_VECTORS[DARK_BLUE],
-				camera_->active_label_, LEVEL_STRING_HEIGHT, LEVEL_STRING_BG_OPACITY);
+				camera_->active_label_, LEVEL_STRING_HEIGHT, LEVEL_STRING_BG_OPACITY, camera_->is_free());
 			state_->text_->toggle_string_drawer(context_label_.get(), true);
 		}
 		should_update_label_ = false;
@@ -190,13 +190,13 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			map_->zone_ = file.read_byte();
 			zone_label_ = std::make_unique<RoomLabelDrawer>(
 				gfx_->fonts_->get_font(Fonts::ABEEZEE, 108), COLOR_VECTORS[BRIGHT_PURPLE],
-				std::string("Zone ") + map_->zone_, ZONE_STRING_HEIGHT, ZONE_STRING_BG_OPACITY);
+				std::string("Zone ") + map_->zone_, ZONE_STRING_HEIGHT, ZONE_STRING_BG_OPACITY, false);
 			break;
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();
 			map_->clear_id_ = file.read_uint32();
 			if (p_global && p_global->has_flag(map_->clear_id_)) {
-				map_->collect_flag();
+				map_->collect_flag(false, nullptr);
 			} else if (e_global) {
 				e_global->assign_flag(map_->clear_id_, name_);
 			}
