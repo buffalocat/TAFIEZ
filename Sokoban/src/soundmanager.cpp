@@ -60,7 +60,6 @@ void SoundManager::clean_sources() {
 
 void SoundManager::play_sounds() {
 	for (auto& q : queued_sounds_) {
-		/*
 		if (q.power) {
 			ALuint source;
 			alGenSources(1, &source);
@@ -69,7 +68,6 @@ void SoundManager::play_sounds() {
 			active_sources_.push_back(source);
 			alSourcePlay(source);
 		}
-		*/
 	}
 }
 

@@ -25,6 +25,7 @@
 #include "incinerator.h"
 #include "flaggate.h"
 #include "savefile.h"
+#include "globalflagconstants.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	int width, int height, int depth) :
@@ -243,6 +244,10 @@ void RoomMap::remove_auto(AutoBlock* obj) {
 
 void RoomMap::remove_puppet(PuppetBlock* obj) {
 	puppets_.erase(std::remove(puppets_.begin(), puppets_.end(), obj), puppets_.end());
+}
+
+void RoomMap::remove_clear_flag(ClearFlag* obj) {
+	clear_flags_.erase(std::remove(clear_flags_.begin(), clear_flags_.end(), obj), clear_flags_.end());
 }
 
 void RoomMap::add_listener(ObjectModifier* obj, Point3 pos) {
@@ -525,10 +530,10 @@ void RoomMap::remove_signaler(Signaler* rem) {
 }
 
 void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
-	if (clear_flag_req_ && clear_flags_changed_) {
+	if (!global_->has_flag(get_clear_flag_code(zone_)) && clear_flags_changed_) {
 		int total = 0;
-		for (auto& pair : clear_flags_) {
-			total += pair.second;
+		for (auto* flag : clear_flags_) {
+			total += flag->active_;
 		}
 		if (total >= clear_flag_req_) {
 			collect_flag(true, delta_frame);
@@ -541,21 +546,19 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 
 void RoomMap::collect_flag(bool real, DeltaFrame* delta_frame) {
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this, clear_flag_req_));
+		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this));
 	}
 	if (real) {
 		static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
 	}
-	for (auto& pair : clear_flags_) {
-		pair.first->collected_ = true;
+	for (auto& flag : clear_flags_) {
+		flag->collected_ = true;
 	}
-	clear_flag_req_ = 0;
 }
 
-void RoomMap::uncollect_flag(int req) {
-	clear_flag_req_ = req;
-	for (auto& pair : clear_flags_) {
-		pair.first->collected_ = false;
+void RoomMap::uncollect_flag() {
+	for (auto& flag : clear_flags_) {
+		flag->collected_ = false;
 	}
 }
 
@@ -631,13 +634,13 @@ void BatchMotionDelta::revert() {
 }
 
 
-ClearFlagCollectionDelta::ClearFlagCollectionDelta(RoomMap* map, int req) :
-	map_{ map }, req_{ req } {}
+ClearFlagCollectionDelta::ClearFlagCollectionDelta(RoomMap* map) :
+	map_{ map } {}
 
 ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
 
 void ClearFlagCollectionDelta::revert() {
-	map_->uncollect_flag(req_);
+	map_->uncollect_flag();
 }
 
 

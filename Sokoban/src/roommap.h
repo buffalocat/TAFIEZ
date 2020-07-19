@@ -74,7 +74,7 @@ public:
 
 	void check_clear_flag_collected(DeltaFrame*);
 	void collect_flag(bool real, DeltaFrame*);
-	void uncollect_flag(int req);
+	void uncollect_flag();
 
 	void validate_players(DeltaFrame*);
 
@@ -84,6 +84,8 @@ public:
 
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
+	void remove_clear_flag(ClearFlag* flag);
+
 
     void add_listener(ObjectModifier*, Point3);
     void remove_listener(ObjectModifier*, Point3);
@@ -100,7 +102,7 @@ public:
     int height_;
     int depth_;
 
-	std::map<ClearFlag*, bool> clear_flags_{};
+	std::vector<ClearFlag*> clear_flags_{};
 	int clear_flag_req_ = 0;
 	unsigned int clear_id_ = 0;
 	char zone_ = '!';
@@ -212,13 +214,12 @@ private:
 
 class ClearFlagCollectionDelta : public Delta {
 public:
-	ClearFlagCollectionDelta(RoomMap* map, int req);
+	ClearFlagCollectionDelta(RoomMap* map);
 	~ClearFlagCollectionDelta();
 	void revert();
 
 private:
 	RoomMap* map_;
-	int req_;
 };
 
 

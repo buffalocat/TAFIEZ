@@ -12,15 +12,15 @@
 #include "delta.h"
 #include "car.h"
 
-ClearFlag::ClearFlag(GameObject* parent, int count, bool real, bool active, bool collected, char zone) :
+ClearFlag::ClearFlag(GameObject* parent, bool real, bool active, bool collected, char zone) :
 	ObjectModifier(parent),
-	count_{ count }, real_{ real }, active_{ active }, collected_{ collected }, zone_{ zone } {}
+	real_{ real }, active_{ active }, collected_{ collected }, zone_{ zone } {}
 
 ClearFlag::~ClearFlag() {}
 
 void ClearFlag::make_str(std::string& str) {
 	char buf[32];
-	snprintf(buf, 32, "ClearFlag:%s:%d", real_ ? "Real" : "Fake", count_);
+	snprintf(buf, 32, "ClearFlag:%s", real_ ? "Real" : "Fake");
 	str += buf;
 }
 
@@ -36,9 +36,7 @@ void ClearFlag::serialize(MapFileO& file) {
 void ClearFlag::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	bool real, active;
 	file >> real >> active;
-	bool collected = map->clear_flag_req_ == 0;
-	auto cf = std::make_unique<ClearFlag>(parent, map->clear_flag_req_, real, active, collected, map->zone_);
-	map->clear_flags_[cf.get()] = active;
+	auto cf = std::make_unique<ClearFlag>(parent, real, active, false, map->zone_);
 	parent->set_modifier(std::move(cf));
 }
 
@@ -72,7 +70,6 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 			}
 		}
 		if (active_ != prev_active) {
-			map->clear_flags_[this] = active_;
 			delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this, map));
 			map->clear_flags_changed_ = true;
 		}
@@ -80,11 +77,13 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 }
 
 void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
+	map->clear_flags_.push_back(this);
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
 }
 
 void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
+	map->remove_clear_flag(this);
 	map->remove_listener(this, pos_above());
 }
 
@@ -128,5 +127,4 @@ ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
 
 void ClearFlagToggleDelta::revert() {
 	flag_->active_ = !flag_->active_;
-	map_->clear_flags_[flag_] = flag_->active_;
 }

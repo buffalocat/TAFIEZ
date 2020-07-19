@@ -38,6 +38,7 @@
 #include "mapfile.h"
 
 #include "savefile.h"
+#include "globalflagconstants.h"
 
 Room::Room(GameState* state, std::string name) : state_{ state }, gfx_{ state->gfx_ }, name_{ name } {}
 
@@ -194,11 +195,10 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			break;
 		case MapCode::ClearFlagRequirement:
 			map_->clear_flag_req_ = file.read_byte();
-			map_->clear_id_ = file.read_uint32();
+			file.read_uint32();
+			map_->clear_id_ = get_clear_flag_code(map_->zone_);
 			if (p_global && p_global->has_flag(map_->clear_id_)) {
 				map_->collect_flag(false, nullptr);
-			} else if (e_global) {
-				e_global->assign_flag(map_->clear_id_, name_);
 			}
 			break;
 		case MapCode::OffsetPos:

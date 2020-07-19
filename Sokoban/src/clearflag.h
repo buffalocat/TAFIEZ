@@ -5,7 +5,7 @@
 
 class ClearFlag : public ObjectModifier {
 public:
-	ClearFlag(GameObject* parent, int count, bool real, bool active, bool collected, char zone);
+	ClearFlag(GameObject* parent, bool real, bool active, bool collected, char zone);
 	~ClearFlag();
 
 	void make_str(std::string&);
@@ -28,9 +28,6 @@ public:
 	bool real_;
 	bool active_;
 	bool collected_;
-
-private:
-	int count_;
 	char zone_;
 };
 
