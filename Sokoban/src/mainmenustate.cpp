@@ -9,7 +9,7 @@
 #include "graphicsmanager.h"
 #include "fontmanager.h"
 
-constexpr bool EDITOR_ENABLED = false;
+constexpr bool EDITOR_ENABLED = true;
 
 MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {}
 
@@ -21,6 +21,7 @@ void MainMenuState::init_menu() {
 		menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
 	}
 	menu_->push_entry("Select File", [this]() { open_file_select(); });
+	quit_entry_index_ = menu_->num_entries_;
 	menu_->push_entry("Quit", [this]() { queue_quit(); });
 }
 
@@ -38,6 +39,10 @@ void MainMenuState::draw() {
 	menu_->draw();
 }
 
+
+void MainMenuState::handle_escape() {
+	menu_->set_current_entry(quit_entry_index_);
+}
 
 const int MAX_SAVE_FILES = 7;
 

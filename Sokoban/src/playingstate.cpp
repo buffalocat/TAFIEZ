@@ -37,6 +37,8 @@ PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 PlayingState::PlayingState(GameState* parent, PlayingGlobalData* global) :
 	GameState(parent), global_{ global } {
 	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this, text_->ui_atlas_);
+	current_death_ = CauseOfDeath::None;
+	current_death_state_ = DeathState::Alive;
 }
 
 PlayingState::~PlayingState() {}
@@ -72,9 +74,6 @@ void PlayingState::main_loop() {
 }
 
 void PlayingState::handle_input() {
-	static int input_cooldown = 0;
-	static int undo_combo = 0;
-
 	if (input_cooldown > 0) {
 		--input_cooldown;
 	}
@@ -180,12 +179,9 @@ void PlayingState::handle_input() {
 	}
 	for (int i = 0; i < 4; ++i) {
 		if (glfwGetKey(window_, MOVEMENT_KEYS[i]) == GLFW_PRESS) {
-			static bool rotate_controls = true;
-			if (rotate_controls) {
-				const double HALF_PI = 1.57079632679;
-				double angle = room_->camera()->get_rotation();
-				i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
-			}
+			const double HALF_PI = 1.57079632679;
+			double angle = room_->camera()->get_rotation();
+			i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
 			create_move_processor(player);
 			if (!move_processor_->try_move_horizontal(MOVEMENT_DIRS[i])) {
 				move_processor_.reset(nullptr);
@@ -290,17 +286,18 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	auto room = std::make_unique<Room>(this, name);
 	RoomInitData init_data{};
 	room->load_from_file(*objs_, file, global_, &init_data);
-	if (use_default_player) {
+	Player* default_player = init_data.default_player;
+	if (use_default_player && default_player) {
 		room->map()->player_cycle_->set_active_player(init_data.default_player);
 	} else {
 		if (Player* active_player = init_data.active_player) {
 			room->map()->player_cycle_->set_active_player(active_player);
 		}
 		// Uncreate the default objects we put in the map
-		if (Player* player = init_data.default_player) {
-			room->map()->player_cycle_->remove_player(player, nullptr);
-			room->map()->take_from_map(player, true, false, nullptr);
-			room->map()->remove_from_object_array(player);
+		if (default_player) {
+			room->map()->player_cycle_->remove_player(default_player, nullptr);
+			room->map()->take_from_map(default_player, true, false, nullptr);
+			room->map()->remove_from_object_array(default_player);
 		}
 		if (Car* car = init_data.default_car) {
 			room->map()->take_from_map(car->parent_, true, false, nullptr);
@@ -345,17 +342,10 @@ bool PlayingState::can_use_door(Door* ent_door, Room** dest_room_ptr,
 	return exit_doors.size() > 0;
 }
 
-enum class DeathState {
-	Alive,
-	DeadAlone,
-	DeadCanSwitch,
-};
-
 void PlayingState::set_death_text() {
-	static CauseOfDeath current_death = CauseOfDeath::None;
 	auto death = player_doa()->death();
-	if (death != current_death) {
-		current_death = death;
+	if (death != current_death_) {
+		current_death_ = death;
 		std::string death_str{};
 		switch (death) {
 		case CauseOfDeath::None:
@@ -379,7 +369,6 @@ void PlayingState::set_death_text() {
 			glm::vec4(0.8, 0.1, 0.2, 1.0), death_str, DEATH_STRING_HEIGHT, DEATH_STRING_FADE_FRAMES, 0.0f);
 		text_->toggle_string_drawer(death_message_.get(), true);
 	}
-	static DeathState current_death_state = DeathState::Alive;
 	DeathState death_state = DeathState::Alive;
 	std::string death_substr{};
 	if (death != CauseOfDeath::None) {
@@ -389,8 +378,8 @@ void PlayingState::set_death_text() {
 			death_state = DeathState::DeadAlone;
 		}
 	}
-	if (death_state != current_death_state) {
-		current_death_state = death_state;
+	if (death_state != current_death_state_) {
+		current_death_state_ = death_state;
 		switch (death_state) {
 		case DeathState::Alive:
 			death_substr = "";
@@ -434,4 +423,10 @@ void PlayingState::update_global_animation() {
 			global_anim_.reset();
 		}
 	}
+}
+
+void PlayingState::handle_escape() {
+	auto pause_state = std::make_unique<PauseState>(this);
+	pause_state->can_escape_quit_ = false;
+	create_child(std::move(pause_state));
 }

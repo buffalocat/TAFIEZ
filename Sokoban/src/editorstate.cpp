@@ -106,6 +106,9 @@ void EditorState::main_loop() {
         return;
     }
 
+	if (try_quit_modal_) {
+		ask_quit();
+	}
 	if (keyboard_cooldown_ == 0 && !want_capture_keyboard()) {
 		if (handle_keyboard_input_main_state()) {
 			keyboard_cooldown_ = MAX_COOLDOWN;
@@ -344,20 +347,23 @@ void EditorState::manage_flag(bool create, unsigned int* flag_ptr, EditorRoom* e
 	}
 }
 
-bool EditorState::can_quit(bool confirm) {
-	if (!confirm) {
-		return true;
-	}
-	bool result = false;
+void EditorState::handle_escape() {
+	try_quit_modal_ = true;
+}
+
+void EditorState::ask_quit() {
 	ImGui::OpenPopup("Quit?");
 	if (ImGui::BeginPopupModal("Quit?", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Text("Are you sure you want to quit?\n");
 		ImGui::Separator();
 		if (ImGui::Button("Yes", ImVec2(-1, 0))) {
+			queue_quit();
 			ImGui::CloseCurrentPopup();
-			result = true;
+		}
+		if (ImGui::Button("No", ImVec2(-1, 0))) {
+			try_quit_modal_ = false;
+			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	return result;
 }

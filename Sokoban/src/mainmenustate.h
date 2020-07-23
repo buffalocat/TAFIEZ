@@ -12,12 +12,14 @@ public:
     ~MainMenuState();
     void main_loop();
 	void init_menu();
+	void handle_escape();
 
 	void open_file_select();
 	void draw();
 
 private:
 	std::unique_ptr<Menu> menu_;
+	int quit_entry_index_;
 };
 
 
@@ -34,7 +36,7 @@ public:
 	void continue_file();
 
 private:
-	int save_index_ = 0;
+	int save_index_;
 	std::unique_ptr<Menu> menu_{};
 	std::vector<std::unique_ptr<SaveFile>> save_files_{};
 };

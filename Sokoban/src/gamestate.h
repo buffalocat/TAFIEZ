@@ -12,7 +12,8 @@ public:
     void create_child(std::unique_ptr<GameState> child);
     void set_csp(std::unique_ptr<GameState>*);
     virtual void main_loop() = 0;
-    void check_for_escape_quit();
+    void check_for_escape();
+	virtual void handle_escape();
     bool attempt_queued_quit();
 	void queue_quit();
 	virtual bool can_quit(bool confirm);
@@ -22,13 +23,12 @@ public:
 	GLFWwindow* window_{};
 	std::unique_ptr<GameState> parent_{};
 
-protected:
 	GameState(GameState* parent);
+	std::unique_ptr<GameState>* current_state_ptr_{};
+	bool can_escape_quit_ = true;
 
 private:
 	void defer_to_parent();
-	std::unique_ptr<GameState>* current_state_ptr_{};
-	bool can_escape_quit_ = true;
 	bool queued_quit_ = false;
 };
 

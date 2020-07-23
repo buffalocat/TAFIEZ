@@ -27,6 +27,11 @@ struct DoorTravellingObj;
 
 enum class CauseOfDeath;
 
+enum class DeathState {
+	Alive,
+	DeadAlone,
+	DeadCanSwitch,
+};
 
 struct PlayingRoom {
 	std::unique_ptr<Room> room;
@@ -75,9 +80,16 @@ protected:
 	std::unique_ptr<MoveProcessor> move_processor_{};
 
 private:
+	void handle_escape();
+
 	std::unique_ptr<StringDrawer> death_message_{};
 	std::unique_ptr<StringDrawer> death_submessage_{};
 	void set_death_text();
+
+	int input_cooldown = 0;
+	int undo_combo = 0;
+	CauseOfDeath current_death_;
+	DeathState current_death_state_;
 
     friend class DoorMoveDelta;
 };

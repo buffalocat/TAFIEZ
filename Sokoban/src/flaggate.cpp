@@ -151,10 +151,9 @@ void FlagGate::get_gate_dims(int* width, int* height) {
 		*width = 3;
 		*height = 3;
 		break;
-	case 16:
-		*width = 5;
-		*height = 5;
+	case 24:
 	case 32:
+	case 36:
 		*width = 7;
 		*height = 7;
 		break;
@@ -167,19 +166,19 @@ void FlagGate::init_draw_constants() {
 	switch (orientation_) {
 	case 0:
 		center_ = glm::vec3((width - 1) / 2.0, 0.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(width, 1.01f, height);
+		scale_ = glm::vec3(width, 1.02f, height);
 		break;
 	case 1:
 		center_ = glm::vec3(0.0, (width - 1) / 2.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(1.01f, width, height);
+		scale_ = glm::vec3(1.02f, width, height);
 		break;
 	case 2:
 		center_ = glm::vec3(- (width - 1) / 2.0, 0.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(width, 1.01f, height);
+		scale_ = glm::vec3(width, 1.02f, height);
 		break;
 	case 3:
 		center_ = glm::vec3(0.0, - (width - 1) / 2.0, 0.5 + height / 2.0);
-		scale_ = glm::vec3(1.01f, width, height);
+		scale_ = glm::vec3(1.02f, width, height);
 		break;
 	}
 }
@@ -208,43 +207,34 @@ void FlagGate::spawn_sigils() {
 			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1, 8 });
 		}
 		break;
-	case 24: // TODO
+	case 24:
 		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
+			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 24 });
 		}
 		for (int i = 0; i < 8; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i + 3, 32 });
+			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 8, i + 3, 24 });
 		}
 		for (int i = 0; i < 13; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 32 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 13, i + 11, 24 });
 		}
 		for (auto& sigil : sigils_) {
 			sigil.lum = 0.95f;
 		}
 		break;
-	case 32:
-		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
+	case 36:
+		for (int i = 0; i < 4; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 4, i, 36 });
 		}
-		for (int i = 0; i < 11; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i+3, 32 });
-		}
-		for (int i = 0; i < 18; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i+14, 32 });
-		}
-		for (auto& sigil : sigils_) {
-			sigil.lum = 0.95f;
-		}
-		break;
-	case 36: // TODO
-		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 32 });
-		}
-		for (int i = 0; i < 11; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 11, i + 3, 32 });
+		for (int i = 0; i < 10; ++i) {
+			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 10, i + 4, 36 });
 		}
 		for (int i = 0; i < 18; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 32 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 36 });
+		}
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				sigils_.push_back(FlagSigil{ center_ + glm::vec3(5 * (i - 0.5), 0, 5 * (j - 0.5)), 0, 1, ((i == 0) ? j : 3 - j) + 32, 36 });
+			}
 		}
 		break;
 	default:
@@ -252,7 +242,26 @@ void FlagGate::spawn_sigils() {
 	}
 }
 
-const int FLAG_GATE_MAX_TIME = 15840; // LCM of all relevant periods
+int FlagGate::get_reset_time() {
+	switch (num_flags_) {
+	case 1:
+		return 1;
+	case 2:
+		return 160;
+	case 4:
+		return 240;
+	case 8:
+		return 280;
+	case 24:
+		return 24960;
+	case 32:
+	case 36:
+		return 14400;
+	default:
+		return 1;
+	}
+}
+
 const int FLAG_GATE_SHRINK_TIME = 30;
 const int MAX_FLAG_SIGIL_CHARGE = 30;
 const int FLAG_SIGIL_DELAY = 8;
@@ -268,7 +277,7 @@ bool FlagGate::update_animation(PlayingState* playing_state) {
 	case FlagGateAnimationState::Default:
 	{
 		++cycle_time_;
-		if (cycle_time_ == FLAG_GATE_MAX_TIME) {
+		if (cycle_time_ >= get_reset_time()) {
 			cycle_time_ = 0;
 		}
 		if (state()) {
@@ -371,16 +380,16 @@ void FlagSigil::draw(ModelInstancer* model, FPoint3 p, int orientation, int time
 	double t = TWO_PI * (time + phase) / (double)period;
 	switch (orientation) {
 	case 0:
-		pos += center + glm::vec3{ -radius*cos(t), 0.51, radius*sin(t) };
+		pos += center + glm::vec3{ -radius*cos(t), 0.52, radius*sin(t) };
 		break;
 	case 1:
-		pos += center + glm::vec3{ -0.51, -radius*cos(t), radius*sin(t) };
+		pos += center + glm::vec3{ -0.52, -radius*cos(t), radius*sin(t) };
 		break;
 	case 2:
-		pos += center + glm::vec3{ radius*cos(t), -0.51, radius*sin(t) };
+		pos += center + glm::vec3{ radius*cos(t), -0.52, radius*sin(t) };
 		break;
 	case 3:
-		pos += center + glm::vec3{ 0.51, radius*cos(t), radius*sin(t) };
+		pos += center + glm::vec3{ 0.52, radius*cos(t), radius*sin(t) };
 		break;
 	}
 	float value = std::min(std::max((charge - FLAG_SIGIL_DELAY * index), 0), MAX_FLAG_SIGIL_CHARGE) / (float)MAX_FLAG_SIGIL_CHARGE;

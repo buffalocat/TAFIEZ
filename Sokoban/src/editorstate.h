@@ -29,7 +29,6 @@ public:
     EditorState(GameState* parent);
     virtual ~EditorState();
     void main_loop();
-	bool can_quit(bool confirm);
 
 	bool handle_keyboard_input_main_state();
     void set_active_room(std::string name);
@@ -63,6 +62,10 @@ private:
 
     void handle_left_click(Point3);
     void handle_right_click(Point3);
+
+	void handle_escape();
+	void ask_quit();
+	bool try_quit_modal_ = false;
 };
 
 #endif // EDITORSTATE_H

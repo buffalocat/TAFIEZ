@@ -58,6 +58,7 @@ public:
 	void signal_animation(AnimationManager*, DeltaFrame*);
 	void reset_animation();
 
+	int get_reset_time();
 	void get_gate_dims(int* width, int* height);
 	void get_gate_extremes(Point3& a, Point3& b);
 

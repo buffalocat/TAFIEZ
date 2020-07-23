@@ -28,54 +28,73 @@ void Menu::push_entry(std::string label, MenuCallback callback) {
 	++num_entries_;
 }
 
+void Menu::set_current_entry() {
+
+}
+
 const int MAX_MENU_COOLDOWN = 8;
 const int MENU_CYCLE_TIME = 120;
+
+int Menu::handle_entry_select_input() {
+	can_select_ = true;
+	int new_current = current_;
+	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+		if (input_cooldown_ == 0) {
+			--new_current;
+			if (new_current < 0) {
+				new_current += num_entries_;
+			}
+			input_cooldown_ = MAX_MENU_COOLDOWN;
+		} else {
+			--input_cooldown_;
+		}
+	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		if (input_cooldown_ == 0) {
+			++new_current;
+			if (new_current >= num_entries_) {
+				new_current -= num_entries_;
+			}
+			input_cooldown_ = MAX_MENU_COOLDOWN;
+		} else {
+			--input_cooldown_;
+		}
+	} else {
+		input_cooldown_ = 0;
+	}
+	return new_current;
+}
 
 void Menu::handle_input(GameState* game_state) {
 	if (num_entries_ == 0) {
 		return;
 	}
-	entries_[current_].text->set_color(inactive_color_);
+	int new_current = current_;
 	if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
 		if (can_select_) {
 			can_select_ = false;
 			(entries_[current_].callback)();
 		}
 	} else {
-		can_select_ = true;
-		if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
-			if (input_cooldown_ == 0) {
-				--current_;
-				if (current_ < 0) {
-					current_ += num_entries_;
-				}
-				time_ = 0;
-				input_cooldown_ = MAX_MENU_COOLDOWN;
-			} else {
-				--input_cooldown_;
-			}
-		} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
-			if (input_cooldown_ == 0) {
-				++current_;
-				if (current_ >= num_entries_) {
-					current_ -= num_entries_;
-				}
-				time_ = 0;
-				input_cooldown_ = MAX_MENU_COOLDOWN;
-			} else {
-				--input_cooldown_;
-			}
-		} else {
-			input_cooldown_ = 0;
-		}
+		new_current = handle_entry_select_input();
 	}
-	glm::vec4 cur_color = active_color_ * glm::vec4((float)(0.85f + 0.2f * sin(time_ * TWO_PI  / (float)MENU_CYCLE_TIME)));
-	cur_color.w = 1.0f;
-	entries_[current_].text->set_color(cur_color);
+	set_current_entry(new_current);
 }
+
+void Menu::set_current_entry(int new_current) {
+	if (current_ == new_current) {
+		return;
+	}
+	entries_[current_].text->set_color(inactive_color_);
+	current_ = new_current;
+}
+
+
 
 void Menu::update() {
 	++time_;
+	glm::vec4 cur_color = active_color_ * glm::vec4((float)(0.9f + 0.15f * sin(time_ * TWO_PI / (float)MENU_CYCLE_TIME)));
+	cur_color.w = 1.0f;
+	entries_[current_].text->set_color(cur_color);
 	if (time_ == MENU_CYCLE_TIME) {
 		time_ = 0;
 	}

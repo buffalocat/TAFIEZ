@@ -29,17 +29,19 @@ void GameState::set_csp(std::unique_ptr<GameState>* csp) {
     current_state_ptr_ = csp;
 }
 
-void GameState::check_for_escape_quit() {
+void GameState::check_for_escape() {
     if (can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        if (parent_) {
-            parent_->can_escape_quit_ = false;
-        }
-		if (can_quit(true)) {
-			defer_to_parent();
-		}
+		handle_escape();
     } else if (!can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
         can_escape_quit_ = true;
     }
+}
+
+void GameState::handle_escape() {
+	if (parent_) {
+		parent_->can_escape_quit_ = false;
+	}
+	defer_to_parent();
 }
 
 bool GameState::attempt_queued_quit() {

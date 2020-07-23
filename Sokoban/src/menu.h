@@ -19,16 +19,20 @@ public:
 	~Menu();
 
 	void push_entry(std::string label, MenuCallback callback);
+	void set_current_entry();
 
+	int handle_entry_select_input();
 	void handle_input(GameState* game_state);
+	void set_current_entry(int new_current);
 	void update();
 	void draw();
+
+	int num_entries_ = 0;
 
 private:
 	GLFWwindow* window_;
 	Font* font_;
 	std::vector<MenuEntry> entries_{};
-	int num_entries_ = 0;
 	int current_ = 0;
 
 	float scale_ = 1.0f;
