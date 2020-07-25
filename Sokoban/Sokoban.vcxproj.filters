@@ -292,6 +292,9 @@
     <ClInclude Include="src\mapdisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\autosavepanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -541,6 +544,9 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\mapdisplay.cpp">
+      <Filter>Source Files\Object Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\autosavepanel.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
   </ItemGroup>

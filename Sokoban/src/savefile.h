@@ -3,8 +3,14 @@
 #include <random>
 #include "delta.h"
 
+class PlayingState;
 struct PlayingRoom;
 class Room;
+
+enum class SaveType {
+	Current,
+	Auto,
+};
 
 class GlobalData {
 public:
@@ -58,9 +64,10 @@ public:
 	void create_save_dir();
 	void load_meta();
 	std::filesystem::path get_path(std::string, bool* from_main);
-	void make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>& loaded_rooms, std::string const& cur_room_name);
+	void make_subsave(PlayingState* state, SaveType type);
 	void load_subsave(unsigned int subsave_index);
 	void load_most_recent_subsave();
+	void load_last_autosave();
 
 	void world_reset();
 
@@ -68,7 +75,6 @@ public:
 	bool exists_ = false;
 	std::string cur_room_name_{};
 
-private:
 	void save_meta();
 	void load_room_data(std::filesystem::path subsave_path);
 	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
@@ -76,8 +82,9 @@ private:
 
 	const std::filesystem::path base_;
 	std::map<std::string, unsigned int> room_subsave_{};
-	unsigned int cur_subsave_ = 0;
-	unsigned int next_subsave_ = 1;
+	int cur_subsave_ = 0;
+	int next_subsave_ = 1;
+	int auto_subsave_ = -1;
 };
 
 class GlobalFlagDelta : public Delta {
@@ -100,4 +107,15 @@ public:
 private:
 	PlayingGlobalData* global_;
 	unsigned int count_;
+};
+
+class AutosaveDelta : public Delta {
+public:
+	AutosaveDelta(SaveFile* savefile, int index);
+	~AutosaveDelta();
+	void revert();
+
+private:
+	SaveFile* savefile_;
+	int index_;
 };

@@ -20,7 +20,9 @@ RealPlayingState::~RealPlayingState() {
 	if (delta_frame_) {
 		delta_frame_->revert();
 	}
-	make_subsave();
+	if (should_save_) {
+		make_subsave(SaveType::Current);
+	}
 }
 
 void RealPlayingState::play_from_map(std::string starting_map) {
@@ -41,15 +43,16 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 	return true;
 }
 
-void RealPlayingState::make_subsave() {
+void RealPlayingState::make_subsave(SaveType type) {
 	if (player_doa()->death_ != CauseOfDeath::None) {
 		undo_stack_->pop();
 	}
-	savefile_->make_subsave(loaded_rooms_, active_room()->name());
+	savefile_->make_subsave(this, type);
 }
 
 void RealPlayingState::play_from_loaded_subsave() {
 	std::string cur_room_name = savefile_->cur_room_name_;
+	reset();
 	load_room(cur_room_name, false);
 	activate_room(cur_room_name);
 	move_camera_to_player(true);
@@ -59,14 +62,8 @@ void RealPlayingState::play_from_loaded_subsave() {
 void RealPlayingState::world_reset() {
 	// Forget all the maps we know
 	global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[int(HubCode::Alpha)]);
-	delta_frame_ = {};
-	loaded_rooms_.clear();
-	text_->reset();
-	anims_->reset();
-	room_ = nullptr;
+	reset();
 	savefile_->world_reset();
-	undo_stack_->reset();
-	objs_ = std::make_unique<GameObjectArray>();
 	// Start anew in the world reset start room (not necessarily the same as the "new file start room"!)
 	play_from_map(WORLD_RESET_START_MAP);
 }

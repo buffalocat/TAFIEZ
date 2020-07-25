@@ -30,7 +30,7 @@ ModCode FloorSign::mod_code() {
 }
 
 void FloorSign::serialize(MapFileO& file) {
-	file.write_long_str(content_.c_str(), (unsigned int)content_.size());
+	file.write_long_str(content_);
 	file << active_;
 }
 
@@ -61,12 +61,8 @@ void FloorSign::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 	}
 	bool should_display_text = false;
 	if (auto* above = map->view(pos_above())) {
-		if (dynamic_cast<Player*>(above)) {
+		if (is_player_rep(above)) {
 			should_display_text = true;
-		} else if (auto* player = dynamic_cast<Player*>(map->view(pos() + Point3{ 0,0,2 }))) {
-			if (player->car_riding()) {
-				should_display_text = true;
-			}
 		}
 	}
 	if (active_ != should_display_text) {

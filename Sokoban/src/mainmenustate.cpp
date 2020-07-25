@@ -44,7 +44,7 @@ void MainMenuState::handle_escape() {
 	menu_->set_current_entry(quit_entry_index_);
 }
 
-const int MAX_SAVE_FILES = 7;
+const int MAX_SAVE_FILES = 1;
 
 FileSelectState::FileSelectState(GameState* parent) : GameState(parent) {
 	load_save_info();

@@ -133,9 +133,10 @@ void MapFileO::write_uint32(unsigned int n) {
 	file_ << (unsigned char)n << (unsigned char)(n >> 8) << (unsigned char)(n >> 16) << (unsigned char)(n >> 24);
 }
 
-void MapFileO::write_long_str(const char* str, unsigned int len) {
+void MapFileO::write_long_str(std::string str) {
+	unsigned int len = (unsigned int)str.size();
 	file_ << (unsigned char)(len) << (unsigned char)(len >> 8);
-	file_.write(str, len);
+	file_.write(str.c_str(), len);
 }
 
 MapFileO& MapFileO::operator<<(unsigned char n) {

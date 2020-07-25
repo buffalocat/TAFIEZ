@@ -14,7 +14,9 @@ class ClearFlag;
 class GraphicsManager;
 class ObjectModifier;
 class PlayingState;
+class PlayingGlobalData;
 class MapDisplay;
+class StringDrawer;
 
 enum class AnimationSignal {
 	NONE,
@@ -232,6 +234,35 @@ private:
 };
 
 
+class Cutscene {
+public:
+	Cutscene(GraphicsManager* gfx);
+	virtual ~Cutscene() = 0;
+	virtual bool update() = 0;
+	virtual void draw() = 0;
+
+protected:
+	GraphicsManager* gfx_;
+};
+
+class FlagCutscene : public Cutscene {
+public:
+	FlagCutscene(GraphicsManager* gfx, PlayingGlobalData* global, char zone);
+	~FlagCutscene();
+	bool update();
+	void draw();
+
+private:
+	static const int TOTAL_TIME;
+	static const int FADE_TIME;
+	static const int WAIT_TIME;
+
+	std::vector<std::unique_ptr<StringDrawer>> lines_{};
+	int time_;
+	char zone_;
+};
+
+
 struct FallTrail {
 	Point3 base;
 	int height;
@@ -257,6 +288,9 @@ public:
 	void draw_fall_trails();
 	void render_particles();
 	void draw_special();
+	void draw_cutscene();
+
+	void start_flag_cutscene(PlayingGlobalData* global, char zone);
 	void create_bound_source(GameObject* obj, std::unique_ptr<ParticleSource> source);
 
 	void set_linear_animation(Direction dir, GameObject* obj);
@@ -278,6 +312,7 @@ private:
 	std::vector<std::unique_ptr<Particle>> particles_{};
 	std::vector<FallTrail> fall_trails_{};
 	std::vector<DoorSquish> door_entering_objects_{};
+	std::unique_ptr<Cutscene> cutscene_{};
 	PlayingState* state_;
 
 	int linear_animation_frames_ = -1;

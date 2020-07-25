@@ -25,8 +25,9 @@
 #include "pausestate.h"
 
 #include "common_constants.h"
-
 #include "globalflagconstants.h"
+#include "color_constants.h"
+
 
 const int MOVEMENT_KEYS[4] = { GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_UP, };
 const Point3 MOVEMENT_DIRS[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { -1, 0, 0 }, { 0, -1, 0 } };
@@ -55,7 +56,7 @@ void PlayingState::main_loop() {
 	anims_->update();
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
-	gfx_->pre_object_rendering();
+	gfx_->pre_object_rendering(get_zone_clear_color(room_->map()->zone_));
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	anims_->view_dir_ = gfx_->view_dir();
@@ -66,6 +67,7 @@ void PlayingState::main_loop() {
 	text_->draw();
 	update_global_animation();
 	gfx_->post_rendering();
+	anims_->draw_cutscene();
 	// If a move is not currently happening, try to push the current DeltaFrame
 	// If it's trivial, nothing will happen
 	if (!move_processor_) {
@@ -398,9 +400,20 @@ void PlayingState::set_death_text() {
 	}
 }
 
-void PlayingState::make_subsave() {}
+void PlayingState::make_subsave(SaveType) {}
 
 void PlayingState::world_reset() {}
+
+void PlayingState::reset() {
+	delta_frame_ = {};
+	loaded_rooms_.clear();
+	text_->reset();
+	anims_->reset();
+	room_ = nullptr;
+	should_save_ = true;
+	undo_stack_->reset();
+	objs_ = std::make_unique<GameObjectArray>();
+}
 
 void PlayingState::move_camera_to_player(bool snap) {
 	Player* player = player_doa();

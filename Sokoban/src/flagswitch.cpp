@@ -39,15 +39,9 @@ void FlagSwitch::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 bool FlagSwitch::should_toggle(RoomMap* map) {
 	bool player_on = false;
 	if (auto* above = map->view(pos_above())) {
-		if (dynamic_cast<Player*>(above)) {
-			player_on = true;
-		} else if (auto* car = dynamic_cast<Car*>(above->modifier())) {
-			if (car->player_) {
-				player_on = true;
-			}
-		}
+		player_on = is_player_rep(above);
 	}
-	return active_ ^ (map->view(pos_above()) != nullptr);
+	return active_ ^ player_on;
 }
 
 void FlagSwitch::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {

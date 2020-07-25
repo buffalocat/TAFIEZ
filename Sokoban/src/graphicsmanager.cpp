@@ -111,6 +111,12 @@ void GraphicsManager::set_state(GraphicsState state) {
 void GraphicsManager::update() {
 	// Handle state transitions
 	switch (state_) {
+	case GraphicsState::Black:
+		shadow_ = 0.0f;
+		break;
+	case GraphicsState::None:
+		shadow_ = 1.0f;
+		break;
 	case GraphicsState::FadeIn:
 		shadow_ = (double)(state_counter_) / FADE_IN_FRAMES;
 		if (state_counter_ < FADE_IN_FRAMES) {
@@ -168,9 +174,9 @@ void GraphicsManager::set_light_source(glm::vec3 light_source) {
 	light_source_ = light_source;
 }
 
-void GraphicsManager::pre_object_rendering() {
+void GraphicsManager::pre_object_rendering(glm::vec4 clear_color) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-	glClearColor(0.0f, 0.7f, 0.9f, 1.0f);
+	glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);

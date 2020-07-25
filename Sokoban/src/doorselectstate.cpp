@@ -48,7 +48,7 @@ void DoorSelectState::main_loop() {
     ImGui::End();
 
 	gfx_->set_state(GraphicsState::None);
-	gfx_->pre_object_rendering();
+	gfx_->pre_object_rendering(CLEAR_COLOR);
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	gfx_->post_rendering();

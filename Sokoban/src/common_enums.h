@@ -41,6 +41,7 @@ enum class ModCode {
 	FlagGate = 12,
 	FlagSwitch = 13,
 	MapDisplay = 14,
+	AutosavePanel = 15,
 };
 
 // This is useless for now, but we'll keep it anyway

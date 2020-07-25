@@ -31,6 +31,7 @@
 #include "flaggate.h"
 #include "flagswitch.h"
 #include "mapdisplay.h"
+#include "autosavepanel.h"
 
 #include "switch.h"
 #include "switchable.h"
@@ -338,6 +339,7 @@ void Room::read_objects(MapFileI& file) {
 			CASE_MODCODE(FlagGate);
 			CASE_MODCODE(FlagSwitch);
 			CASE_MODCODE(MapDisplay);
+			CASE_MODCODE(AutosavePanel);
 		case ModCode::NONE:
 			break;
 		}

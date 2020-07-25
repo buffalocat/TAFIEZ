@@ -5,11 +5,15 @@
 
 #include "playingstate.h"
 #include "graphicsmanager.h"
+#include "fontmanager.h"
 #include "gameobject.h"
 #include "common_constants.h"
 #include "texture_constants.h"
 #include "color_constants.h"
 #include "soundmanager.h"
+#include "savefile.h"
+#include "stringdrawer.h"
+#include "globalflagconstants.h"
 
 #include "car.h"
 #include "clearflag.h"
@@ -287,6 +291,63 @@ double RandDouble::operator()() {
 }
 
 
+Cutscene::Cutscene(GraphicsManager* gfx) : gfx_{ gfx } {}
+
+Cutscene::~Cutscene() {}
+
+
+FlagCutscene::FlagCutscene(GraphicsManager* gfx, PlayingGlobalData* global, char zone) :
+	Cutscene(gfx), time_{ TOTAL_TIME }, zone_{ zone } {
+	auto* font = gfx_->fonts_->get_font(Fonts::ABEEZEE, 144);
+	auto color = glm::vec4(1.0f, 1.0f, 0.6f, 1.0f);
+	lines_.push_back(std::make_unique<StringDrawer>(font, color, std::string("YOU GOT THE"), 0.0f, 0.45f, 1.0f, 1.0f, 0.0f));
+	char buffer[16];
+	sprintf_s(buffer, "ZONE %c FLAG", zone_);
+	lines_.push_back(std::make_unique<StringDrawer>(font, color, std::string(buffer), 0.0f, 0.15f , 1.0f, 1.0f, 0.0f));
+	if (global->has_flag(get_clear_flag_code('1'))) {
+		sprintf_s(buffer, "TOTAL: %d/36", global->clear_flag_total_);
+	} else {
+		sprintf_s(buffer, "TOTAL: %d", global->clear_flag_total_);
+	}
+	lines_.push_back(std::make_unique<StringDrawer>(font, color, std::string(buffer), 0.0f, -0.15f, 1.0f, 1.0f, 0.0f));
+}
+
+FlagCutscene::~FlagCutscene() {}
+
+const int FlagCutscene::TOTAL_TIME = 300;
+const int FlagCutscene::FADE_TIME = 20;
+const int FlagCutscene::WAIT_TIME = 60;
+
+bool FlagCutscene::update() {
+	--time_;
+	static const float SHADOW = 0.7f;
+	if (time_ > TOTAL_TIME - FADE_TIME) {
+		gfx_->shadow_ *= SHADOW + (1 - SHADOW) * ((time_ - (TOTAL_TIME - FADE_TIME)) / (float)FADE_TIME);
+	} else if (time_ < 20) {
+		gfx_->shadow_ *= 1.0 - (1 - SHADOW) * (time_ / (float)FADE_TIME);
+	} else {
+		gfx_->shadow_ *= SHADOW;
+	}
+	return time_ == 0;
+}
+
+void FlagCutscene::draw() {
+	if (time_ < FADE_TIME) {
+		return;
+	}
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	gfx_->text_shader_.use();
+	if (time_ < TOTAL_TIME - FADE_TIME) {
+		lines_[0]->render();
+		lines_[1]->render();
+	}
+	if (time_ < TOTAL_TIME - FADE_TIME - WAIT_TIME) {
+		lines_[2]->render();
+	}
+}
+
+
 AnimationManager::AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas) :
 	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() },
 	state_{ state }, gfx_{ state->gfx_ }, particle_atlas_{ particle_atlas } {
@@ -363,6 +424,12 @@ void AnimationManager::update() {
 		[this](auto& p) { return p->update(rand_, particles_); }), sources_.end());
 	particles_.erase(std::remove_if(particles_.begin(), particles_.end(),
 		[](auto& p) { return p->update(); }), particles_.end());
+	// Advance cutscene
+	if (cutscene_) {
+		if (cutscene_->update()) {
+			cutscene_ = {};
+		}
+	}
 	// Run sound engine
 	sounds_->clean_sources();
 	sounds_->play_sounds();
@@ -437,9 +504,19 @@ void AnimationManager::render_particles() {
 	glDrawArrays(GL_POINTS, 0, (GLsizei)vertices.size());
 }
 
+void AnimationManager::start_flag_cutscene(PlayingGlobalData* global, char zone) {
+	cutscene_ = std::make_unique<FlagCutscene>(gfx_, global, zone);
+}
+
 void AnimationManager::draw_special() {
 	if (map_display_) {
 		map_display_->draw_special(gfx_, particle_atlas_);
+	}
+}
+
+void AnimationManager::draw_cutscene() {
+	if (cutscene_) {
+		cutscene_->draw();
 	}
 }
 

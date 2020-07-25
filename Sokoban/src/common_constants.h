@@ -67,7 +67,6 @@ extern const std::string NEW_FILE_START_MAP;
 extern const std::string WORLD_RESET_START_MAP;
 
 namespace Fonts {
-	extern const std::string KALAM_BOLD;
 	extern const std::string ABEEZEE;
 }
 

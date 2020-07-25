@@ -26,6 +26,7 @@ class Door;
 struct DoorTravellingObj;
 
 enum class CauseOfDeath;
+enum class SaveType;
 
 enum class DeathState {
 	Alive,
@@ -61,8 +62,9 @@ public:
 
 	Player* player_doa();
 
-	virtual void make_subsave();
+	virtual void make_subsave(SaveType);
 	virtual void world_reset();
+	void reset();
 
 	bool mandatory_wait_ = false;
 
@@ -73,8 +75,10 @@ public:
 	Room* room_{};
 	std::unique_ptr<DeltaFrame> delta_frame_{};
 
-protected:
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
+	bool should_save_ = true;
+
+protected:
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
 	std::unique_ptr<MoveProcessor> move_processor_{};

@@ -209,27 +209,27 @@ void FlagGate::spawn_sigils() {
 		break;
 	case 24:
 		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 3, i, 24 });
+			sigils_.push_back(FlagSigil{ center_, 0.7, 80 * i, 80 * 3, i, 24 });
 		}
 		for (int i = 0; i < 8; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 8, i + 3, 24 });
+			sigils_.push_back(FlagSigil{ center_, 1.6, -80 * i, -80 * 8, i + 3, 24 });
 		}
 		for (int i = 0; i < 13; ++i) {
 			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 13, i + 11, 24 });
 		}
 		for (auto& sigil : sigils_) {
-			sigil.lum = 0.95f;
+			sigil.lum = 1.0f;
 		}
 		break;
 	case 36:
 		for (int i = 0; i < 4; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.6, 80 * i, 80 * 4, i, 36 });
+			sigils_.push_back(FlagSigil{ center_, 0.7, -80 * i, -80 * 4, i, 36 });
 		}
 		for (int i = 0; i < 10; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.5, 80 * i, 80 * 10, i + 4, 36 });
+			sigils_.push_back(FlagSigil{ center_, 1.6, 80 * i, 80 * 10, i + 4, 36 });
 		}
 		for (int i = 0; i < 18; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 18, i + 14, 36 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, -80 * i, -80 * 18, i + 14, 36 });
 		}
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -296,7 +296,6 @@ bool FlagGate::update_animation(PlayingState* playing_state) {
 	}
 	case FlagGateAnimationState::Fade:
 		for (auto& sigil : sigils_) {
-			sigil.update(false, 0);
 			--sigil.opacity;
 		}
 		if (sigils_[0].opacity == 0) {

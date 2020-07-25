@@ -24,6 +24,7 @@
 #include "flaggate.h"
 #include "flagswitch.h"
 #include "mapdisplay.h"
+#include "autosavepanel.h"
 
 #include "colorcycle.h"
 
@@ -45,6 +46,7 @@ static FloorSign model_floor_sign{ nullptr, "", false };
 static Incinerator model_incinerator{ nullptr, 0, false, true, false };
 static FlagGate model_flag_gate{ nullptr, 1, 0, 0, false, false, false };
 static FlagSwitch model_flag_switch{ nullptr, false, 0 };
+static AutosavePanel model_autosave_panel{ nullptr, "", false };
 
 static ColorCycle model_color_cycle{};
 
@@ -97,6 +99,7 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::RadioButton("Flag Gate##MOD_object", &mod_code, ModCode::FlagGate);
 		ImGui::RadioButton("Flag Switch##MOD_object", &mod_code, ModCode::FlagSwitch);
 		ImGui::RadioButton("Map Display##MOD_object", &mod_code, ModCode::MapDisplay);
+		ImGui::RadioButton("Autosave Panel##MOD_object", &mod_code, ModCode::AutosavePanel);
 	}
 	ImGui::Separator();
 	switch (mod ? mod->mod_code() : mod_code) {
@@ -205,6 +208,16 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::InputInt("Orientation##MOD_FLAGSWITCH_orientation", &flag_switch->orientation_);
 		break;
 	}
+	case ModCode::AutosavePanel:
+	{
+		ImGui::Text("AutosavePanel");
+		AutosavePanel* panel = mod ? static_cast<AutosavePanel*>(mod) : &model_autosave_panel;
+		static char buf[256];
+		snprintf(buf, 256, panel->label_.c_str());
+		ImGui::InputTextMultiline("Autosave Label:##MOD_AUTOSAVE_PANEL_text", buf, 256);
+		panel->label_ = std::string(buf);
+		break;
+	}
 	// Trivial objects
 	case ModCode::AutoBlock:
 	case ModCode::PuppetBlock:
@@ -308,6 +321,9 @@ void ModifierTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 		break;
 	case ModCode::MapDisplay:
 		mod = std::make_unique<MapDisplay>(obj);
+		break;
+	case ModCode::AutosavePanel:
+		mod = std::make_unique<AutosavePanel>(obj, model_autosave_panel.label_, false);
 		break;
 	}
 	if (!mod->valid_parent(obj)) {

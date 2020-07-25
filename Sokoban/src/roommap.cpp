@@ -430,7 +430,7 @@ void RoomStateInitializer::operator()(int id) {
 	if (SnakeBlock* sb = dynamic_cast<SnakeBlock*>(obj)) {
 		sb->check_add_local_links(map, delta_frame);
 	} else if (Player* player = dynamic_cast<Player*>(obj)) {
-			player->validate_state(map, delta_frame);
+		player->validate_state(map, delta_frame);
 	}
 	if (ObjectModifier* mod = obj->modifier()) {
 		map->activate_listener_of(mod);
@@ -539,6 +539,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 			collect_flag(true, delta_frame);
 			if (global_) {
 				global_->collect_clear_flag(zone_, delta_frame);
+				static_cast<PlayingState*>(state_)->anims_->start_flag_cutscene(global_, zone_);
 			}
 		}
 	}

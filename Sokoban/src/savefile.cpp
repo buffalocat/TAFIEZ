@@ -168,19 +168,33 @@ void SaveFile::create_save_dir() {
 	}
 }
 
-void SaveFile::make_subsave(std::map<std::string, std::unique_ptr<PlayingRoom>>& loaded_rooms, std::string const& cur_room_name) {
-	cur_subsave_ = next_subsave_;
+void SaveFile::make_subsave(PlayingState* state, SaveType type) {
+	int* save_index;
+	switch (type) {
+	case SaveType::Current:
+		save_index = &cur_subsave_;
+		break;
+	case SaveType::Auto:
+		save_index = &auto_subsave_;
+		state->delta_frame_->push(std::make_unique<AutosaveDelta>(this, auto_subsave_));
+		break;
+	default:
+		return;
+	}
+	*save_index = next_subsave_;
 	++next_subsave_;
-	std::filesystem::path subsave_path = base_ / std::to_string(cur_subsave_);
+	std::filesystem::path subsave_path = base_ / std::to_string(*save_index);
 	std::filesystem::create_directory(subsave_path);
+	auto& loaded_rooms = state->loaded_rooms_;
 	for (auto& p : loaded_rooms) {
 		auto* proom = p.second.get();
 		if (proom->changed) {
 			save_room(proom->room.get(), subsave_path);
 			proom->changed = false;
-			room_subsave_[proom->room->name()] = cur_subsave_;
+			room_subsave_[proom->room->name()] = *save_index;
 		}
 	}
+	auto cur_room_name = state->active_room()->name();
 	loaded_rooms[cur_room_name]->changed = true;
 	save_room_data(subsave_path, cur_room_name);
 	global_->save_flags(subsave_path);
@@ -198,6 +212,10 @@ void SaveFile::load_most_recent_subsave() {
 	load_subsave(cur_subsave_);
 }
 
+void SaveFile::load_last_autosave() {
+	load_subsave(auto_subsave_);
+}
+
 void SaveFile::load_meta() {
 	auto meta_path = base_ / "meta.sav";
 	if (!std::filesystem::exists(meta_path)) {
@@ -205,7 +223,7 @@ void SaveFile::load_meta() {
 	}
 	std::ifstream meta_file{};
 	meta_file.open(meta_path, std::ios::in);
-	meta_file >> cur_subsave_ >> next_subsave_;
+	meta_file >> cur_subsave_ >> next_subsave_ >> auto_subsave_;
 	meta_file.close();
 	exists_ = true;
 	return;
@@ -215,7 +233,7 @@ void SaveFile::save_meta() {
 	auto meta_path = base_ / "meta.sav";
 	std::ofstream meta_file{};
 	meta_file.open(meta_path, std::ios::out);
-	meta_file << cur_subsave_ << " " << next_subsave_;
+	meta_file << cur_subsave_ << " " << next_subsave_ << " " << auto_subsave_;
 	meta_file.close();
 }
 
@@ -295,4 +313,13 @@ FlagCountDelta::~FlagCountDelta() {}
 
 void FlagCountDelta::revert() {
 	global_->clear_flag_total_--;
+}
+
+AutosaveDelta::AutosaveDelta(SaveFile* savefile, int index) : Delta(),
+	savefile_{ savefile }, index_{ index } {}
+
+AutosaveDelta::~AutosaveDelta() {}
+
+void AutosaveDelta::revert() {
+	savefile_->auto_subsave_ = index_;
 }

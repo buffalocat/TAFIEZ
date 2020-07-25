@@ -198,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\animationmanager.h" />
+    <ClInclude Include="src\autosavepanel.h" />
     <ClInclude Include="src\flaggate.h" />
     <ClInclude Include="src\flagswitch.h" />
     <ClInclude Include="src\fpstimer.h" />
@@ -335,6 +336,7 @@
       </PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="src\animationmanager.cpp" />
+    <ClCompile Include="src\autosavepanel.cpp" />
     <ClCompile Include="src\common_enums.cpp" />
     <ClCompile Include="src\flaggate.cpp" />
     <ClCompile Include="src\flagswitch.cpp" />

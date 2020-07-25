@@ -40,6 +40,8 @@ enum class BlockTexture {
 	FlagSwitch1,
 	FlagSwitch2,
 	FlagSwitch3,
+	AutosaveFresh,
+	AutosaveUsed,
 
 	// Padded Single-Size
 	FlagSigil = 129,

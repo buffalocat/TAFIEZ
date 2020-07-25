@@ -47,7 +47,7 @@ public:
 	void set_PV(glm::mat4, glm::mat4);
 	void set_light_source(glm::vec3);
 
-	void pre_object_rendering();
+	void pre_object_rendering(glm::vec4 clear_color);
 	void prepare_draw_objects();
 	void prepare_draw_objects_particle_atlas(GLuint atlas);
 	void draw_objects();

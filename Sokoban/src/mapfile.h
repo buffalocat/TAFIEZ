@@ -73,7 +73,7 @@ public:
     ~MapFileO();
 
 	void write_uint32(unsigned int);
-	void write_long_str(const char* str, unsigned int len);
+	void write_long_str(std::string str);
 
     MapFileO& operator<<(unsigned char);
     MapFileO& operator<<(int);

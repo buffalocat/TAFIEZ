@@ -33,6 +33,7 @@ enum {
 
 extern const glm::vec4 COLOR_VECTORS[NUM_COLORS];
 
+extern const glm::vec4 ZONE_CLEAR_COLORS[37];
 
 const int NUM_GREYS = 8;
 

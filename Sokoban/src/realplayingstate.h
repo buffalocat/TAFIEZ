@@ -14,12 +14,11 @@ public:
 
 	void play_from_map(std::string starting_map);
 	bool load_room(std::string name, bool use_default_player);
-	void make_subsave();
+	void make_subsave(SaveType type);
 	void play_from_loaded_subsave();
 
 	void world_reset();
 
-private:
 	SaveFile* savefile_;
 };
 
