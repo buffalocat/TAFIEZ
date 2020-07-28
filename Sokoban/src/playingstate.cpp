@@ -56,7 +56,7 @@ void PlayingState::main_loop() {
 	anims_->update();
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
-	gfx_->pre_object_rendering(get_zone_clear_color(room_->map()->zone_));
+	gfx_->pre_object_rendering(glm::vec4{ 0.33f, 0.67f, 0.89f, 1.0f });
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	anims_->view_dir_ = gfx_->view_dir();
@@ -118,6 +118,10 @@ void PlayingState::handle_input() {
 	if (move_processor_) {
 		if (move_processor_->update()) {
 			move_processor_.reset(nullptr);
+			if (queued_autosave_) {
+				make_subsave(SaveType::Auto);
+				queued_autosave_ = false;
+			}
 			undo_stack_->push(std::move(delta_frame_));
 			delta_frame_ = std::make_unique<DeltaFrame>();
 		} else {

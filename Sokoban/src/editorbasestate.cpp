@@ -22,7 +22,7 @@ ortho_cam_ {true}, one_layer_ {false}, keyboard_cooldown_ {0} {}
 
 EditorBaseState::~EditorBaseState() {}
 
-const glm::vec4 CLEAR_COLOR = glm::vec4(0.7f, 0.8f, 0.9f, 1.0f);
+const glm::vec4 EditorBaseState::CLEAR_COLOR = glm::vec4(0.3f, 0.6f, 0.9f, 1.0f);
 
 bool EditorBaseState::want_capture_keyboard() {
     return ImGui::GetIO().WantCaptureKeyboard;

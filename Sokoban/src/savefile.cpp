@@ -101,6 +101,7 @@ void PlayingGlobalData::load_flags(std::filesystem::path path) {
 		for (unsigned int i = 0; i < num_flags; ++i) {
 			flags_.insert(flag_file.read_uint32());
 		}
+		clear_flag_total_ = 0;
 		for (auto f : FLAG_COLLECT_FLAGS) {
 			if (flags_.count(f)) {
 				++clear_flag_total_;

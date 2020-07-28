@@ -77,6 +77,7 @@ public:
 
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
 	bool should_save_ = true;
+	bool queued_autosave_ = false;
 
 protected:
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();

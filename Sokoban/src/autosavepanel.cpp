@@ -48,8 +48,7 @@ void AutosavePanel::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProc
 				if (delta_frame) {
 					delta_frame->push(std::make_unique<AutosavePanelDelta>(this));
 				}
-				auto* state = mp->playing_state_;
-				state->make_subsave(SaveType::Auto);
+				mp->playing_state_->queued_autosave_ = true;
 			}
 		}
 	}
