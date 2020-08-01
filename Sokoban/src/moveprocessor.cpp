@@ -165,7 +165,7 @@ bool MoveProcessor::try_toggle_riding() {
 	state_ = MoveStep::ToggleRiding;
 	frames_ = TOGGLE_RIDING_MOVEMENT_FRAMES;
 	fall_check_.push_back(player_);
-	if (Car* car = player_->car_bound(map_)) {
+	if (Car* car = player_->car_below(map_)) {
 		if (car->player_) {
 			anims_->receive_signal(AnimationSignal::CarRide, car->parent_, delta_frame_);
 		} else {

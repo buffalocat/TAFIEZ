@@ -29,6 +29,23 @@
 #include "color_constants.h"
 
 
+KeyStatus::KeyStatus(int code) : code_{ code }, press_{ false }, held_{ false }, status_{ false } {}
+
+void KeyStatus::update(GLFWwindow* window) {
+	bool cur = (glfwGetKey(window, code_) == GLFW_PRESS);
+	if (held_) {
+		held_ = cur;
+	} else if (cur) {
+		press_ = true;
+		held_ = true;
+	}
+}
+
+void KeyStatus::consume() {
+	status_ = press_ ;
+	press_ = false;
+}
+
 const int MOVEMENT_KEYS[4] = { GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_UP, };
 const Point3 MOVEMENT_DIRS[4] = { { 1, 0, 0 }, { 0, 1, 0 }, { -1, 0, 0 }, { 0, -1, 0 } };
 
@@ -48,6 +65,7 @@ void PlayingState::main_loop() {
 	if (!move_processor_) {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
+	update_key_status();
 	if (!mandatory_wait_) {
 		handle_input();
 	}
@@ -73,6 +91,12 @@ void PlayingState::main_loop() {
 	if (!move_processor_) {
 		undo_stack_->push(std::move(delta_frame_));
 	}
+}
+
+void PlayingState::update_key_status() {
+	car_ride_key_.update(window_);
+	color_change_key_.update(window_);
+	player_switch_key_.update(window_);
 }
 
 void PlayingState::handle_input() {
@@ -128,6 +152,11 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
+
+	car_ride_key_.consume();
+	color_change_key_.consume();
+	player_switch_key_.consume();
+
 	// You can pause with any cooldown, but not in a move
 	if (glfwGetKey(window_, GLFW_KEY_P) == GLFW_PRESS) {
 		create_child(std::make_unique<PauseState>(this));
@@ -144,7 +173,7 @@ void PlayingState::handle_input() {
 		return;
 	}
 	
-	if (glfwGetKey(window_, GLFW_KEY_V) == GLFW_PRESS) {
+	if (player_switch_key_.status_) {
 		if (p_cycle->cycle_player(delta_frame_.get())) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
@@ -156,7 +185,7 @@ void PlayingState::handle_input() {
 		return;
 	}
 
-	if (glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS) {
+	if (car_ride_key_.status_) {
 		create_move_processor(player);
 		if (move_processor_->try_toggle_riding()) {
 			input_cooldown = MAX_COOLDOWN;
@@ -165,7 +194,7 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
+	if (color_change_key_.status_) {
 		create_move_processor(player);
 		if (move_processor_->try_color_change()) {
 			input_cooldown = MAX_COOLDOWN;

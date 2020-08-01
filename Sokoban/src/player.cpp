@@ -243,7 +243,7 @@ void Player::draw(GraphicsManager* gfx) {
 	float z_offset = 0.0f;
 	float scale = PLAYER_DEFAULT_SCALE;
 	Car* car = animation_car_ ? animation_car_ : car_;
-	if (car) {
+	if (car && car->type_ != CarType::Binding) {
 		float t;
 		switch (car->animation_state_) {
 		case CarAnimationState::None:

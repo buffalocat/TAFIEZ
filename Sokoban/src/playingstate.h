@@ -40,12 +40,27 @@ struct PlayingRoom {
 	PlayingRoom(std::unique_ptr<Room>);
 };
 
+class KeyStatus {
+public:
+	KeyStatus(int code);
+	void update(GLFWwindow* window);
+	void consume();
+
+	int status_;
+
+private:
+	int code_;
+	bool press_;
+	bool held_;
+};
+
 class PlayingState : public GameState {
 public:
 	PlayingState(GameState* parent, PlayingGlobalData* global);
 	virtual ~PlayingState();
 
 	void main_loop();
+	void update_key_status();
 	void handle_input();
 	void create_move_processor(Player* player);
 	void update_global_animation();
@@ -93,10 +108,11 @@ private:
 
 	int input_cooldown = 0;
 	int undo_combo = 0;
+	KeyStatus car_ride_key_{ GLFW_KEY_X };
+	KeyStatus color_change_key_{ GLFW_KEY_C };
+	KeyStatus player_switch_key_{ GLFW_KEY_V };
 	CauseOfDeath current_death_;
 	DeathState current_death_state_;
-
-    friend class DoorMoveDelta;
 };
 
 #endif // PLAYINGSTATE_H
