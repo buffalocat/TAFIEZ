@@ -10,6 +10,9 @@
 #include "mapfile.h"
 #include "objectmodifier.h"
 #include "moveprocessor.h"
+#include "playingstate.h"
+#include "room.h"
+#include "roommap.h"
 
 #include "component.h"
 
@@ -55,6 +58,16 @@ void GameObject::serialize(MapFileO& file) {}
 
 void GameObject::relation_serialize(MapFileO& file) {}
 
+GameObject* GameObject::realize(PlayingState* state) {
+	return this;
+}
+
+void GameObject::realize_references(RoomMap* room_map) {
+	if (auto* mod = modifier()) {
+		mod->realize_references(room_map);
+	}
+}
+
 Point3 GameObject::shifted_pos(Point3 d) {
 	return pos_ + d;
 }
@@ -72,6 +85,7 @@ void GameObject::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 }
 
 void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death) {
+	mp->map_->push_to_object_array_deleted(this, mp->delta_frame_);
 	if (modifier_) {
 		modifier_->destroy(mp, death);
 	}
@@ -165,7 +179,6 @@ FPoint3 GameObject::real_pos() {
 void GameObject::draw_squished(GraphicsManager*, FPoint3 p, float scale) {}
 
 
-
 Block::Block(Point3 pos, bool pushable, bool gravitable) :
 	GameObject(pos, pushable, gravitable) {}
 
@@ -191,13 +204,38 @@ int ColoredBlock::color() {
 }
 
 
+DummyGameObject::DummyGameObject(Point3 pos, ObjRefCode ref_code) :
+	GameObject(pos, false, false), ref_code_{ ref_code } {}
+
+DummyGameObject::~DummyGameObject() {}
+
+GameObject* DummyGameObject::create(Point3 pos, ObjRefCode ref_code) {
+	auto obj_unique = std::make_unique<DummyGameObject>(pos, ref_code);
+	auto* obj = obj_unique.get();
+	obj->self_ = std::move(obj_unique);
+	return obj;
+}
+
+GameObject * DummyGameObject::realize(PlayingState* state) {
+	auto* obj = state->room_->map()->deref_object(ref_code_, pos_);
+	self_.reset(nullptr);
+	return obj;
+}
+
+
 DestructionDelta::DestructionDelta(GameObject* obj) :
 	obj_{ obj } {}
 
 DestructionDelta::~DestructionDelta() {}
 
-void DestructionDelta::revert() {
-	obj_->undestroy();
+void DestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void DestructionDelta::revert(RoomMap* room_map) {
+	auto* obj = obj_.resolve(room_map);
+	obj->undestroy();
+	room_map->remove_from_object_array_deleted(obj);
 }
 
 
@@ -206,8 +244,14 @@ AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos) :
 
 AbstractShiftDelta::~AbstractShiftDelta() {}
 
-void AbstractShiftDelta::revert() {
-	obj_->pos_ -= dpos_;
+void AbstractShiftDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+	file << dpos_;
+}
+
+void AbstractShiftDelta::revert(RoomMap* room_map) {
+	auto* obj = obj_.resolve(room_map);
+	obj->pos_ -= dpos_;
 }
 
 
@@ -216,6 +260,12 @@ AbstractPutDelta::AbstractPutDelta(GameObject* obj, Point3 pos) :
 
 AbstractPutDelta::~AbstractPutDelta() {}
 
-void AbstractPutDelta::revert() {
-	obj_->pos_ = pos_;
+void AbstractPutDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+	file << pos_;
+}
+
+void AbstractPutDelta::revert(RoomMap* room_map) {
+	auto* obj = obj_.resolve(room_map);
+	obj->pos_ = pos_;
 }

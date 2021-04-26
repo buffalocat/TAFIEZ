@@ -4,6 +4,7 @@
 #include "delta.h"
 #include "moveprocessor.h"
 #include "signaler.h"
+#include "gameobject.h"
 
 Switchable::Switchable(GameObject* parent, int count, bool persistent, bool def, bool active, bool waiting) : ObjectModifier(parent),
 count_ { count },
@@ -42,6 +43,12 @@ void Switchable::remove_signaler(Signaler* signaler) {
 void Switchable::connect_to_signalers() {
 	for (auto& p : signalers_) {
 		p.first->push_switchable(this, p.second, false);
+	}
+}
+
+void Switchable::remove_from_signalers() {
+	for (auto& p : signalers_) {
+		p.first->remove_switchable(this, p.second);
 	}
 }
 
@@ -108,9 +115,7 @@ void Switchable::check_waiting(RoomMap* map, DeltaFrame* delta_frame, MoveProces
 
 void Switchable::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {
 	if (real) {
-		for (auto& p : signalers_) {
-			p.first->remove_switchable(this, p.second);
-		}
+		remove_from_signalers();
 	}
 }
 
@@ -126,9 +131,15 @@ SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool w
 
 SwitchableDelta::~SwitchableDelta() {}
 
-void SwitchableDelta::revert() {
-	obj_->count_ = count_;
-	obj_->prev_count_ = count_;
-	obj_->active_ = active_;
-	obj_->waiting_ = waiting_;
+void SwitchableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+	file << count_ << active_ << waiting_;
+}
+
+void SwitchableDelta::revert(RoomMap* room_map) {
+	auto* obj = static_cast<Switchable*>(obj_.resolve(room_map)->modifier());
+	obj->count_ = count_;
+	obj->prev_count_ = count_;
+	obj->active_ = active_;
+	obj->waiting_ = waiting_;
 }

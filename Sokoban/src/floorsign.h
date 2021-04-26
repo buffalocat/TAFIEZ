@@ -44,24 +44,24 @@ private:
 
 class SignToggleDelta : public Delta {
 public:
-	SignToggleDelta(FloorSign* sign, TextRenderer* text);
+	SignToggleDelta(FloorSign* sign);
 	~SignToggleDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	FloorSign* sign_;
-	TextRenderer* text_;
+	FrozenObject sign_;
 };
 
 class LearnFlagDelta : public Delta {
 public:
-	LearnFlagDelta(FloorSign* sign, unsigned int flag, PlayingGlobalData* global);
+	LearnFlagDelta(FloorSign* sign, unsigned int flag);
 	~LearnFlagDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	FloorSign* sign_;
+	FrozenObject sign_;
 	unsigned int flag_;
-	PlayingGlobalData* global_;
 };
 

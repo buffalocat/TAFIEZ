@@ -286,7 +286,7 @@ void MoveProcessor::run_incinerators() {
 				anims_->receive_signal(AnimationSignal::IncineratorBurn, inc->parent_, nullptr);
 				if (above->id_ == GENERIC_WALL_ID) {
 					map_->clear(pos_above);
-					delta_frame_->push(std::make_unique<WallDestructionDelta>(pos_above, map_));
+					delta_frame_->push(std::make_unique<WallDestructionDelta>(pos_above));
 				} else {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
 						sb->collect_all_viable_neighbors(map_, snake_check);
@@ -529,12 +529,16 @@ void MoveProcessor::set_initializer_state() {
 
 
 RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
-	state_{ state }, room_{ room } {}
+	state_{ state }, room_name_{ room->name() } {}
 
 RoomChangeDelta::~RoomChangeDelta() {}
 
-void RoomChangeDelta::revert() {
-	state_->activate_room(room_);
+void RoomChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << room_name_;
+}
+
+void RoomChangeDelta::revert(RoomMap* room_map) {
+	state_->activate_room(room_name_);
 }
 
 
@@ -543,8 +547,13 @@ ToggleGravitableDelta::ToggleGravitableDelta(GameObject* obj) :
 
 ToggleGravitableDelta::~ToggleGravitableDelta() {}
 
-void ToggleGravitableDelta::revert() {
-	obj_->gravitable_ = !obj_->gravitable_;
+void ToggleGravitableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void ToggleGravitableDelta::revert(RoomMap* room_map) {
+	auto* obj = obj_.resolve(room_map);
+	obj->gravitable_ = !obj->gravitable_;
 }
 
 
@@ -552,6 +561,11 @@ ColorChangeDelta::ColorChangeDelta(Car* car, bool undo) : car_{ car }, undo_{ un
 
 ColorChangeDelta::~ColorChangeDelta() {}
 
-void ColorChangeDelta::revert() {
-	car_->cycle_color(undo_);
+void ColorChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	car_.serialize(file, arr);
+	file << undo_;
+}
+
+void ColorChangeDelta::revert(RoomMap* room_map) {
+	static_cast<Car*>(car_.resolve(room_map)->modifier())->cycle_color(undo_);
 }

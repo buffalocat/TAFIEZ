@@ -40,7 +40,7 @@ static Car model_car{ nullptr, CarType::Normal, {} };
 static Door model_door{ nullptr, 0, false, true, false, 0 };
 static Gate model_gate{ nullptr, nullptr, GREEN, 0, false, false, false, false };
 static PressSwitch model_press_switch{ nullptr, GREEN, false, false };
-static ClearFlag model_clear_flag{ nullptr, true, false, false, '!' };
+static ClearFlag model_clear_flag{ nullptr, true, false, false };
 static PermanentSwitch model_perm_switch{ nullptr, GREEN, false, 0 };
 static FloorSign model_floor_sign{ nullptr, "", false };
 static Incinerator model_incinerator{ nullptr, 0, false, true, false };

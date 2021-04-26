@@ -43,7 +43,7 @@ void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	if (b[6]) {
 		Point3_S16 body_pos{};
 		file >> body_pos;
-		map->push_to_object_array(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } +parent->pos_), nullptr);
+		map->push_to_object_array(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_), nullptr);
 	}
 	parent->set_modifier(std::move(gate));
 }

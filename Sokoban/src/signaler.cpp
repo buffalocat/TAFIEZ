@@ -10,11 +10,12 @@
 #include "playingstate.h"
 #include "savefile.h"
 #include "globalflagconstants.h"
+#include "roommap.h"
 
 
 
-Signaler::Signaler(const std::string& label, int count) :
-	label_{ label }, prev_count_{ count }, count_{ count } {}
+Signaler::Signaler(const std::string& label, unsigned int sig_index, int count) :
+	label_{ label }, sig_index_{ sig_index }, prev_count_{ count }, count_{ count } {}
 
 Signaler::~Signaler() {}
 
@@ -52,8 +53,8 @@ void Signaler::reset_prev_count(int count) {
 	prev_count_ = count;
 }
 
-ThresholdSignaler::ThresholdSignaler(std::string label, int count, int threshold) :
-	Signaler(label, count), threshold_{ threshold } {}
+ThresholdSignaler::ThresholdSignaler(std::string label, unsigned int sig_index, int count, int threshold) :
+	Signaler(label, sig_index, count), threshold_{ threshold } {}
 
 ThresholdSignaler::~ThresholdSignaler() {}
 
@@ -104,8 +105,8 @@ void ThresholdSignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame
 }
 
 
-ParitySignaler::ParitySignaler(std::string label, int count, int parity_level, bool initialized) :
-	Signaler(label, count), parity_level_{ parity_level }, initialized_{ initialized } {
+ParitySignaler::ParitySignaler(std::string label, unsigned int sig_index, int count, int parity_level, bool initialized) :
+	Signaler(label, sig_index, count), parity_level_{ parity_level }, initialized_{ initialized } {
 	for (int i = 0; i < parity_level; ++i) {
 		switchables_.push_back({});
 	}
@@ -166,7 +167,8 @@ void ParitySignaler::check_send_initial(RoomMap* map, DeltaFrame* delta_frame, M
 	}
 }
 
-FateSignaler::FateSignaler(std::string label, int count, int threshold): ThresholdSignaler(label, count, threshold) {}
+FateSignaler::FateSignaler(std::string label, unsigned int sig_index, int count, int threshold) :
+	ThresholdSignaler(label, sig_index, count, threshold) {}
 
 FateSignaler::~FateSignaler() {}
 
@@ -218,10 +220,16 @@ void FateSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, Move
 }
 
 
-SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) : sig_{ sig }, count_{ count } {}
+SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) :
+	index_{ sig->sig_index_ }, count_{ count } {}
 
 SignalerCountDelta::~SignalerCountDelta() {}
 
-void SignalerCountDelta::revert() {
-	sig_->reset_prev_count(count_);
+void SignalerCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file.write_uint32(index_);
+	file << count_;
+}
+
+void SignalerCountDelta::revert(RoomMap* room_map) {
+	room_map->signalers_[index_]->reset_prev_count(count_);
 }

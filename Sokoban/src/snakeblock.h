@@ -101,11 +101,12 @@ class AddLinkDelta : public Delta {
 public:
 	AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
 	~AddLinkDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	SnakeBlock* a_;
-	SnakeBlock* b_;
+	FrozenObject a_;
+	FrozenObject b_;
 };
 
 
@@ -113,22 +114,24 @@ class RemoveLinkDelta : public Delta {
 public:
 	RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
 	~RemoveLinkDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	SnakeBlock* a_;
-	SnakeBlock* b_;
+	FrozenObject a_;
+	FrozenObject b_;
 };
 
 class RemoveLinkOneWayDelta : public Delta {
 public:
 	RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b);
 	~RemoveLinkOneWayDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	SnakeBlock* a_;
-	SnakeBlock* b_;
+	FrozenObject a_;
+	FrozenObject b_;
 };
 
 #endif // SNAKEBLOCK_H

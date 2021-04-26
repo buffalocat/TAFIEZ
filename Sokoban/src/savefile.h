@@ -89,33 +89,33 @@ public:
 
 class GlobalFlagDelta : public Delta {
 public:
-	GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag);
+	GlobalFlagDelta(unsigned int flag);
 	~GlobalFlagDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	PlayingGlobalData* global_;
 	unsigned int flag_;
 };
 
 class FlagCountDelta : public Delta {
 public:
-	FlagCountDelta(PlayingGlobalData* global, unsigned int count);
+	FlagCountDelta(unsigned int count);
 	~FlagCountDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	PlayingGlobalData* global_;
 	unsigned int count_;
 };
 
 class AutosaveDelta : public Delta {
 public:
-	AutosaveDelta(SaveFile* savefile, int index);
+	AutosaveDelta(int index);
 	~AutosaveDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	SaveFile* savefile_;
 	int index_;
 };

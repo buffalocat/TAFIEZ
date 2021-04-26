@@ -34,7 +34,7 @@ void FloorSign::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void FloorSign::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void FloorSign::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	std::string content = file.read_long_str();
 	bool showing_text = file.read_byte();
 	auto sign = std::make_unique<FloorSign>(parent, content, showing_text);
@@ -69,6 +69,7 @@ void FloorSign::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 		if (learn_flag_ != 0) {
 			PlayingGlobalData* global = mp->playing_state_->global_;
 			global->add_flag_delta(learn_flag_, delta_frame);
+			delta_frame->push(std::make_unique<LearnFlagDelta>(this, learn_flag_));
 			learn_flag_ = 0;
 		}
 		toggle_active(map->text_renderer(), delta_frame);
@@ -79,7 +80,7 @@ void FloorSign::toggle_active(TextRenderer* text, DeltaFrame* delta_frame) {
 	active_ = !active_;
 	set_text_state(active_, text);
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<SignToggleDelta>(this, text));
+		delta_frame->push(std::make_unique<SignToggleDelta>(this));
 	}
 }
 
@@ -117,11 +118,30 @@ void FloorSign::draw(GraphicsManager* gfx, FPoint3 p) {
 }
 
 
-SignToggleDelta::SignToggleDelta(FloorSign* sign, TextRenderer* text) :
-	Delta(), sign_{ sign }, text_{ text } {}
+SignToggleDelta::SignToggleDelta(FloorSign* sign) :
+	Delta(), sign_{ sign } {}
 
 SignToggleDelta::~SignToggleDelta() {}
 
-void SignToggleDelta::revert() {
-	sign_->toggle_active(text_, nullptr);
+void SignToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	sign_.serialize(file, arr);
+}
+
+void SignToggleDelta::revert(RoomMap* room_map) {
+	static_cast<FloorSign*>(sign_.resolve(room_map)->modifier())->toggle_active(room_map->text_renderer(), nullptr);
+}
+
+
+LearnFlagDelta::LearnFlagDelta(FloorSign* sign, unsigned int flag) :
+	Delta(), sign_{ sign }, flag_{ flag } {}
+
+LearnFlagDelta::~LearnFlagDelta() {}
+
+void LearnFlagDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	sign_.serialize(file, arr);
+	file.write_uint32(flag_);
+}
+
+void LearnFlagDelta::revert(RoomMap* room_map) {
+	static_cast<FloorSign*>(sign_.resolve(room_map)->modifier())->learn_flag_ = flag_;
 }

@@ -236,6 +236,11 @@ MapFileO& MapFileO::operator<<(CameraCode code) {
     return *this;
 }
 
+MapFileO& MapFileO::operator<<(ObjRefCode code) {
+	file_ << (unsigned char)code;
+	return *this;
+}
+
 MapFileO& MapFileO::operator<<(Sticky sticky) {
     file_ << (unsigned char) sticky;
     return *this;
@@ -246,8 +251,18 @@ MapFileO& MapFileO::operator<<(PlayerState state) {
     return *this;
 }
 
-MapFileO& MapFileO::operator<<(CarType state) {
-	file_ << (unsigned char)state;
+MapFileO& MapFileO::operator<<(CarType type) {
+	file_ << (unsigned char)type;
+	return *this;
+}
+
+MapFileO& MapFileO::operator<<(AnimationSignal signal) {
+	file_ << (unsigned char)signal;
+	return *this;
+}
+
+MapFileO& MapFileO::operator<<(CauseOfDeath value) {
+	file_ << (unsigned char)value;
 	return *this;
 }
 
@@ -259,3 +274,4 @@ MapFileO& MapFileO::operator<<(const ColorCycle& color) {
     }
     return *this;
 }
+

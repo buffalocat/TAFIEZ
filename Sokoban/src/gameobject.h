@@ -5,6 +5,7 @@
 #include "point.h"
 #include "colorcycle.h"
 #include "delta.h"
+#include "mapfile.h"
 
 class ObjectModifier;
 class PositionalAnimation;
@@ -34,6 +35,9 @@ public:
     virtual void serialize(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
+
+	virtual GameObject* realize(PlayingState* state);
+	virtual void realize_references(RoomMap* room_map);
 
     Point3 shifted_pos(Point3 d);
     void abstract_shift(Point3 dpos);
@@ -83,6 +87,9 @@ protected:
     GameObject(Point3 pos, bool pushable, bool gravitable);
 };
 
+enum class ObjRefCode;
+
+
 // TODO: add copy constructors?
 class Block : public GameObject {
 public:
@@ -104,15 +111,31 @@ public:
 	int color_ = 0;
 };
 
+class DummyGameObject : public GameObject {
+public:
+	DummyGameObject(Point3 pos, ObjRefCode ref_code);
+	~DummyGameObject();
+	static GameObject* create(Point3 pos, ObjRefCode ref_code);
+	
+	std::string name() { return ""; }
+	ObjCode obj_code() { return ObjCode::NONE; }
+	void draw(GraphicsManager*) {}
+	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*) { return nullptr;  }
+
+	GameObject* realize(PlayingState* state);
+	ObjRefCode ref_code_;
+	std::unique_ptr<GameObject> self_{};
+};
 
 class DestructionDelta : public Delta {
 public:
 	DestructionDelta(GameObject* obj);
-	~DestructionDelta();
-	void revert();
+	virtual ~DestructionDelta();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
-private:
-	GameObject* obj_;
+protected:
+	FrozenObject obj_;
 };
 
 
@@ -120,10 +143,11 @@ class AbstractShiftDelta : public Delta {
 public:
 	AbstractShiftDelta(GameObject* obj, Point3 dpos);
 	~AbstractShiftDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
+	FrozenObject obj_;
 	Point3 dpos_;
 };
 
@@ -132,10 +156,11 @@ class AbstractPutDelta : public Delta {
 public:
 	AbstractPutDelta(GameObject* obj, Point3 pos);
 	~AbstractPutDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
+	FrozenObject obj_;
 	Point3 pos_;
 };
 

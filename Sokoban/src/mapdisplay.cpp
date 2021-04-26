@@ -31,7 +31,7 @@ ModCode MapDisplay::mod_code() {
 	return ModCode::MapDisplay;
 }
 
-void MapDisplay::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void MapDisplay::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	auto fg = std::make_unique<MapDisplay>(parent);
 	parent->set_modifier(std::move(fg));
 }
@@ -390,7 +390,7 @@ bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
 	case HubCode::Omega:
 	{
 		letter_tex = ParticleTexture::Omega;
-		color = GOLD;
+		color = WHITE;
 		exits_done = draw_zone('1', -1, 0) &
 			draw_zone('!', 0, -1);
 		break;
@@ -412,7 +412,7 @@ bool MapDisplay::draw_warp(HubCode hub, char zone, float dx, float dy) {
 		should_draw = global_->has_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[static_cast<int>(hub)]);
 	}
 	if (should_draw) {
-		draw_tex(ParticleTexture::SolidBox, dx, dy, 0, PINK);
+		draw_tex(ParticleTexture::SolidBox, dx, dy, 0, LIGHT_PINK);
 		if (dx != 0) {
 			draw_tex(ParticleTexture::HorDashes, dx / 2, 0, -0.02f, WHITE);
 		} else if (dy != 0) {

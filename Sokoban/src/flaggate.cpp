@@ -38,7 +38,7 @@ void FlagGate::serialize(MapFileO& file) {
 	file << num_flags_ << orientation_ << count_ << active_ << walls_placed_ << down_;
 }
 
-void FlagGate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void FlagGate::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	unsigned char b[6];
 	file.read(b, 6);
 	auto fg = std::make_unique<FlagGate>(parent, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -262,8 +262,8 @@ int FlagGate::get_reset_time() {
 	}
 }
 
-const int FLAG_GATE_SHRINK_TIME = 30;
-const int MAX_FLAG_SIGIL_CHARGE = 30;
+const int FLAG_GATE_SHRINK_TIME = 20;
+const int MAX_FLAG_SIGIL_CHARGE = 20;
 const int FLAG_SIGIL_DELAY = 8;
 
 bool FlagGate::update_animation(PlayingState* playing_state) {
@@ -402,9 +402,14 @@ FlagGateOpenDelta::FlagGateOpenDelta(FlagGate* fg) : Delta(), fg_{ fg } {}
 
 FlagGateOpenDelta::~FlagGateOpenDelta() {}
 
-void FlagGateOpenDelta::revert() {
-	fg_->down_ = false;
-	for (auto& sigil : fg_->sigils_) {
+void FlagGateOpenDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	fg_.serialize(file, arr);
+}
+
+void FlagGateOpenDelta::revert(RoomMap* room_map) {
+	auto* fg = static_cast<FlagGate*>(fg_.resolve(room_map)->modifier());
+	fg->down_ = false;
+	for (auto& sigil : fg->sigils_) {
 		sigil.charge = 0;
 		sigil.opacity = MAX_FLAG_SIGIL_OPACITY;
 	}

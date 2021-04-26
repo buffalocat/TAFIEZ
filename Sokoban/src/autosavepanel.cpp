@@ -83,6 +83,10 @@ AutosavePanelDelta::AutosavePanelDelta(AutosavePanel* panel) : Delta(), panel_{ 
 
 AutosavePanelDelta::~AutosavePanelDelta() {}
 
-void AutosavePanelDelta::revert() {
-	panel_->active_ = false;
+void AutosavePanelDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	panel_.serialize(file, arr);
+}
+
+void AutosavePanelDelta::revert(RoomMap* room_map) {
+	static_cast<AutosavePanel*>(panel_.resolve(room_map)->modifier())->active_ = false;
 }

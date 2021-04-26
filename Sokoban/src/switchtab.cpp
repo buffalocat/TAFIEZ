@@ -246,7 +246,7 @@ void SwitchTab::threshold_signaler_options(ThresholdSignaler* t_sig, RoomMap* ma
 			}
 		}
 		if (ImGui::Button("Make Signaler##SWITCH")) {
-			auto new_sig = std::make_unique<ThresholdSignaler>(model_label_, 0, model_threshold_);
+			auto new_sig = std::make_unique<ThresholdSignaler>(model_label_, 0, 0, model_threshold_);
 			for (auto* obj : model_switches_) {
 				new_sig->push_switch(obj, true);
 			}
@@ -332,7 +332,7 @@ void SwitchTab::parity_signaler_options(ParitySignaler* p_sig, RoomMap* map) {
 			}
 		}
 		if (ImGui::Button("Make Signaler##SWITCH")) {
-			auto new_sig = std::make_unique<ParitySignaler>(model_label_, 0, model_parity_level_, false);
+			auto new_sig = std::make_unique<ParitySignaler>(model_label_, 0, 0, model_parity_level_, false);
 			for (auto* obj : model_switches_) {
 				new_sig->push_switch(obj, true);
 			}

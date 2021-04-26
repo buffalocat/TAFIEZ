@@ -29,9 +29,10 @@ class AutosavePanelDelta : public Delta {
 public:
 	AutosavePanelDelta(AutosavePanel* panel);
 	~AutosavePanelDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	AutosavePanel* panel_;
+	FrozenObject panel_;
 };
 

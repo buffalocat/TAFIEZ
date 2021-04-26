@@ -20,6 +20,7 @@ public:
     void push_signaler(Signaler*, int index);
 	void remove_signaler(Signaler*);
     void connect_to_signalers();
+	void remove_from_signalers();
 
     bool state();
     virtual bool can_set_state(bool state, RoomMap*) = 0;
@@ -52,10 +53,11 @@ class SwitchableDelta : public Delta {
 public:
 	SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
 	~SwitchableDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	Switchable* obj_;
+	FrozenObject obj_;
 	int count_;
 	bool active_;
 	bool waiting_;

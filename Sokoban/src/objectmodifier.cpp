@@ -17,6 +17,8 @@ bool ObjectModifier::relation_check() {
 
 void ObjectModifier::relation_serialize(MapFileO&) {}
 
+void ObjectModifier::realize_references(RoomMap* map) {}
+
 // The "default" case is "Block"
 bool ObjectModifier::valid_parent(GameObject* obj) {
 	return dynamic_cast<Block*>(obj);
@@ -82,6 +84,10 @@ ModDestructionDelta::ModDestructionDelta(ObjectModifier* mod) :
 
 ModDestructionDelta::~ModDestructionDelta() {}
 
-void ModDestructionDelta::revert() {
-	mod_->undestroy();
+void ModDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	mod_.serialize(file, arr);
+}
+
+void ModDestructionDelta::revert(RoomMap* room_map) {
+	mod_.resolve(room_map)->modifier()->undestroy();
 }

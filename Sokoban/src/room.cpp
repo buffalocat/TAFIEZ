@@ -294,15 +294,14 @@ case ObjCode::CLASS:\
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize(file, map_.get(), obj.get());\
+    CLASS::deserialize(file, map, obj.get());\
     break;
 
 
-void Room::read_objects(MapFileI& file) {
+void read_objects_free(MapFileI& file, RoomMap* map) {
 	unsigned char b;
 	std::unique_ptr<GameObject> obj{};
 	while (true) {
-		obj = nullptr;
 		file.read(&b, 1);
 		switch (static_cast<ObjCode>(b)) {
 			CASE_OBJCODE(PushBlock);
@@ -315,7 +314,7 @@ void Room::read_objects(MapFileI& file) {
 			obj = Player::deserialize(file);
 			// Players need special initialization when brought into the map
 			auto* player = static_cast<Player*>(obj.get());
-			map_->player_cycle_->add_player(player, nullptr, false);
+			map->player_cycle_->add_player(player, nullptr, false);
 			break;
 		}
 		case ObjCode::NONE:
@@ -343,9 +342,13 @@ void Room::read_objects(MapFileI& file) {
 		case ModCode::NONE:
 			break;
 		}
-		auto* obj_raw = obj.get();
-		map_->create_in_map(std::move(obj), false, nullptr);
+		map->create_in_map(std::move(obj), false, nullptr);
 	}
+}
+
+
+void Room::read_objects(MapFileI& file) {
+	read_objects_free(file, map_.get());
 }
 
 #undef CASE_OBJCODE
@@ -406,7 +409,7 @@ void Room::read_threshold_signaler(MapFileI& file) {
 		label = "UNNAMED";
 	}
 	file.read(b, 4);
-	auto signaler = std::make_unique<ThresholdSignaler>(label, b[0], b[1]);
+	auto signaler = std::make_unique<ThresholdSignaler>(label, (unsigned int)map_->signalers_.size(), b[0], b[1]);
 	for (int i = 0; i < b[2]; ++i) {
 		signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
 	}
@@ -424,7 +427,7 @@ void Room::read_parity_signaler(MapFileI& file) {
 	}
 	file.read(b, 4);
 	int parity_level = b[1];
-	auto signaler = std::make_unique<ParitySignaler>(label, b[0], b[1], b[2]);
+	auto signaler = std::make_unique<ParitySignaler>(label, (unsigned int)map_->signalers_.size(), b[0], b[1], b[2]);
 	for (int i = 0; i < b[3]; ++i) {
 		signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
 	}
@@ -444,7 +447,7 @@ void Room::read_fate_signaler(MapFileI& file) {
 		label = "UNNAMED";
 	}
 	file.read(b, 4);
-	auto signaler = std::make_unique<FateSignaler>(label, b[0], b[1]);
+	auto signaler = std::make_unique<FateSignaler>(label, (unsigned int)map_->signalers_.size(), b[0], b[1]);
 	for (int i = 0; i < b[2]; ++i) {
 		signaler->push_switch(dynamic_cast<Switch*>(map_->view(file.read_point3())->modifier()), true);
 	}

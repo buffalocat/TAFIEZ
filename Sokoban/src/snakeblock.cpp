@@ -537,8 +537,13 @@ AddLinkDelta::AddLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
 
 AddLinkDelta::~AddLinkDelta() {}
 
-void AddLinkDelta::revert() {
-	a_->remove_link_quiet(b_);
+void AddLinkDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	a_.serialize(file, arr);
+	b_.serialize(file, arr);
+}
+
+void AddLinkDelta::revert(RoomMap* room_map) {
+	static_cast<SnakeBlock*>(a_.resolve(room_map))->remove_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }
 
 
@@ -546,8 +551,13 @@ RemoveLinkDelta::RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b 
 
 RemoveLinkDelta::~RemoveLinkDelta() {}
 
-void RemoveLinkDelta::revert() {
-	a_->add_link_quiet(b_);
+void RemoveLinkDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	a_.serialize(file, arr);
+	b_.serialize(file, arr);
+}
+
+void RemoveLinkDelta::revert(RoomMap* room_map) {
+	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }
 
 
@@ -555,6 +565,11 @@ RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b) : a_{
 
 RemoveLinkOneWayDelta::~RemoveLinkOneWayDelta() {}
 
-void RemoveLinkOneWayDelta::revert() {
-	a_->add_link_one_way(b_);
+void RemoveLinkOneWayDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	a_.serialize(file, arr);
+	b_.serialize(file, arr);
+}
+
+void RemoveLinkOneWayDelta::revert(RoomMap* room_map) {
+	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_one_way(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }

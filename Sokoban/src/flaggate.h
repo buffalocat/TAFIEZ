@@ -4,9 +4,10 @@
 #include "switchable.h"
 #include "delta.h"
 
-const int MAX_FLAG_SIGIL_OPACITY = 60;
+const int MAX_FLAG_SIGIL_OPACITY = 20;
 
 class ModelInstancer;
+class FrozenObject;
 
 struct FlagSigil {
 	glm::vec3 center;
@@ -84,10 +85,11 @@ public:
 	FlagGateOpenDelta(FlagGate* fg);
 	~FlagGateOpenDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	FlagGate* fg_;
+	FrozenObject fg_;
 };
 
 

@@ -71,4 +71,8 @@ private:
     void read_wall_runs(MapFileI& file);
 };
 
+
+void read_objects_free(MapFileI& file, RoomMap* map);
+
+
 #endif // ROOM_H

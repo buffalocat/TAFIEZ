@@ -3,6 +3,7 @@
 
 #include "roommap.h"
 #include "signaler.h"
+#include "gameobject.h"
 
 Switch::Switch(GameObject* parent, bool persistent, bool active): ObjectModifier(parent),
 persistent_ {persistent}, active_ {active}, signalers_ {} {}
@@ -76,6 +77,10 @@ SwitchToggleDelta::SwitchToggleDelta(Switch* obj) : obj_{ obj } {}
 
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
-void SwitchToggleDelta::revert() {
-	obj_->toggle();
+void SwitchToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void SwitchToggleDelta::revert(RoomMap* room_map) {
+	static_cast<Switch*>(obj_.resolve(room_map)->modifier())->toggle();
 }

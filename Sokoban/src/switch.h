@@ -42,10 +42,11 @@ class SwitchToggleDelta : public Delta {
 public:
 	SwitchToggleDelta(Switch* obj);
 	~SwitchToggleDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	Switch* obj_;
+	FrozenObject obj_;
 };
 
 #endif // SWITCH_H

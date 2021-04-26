@@ -26,6 +26,8 @@
 #include "flaggate.h"
 #include "savefile.h"
 #include "globalflagconstants.h"
+#include "gate.h"
+#include "gatebody.h"
 
 RoomMap::RoomMap(GameObjectArray& obj_array, GameState* state,
 	int width, int height, int depth) :
@@ -144,7 +146,7 @@ void RoomMap::push_to_object_array(std::unique_ptr<GameObject> obj_unique, Delta
 	GameObject* obj = obj_unique.get();
 	obj_array_.push_object(std::move(obj_unique));
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<ObjArrayPushDelta>(obj, this));
+		delta_frame->push(std::make_unique<ObjArrayPushDelta>(obj));
 	}
 }
 
@@ -154,8 +156,32 @@ void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, bool activat
 	put_in_map(obj, true, activate_listeners, delta_frame);
 }
 
+GameObject* RoomMap::deref_object(ObjRefCode ref_code, Point3 pos) {
+	auto* base_obj = view(pos);
+	switch (ref_code) {
+	case ObjRefCode::Tangible:
+		return base_obj;
+	case ObjRefCode::HeldPlayer:
+		return dynamic_cast<Car*>(base_obj->modifier())->player_;
+	case ObjRefCode::HeldGateBody:
+		return dynamic_cast<Gate*>(base_obj->modifier())->body_;
+	}
+	return nullptr;
+}
+
 void RoomMap::remove_from_object_array(GameObject* obj) {
-	obj_array_.schedule_deletion(obj);
+	obj_array_.schedule_uncreation(obj);
+}
+
+void RoomMap::push_to_object_array_deleted(GameObject* obj, DeltaFrame* delta_frame) {
+	obj_array_.add_dead_obj(obj);
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<ObjArrayDeletedPushDelta>(obj));
+	}
+}
+
+void RoomMap::remove_from_object_array_deleted(GameObject* obj) {
+	obj_array_.schedule_undeletion(obj);
 }
 
 void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, DeltaFrame* delta_frame) {
@@ -166,7 +192,7 @@ void RoomMap::put_in_map(GameObject* obj, bool real, bool activate_listeners, De
 		activate_listeners_at(obj->pos_);
 	}
 	if (real && delta_frame) {
-		delta_frame->push(std::make_unique<PutDelta>(obj, this));
+		delta_frame->push(std::make_unique<PutDelta>(obj));
 	}
 }
 
@@ -178,7 +204,7 @@ void RoomMap::take_from_map(GameObject* obj, bool real, bool activate_listeners,
 	obj->tangible_ = false;
 	at(obj->pos_) -= obj->id_;
 	if (real && delta_frame) {
-		delta_frame->push(std::make_unique<TakeDelta>(obj, this));
+		delta_frame->push(std::make_unique<TakeDelta>(obj));
 	}
 }
 
@@ -195,7 +221,7 @@ void RoomMap::shift(GameObject* obj, Point3 dpos, bool activate_listeners, Delta
 	obj->abstract_shift(dpos);
 	put_in_map(obj, false, activate_listeners, nullptr);
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos, this));
+		delta_frame->push(std::make_unique<MotionDelta>(obj, dpos));
 	}
 }
 
@@ -206,7 +232,16 @@ void RoomMap::batch_shift(std::vector<GameObject*> objs, Point3 dpos, bool activ
 		put_in_map(obj, false, activate_listeners, nullptr);
 	}
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos, this));
+		delta_frame->push(std::make_unique<BatchMotionDelta>(std::move(objs), dpos));
+	}
+}
+
+void RoomMap::batch_shift_frozen(std::vector<FrozenObject> objs, Point3 dpos) {
+	for (auto& f_obj : objs) {
+		auto* obj = f_obj.resolve(this);
+		take_from_map(obj, false, false, nullptr);
+		obj->abstract_shift(dpos);
+		put_in_map(obj, false, false, nullptr);
 	}
 }
 
@@ -547,7 +582,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 
 void RoomMap::collect_flag(bool real, DeltaFrame* delta_frame) {
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>(this));
+		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>());
 	}
 	if (real) {
 		static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
@@ -569,6 +604,10 @@ void RoomMap::validate_players(DeltaFrame* delta_frame) {
 	}
 }
 
+PlayerCycle* RoomMap::player_cycle() {
+	return player_cycle_.get();
+}
+
 TextRenderer* RoomMap::text_renderer() {
 	return state_->text_.get();
 }
@@ -586,62 +625,105 @@ std::vector<Player*>& RoomMap::player_list() {
 }
 
 
-PutDelta::PutDelta(GameObject* obj, RoomMap* map) :
-	obj_{ obj }, map_{ map } {}
+PutDelta::PutDelta(GameObject* obj) :
+	obj_{ obj } {}
 
 PutDelta::~PutDelta() {}
 
-void PutDelta::revert() {
-	map_->take_from_map(obj_, true, false, nullptr);
+void PutDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void PutDelta::revert(RoomMap* room_map) {
+	room_map->take_from_map(obj_.resolve(room_map), true, false, nullptr);
 }
 
 
-TakeDelta::TakeDelta(GameObject* obj, RoomMap* map) :
-	obj_{ obj }, map_{ map } {}
+TakeDelta::TakeDelta(GameObject* obj) :
+	obj_{ obj } {}
 
 TakeDelta::~TakeDelta() {}
 
-void TakeDelta::revert() {
-	map_->put_in_map(obj_, true, false, nullptr);
+void TakeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void TakeDelta::revert(RoomMap* room_map) {
+	room_map->put_in_map(obj_.resolve(room_map), true, false, nullptr);
 }
 
 
-ObjArrayPushDelta::ObjArrayPushDelta(GameObject* obj, RoomMap* map) : obj_{ obj }, map_{ map } {}
+ObjArrayPushDelta::ObjArrayPushDelta(GameObject* obj) : obj_{ obj } {}
 
 ObjArrayPushDelta::~ObjArrayPushDelta() {}
 
-void ObjArrayPushDelta::revert() {
-	map_->remove_from_object_array(obj_);
+void ObjArrayPushDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void ObjArrayPushDelta::revert(RoomMap* room_map) {
+	room_map->remove_from_object_array(obj_.resolve(room_map));
 }
 
 
-MotionDelta::MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map) :
-	obj_{ obj }, dpos_{ dpos }, map_{ map } {}
+ObjArrayDeletedPushDelta::ObjArrayDeletedPushDelta(GameObject* obj) : obj_{ obj } {}
+
+ObjArrayDeletedPushDelta::~ObjArrayDeletedPushDelta() {}
+
+void ObjArrayDeletedPushDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+}
+
+void ObjArrayDeletedPushDelta::revert(RoomMap* room_map) {
+	room_map->remove_from_object_array_deleted(obj_.resolve(room_map));
+}
+
+
+MotionDelta::MotionDelta(GameObject* obj, Point3 dpos) :
+	obj_{ obj }, dpos_{ dpos } {}
 
 MotionDelta::~MotionDelta() {}
 
-void MotionDelta::revert() {
-	map_->shift(obj_, -dpos_, false, nullptr);
+void MotionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	obj_.serialize(file, arr);
+	file << dpos_;
+}
+
+void MotionDelta::revert(RoomMap* room_map) {
+	room_map->shift(obj_.resolve(room_map), -dpos_, false, nullptr);
 }
 
 
-BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* map) :
-	objs_{ objs }, dpos_{ dpos }, map_{ map } {}
+BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos) :
+	objs_{}, dpos_{ dpos } {
+	for (auto* obj : objs) {
+		objs_.push_back({ obj });
+	}
+}
 
 BatchMotionDelta::~BatchMotionDelta() {}
 
-void BatchMotionDelta::revert() {
-	map_->batch_shift(objs_, -dpos_, false, nullptr);
+void BatchMotionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file.write_uint32((unsigned int)objs_.size());
+	for (auto& obj : objs_) {
+		obj.serialize(file, arr);
+	}
+	file << dpos_;
+}
+
+void BatchMotionDelta::revert(RoomMap* room_map) {
+	room_map->batch_shift_frozen(std::move(objs_), -dpos_);
 }
 
 
-ClearFlagCollectionDelta::ClearFlagCollectionDelta(RoomMap* map) :
-	map_{ map } {}
+ClearFlagCollectionDelta::ClearFlagCollectionDelta() {}
 
 ClearFlagCollectionDelta::~ClearFlagCollectionDelta() {}
 
-void ClearFlagCollectionDelta::revert() {
-	map_->uncollect_flag();
+void ClearFlagCollectionDelta::serialize(MapFileO& file, GameObjectArray* arr) {}
+
+void ClearFlagCollectionDelta::revert(RoomMap* room_map) {
+	room_map->uncollect_flag();
 }
 
 
@@ -665,7 +747,7 @@ PlayerCycle::~PlayerCycle() {}
 void PlayerCycle::add_player(Player* player, DeltaFrame* delta_frame, bool init) {
 	ActivePlayerGuard guard{ this };
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<AddPlayerDelta>(this, index_));
+		delta_frame->push(std::make_unique<AddPlayerDelta>(index_));
 	}
 	if (init) {
 		index_ = (int)players_.size();
@@ -698,7 +780,7 @@ void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
 	}
 	int rem_index = (int)std::distance(players_.begin(), rem_it);
 	if (delta_frame) {
-		delta_frame->push(std::make_unique<RemovePlayerDelta>(this, player, dead_player_, index_, dead_index_, rem_index));
+		delta_frame->push(std::make_unique<RemovePlayerDelta>(player, dead_player_, index_, dead_index_, rem_index));
 	}
 	if (index_ == rem_index) {
 		dead_player_ = player;
@@ -716,7 +798,7 @@ void PlayerCycle::remove_player(Player* player, DeltaFrame* delta_frame) {
 
 bool PlayerCycle::cycle_player(DeltaFrame* delta_frame) {
 	ActivePlayerGuard guard{ this };
-	auto delta = std::make_unique<CyclePlayerDelta>(this, dead_player_, index_, dead_index_);
+	auto delta = std::make_unique<CyclePlayerDelta>(dead_player_, index_, dead_index_);
 	if (index_ == -1) {
 		if (players_.size() == 0) {
 			return false;
@@ -758,48 +840,119 @@ bool PlayerCycle::any_player_alive() {
 	return players_.size() > 0;
 }
 
+void PlayerCycle::serialize_permutation(MapFileO& file) {
+	file << MapCode::PlayerCycle;
+	for (auto* player : players_) {
+		if (player->tangible_) {
+			file << ObjRefCode::Tangible;
+			file << player->pos_;
+		} else {
+			file << ObjRefCode::HeldPlayer;
+			file << player->car_riding()->pos();
+		}
+	}
+}
 
-AddPlayerDelta::AddPlayerDelta(PlayerCycle* cycle, int index) :
-	cycle_{ cycle }, index_{ index } {}
+void PlayerCycle::deserialize_permutation(MapFileI& file, RoomMap* room_map) {
+	for (int i = 0; i < players_.size(); ++i) {
+		auto ref_code = static_cast<ObjRefCode>(file.read_byte());
+		Player* cur_player = nullptr;
+		auto pos = file.read_point3();
+		switch (ref_code) {
+		case ObjRefCode::Tangible:
+		{
+			cur_player = dynamic_cast<Player*>(room_map->view(pos));
+			break;
+		}
+		case ObjRefCode::HeldPlayer:
+		{
+			cur_player = dynamic_cast<Car*>(room_map->view(pos)->modifier())->player_;
+			break;
+		}
+		}
+		players_[i] = cur_player;
+	}
+}
+
+
+AddPlayerDelta::AddPlayerDelta(int index) :
+	index_{ index } {}
 
 AddPlayerDelta::~AddPlayerDelta() {}
 
-void AddPlayerDelta::revert() {
-	ActivePlayerGuard guard{ cycle_ };
-	cycle_->players_.pop_back();
-	cycle_->index_ = index_;
+void AddPlayerDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << index_;
+}
+
+void AddPlayerDelta::revert(RoomMap* room_map) {
+	auto* cycle = room_map->player_cycle();
+	ActivePlayerGuard guard{ cycle };
+	cycle->players_.pop_back();
+	cycle->index_ = index_;
 }
 
 
-RemovePlayerDelta::RemovePlayerDelta(PlayerCycle* cycle, Player* player, Player* dead_player, int index, int dead_index, int rem) :
-	cycle_{ cycle }, player_{ player }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index }, rem_{ rem } {}
+RemovePlayerDelta::RemovePlayerDelta(Player* player, Player* dead_player, int index, int dead_index, int rem) :
+	player_{ player }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index }, rem_{ rem } {}
 
 RemovePlayerDelta::~RemovePlayerDelta() {}
 
-void RemovePlayerDelta::revert() {
-	ActivePlayerGuard guard{ cycle_ };
-	cycle_->dead_player_ = dead_player_;
-	cycle_->index_ = index_;
-	cycle_->add_player_at_pos(player_, rem_);
+void RemovePlayerDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	player_.serialize(file, arr);
+	dead_player_.serialize(file, arr);
+	file << index_ << dead_index_ << rem_;
+}
+
+void RemovePlayerDelta::revert(RoomMap* room_map) {
+	auto* cycle = room_map->player_cycle();
+	ActivePlayerGuard guard{ cycle };
+	cycle->dead_player_ = static_cast<Player*>(dead_player_.resolve(room_map));
+	cycle->index_ = index_;
+	cycle->add_player_at_pos(static_cast<Player*>(player_.resolve(room_map)), rem_);
 }
 
 
-CyclePlayerDelta::CyclePlayerDelta(PlayerCycle* cycle, Player* dead_player, int index, int dead_index) :
-	cycle_{ cycle }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index } {}
+CyclePlayerDelta::CyclePlayerDelta(Player* dead_player, int index, int dead_index) :
+	dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index } {}
 
 CyclePlayerDelta::~CyclePlayerDelta() {}
 
-void CyclePlayerDelta::revert() {
-	ActivePlayerGuard guard{ cycle_ };
-	cycle_->dead_player_ = dead_player_;
-	cycle_->index_ = index_;
-	cycle_->dead_index_ = dead_index_;
+void CyclePlayerDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	dead_player_.serialize(file, arr);
+	file << index_ << dead_index_;
 }
 
-WallDestructionDelta::WallDestructionDelta(Point3 pos, RoomMap* room_map) : Delta(), pos_{ pos }, map_{ room_map } {}
+void CyclePlayerDelta::revert(RoomMap* room_map) {
+	auto* cycle = room_map->player_cycle();
+	ActivePlayerGuard guard{ cycle };
+	cycle->dead_player_ = static_cast<Player*>(dead_player_.resolve(room_map));
+	cycle->index_ = index_;
+	cycle->dead_index_ = dead_index_;
+}
+
+WallDestructionDelta::WallDestructionDelta(Point3 pos) : Delta(), pos_{ pos } {}
 
 WallDestructionDelta::~WallDestructionDelta() {}
 
-void WallDestructionDelta::revert() {
-	map_->at(pos_) = GENERIC_WALL_ID;
+void WallDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << pos_;
+}
+
+void WallDestructionDelta::revert(RoomMap* room_map) {
+	room_map->at(pos_) = GENERIC_WALL_ID;
+}
+
+DeadObjectAdder::DeadObjectAdder(GameObjectArray & obj_array) :
+	RoomMap(obj_array, nullptr, 0, 0, 0) {}
+
+DeadObjectAdder::~DeadObjectAdder() {}
+
+void DeadObjectAdder::push_to_object_array(std::unique_ptr<GameObject> obj, DeltaFrame*) {
+	auto* obj_raw = obj.get();
+	obj_array_.push_object(std::move(obj));
+	obj_array_.add_dead_obj(obj_raw);
+}
+
+void DeadObjectAdder::create_in_map(std::unique_ptr<GameObject> obj_unique, bool, DeltaFrame*) {
+	push_to_object_array(std::move(obj_unique), nullptr);
 }

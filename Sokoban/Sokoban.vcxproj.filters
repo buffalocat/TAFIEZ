@@ -295,6 +295,9 @@
     <ClInclude Include="src\autosavepanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\objectrefarray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -549,6 +552,9 @@
     <ClCompile Include="src\autosavepanel.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
+    <ClCompile Include="src\objectrefarray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\text_shader.vs">
@@ -569,5 +575,6 @@
     <None Include="shaders\text_shader.fs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="src\deadobjectarray" />
   </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@ RealPlayingState::RealPlayingState(SaveFile* savefile, GameState* parent) :
 
 RealPlayingState::~RealPlayingState() {
 	if (delta_frame_) {
-		delta_frame_->revert();
+		delta_frame_->revert(this);
 	}
 	if (should_save_) {
 		make_subsave(SaveType::Current);

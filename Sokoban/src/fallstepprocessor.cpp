@@ -200,7 +200,7 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
 				sub->pos_ += {0, 0, -layers_fallen_};
 			}
 		}
-        delta_frame_->push(std::make_unique<BatchMotionDelta>(std::move(live_blocks), Point3{0,0,-layers_fallen_}, map_));
+        delta_frame_->push(std::make_unique<BatchMotionDelta>(std::move(live_blocks), Point3{0,0,-layers_fallen_}));
     }
 }
 

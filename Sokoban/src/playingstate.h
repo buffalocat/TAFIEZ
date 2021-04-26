@@ -94,9 +94,8 @@ public:
 	bool should_save_ = true;
 	bool queued_autosave_ = false;
 
-protected:
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
-	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(MAX_UNDO_DEPTH) };
+	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(this, MAX_UNDO_DEPTH) };
 	std::unique_ptr<MoveProcessor> move_processor_{};
 
 private:

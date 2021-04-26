@@ -60,14 +60,10 @@ public:
 
 	CauseOfDeath death_ = CauseOfDeath::None;
 
-private:
 	void set_bound();
 
 	Car* car_;
 	PlayerState state_;
-
-	friend class PlayerStateDelta;
-	friend class ObjectTab;
 };
 
 bool is_player_rep(GameObject*);
@@ -77,11 +73,12 @@ class PlayerStateDelta : public Delta {
 public:
 	PlayerStateDelta(Player* player);
 	~PlayerStateDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	Player* player_;
-	Car* car_;
+	FrozenObject player_;
+	FrozenObject car_;
 	PlayerState state_;
 	CauseOfDeath death_;
 };

@@ -31,6 +31,7 @@ public:
 	virtual void serialize(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
+	virtual void realize_references(RoomMap* map);
 	virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*) = 0;
 
 	virtual bool valid_parent(GameObject*);
@@ -68,10 +69,11 @@ class ModDestructionDelta : public Delta {
 public:
 	ModDestructionDelta(ObjectModifier* obj);
 	~ModDestructionDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	ObjectModifier* mod_;
+	FrozenObject mod_;
 };
 
 

@@ -25,8 +25,21 @@ enum class MapCode {
 	FateSignaler = 19,
 	FloorSignFlag = 20,
 	DoorFlag = 21,
+	PlayerCycle = 22,
+	DeadObjs = 23,
+	Deltas = 24,
 	End = 255,
 };
+
+
+enum class ObjRefCode {
+	Tangible = 1,
+	Dead = 2,
+	HeldGateBody = 3,
+	HeldPlayer = 4,
+	Null = 5,
+};
+
 
 class ColorCycle;
 
@@ -36,6 +49,8 @@ enum class CameraCode;
 enum class Sticky;
 enum class PlayerState;
 enum class CarType;
+enum class AnimationSignal;
+enum class CauseOfDeath;
 
 class MapFileI {
 public:
@@ -95,9 +110,12 @@ public:
     MapFileO& operator<<(ObjCode);
     MapFileO& operator<<(ModCode);
     MapFileO& operator<<(CameraCode);
+	MapFileO& operator<<(ObjRefCode);
     MapFileO& operator<<(Sticky);
     MapFileO& operator<<(PlayerState);
 	MapFileO& operator<<(CarType);
+	MapFileO& operator<<(AnimationSignal);
+	MapFileO& operator<<(CauseOfDeath);
 
 private:
     std::ofstream file_;

@@ -122,11 +122,12 @@ class RoomChangeDelta : public Delta {
 public:
 	RoomChangeDelta(PlayingState* state, Room* room);
 	~RoomChangeDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
 	PlayingState* state_;
-	Room* room_;
+	std::string room_name_;
 };
 
 
@@ -134,10 +135,11 @@ class ToggleGravitableDelta : public Delta {
 public:
 	ToggleGravitableDelta(GameObject* obj);
 	~ToggleGravitableDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
+	FrozenObject obj_;
 };
 
 class Car;
@@ -146,10 +148,11 @@ class ColorChangeDelta : public Delta {
 public:
 	ColorChangeDelta(Car* car, bool undo);
 	~ColorChangeDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	Car* car_;
+	FrozenObject car_;
 	bool undo_;
 };
 

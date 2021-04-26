@@ -12,9 +12,9 @@
 #include "delta.h"
 #include "car.h"
 
-ClearFlag::ClearFlag(GameObject* parent, bool real, bool active, bool collected, char zone) :
+ClearFlag::ClearFlag(GameObject* parent, bool real, bool active, bool collected) :
 	ObjectModifier(parent),
-	real_{ real }, active_{ active }, collected_{ collected }, zone_{ zone } {}
+	real_{ real }, active_{ active }, collected_{ collected } {}
 
 ClearFlag::~ClearFlag() {}
 
@@ -33,10 +33,10 @@ void ClearFlag::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void ClearFlag::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void ClearFlag::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	bool real, active;
 	file >> real >> active;
-	auto cf = std::make_unique<ClearFlag>(parent, real, active, false, map->zone_);
+	auto cf = std::make_unique<ClearFlag>(parent, real, active, false);
 	parent->set_modifier(std::move(cf));
 }
 
@@ -70,7 +70,7 @@ void ClearFlag::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcesso
 			}
 		}
 		if (active_ != prev_active) {
-			delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this, map));
+			delta_frame->push(std::make_unique<ClearFlagToggleDelta>(this));
 			map->clear_flags_changed_ = true;
 		}
 	}
@@ -120,11 +120,16 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 }
 
 
-ClearFlagToggleDelta::ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map) :
-	flag_{ flag }, map_{ map } {}
+ClearFlagToggleDelta::ClearFlagToggleDelta(ClearFlag* flag) :
+	flag_{ flag } {}
 
 ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
 
-void ClearFlagToggleDelta::revert() {
-	flag_->active_ = !flag_->active_;
+void ClearFlagToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	flag_.serialize(file, arr);
+}
+
+void ClearFlagToggleDelta::revert(RoomMap* room_map) {
+	auto* flag = static_cast<ClearFlag*>(flag_.resolve(room_map)->modifier());
+	flag->active_ = !flag->active_;
 }

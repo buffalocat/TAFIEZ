@@ -66,6 +66,7 @@ void GateBody::set_gate(Gate* gate) {
 }
 
 void GateBody::destroy(MoveProcessor* mp, CauseOfDeath death) {
+	GameObject::destroy(mp, death);	
 	if (gate_) {
 		gate_->body_ = nullptr;
 		mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));

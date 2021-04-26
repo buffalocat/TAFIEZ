@@ -116,7 +116,7 @@ void PlayingState::handle_input() {
 			}
 			if (move_processor_) {
 				move_processor_.reset(nullptr);
-				delta_frame_->revert();
+				delta_frame_->revert(this);
 				anims_->reset_temp();
 				delta_frame_ = std::make_unique<DeltaFrame>();
 				move_camera_to_player(true);

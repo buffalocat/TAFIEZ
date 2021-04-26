@@ -16,6 +16,7 @@ class TextRenderer;
 class DeltaFrame;
 class MoveProcessor;
 class ObjectModifier;
+class MapFileI;
 class MapFileO;
 class RoomMap;
 class PlayingGlobalData;
@@ -31,26 +32,33 @@ class Car;
 
 class PlayerCycle;
 
+enum class ObjRefCode;
+
 class RoomMap {
 public:
     RoomMap(GameObjectArray& objs, GameState* state, int width, int height, int depth);
-    ~RoomMap();
+    virtual ~RoomMap();
     bool valid(Point3 pos);
 
     int& at(Point3);
     GameObject* view(Point3);
 
-	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
+	virtual void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
+	void push_to_object_array_deleted(GameObject*, DeltaFrame*);
+	void remove_from_object_array_deleted(GameObject*);
 	void put_in_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
     void take_from_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
-	void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+	GameObject* deref_object(ObjRefCode ref_code, Point3 pos);
 
 	void create_wall(Point3);
 	void clear(Point3);
 
     void shift(GameObject*, Point3, bool activate_listeners, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, bool activate_listeners, DeltaFrame*);
+	void batch_shift_frozen(std::vector<FrozenObject>, Point3);
+
 
     void serialize(MapFileO& file);
 
@@ -94,6 +102,8 @@ public:
     void alert_activated_listeners(DeltaFrame*, MoveProcessor*);
 	void handle_moved_cars(MoveProcessor*);
 
+	PlayerCycle* player_cycle();
+
 	std::vector<Door*>& door_group(unsigned int id);
 	std::vector<Player*>& player_list();
 
@@ -125,7 +135,6 @@ public:
 
 	TextRenderer* text_renderer();
 
-private:
 	std::unordered_map<Point3, std::vector<ObjectModifier*>, Point3Hash> listeners_{};
 	std::vector<std::unique_ptr<Signaler>> signalers_{};
 
@@ -135,91 +144,111 @@ private:
     friend class SwitchTab;
 };
 
+class DeadObjectAdder : public RoomMap {
+public:
+	DeadObjectAdder(GameObjectArray& obj_array);
+	~DeadObjectAdder();
+
+	virtual void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
+	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+};
+
 // Deltas
 
 class PutDelta : public Delta {
 public:
-	PutDelta(GameObject* obj, RoomMap* map);
+	PutDelta(GameObject* obj);
 	~PutDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
-	RoomMap* map_;
+	FrozenObject obj_;
 };
 
 
 class TakeDelta : public Delta {
 public:
-	TakeDelta(GameObject* obj, RoomMap* map);
+	TakeDelta(GameObject* obj);
 	~TakeDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
-	RoomMap* map_;
+	FrozenObject obj_;
 };
 
 
 class WallDestructionDelta : public Delta {
 public:
-	WallDestructionDelta(Point3 pos, RoomMap* map);
+	WallDestructionDelta(Point3 pos);
 	~WallDestructionDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
 	Point3 pos_;
-	RoomMap* map_;
 };
 
 
 class ObjArrayPushDelta : public Delta {
 public:
-	ObjArrayPushDelta(GameObject* obj, RoomMap* map);
+	ObjArrayPushDelta(GameObject* obj);
 	~ObjArrayPushDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
-	RoomMap* map_;
+	FrozenObject obj_;
 };
+
+
+class ObjArrayDeletedPushDelta : public Delta {
+public:
+	ObjArrayDeletedPushDelta(GameObject* obj);
+	~ObjArrayDeletedPushDelta();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
+
+private:
+	FrozenObject obj_;
+};
+
 
 
 class MotionDelta : public Delta {
 public:
-	MotionDelta(GameObject* obj, Point3 dpos, RoomMap* map);
+	MotionDelta(GameObject* obj, Point3 dpos);
 	~MotionDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	GameObject* obj_;
+	FrozenObject obj_;
 	Point3 dpos_;
-	RoomMap* map_;
 };
 
 
 class BatchMotionDelta : public Delta {
 public:
-	BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos, RoomMap* map);
+	BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos);
 	~BatchMotionDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	std::vector<GameObject*> objs_;
+	std::vector<FrozenObject> objs_;
 	Point3 dpos_;
-	RoomMap* map_;
 };
 
 
 class ClearFlagCollectionDelta : public Delta {
 public:
-	ClearFlagCollectionDelta(RoomMap* map);
+	ClearFlagCollectionDelta();
 	~ClearFlagCollectionDelta();
-	void revert();
-
-private:
-	RoomMap* map_;
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 };
 
 
@@ -244,6 +273,8 @@ public:
 	Player* current_player();
 	Player* dead_player();
 	bool any_player_alive();
+	void serialize_permutation(MapFileO & file);
+	void deserialize_permutation(MapFileI& file, RoomMap* room_map);
 
 private:
 	std::vector<Player*> players_{};
@@ -261,28 +292,28 @@ private:
 
 class AddPlayerDelta : public Delta {
 public:
-	AddPlayerDelta(PlayerCycle*, int index);
+	AddPlayerDelta(int index);
 	~AddPlayerDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	PlayerCycle* cycle_;
 	int index_;
 };
 
 
 class RemovePlayerDelta : public Delta {
 public:
-	RemovePlayerDelta(PlayerCycle*, Player*, Player* dead_player, int index, int dead_index, int rem);
+	RemovePlayerDelta(Player*, Player* dead_player, int index, int dead_index, int rem);
 	~RemovePlayerDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	PlayerCycle* cycle_;
-	Player* player_;
-	Player* dead_player_;
+	FrozenObject player_;
+	FrozenObject dead_player_;
 	int index_;
 	int dead_index_;
 	int rem_;
@@ -291,14 +322,14 @@ private:
 
 class CyclePlayerDelta : public Delta {
 public:
-	CyclePlayerDelta(PlayerCycle*, Player* dead_player, int index, int dead_index);
+	CyclePlayerDelta(Player* dead_player, int index, int dead_index);
 	~CyclePlayerDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	PlayerCycle* cycle_;
-	Player* dead_player_;
+	FrozenObject dead_player_;
 	int index_;
 	int dead_index_;
 };

@@ -13,7 +13,7 @@ class ObjectModifier;
 
 class Signaler {
 public:
-    Signaler(const std::string& label, int count);
+    Signaler(const std::string& label, unsigned int sig_index, int count);
     virtual ~Signaler();
 
     virtual void serialize(MapFileO& file) = 0;
@@ -31,17 +31,15 @@ public:
 
 	std::string label_;
 
-protected:
 	std::vector<Switch*> switches_{};
+	unsigned int sig_index_;
 	int prev_count_;
     int count_;
-
-    friend class SwitchTab;
 };
 
 class ThresholdSignaler : public Signaler {
 public:
-	ThresholdSignaler(std::string label, int count, int threshold);
+	ThresholdSignaler(std::string label, unsigned int sig_index, int count, int threshold);
 	virtual ~ThresholdSignaler();
 
 	virtual void serialize(MapFileO& file);
@@ -52,16 +50,14 @@ public:
 	virtual void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-protected:
 	std::vector<Switchable*> switchables_{};
 	int threshold_;
 
-	friend class SwitchTab;
 };
 
 class ParitySignaler : public Signaler {
 public:
-	ParitySignaler(std::string label, int count, int parity_level, bool initialized);
+	ParitySignaler(std::string label, unsigned int sig_index, int count, int parity_level, bool initialized);
 	~ParitySignaler();
 
 	void serialize(MapFileO& file);
@@ -72,17 +68,14 @@ public:
 	void check_send_signal(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void check_send_initial(RoomMap*, DeltaFrame*, MoveProcessor*);
 
-private:
 	std::vector<std::vector<Switchable*>> switchables_{};
 	int parity_level_;
 	bool initialized_;
-
-	friend class SwitchTab;
 };
 
 class FateSignaler : public ThresholdSignaler {
 public:
-	FateSignaler(std::string label, int count, int threshold);
+	FateSignaler(std::string label, unsigned int sig_index, int count, int threshold);
 	~FateSignaler();
 
 	void serialize(MapFileO& file);
@@ -91,12 +84,13 @@ public:
 
 class SignalerCountDelta : public Delta {
 public:
-	SignalerCountDelta(Signaler*, int count);
+	SignalerCountDelta(Signaler* sig, int count);
 	~SignalerCountDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	Signaler* sig_;
+	unsigned int index_;
 	int count_;
 };
 

@@ -335,12 +335,14 @@ public:
 	AnimationSignalDelta(AnimationManager* anims, AnimationSignal signal, GameObject* parent);
 	~AnimationSignalDelta();
 
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
 	AnimationManager* anims_;
 	AnimationSignal signal_;
-	GameObject* obj_;
+	FrozenObject obj_;
 };
+
 
 #endif ANIMATIONMANAGER_H

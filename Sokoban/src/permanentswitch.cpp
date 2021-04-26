@@ -30,7 +30,7 @@ void PermanentSwitch::serialize(MapFileO& file) {
 	file.write_uint32(global_id_);
 }
 
-void PermanentSwitch::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void PermanentSwitch::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	int color;
 	bool active;
 	file >> color >> active;

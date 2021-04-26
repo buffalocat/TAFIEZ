@@ -186,6 +186,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 }
 
 void Player::destroy(MoveProcessor* mp, CauseOfDeath death) {
+	GameObject::destroy(mp, death);
 	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	mp->map_->player_cycle_->remove_player(this, mp->delta_frame_);
 	death_ = death;
@@ -333,10 +334,19 @@ PlayerStateDelta::PlayerStateDelta(Player* player) :
 
 PlayerStateDelta::~PlayerStateDelta() {}
 
-void PlayerStateDelta::revert() {
-	player_->state_ = state_;
-	player_->death_ = death_;
-	player_->set_car(car_);
+void PlayerStateDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	player_.serialize(file, arr);
+	car_.serialize(file, arr);
+	file << state_;
+	file << death_;
+}
+
+void PlayerStateDelta::revert(RoomMap* room_map) {
+	auto* player = static_cast<Player*>(player_.resolve(room_map));
+	auto* car = static_cast<Car*>(car_.resolve(room_map)->modifier());
+	player->state_ = state_;
+	player->death_ = death_;
+	player->set_car(car);
 }
 
 bool is_player_rep(GameObject* obj) {

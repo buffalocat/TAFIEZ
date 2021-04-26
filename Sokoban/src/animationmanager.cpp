@@ -708,6 +708,11 @@ AnimationSignalDelta::AnimationSignalDelta(AnimationManager* anims, AnimationSig
 
 AnimationSignalDelta::~AnimationSignalDelta() {}
 
-void AnimationSignalDelta::revert() {
-	anims_->receive_signal(signal_, obj_, nullptr);
+void AnimationSignalDelta::revert(RoomMap* room_map) {
+	anims_->receive_signal(signal_, obj_.resolve(room_map), nullptr);
+}
+
+void AnimationSignalDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << signal_;
+	obj_.serialize(file, arr);
 }

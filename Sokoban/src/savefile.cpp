@@ -7,8 +7,9 @@
 #include "roommap.h"
 #include "player.h"
 #include "car.h"
-#include "playingstate.h"
+#include "realplayingstate.h"
 #include "mapfile.h"
+#include "gameobjectarray.h"
 
 
 GlobalData::GlobalData() {}
@@ -126,7 +127,7 @@ void PlayingGlobalData::add_flag_delta(unsigned int flag, DeltaFrame* delta_fram
 	if (!flags_.count(flag)) {
 		flags_.insert(flag);
 		if (delta_frame) {
-			delta_frame->push(std::make_unique<GlobalFlagDelta>(this, flag));
+			delta_frame->push(std::make_unique<GlobalFlagDelta>(flag));
 		}
 	}
 }
@@ -143,8 +144,8 @@ void PlayingGlobalData::collect_clear_flag(char zone, DeltaFrame* delta_frame) {
 	auto flag = get_clear_flag_code(zone);
 	if (!flags_.count(flag)) {
 		if (delta_frame) {
-			delta_frame->push(std::make_unique<GlobalFlagDelta>(this, flag));
-			delta_frame->push(std::make_unique<FlagCountDelta>(this, clear_flag_total_));
+			delta_frame->push(std::make_unique<GlobalFlagDelta>(flag));
+			delta_frame->push(std::make_unique<FlagCountDelta>(clear_flag_total_));
 		}
 		flags_.insert(get_clear_flag_code(zone));
 		++clear_flag_total_;
@@ -177,7 +178,7 @@ void SaveFile::make_subsave(PlayingState* state, SaveType type) {
 		break;
 	case SaveType::Auto:
 		save_index = &auto_subsave_;
-		state->delta_frame_->push(std::make_unique<AutosaveDelta>(this, auto_subsave_));
+		state->delta_frame_->push(std::make_unique<AutosaveDelta>(auto_subsave_));
 		break;
 	default:
 		return;
@@ -199,6 +200,10 @@ void SaveFile::make_subsave(PlayingState* state, SaveType type) {
 	loaded_rooms[cur_room_name]->changed = true;
 	save_room_data(subsave_path, cur_room_name);
 	global_->save_flags(subsave_path);
+	MapFileO dead_objs_file{ subsave_path / "objs.sav" };
+	state->objs_->serialize_dead_objs(dead_objs_file);
+	MapFileO deltas_file{ subsave_path / "deltas.sav" };
+	state->undo_stack_->serialize(deltas_file, state->objs_.get());
 	save_meta();
 }
 
@@ -244,6 +249,7 @@ void SaveFile::load_room_data(std::filesystem::path subsave_path) {
 	room_data_file.open(room_data_path, std::ios::in);
 	unsigned int number_pairs;
 	room_data_file >> number_pairs;
+	room_subsave_.clear();
 	for (unsigned int i = 0; i < number_pairs; ++i) {
 		std::string room_name;
 		unsigned int subsave_index;
@@ -297,30 +303,44 @@ void SaveFile::world_reset() {
 }
 
 
-GlobalFlagDelta::GlobalFlagDelta(PlayingGlobalData* global, unsigned int flag) :
-	Delta(), global_{ global }, flag_{ flag } {}
+GlobalFlagDelta::GlobalFlagDelta(unsigned int flag) :
+	Delta(), flag_{ flag } {}
 
 GlobalFlagDelta::~GlobalFlagDelta() {}
 
-void GlobalFlagDelta::revert() {
-	global_->remove_flag(flag_);
+void GlobalFlagDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file.write_uint32(flag_);
+}
+
+void GlobalFlagDelta::revert(RoomMap* room_map) {
+	room_map->global_->remove_flag(flag_);
 }
 
 
-FlagCountDelta::FlagCountDelta(PlayingGlobalData* global, unsigned int count) :
-	Delta(), global_{ global }, count_{ count } {}
+FlagCountDelta::FlagCountDelta(unsigned int count) :
+	Delta(), count_{ count } {}
 
 FlagCountDelta::~FlagCountDelta() {}
 
-void FlagCountDelta::revert() {
-	global_->clear_flag_total_--;
+void FlagCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << count_;
 }
 
-AutosaveDelta::AutosaveDelta(SaveFile* savefile, int index) : Delta(),
-	savefile_{ savefile }, index_{ index } {}
+void FlagCountDelta::revert(RoomMap* room_map) {
+	room_map->global_->clear_flag_total_--;
+}
+
+AutosaveDelta::AutosaveDelta(int index) : Delta(),
+	index_{ index } {}
 
 AutosaveDelta::~AutosaveDelta() {}
 
-void AutosaveDelta::revert() {
-	savefile_->auto_subsave_ = index_;
+void AutosaveDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+	file << index_;
+}
+
+void AutosaveDelta::revert(RoomMap* room_map) {
+	if (auto* rps = dynamic_cast<RealPlayingState*>(room_map->state_)) {
+		rps->savefile_->auto_subsave_ = index_;
+	}
 }

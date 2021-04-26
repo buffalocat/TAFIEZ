@@ -446,30 +446,31 @@ void Camera::handle_free_cam_input(GLFWwindow* window) {
 	if (context_->is_free()) {
 		tilt_ptr = context_->get_tilt_ptr();
 		rot_ptr = context_->get_rot_ptr();
-	}
-	if (free_override_) {
+	} else if (free_override_) {
 		tilt_ptr = free_context_.get_tilt_ptr();
 		rot_ptr = free_context_.get_rot_ptr();
+	} else {
+		return;
 	}
-	if (tilt_ptr) {
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-			*tilt_ptr = std::min(*tilt_ptr + FREE_CAM_TILT_SPEED, MAX_CAM_TILT);
-		} else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-			*tilt_ptr = std::max(*tilt_ptr - FREE_CAM_TILT_SPEED, MIN_CAM_TILT);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		*tilt_ptr = std::min(*tilt_ptr + FREE_CAM_TILT_SPEED, MAX_CAM_TILT);
+	} else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		*tilt_ptr = std::max(*tilt_ptr - FREE_CAM_TILT_SPEED, MIN_CAM_TILT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		*rot_ptr += FREE_CAM_ROT_SPEED;
+		if (*rot_ptr >= TWO_PI) {
+			*rot_ptr -= TWO_PI;
+		}
+	} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		*rot_ptr -= FREE_CAM_ROT_SPEED;
+		if (*rot_ptr <= -TWO_PI) {
+			*rot_ptr += TWO_PI;
 		}
 	}
-	if (rot_ptr) {
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			*rot_ptr += FREE_CAM_ROT_SPEED;
-			if (*rot_ptr >= TWO_PI) {
-				*rot_ptr -= TWO_PI;
-			}
-		} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			*rot_ptr -= FREE_CAM_ROT_SPEED;
-			if (*rot_ptr <= -TWO_PI) {
-				*rot_ptr += TWO_PI;
-			}
-		}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		*tilt_ptr = DEFAULT_CAM_TILT;
+		*rot_ptr = DEFAULT_CAM_ROTATION;
 	}
 }
 

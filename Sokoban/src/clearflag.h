@@ -5,7 +5,7 @@
 
 class ClearFlag : public ObjectModifier {
 public:
-	ClearFlag(GameObject* parent, bool real, bool active, bool collected, char zone);
+	ClearFlag(GameObject* parent, bool real, bool active, bool collected);
 	~ClearFlag();
 
 	void make_str(std::string&);
@@ -28,17 +28,17 @@ public:
 	bool real_;
 	bool active_;
 	bool collected_;
-	char zone_;
 };
 
 
 class ClearFlagToggleDelta : public Delta {
 public:
-	ClearFlagToggleDelta(ClearFlag* flag, RoomMap* map);
+	ClearFlagToggleDelta(ClearFlag* flag);
 	~ClearFlagToggleDelta();
-	void revert();
+	void serialize(MapFileO&, GameObjectArray*);
+	void revert(RoomMap*);
 
 private:
-	ClearFlag* flag_;
+	FrozenObject flag_;
 	RoomMap* map_;
 };
