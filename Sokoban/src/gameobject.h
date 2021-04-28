@@ -111,21 +111,6 @@ public:
 	int color_ = 0;
 };
 
-class DummyGameObject : public GameObject {
-public:
-	DummyGameObject(Point3 pos, ObjRefCode ref_code);
-	~DummyGameObject();
-	static GameObject* create(Point3 pos, ObjRefCode ref_code);
-	
-	std::string name() { return ""; }
-	ObjCode obj_code() { return ObjCode::NONE; }
-	void draw(GraphicsManager*) {}
-	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*) { return nullptr;  }
-
-	GameObject* realize(PlayingState* state);
-	ObjRefCode ref_code_;
-	std::unique_ptr<GameObject> self_{};
-};
 
 class DestructionDelta : public Delta {
 public:

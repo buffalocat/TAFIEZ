@@ -575,6 +575,5 @@
     <None Include="shaders\text_shader.fs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="src\deadobjectarray" />
   </ItemGroup>
 </Project>

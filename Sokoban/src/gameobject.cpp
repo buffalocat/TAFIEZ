@@ -204,25 +204,6 @@ int ColoredBlock::color() {
 }
 
 
-DummyGameObject::DummyGameObject(Point3 pos, ObjRefCode ref_code) :
-	GameObject(pos, false, false), ref_code_{ ref_code } {}
-
-DummyGameObject::~DummyGameObject() {}
-
-GameObject* DummyGameObject::create(Point3 pos, ObjRefCode ref_code) {
-	auto obj_unique = std::make_unique<DummyGameObject>(pos, ref_code);
-	auto* obj = obj_unique.get();
-	obj->self_ = std::move(obj_unique);
-	return obj;
-}
-
-GameObject * DummyGameObject::realize(PlayingState* state) {
-	auto* obj = state->room_->map()->deref_object(ref_code_, pos_);
-	self_.reset(nullptr);
-	return obj;
-}
-
-
 DestructionDelta::DestructionDelta(GameObject* obj) :
 	obj_{ obj } {}
 
