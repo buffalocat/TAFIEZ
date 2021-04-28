@@ -102,6 +102,8 @@ public:
     void alert_activated_listeners(DeltaFrame*, MoveProcessor*);
 	void handle_moved_cars(MoveProcessor*);
 
+	PlayingState* playing_state();
+
 	PlayerCycle* player_cycle();
 
 	std::vector<Door*>& door_group(unsigned int id);
@@ -158,9 +160,12 @@ public:
 class PutDelta : public Delta {
 public:
 	PutDelta(GameObject* obj);
+	PutDelta(FrozenObject obj);
 	~PutDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -170,9 +175,12 @@ private:
 class TakeDelta : public Delta {
 public:
 	TakeDelta(GameObject* obj);
+	TakeDelta(FrozenObject obj);
 	~TakeDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -186,6 +194,8 @@ public:
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	Point3 pos_;
@@ -195,9 +205,12 @@ private:
 class ObjArrayPushDelta : public Delta {
 public:
 	ObjArrayPushDelta(GameObject* obj);
+	ObjArrayPushDelta(FrozenObject obj);
 	~ObjArrayPushDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -207,9 +220,12 @@ private:
 class ObjArrayDeletedPushDelta : public Delta {
 public:
 	ObjArrayDeletedPushDelta(GameObject* obj);
+	ObjArrayDeletedPushDelta(FrozenObject obj);
 	~ObjArrayDeletedPushDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -220,9 +236,12 @@ private:
 class MotionDelta : public Delta {
 public:
 	MotionDelta(GameObject* obj, Point3 dpos);
+	MotionDelta(FrozenObject obj, Point3 dpos);
 	~MotionDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -233,9 +252,12 @@ private:
 class BatchMotionDelta : public Delta {
 public:
 	BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos);
+	BatchMotionDelta(std::vector<FrozenObject>&& objs, Point3 dpos);
 	~BatchMotionDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	std::vector<FrozenObject> objs_;
@@ -249,6 +271,8 @@ public:
 	~ClearFlagCollectionDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 };
 
 
@@ -297,6 +321,8 @@ public:
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	int index_;
@@ -306,10 +332,13 @@ private:
 class RemovePlayerDelta : public Delta {
 public:
 	RemovePlayerDelta(Player*, Player* dead_player, int index, int dead_index, int rem);
+	RemovePlayerDelta(FrozenObject player, FrozenObject dead_player, int index, int dead_index, int rem);
 	~RemovePlayerDelta();
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject player_;
@@ -323,10 +352,13 @@ private:
 class CyclePlayerDelta : public Delta {
 public:
 	CyclePlayerDelta(Player* dead_player, int index, int dead_index);
+	CyclePlayerDelta(FrozenObject dead_player, int index, int dead_index);
 	~CyclePlayerDelta();
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject dead_player_;

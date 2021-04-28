@@ -65,9 +65,9 @@ public:
 	void load_meta();
 	std::filesystem::path get_path(std::string, bool* from_main);
 	void make_subsave(PlayingState* state, SaveType type);
-	void load_subsave(unsigned int subsave_index);
-	void load_most_recent_subsave();
-	void load_last_autosave();
+	void load_subsave(PlayingState* state, unsigned int subsave_index);
+	void load_most_recent_subsave(PlayingState* state);
+	void load_last_autosave(PlayingState* state);
 
 	void world_reset();
 
@@ -93,6 +93,8 @@ public:
 	~GlobalFlagDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	unsigned int flag_;
@@ -104,6 +106,8 @@ public:
 	~FlagCountDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	unsigned int count_;
@@ -115,6 +119,8 @@ public:
 	~AutosaveDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	int index_;

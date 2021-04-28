@@ -83,10 +83,13 @@ private:
 class FlagGateOpenDelta: public Delta{
 public:
 	FlagGateOpenDelta(FlagGate* fg);
+	FlagGateOpenDelta(FrozenObject fg);
 	~FlagGateOpenDelta();
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject fg_;

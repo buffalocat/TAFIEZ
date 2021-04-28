@@ -121,6 +121,9 @@ void FloorSign::draw(GraphicsManager* gfx, FPoint3 p) {
 SignToggleDelta::SignToggleDelta(FloorSign* sign) :
 	Delta(), sign_{ sign } {}
 
+SignToggleDelta::SignToggleDelta(FrozenObject sign) :
+	Delta(), sign_{ sign } {}
+
 SignToggleDelta::~SignToggleDelta() {}
 
 void SignToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -128,11 +131,22 @@ void SignToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void SignToggleDelta::revert(RoomMap* room_map) {
-	static_cast<FloorSign*>(sign_.resolve(room_map)->modifier())->toggle_active(room_map->text_renderer(), nullptr);
+	static_cast<FloorSign*>(sign_.resolve_mod(room_map))->toggle_active(room_map->text_renderer(), nullptr);
+}
+
+DeltaCode SignToggleDelta::code() {
+	return DeltaCode::SignToggleDelta;
+}
+
+std::unique_ptr<Delta> SignToggleDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<SignToggleDelta>(file.read_frozen_obj());
 }
 
 
 LearnFlagDelta::LearnFlagDelta(FloorSign* sign, unsigned int flag) :
+	Delta(), sign_{ sign }, flag_{ flag } {}
+
+LearnFlagDelta::LearnFlagDelta(FrozenObject sign, unsigned int flag) :
 	Delta(), sign_{ sign }, flag_{ flag } {}
 
 LearnFlagDelta::~LearnFlagDelta() {}
@@ -143,5 +157,15 @@ void LearnFlagDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void LearnFlagDelta::revert(RoomMap* room_map) {
-	static_cast<FloorSign*>(sign_.resolve(room_map)->modifier())->learn_flag_ = flag_;
+	static_cast<FloorSign*>(sign_.resolve_mod(room_map))->learn_flag_ = flag_;
+}
+
+DeltaCode LearnFlagDelta::code() {
+	return DeltaCode::LearnFlagDelta;
+}
+
+std::unique_ptr<Delta> LearnFlagDelta::deserialize(MapFileIwithObjs& file) {
+	auto sign = file.read_frozen_obj();
+	auto flag = file.read_uint32();
+	return std::make_unique<LearnFlagDelta>(sign, flag);
 }

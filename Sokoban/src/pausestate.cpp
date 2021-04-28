@@ -54,7 +54,8 @@ void PauseState::unpause() {
 
 void PauseState::load_last_autosave() {
 	auto* rps = static_cast<RealPlayingState*>(playing_state_);
-	rps->savefile_->load_last_autosave();
+	rps->reset();
+	rps->savefile_->load_last_autosave(rps);
 	rps->play_from_loaded_subsave();
 	queue_quit();
 }

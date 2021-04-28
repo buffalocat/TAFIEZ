@@ -129,6 +129,9 @@ void Switchable::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 SwitchableDelta::SwitchableDelta(Switchable* obj, int count, bool active, bool waiting) :
 	obj_{ obj }, count_{ count }, active_{ active }, waiting_{ waiting } {}
 
+SwitchableDelta::SwitchableDelta(FrozenObject obj, int count, bool active, bool waiting) :
+	obj_{ obj }, count_{ count }, active_{ active }, waiting_{ waiting } {}
+
 SwitchableDelta::~SwitchableDelta() {}
 
 void SwitchableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -137,9 +140,20 @@ void SwitchableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void SwitchableDelta::revert(RoomMap* room_map) {
-	auto* obj = static_cast<Switchable*>(obj_.resolve(room_map)->modifier());
+	auto* obj = static_cast<Switchable*>(obj_.resolve_mod(room_map));
 	obj->count_ = count_;
 	obj->prev_count_ = count_;
 	obj->active_ = active_;
 	obj->waiting_ = waiting_;
+}
+
+DeltaCode SwitchableDelta::code() {
+	return DeltaCode::SwitchableDelta;
+}
+
+std::unique_ptr<Delta> SwitchableDelta::deserialize(MapFileIwithObjs& file) {
+	auto obj = file.read_frozen_obj();
+	unsigned char b[3];
+	file.read(b, 3);
+	return std::make_unique<SwitchableDelta>(obj, b[0], b[1], b[2]);
 }

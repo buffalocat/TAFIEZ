@@ -400,6 +400,8 @@ void FlagSigil::draw(ModelInstancer* model, FPoint3 p, int orientation, int time
 
 FlagGateOpenDelta::FlagGateOpenDelta(FlagGate* fg) : Delta(), fg_{ fg } {}
 
+FlagGateOpenDelta::FlagGateOpenDelta(FrozenObject fg) : Delta(), fg_{ fg } {}
+
 FlagGateOpenDelta::~FlagGateOpenDelta() {}
 
 void FlagGateOpenDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -407,7 +409,7 @@ void FlagGateOpenDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void FlagGateOpenDelta::revert(RoomMap* room_map) {
-	auto* fg = static_cast<FlagGate*>(fg_.resolve(room_map)->modifier());
+	auto* fg = static_cast<FlagGate*>(fg_.resolve_mod(room_map));
 	fg->down_ = false;
 	for (auto& sigil : fg->sigils_) {
 		sigil.charge = 0;
@@ -415,3 +417,10 @@ void FlagGateOpenDelta::revert(RoomMap* room_map) {
 	}
 }
 
+DeltaCode FlagGateOpenDelta::code() {
+	return DeltaCode::FlagGateOpenDelta;
+}
+
+std::unique_ptr<Delta> FlagGateOpenDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<FlagGateOpenDelta>(file.read_frozen_obj());
+}

@@ -207,19 +207,26 @@ void SaveFile::make_subsave(PlayingState* state, SaveType type) {
 	save_meta();
 }
 
-void SaveFile::load_subsave(unsigned int subsave_index) {
+void SaveFile::load_subsave(PlayingState* state, unsigned int subsave_index) {
 	cur_subsave_ = subsave_index;
 	auto subsave_path = base_ / std::to_string(subsave_index);
 	global_->load_flags(subsave_path);
+	auto* obj_arr = state->objs_.get();
+	auto dead_objs_path = subsave_path / "objs.sav";
+	MapFileIwithObjs dead_objs_file{ dead_objs_path, obj_arr };
+	obj_arr->deserialize_dead_objs(dead_objs_file);
+	auto deltas_path = subsave_path / "deltas.sav";
+	MapFileIwithObjs deltas_file{ deltas_path, obj_arr };
+	state->undo_stack_->deserialize(deltas_file);
 	load_room_data(subsave_path);
 }
 
-void SaveFile::load_most_recent_subsave() {
-	load_subsave(cur_subsave_);
+void SaveFile::load_most_recent_subsave(PlayingState* state) {
+	load_subsave(state, cur_subsave_);
 }
 
-void SaveFile::load_last_autosave() {
-	load_subsave(auto_subsave_);
+void SaveFile::load_last_autosave(PlayingState* state) {
+	load_subsave(state, auto_subsave_);
 }
 
 void SaveFile::load_meta() {
@@ -316,6 +323,14 @@ void GlobalFlagDelta::revert(RoomMap* room_map) {
 	room_map->global_->remove_flag(flag_);
 }
 
+DeltaCode GlobalFlagDelta::code() {
+	return DeltaCode::GlobalFlagDelta;
+}
+
+std::unique_ptr<Delta> GlobalFlagDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<GlobalFlagDelta>(file.read_uint32());
+}
+
 
 FlagCountDelta::FlagCountDelta(unsigned int count) :
 	Delta(), count_{ count } {}
@@ -330,17 +345,34 @@ void FlagCountDelta::revert(RoomMap* room_map) {
 	room_map->global_->clear_flag_total_--;
 }
 
+DeltaCode FlagCountDelta::code() {
+	return DeltaCode::FlagCountDelta;
+}
+
+std::unique_ptr<Delta> FlagCountDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<FlagCountDelta>(file.read_uint32());
+}
+
+
 AutosaveDelta::AutosaveDelta(int index) : Delta(),
 	index_{ index } {}
 
 AutosaveDelta::~AutosaveDelta() {}
 
 void AutosaveDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	file << index_;
+	file.write_int32(index_);
 }
 
 void AutosaveDelta::revert(RoomMap* room_map) {
 	if (auto* rps = dynamic_cast<RealPlayingState*>(room_map->state_)) {
 		rps->savefile_->auto_subsave_ = index_;
 	}
+}
+
+DeltaCode AutosaveDelta::code() {
+	return DeltaCode::AutosaveDelta;
+}
+
+std::unique_ptr<Delta> AutosaveDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<AutosaveDelta>(file.read_int32());
 }

@@ -226,6 +226,9 @@ GameObject * DummyGameObject::realize(PlayingState* state) {
 DestructionDelta::DestructionDelta(GameObject* obj) :
 	obj_{ obj } {}
 
+DestructionDelta::DestructionDelta(FrozenObject obj) :
+	obj_{ obj } {}
+
 DestructionDelta::~DestructionDelta() {}
 
 void DestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -238,15 +241,26 @@ void DestructionDelta::revert(RoomMap* room_map) {
 	room_map->remove_from_object_array_deleted(obj);
 }
 
+DeltaCode DestructionDelta::code() {
+	return DeltaCode::DestructionDelta;
+}
+
+std::unique_ptr<Delta> DestructionDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<DestructionDelta>(file.read_frozen_obj());
+}
+
 
 AbstractShiftDelta::AbstractShiftDelta(GameObject* obj, Point3 dpos) :
+	obj_{ obj }, dpos_{ dpos } {}
+
+AbstractShiftDelta::AbstractShiftDelta(FrozenObject obj, Point3 dpos) :
 	obj_{ obj }, dpos_{ dpos } {}
 
 AbstractShiftDelta::~AbstractShiftDelta() {}
 
 void AbstractShiftDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 	obj_.serialize(file, arr);
-	file << dpos_;
+	file.write_spoint3(dpos_);
 }
 
 void AbstractShiftDelta::revert(RoomMap* room_map) {
@@ -254,18 +268,41 @@ void AbstractShiftDelta::revert(RoomMap* room_map) {
 	obj->pos_ -= dpos_;
 }
 
+DeltaCode AbstractShiftDelta::code() {
+	return DeltaCode::AbstractShiftDelta;
+}
+
+std::unique_ptr<Delta> AbstractShiftDelta::deserialize(MapFileIwithObjs& file) {
+	auto obj = file.read_frozen_obj();
+	auto dpos = file.read_spoint3();
+	return std::make_unique<AbstractShiftDelta>(obj, dpos);
+}
+
 
 AbstractPutDelta::AbstractPutDelta(GameObject* obj, Point3 pos) :
+	obj_{ obj }, pos_{ pos } {}
+
+AbstractPutDelta::AbstractPutDelta(FrozenObject obj, Point3 pos) :
 	obj_{ obj }, pos_{ pos } {}
 
 AbstractPutDelta::~AbstractPutDelta() {}
 
 void AbstractPutDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 	obj_.serialize(file, arr);
-	file << pos_;
+	file.write_spoint3(pos_);
 }
 
 void AbstractPutDelta::revert(RoomMap* room_map) {
 	auto* obj = obj_.resolve(room_map);
 	obj->pos_ = pos_;
+}
+
+DeltaCode AbstractPutDelta::code() {
+	return DeltaCode::AbstractPutDelta;
+}
+
+std::unique_ptr<Delta> AbstractPutDelta::deserialize(MapFileIwithObjs& file) {
+	auto obj = file.read_frozen_obj();
+	auto pos = file.read_spoint3();
+	return std::make_unique<AbstractPutDelta>(obj, pos);
 }

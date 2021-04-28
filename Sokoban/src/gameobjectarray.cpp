@@ -130,4 +130,9 @@ void GameObjectArray::serialize_dead_objs(MapFileO& file) {
 void GameObjectArray::deserialize_dead_objs(MapFileI& file) {
 	DeadObjectAdder fake_room{ *this };
 	read_objects_free(file, &fake_room);
+	for (auto* obj : dead_obj_list_) {
+		if (obj->tangible_) {
+			obj->tangible_ = false;
+		}
+	}
 }

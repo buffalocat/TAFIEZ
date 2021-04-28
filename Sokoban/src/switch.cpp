@@ -75,6 +75,8 @@ void Switch::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 
 SwitchToggleDelta::SwitchToggleDelta(Switch* obj) : obj_{ obj } {}
 
+SwitchToggleDelta::SwitchToggleDelta(FrozenObject obj) : obj_{ obj } {}
+
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
 void SwitchToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -82,5 +84,13 @@ void SwitchToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void SwitchToggleDelta::revert(RoomMap* room_map) {
-	static_cast<Switch*>(obj_.resolve(room_map)->modifier())->toggle();
+	static_cast<Switch*>(obj_.resolve_mod(room_map))->toggle();
+}
+
+DeltaCode SwitchToggleDelta::code() {
+	return DeltaCode::SwitchToggleDelta;
+}
+
+std::unique_ptr<Delta> SwitchToggleDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<SwitchToggleDelta>(file.read_frozen_obj());
 }

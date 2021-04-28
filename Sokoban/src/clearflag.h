@@ -34,11 +34,13 @@ public:
 class ClearFlagToggleDelta : public Delta {
 public:
 	ClearFlagToggleDelta(ClearFlag* flag);
+	ClearFlagToggleDelta(FrozenObject flag);
 	~ClearFlagToggleDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject flag_;
-	RoomMap* map_;
 };

@@ -504,7 +504,7 @@ void MoveProcessor::try_door_unentry() {
 }
 
 void MoveProcessor::ext_door_exit() {
-	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_, playing_state_->active_room()));
+	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_->active_room()));
 	map_->player_cycle_->remove_player(player_, delta_frame_);
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
@@ -528,8 +528,11 @@ void MoveProcessor::set_initializer_state() {
 }
 
 
-RoomChangeDelta::RoomChangeDelta(PlayingState* state, Room* room) :
-	state_{ state }, room_name_{ room->name() } {}
+RoomChangeDelta::RoomChangeDelta(Room* room) :
+	room_name_{ room->name() } {}
+
+RoomChangeDelta::RoomChangeDelta(std::string room_name) :
+	room_name_{ room_name } {}
 
 RoomChangeDelta::~RoomChangeDelta() {}
 
@@ -538,11 +541,23 @@ void RoomChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void RoomChangeDelta::revert(RoomMap* room_map) {
-	state_->activate_room(room_name_);
+	room_map->playing_state()->activate_room(room_name_);
+}
+
+DeltaCode RoomChangeDelta::code() {
+	return DeltaCode::RoomChangeDelta;
+}
+
+std::unique_ptr<Delta> RoomChangeDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<RoomChangeDelta>(file.read_str());
 }
 
 
+
 ToggleGravitableDelta::ToggleGravitableDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+ToggleGravitableDelta::ToggleGravitableDelta(FrozenObject obj) :
 	obj_{ obj } {}
 
 ToggleGravitableDelta::~ToggleGravitableDelta() {}
@@ -556,8 +571,18 @@ void ToggleGravitableDelta::revert(RoomMap* room_map) {
 	obj->gravitable_ = !obj->gravitable_;
 }
 
+DeltaCode ToggleGravitableDelta::code() {
+	return DeltaCode::ToggleGravitableDelta;
+}
+
+std::unique_ptr<Delta> ToggleGravitableDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<ToggleGravitableDelta>(file.read_frozen_obj());
+}
+
 
 ColorChangeDelta::ColorChangeDelta(Car* car, bool undo) : car_{ car }, undo_{ undo } {}
+
+ColorChangeDelta::ColorChangeDelta(FrozenObject car, bool undo) : car_{ car }, undo_{ undo } {}
 
 ColorChangeDelta::~ColorChangeDelta() {}
 
@@ -567,5 +592,15 @@ void ColorChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void ColorChangeDelta::revert(RoomMap* room_map) {
-	static_cast<Car*>(car_.resolve(room_map)->modifier())->cycle_color(undo_);
+	static_cast<Car*>(car_.resolve_mod(room_map))->cycle_color(undo_);
+}
+
+DeltaCode ColorChangeDelta::code() {
+	return DeltaCode::ColorChangeDelta;
+}
+
+std::unique_ptr<Delta> ColorChangeDelta::deserialize(MapFileIwithObjs& file) {
+	auto car = file.read_frozen_obj();
+	bool undo = file.read_byte();
+	return std::make_unique<ColorChangeDelta>(car, undo);
 }

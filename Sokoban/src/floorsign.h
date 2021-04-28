@@ -45,9 +45,12 @@ private:
 class SignToggleDelta : public Delta {
 public:
 	SignToggleDelta(FloorSign* sign);
+	SignToggleDelta(FrozenObject sign);
 	~SignToggleDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject sign_;
@@ -56,9 +59,12 @@ private:
 class LearnFlagDelta : public Delta {
 public:
 	LearnFlagDelta(FloorSign* sign, unsigned int flag);
+	LearnFlagDelta(FrozenObject sign, unsigned int flag);
 	~LearnFlagDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject sign_;

@@ -72,9 +72,12 @@ bool is_player_rep(GameObject*);
 class PlayerStateDelta : public Delta {
 public:
 	PlayerStateDelta(Player* player);
+	PlayerStateDelta(FrozenObject player, FrozenObject car, PlayerState state, CauseOfDeath death);
 	~PlayerStateDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject player_;

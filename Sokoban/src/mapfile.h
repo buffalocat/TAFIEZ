@@ -2,6 +2,7 @@
 #define MAPFILE_H
 
 #include "point.h"
+#include "delta.h"
 
 enum class MapCode {
 	Dimensions = 1, // The dimensions of the room as 1 byte integers
@@ -46,21 +47,26 @@ class ColorCycle;
 enum class ObjCode;
 enum class ModCode;
 enum class CameraCode;
+enum class DeltaCode;
 enum class Sticky;
 enum class PlayerState;
 enum class CarType;
 enum class AnimationSignal;
 enum class CauseOfDeath;
 
+class GameObjectArray;
+
 class MapFileI {
 public:
     MapFileI(const std::filesystem::path& path);
-    ~MapFileI();
+    virtual ~MapFileI();
     void read(unsigned char* b, int n);
 
     unsigned char read_byte();
 	unsigned int read_uint32();
+	int read_int32();
     Point3 read_point3();
+	Point3 read_spoint3();
     std::string read_str();
 	std::string read_long_str();
 
@@ -81,6 +87,18 @@ MapFileI& operator>>(MapFileI& f, FloatRect& v);
 
 MapFileI& operator>>(MapFileI& f, ColorCycle& v);
 
+class MapFileIwithObjs : public MapFileI {
+public:
+	MapFileIwithObjs(const std::filesystem::path& path, GameObjectArray* arr);
+	~MapFileIwithObjs();
+
+	FrozenObject read_frozen_obj();
+
+private:
+	GameObjectArray* arr_;
+};
+
+
 
 class MapFileO {
 public:
@@ -88,6 +106,8 @@ public:
     ~MapFileO();
 
 	void write_uint32(unsigned int);
+	void write_int32(int);
+	void write_spoint3(Point3);
 	void write_long_str(std::string str);
 
     MapFileO& operator<<(unsigned char);
@@ -109,6 +129,7 @@ public:
     MapFileO& operator<<(MapCode);
     MapFileO& operator<<(ObjCode);
     MapFileO& operator<<(ModCode);
+	MapFileO& operator<<(DeltaCode);
     MapFileO& operator<<(CameraCode);
 	MapFileO& operator<<(ObjRefCode);
     MapFileO& operator<<(Sticky);

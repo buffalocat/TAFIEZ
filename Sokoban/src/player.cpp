@@ -332,6 +332,9 @@ void Player::collect_special_links(std::vector<GameObject*>& links) {
 PlayerStateDelta::PlayerStateDelta(Player* player) :
 	player_{ player }, car_{ player->car_ }, state_{ player->state_ }, death_{ player->death_ } {}
 
+PlayerStateDelta::PlayerStateDelta(FrozenObject player, FrozenObject car, PlayerState state, CauseOfDeath death) :
+	player_{ player }, car_{ car }, state_{ state }, death_{ death } {}
+
 PlayerStateDelta::~PlayerStateDelta() {}
 
 void PlayerStateDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -343,11 +346,24 @@ void PlayerStateDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 
 void PlayerStateDelta::revert(RoomMap* room_map) {
 	auto* player = static_cast<Player*>(player_.resolve(room_map));
-	auto* car = static_cast<Car*>(car_.resolve(room_map)->modifier());
+	auto* car = static_cast<Car*>(car_.resolve_mod(room_map));
 	player->state_ = state_;
 	player->death_ = death_;
 	player->set_car(car);
 }
+
+DeltaCode PlayerStateDelta::code() {
+	return DeltaCode::PlayerStateDelta;
+}
+
+std::unique_ptr<Delta> PlayerStateDelta::deserialize(MapFileIwithObjs& file) {
+	auto player = file.read_frozen_obj();
+	auto car = file.read_frozen_obj();
+	auto state = static_cast<PlayerState>(file.read_byte());
+	auto death = static_cast<CauseOfDeath>(file.read_byte());
+	return std::make_unique<PlayerStateDelta>(player, car, state, death);
+}
+
 
 bool is_player_rep(GameObject* obj) {
 	if (dynamic_cast<Player*>(obj)) {

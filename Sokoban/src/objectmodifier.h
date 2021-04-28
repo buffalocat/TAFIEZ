@@ -68,9 +68,12 @@ public:
 class ModDestructionDelta : public Delta {
 public:
 	ModDestructionDelta(ObjectModifier* obj);
+	ModDestructionDelta(FrozenObject mod);
 	~ModDestructionDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject mod_;

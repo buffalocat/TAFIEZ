@@ -223,6 +223,9 @@ void FateSignaler::check_send_signal(RoomMap* map, DeltaFrame* delta_frame, Move
 SignalerCountDelta::SignalerCountDelta(Signaler* sig, int count) :
 	index_{ sig->sig_index_ }, count_{ count } {}
 
+SignalerCountDelta::SignalerCountDelta(unsigned int sig_index, int count) :
+	index_{ sig_index }, count_{ count } {}
+
 SignalerCountDelta::~SignalerCountDelta() {}
 
 void SignalerCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -232,4 +235,14 @@ void SignalerCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 
 void SignalerCountDelta::revert(RoomMap* room_map) {
 	room_map->signalers_[index_]->reset_prev_count(count_);
+}
+
+DeltaCode SignalerCountDelta::code() {
+	return DeltaCode::SignalerCountDelta;
+}
+
+std::unique_ptr<Delta> SignalerCountDelta::deserialize(MapFileIwithObjs& file) {
+	auto index = file.read_uint32();
+	auto count = file.read_byte();
+	return std::make_unique<SignalerCountDelta>(index, count);
 }

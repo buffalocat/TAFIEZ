@@ -100,9 +100,12 @@ private:
 class AddLinkDelta : public Delta {
 public:
 	AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	AddLinkDelta(FrozenObject a, FrozenObject b);
 	~AddLinkDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject a_;
@@ -113,9 +116,12 @@ private:
 class RemoveLinkDelta : public Delta {
 public:
 	RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
+	RemoveLinkDelta(FrozenObject a, FrozenObject b);
 	~RemoveLinkDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject a_;
@@ -125,9 +131,12 @@ private:
 class RemoveLinkOneWayDelta : public Delta {
 public:
 	RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b);
+	RemoveLinkOneWayDelta(FrozenObject a, FrozenObject b);
 	~RemoveLinkOneWayDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject a_;

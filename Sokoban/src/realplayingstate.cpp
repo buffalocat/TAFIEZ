@@ -52,7 +52,6 @@ void RealPlayingState::make_subsave(SaveType type) {
 
 void RealPlayingState::play_from_loaded_subsave() {
 	std::string cur_room_name = savefile_->cur_room_name_;
-	reset();
 	load_room(cur_room_name, false);
 	activate_room(cur_room_name);
 	move_camera_to_player(true);

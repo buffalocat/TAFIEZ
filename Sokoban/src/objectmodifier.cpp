@@ -82,6 +82,9 @@ void ObjectModifier::collect_special_links(std::vector<GameObject*>&) {}
 ModDestructionDelta::ModDestructionDelta(ObjectModifier* mod) :
 	mod_{ mod } {}
 
+ModDestructionDelta::ModDestructionDelta(FrozenObject mod) :
+	mod_{ mod } {}
+
 ModDestructionDelta::~ModDestructionDelta() {}
 
 void ModDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -89,5 +92,15 @@ void ModDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void ModDestructionDelta::revert(RoomMap* room_map) {
-	mod_.resolve(room_map)->modifier()->undestroy();
+	mod_.resolve_mod(room_map)->undestroy();
 }
+
+DeltaCode ModDestructionDelta::code() {
+	return DeltaCode::ModDestructionDelta;
+}
+
+std::unique_ptr<Delta> ModDestructionDelta::deserialize(MapFileIwithObjs& file) {
+	auto mod = file.read_frozen_obj();
+	return std::make_unique<ModDestructionDelta>(mod);
+}
+

@@ -123,6 +123,9 @@ void ClearFlag::draw(GraphicsManager* gfx, FPoint3 p) {
 ClearFlagToggleDelta::ClearFlagToggleDelta(ClearFlag* flag) :
 	flag_{ flag } {}
 
+ClearFlagToggleDelta::ClearFlagToggleDelta(FrozenObject flag) :
+	flag_{ flag } {}
+
 ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
 
 void ClearFlagToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -130,6 +133,14 @@ void ClearFlagToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void ClearFlagToggleDelta::revert(RoomMap* room_map) {
-	auto* flag = static_cast<ClearFlag*>(flag_.resolve(room_map)->modifier());
+	auto* flag = static_cast<ClearFlag*>(flag_.resolve_mod(room_map));
 	flag->active_ = !flag->active_;
+}
+
+DeltaCode ClearFlagToggleDelta::code() {
+	return DeltaCode::ClearFlagToggleDelta;
+}
+
+std::unique_ptr<Delta> ClearFlagToggleDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<ClearFlagToggleDelta>(file.read_frozen_obj());
 }

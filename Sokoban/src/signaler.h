@@ -85,9 +85,12 @@ public:
 class SignalerCountDelta : public Delta {
 public:
 	SignalerCountDelta(Signaler* sig, int count);
+	SignalerCountDelta(unsigned int sig_index, int count);
 	~SignalerCountDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	unsigned int index_;

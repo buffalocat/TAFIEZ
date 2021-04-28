@@ -12,12 +12,38 @@
 #include "car.h"
 #include "objectmodifier.h"
 #include "gameobjectarray.h"
+#include "animationmanager.h"
+#include "autosavepanel.h"
+#include "flaggate.h"
+#include "floorsign.h"
+#include "clearflag.h"
+#include "moveprocessor.h"
+#include "savefile.h"
+#include "switch.h"
+#include "snakeblock.h"
+#include "signaler.h"
 
-FrozenObject::FrozenObject(GameObject* obj) : obj_{ obj }, pos_{ obj->pos_ } {
+FrozenObject::FrozenObject() {}
+
+FrozenObject::FrozenObject(GameObject* obj) : obj_{ obj } {
 	init_from_obj();
 }
 
-FrozenObject::FrozenObject(ObjectModifier* mod) : obj_{ mod->parent_ }, pos_{ mod->pos() } {
+FrozenObject FrozenObject::create_dead_obj(GameObject* obj) {
+	auto f_obj = FrozenObject();
+	f_obj.obj_ = obj;
+	f_obj.ref_ = ObjRefCode::Dead;
+	return f_obj;
+}
+
+FrozenObject::FrozenObject(ObjectModifier* mod) {
+	if (mod) {
+		obj_ = mod->parent_;
+		pos_ = obj_->pos_;
+	} else {
+		obj_ = nullptr;
+		pos_ = { 0,0,0 };
+	}
 	init_from_obj();
 }
 
@@ -31,12 +57,14 @@ void FrozenObject::init_from_obj() {
 		return;
 	}
 	if (obj_->tangible_) {
+		pos_ = obj_->pos_;
 		ref_ = ObjRefCode::Tangible;
 		return;
 	}
 	if (auto* gate_body = dynamic_cast<GateBody*>(obj_)) {
 		if (auto* gate = gate_body->gate_) {
 			if (gate->body_ == gate_body) {
+				pos_ = gate->pos();
 				ref_ = ObjRefCode::HeldGateBody;
 				return;
 			}
@@ -45,11 +73,13 @@ void FrozenObject::init_from_obj() {
 	if (auto* player = dynamic_cast<Player*>(obj_)) {
 		if (auto* car = player->car_) {
 			if (car->player_ == player) {
+				pos_ = car->pos();
 				ref_ = ObjRefCode::HeldPlayer;
 				return;
 			}
 		}
 	}
+	pos_ = obj_->pos_;
 	ref_ = ObjRefCode::Dead;
 }
 
@@ -66,10 +96,23 @@ void FrozenObject::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 GameObject* FrozenObject::resolve(RoomMap* room_map) {
+	if (ref_ == ObjRefCode::Null) {
+		return nullptr;
+	}
 	if (!obj_) {
 		obj_ = room_map->deref_object(ref_, pos_);
 	}
 	return obj_;
+}
+
+ObjectModifier* FrozenObject::resolve_mod(RoomMap* room_map) {
+	if (ref_ == ObjRefCode::Null) {
+		return nullptr;
+	}
+	if (!obj_) {
+		obj_ = room_map->deref_object(ref_, pos_);
+	}
+	return obj_->modifier();
 }
 
 
@@ -103,9 +146,63 @@ bool DeltaFrame::changed() {
 	return changed_;
 }
 
+
+#define CASE_DELTACODE(CLASS)\
+case DeltaCode::CLASS:\
+    delta = CLASS::deserialize(file);\
+    break;
+
+void DeltaFrame::deserialize(MapFileIwithObjs& file) {
+	unsigned int n_deltas = file.read_uint32();
+	std::unique_ptr<Delta> delta{};
+	for (unsigned int i = 0; i < n_deltas; ++i) {
+		switch (static_cast<DeltaCode>(file.read_byte())) {
+			CASE_DELTACODE(AnimationSignalDelta);
+			CASE_DELTACODE(AutosavePanelDelta);
+			CASE_DELTACODE(ClearFlagToggleDelta);
+			CASE_DELTACODE(FlagGateOpenDelta);
+			CASE_DELTACODE(SignToggleDelta);
+			CASE_DELTACODE(LearnFlagDelta);
+			CASE_DELTACODE(DestructionDelta);
+			CASE_DELTACODE(AbstractShiftDelta);
+			CASE_DELTACODE(AbstractPutDelta);
+			CASE_DELTACODE(RoomChangeDelta);
+			CASE_DELTACODE(ToggleGravitableDelta);
+			CASE_DELTACODE(ColorChangeDelta);
+			CASE_DELTACODE(ModDestructionDelta);
+			CASE_DELTACODE(PlayerStateDelta);
+			CASE_DELTACODE(PutDelta);
+			CASE_DELTACODE(TakeDelta);
+			CASE_DELTACODE(WallDestructionDelta);
+			CASE_DELTACODE(ObjArrayPushDelta);
+			CASE_DELTACODE(ObjArrayDeletedPushDelta);
+			CASE_DELTACODE(MotionDelta);
+			CASE_DELTACODE(BatchMotionDelta);
+			CASE_DELTACODE(ClearFlagCollectionDelta);
+			CASE_DELTACODE(AddPlayerDelta);
+			CASE_DELTACODE(RemovePlayerDelta);
+			CASE_DELTACODE(CyclePlayerDelta);
+			CASE_DELTACODE(GlobalFlagDelta);
+			CASE_DELTACODE(FlagCountDelta);
+			CASE_DELTACODE(AutosaveDelta);
+			CASE_DELTACODE(SignalerCountDelta);
+			CASE_DELTACODE(AddLinkDelta);
+			CASE_DELTACODE(RemoveLinkDelta);
+			CASE_DELTACODE(RemoveLinkOneWayDelta);
+			CASE_DELTACODE(SwitchToggleDelta);
+			CASE_DELTACODE(SwitchableDelta);
+		}
+		push(std::move(delta));
+	}
+}
+
+#undef CASE_DELTACODE
+
+
 void DeltaFrame::serialize(MapFileO& file, GameObjectArray* arr) {
 	file.write_uint32((unsigned int)deltas_.size());
 	for (auto& delta : deltas_) {
+		file << delta->code();
 		delta->serialize(file, arr);
 	}
 }
@@ -140,6 +237,15 @@ void UndoStack::pop() {
 void UndoStack::reset() {
 	frames_.clear();
 	size_ = 0;
+}
+
+void UndoStack::deserialize(MapFileIwithObjs& file) {
+	unsigned int n_frames = file.read_uint32();
+	for (unsigned int i = 0; i < n_frames; ++i) {
+		auto frame = std::make_unique<DeltaFrame>();
+		frame->deserialize(file);
+		push(std::move(frame));
+	}
 }
 
 void UndoStack::serialize(MapFileO& file, GameObjectArray* arr) {

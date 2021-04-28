@@ -22,6 +22,8 @@
 #include "incinerator.h"
 #include "gate.h"
 #include "mapdisplay.h"
+#include "roommap.h"
+#include "playingstate.h"
 
 Particle::Particle() {}
 
@@ -536,7 +538,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		if (!source_map_.count(obj)) {
 			create_bound_source(obj, std::make_unique<EmberSource>(obj));
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOff, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::IncineratorOff, obj));
 			}
 		}
 		break;
@@ -548,7 +550,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 			source->active_ = false;
 			source_map_.erase(obj);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::IncineratorOn, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::IncineratorOn, obj));
 			}
 		}
 		break;
@@ -563,7 +565,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		if (!source_map_.count(obj)) {
 			create_bound_source(obj, std::make_unique<DoorVortexSource>(obj));
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::DoorOff, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::DoorOff, obj));
 			}
 		}
 		break;
@@ -575,7 +577,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 			source->active_ = false;
 			source_map_.erase(obj);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::DoorOn, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::DoorOn, obj));
 			}
 		}
 		break;
@@ -600,7 +602,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		if (!source_map_.count(obj)) {
 			create_bound_source(obj, std::make_unique<FlagSparkleSource>(flag));
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagOff, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::FlagOff, obj));
 			}
 		}
 		break;
@@ -612,7 +614,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 			source->active_ = false;
 			source_map_.erase(obj);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagOn, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::FlagOn, obj));
 			}
 		}
 		break;
@@ -623,7 +625,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		if (!static_animated_objects_.count(flag_gate)) {
 			static_animated_objects_.insert(flag_gate);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagGateOff, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::FlagGateOff, obj));
 			}
 		}
 		break;
@@ -634,7 +636,7 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 		if (static_animated_objects_.count(flag_gate)) {
 			static_animated_objects_.erase(flag_gate);
 			if (delta_frame) {
-				delta_frame->push(std::make_unique<AnimationSignalDelta>(this, AnimationSignal::FlagGateOn, obj));
+				delta_frame->push(std::make_unique<AnimationSignalDelta>(AnimationSignal::FlagGateOn, obj));
 			}
 		}
 		break;
@@ -703,16 +705,29 @@ void AnimationManager::receive_signal(AnimationSignal signal, GameObject* obj, D
 	}
 }
 
-AnimationSignalDelta::AnimationSignalDelta(AnimationManager* anims, AnimationSignal signal, GameObject* obj) :
-	Delta(), anims_{ anims }, signal_{ signal }, obj_{ obj } {}
+AnimationSignalDelta::AnimationSignalDelta(AnimationSignal signal, GameObject* obj) :
+	Delta(), signal_{ signal }, obj_{ obj } {}
+
+AnimationSignalDelta::AnimationSignalDelta(AnimationSignal signal, FrozenObject obj) :
+	Delta(), signal_{ signal }, obj_{ obj } {}
 
 AnimationSignalDelta::~AnimationSignalDelta() {}
 
 void AnimationSignalDelta::revert(RoomMap* room_map) {
-	anims_->receive_signal(signal_, obj_.resolve(room_map), nullptr);
+	room_map->playing_state()->anims_->receive_signal(signal_, obj_.resolve(room_map), nullptr);
 }
 
 void AnimationSignalDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 	file << signal_;
 	obj_.serialize(file, arr);
+}
+
+DeltaCode AnimationSignalDelta::code() {
+	return DeltaCode::AnimationSignalDelta;
+}
+
+std::unique_ptr<Delta> AnimationSignalDelta::deserialize(MapFileIwithObjs& file) {
+	auto signal = static_cast<AnimationSignal>(file.read_byte());
+	auto obj = file.read_frozen_obj();
+	return std::make_unique<AnimationSignalDelta>(signal, obj);
 }

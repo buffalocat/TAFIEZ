@@ -28,9 +28,12 @@ public:
 class AutosavePanelDelta : public Delta {
 public:
 	AutosavePanelDelta(AutosavePanel* panel);
+	AutosavePanelDelta(FrozenObject panel);
 	~AutosavePanelDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject panel_;

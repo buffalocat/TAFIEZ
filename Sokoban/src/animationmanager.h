@@ -332,14 +332,16 @@ private:
 
 class AnimationSignalDelta : public Delta {
 public:
-	AnimationSignalDelta(AnimationManager* anims, AnimationSignal signal, GameObject* parent);
+	AnimationSignalDelta(AnimationSignal signal, GameObject* parent);
+	AnimationSignalDelta(AnimationSignal signal, FrozenObject obj);
 	~AnimationSignalDelta();
 
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
-	AnimationManager* anims_;
 	AnimationSignal signal_;
 	FrozenObject obj_;
 };

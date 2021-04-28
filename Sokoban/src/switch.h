@@ -41,9 +41,12 @@ protected:
 class SwitchToggleDelta : public Delta {
 public:
 	SwitchToggleDelta(Switch* obj);
+	SwitchToggleDelta(FrozenObject obj);
 	~SwitchToggleDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;

@@ -2,6 +2,7 @@
 #include "mapfile.h"
 
 #include "colorcycle.h"
+#include "gameobjectarray.h"
 
 MapFileI::MapFileI(const std::filesystem::path& path): file_ {} {
     file_.open(path, std::ios::in | std::ios::binary);
@@ -28,10 +29,23 @@ unsigned int MapFileI::read_uint32() {
 	return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
 
+int MapFileI::read_int32() {
+	unsigned char b[4];
+	file_.read((char*)b, 4);
+    unsigned int u = b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
+	return *(int*)(&u);
+}
+
 Point3 MapFileI::read_point3() {
     unsigned char b[3];
     read(b, 3);
     return {b[0], b[1], b[2]};
+}
+
+Point3 MapFileI::read_spoint3() {
+    Point3_S16 p;
+    *this >> p;
+    return Point3{ p };
 }
 
 std::string MapFileI::read_str() {
@@ -121,6 +135,30 @@ MapFileI& operator>>(MapFileI& f, ColorCycle& v) {
 }
 
 
+MapFileIwithObjs::MapFileIwithObjs(const std::filesystem::path& path, GameObjectArray* arr) :
+	MapFileI(path), arr_{ arr } {}
+
+MapFileIwithObjs::~MapFileIwithObjs() {}
+
+FrozenObject MapFileIwithObjs::read_frozen_obj() {
+	auto ref = static_cast<ObjRefCode>(read_byte());
+	switch (ref) {
+	case ObjRefCode::Null:
+		return FrozenObject({ 0,0,0 }, ref);
+	case ObjRefCode::Dead:
+    {
+        auto dead_id = read_uint32();
+        return FrozenObject::create_dead_obj(arr_->dead_obj_list_[dead_id]);
+    }
+	default:
+    {
+        auto pos = read_point3();
+        return FrozenObject(pos, ref);
+    }
+	}
+}
+
+
 MapFileO::MapFileO(const std::filesystem::path& path): file_ {} {
     file_.open(path, std::ios::out | std::ios::binary);
 }
@@ -131,6 +169,14 @@ MapFileO::~MapFileO() {
 
 void MapFileO::write_uint32(unsigned int n) {
 	file_ << (unsigned char)n << (unsigned char)(n >> 8) << (unsigned char)(n >> 16) << (unsigned char)(n >> 24);
+}
+
+void MapFileO::write_int32(int n) {
+    write_uint32(*(unsigned int*)(&n));
+}
+
+void MapFileO::write_spoint3(Point3 p) {
+    *this << Point3_S16{ p };
 }
 
 void MapFileO::write_long_str(std::string str) {
@@ -229,6 +275,11 @@ MapFileO& MapFileO::operator<<(ObjCode code) {
 MapFileO& MapFileO::operator<<(ModCode code) {
     file_ << (unsigned char) code;
     return *this;
+}
+
+MapFileO& MapFileO::operator<<(DeltaCode code) {
+	file_ << (unsigned char)code;
+	return *this;
 }
 
 MapFileO& MapFileO::operator<<(CameraCode code) {

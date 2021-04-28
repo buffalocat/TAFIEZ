@@ -81,6 +81,8 @@ std::unique_ptr<ObjectModifier> AutosavePanel::duplicate(GameObject* parent, Roo
 
 AutosavePanelDelta::AutosavePanelDelta(AutosavePanel* panel) : Delta(), panel_{ panel } {}
 
+AutosavePanelDelta::AutosavePanelDelta(FrozenObject panel) : Delta(), panel_{ panel } {}
+
 AutosavePanelDelta::~AutosavePanelDelta() {}
 
 void AutosavePanelDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -88,5 +90,14 @@ void AutosavePanelDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 }
 
 void AutosavePanelDelta::revert(RoomMap* room_map) {
-	static_cast<AutosavePanel*>(panel_.resolve(room_map)->modifier())->active_ = false;
+	static_cast<AutosavePanel*>(panel_.resolve_mod(room_map))->active_ = false;
 }
+
+DeltaCode AutosavePanelDelta::code() {
+	return DeltaCode::AutosavePanelDelta;
+}
+
+std::unique_ptr<Delta> AutosavePanelDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<AutosavePanelDelta>(file.read_frozen_obj());
+}
+

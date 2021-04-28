@@ -535,6 +535,8 @@ void SnakePuller::perform_pulls() {
 
 AddLinkDelta::AddLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
 
+AddLinkDelta::AddLinkDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ b } {}
+
 AddLinkDelta::~AddLinkDelta() {}
 
 void AddLinkDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -546,8 +548,20 @@ void AddLinkDelta::revert(RoomMap* room_map) {
 	static_cast<SnakeBlock*>(a_.resolve(room_map))->remove_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }
 
+DeltaCode AddLinkDelta::code() {
+	return DeltaCode::AddLinkDelta;
+}
+
+std::unique_ptr<Delta> AddLinkDelta::deserialize(MapFileIwithObjs& file) {
+	auto a = file.read_frozen_obj();
+	auto b = file.read_frozen_obj();
+	return std::make_unique<AddLinkDelta>(a, b);
+}
+
 
 RemoveLinkDelta::RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+RemoveLinkDelta::RemoveLinkDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ b } {}
 
 RemoveLinkDelta::~RemoveLinkDelta() {}
 
@@ -560,8 +574,20 @@ void RemoveLinkDelta::revert(RoomMap* room_map) {
 	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }
 
+DeltaCode RemoveLinkDelta::code() {
+	return DeltaCode::RemoveLinkDelta;
+}
+
+std::unique_ptr<Delta> RemoveLinkDelta::deserialize(MapFileIwithObjs& file) {
+	auto a = file.read_frozen_obj();
+	auto b = file.read_frozen_obj();
+	return std::make_unique<RemoveLinkDelta>(a, b);
+}
+
 
 RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
+
+RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ b } {}
 
 RemoveLinkOneWayDelta::~RemoveLinkOneWayDelta() {}
 
@@ -573,3 +599,14 @@ void RemoveLinkOneWayDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 void RemoveLinkOneWayDelta::revert(RoomMap* room_map) {
 	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_one_way(static_cast<SnakeBlock*>(b_.resolve(room_map)));
 }
+
+DeltaCode RemoveLinkOneWayDelta::code() {
+	return DeltaCode::RemoveLinkOneWayDelta;
+}
+
+std::unique_ptr<Delta> RemoveLinkOneWayDelta::deserialize(MapFileIwithObjs& file) {
+	auto a = file.read_frozen_obj();
+	auto b = file.read_frozen_obj();
+	return std::make_unique<RemoveLinkOneWayDelta>(a, b);
+}
+

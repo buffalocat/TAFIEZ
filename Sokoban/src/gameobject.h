@@ -130,9 +130,12 @@ public:
 class DestructionDelta : public Delta {
 public:
 	DestructionDelta(GameObject* obj);
+	DestructionDelta(FrozenObject obj);
 	virtual ~DestructionDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 protected:
 	FrozenObject obj_;
@@ -142,9 +145,12 @@ protected:
 class AbstractShiftDelta : public Delta {
 public:
 	AbstractShiftDelta(GameObject* obj, Point3 dpos);
+	AbstractShiftDelta(FrozenObject obj, Point3 dpos);
 	~AbstractShiftDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
@@ -155,9 +161,12 @@ private:
 class AbstractPutDelta : public Delta {
 public:
 	AbstractPutDelta(GameObject* obj, Point3 pos);
+	AbstractPutDelta(FrozenObject obj, Point3 pos);
 	~AbstractPutDelta();
 	void serialize(MapFileO&, GameObjectArray*);
 	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;

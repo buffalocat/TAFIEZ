@@ -165,8 +165,9 @@ GameObject* RoomMap::deref_object(ObjRefCode ref_code, Point3 pos) {
 		return dynamic_cast<Car*>(base_obj->modifier())->player_;
 	case ObjRefCode::HeldGateBody:
 		return dynamic_cast<Gate*>(base_obj->modifier())->body_;
+	default:
+		return nullptr;
 	}
-	return nullptr;
 }
 
 void RoomMap::remove_from_object_array(GameObject* obj) {
@@ -319,6 +320,10 @@ void RoomMap::handle_moved_cars(MoveProcessor* mp) {
 		car->handle_movement(this, mp->delta_frame_, mp);
 	}
 	moved_cars_.clear();
+}
+
+PlayingState* RoomMap::playing_state() {
+	return static_cast<PlayingState*>(state_);
 }
 
 struct ObjectDrawer {
@@ -574,7 +579,7 @@ void RoomMap::check_clear_flag_collected(DeltaFrame* delta_frame) {
 			collect_flag(true, delta_frame);
 			if (global_) {
 				global_->collect_clear_flag(zone_, delta_frame);
-				static_cast<PlayingState*>(state_)->anims_->start_flag_cutscene(global_, zone_);
+				playing_state()->anims_->start_flag_cutscene(global_, zone_);
 			}
 		}
 	}
@@ -585,7 +590,7 @@ void RoomMap::collect_flag(bool real, DeltaFrame* delta_frame) {
 		delta_frame->push(std::make_unique<ClearFlagCollectionDelta>());
 	}
 	if (real) {
-		static_cast<PlayingState*>(state_)->anims_->sounds_->queue_sound(SoundName::FlagGet);
+		playing_state()->anims_->sounds_->queue_sound(SoundName::FlagGet);
 	}
 	for (auto& flag : clear_flags_) {
 		flag->collected_ = true;
@@ -628,6 +633,9 @@ std::vector<Player*>& RoomMap::player_list() {
 PutDelta::PutDelta(GameObject* obj) :
 	obj_{ obj } {}
 
+PutDelta::PutDelta(FrozenObject obj) :
+	obj_{ obj } {}
+
 PutDelta::~PutDelta() {}
 
 void PutDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -638,8 +646,19 @@ void PutDelta::revert(RoomMap* room_map) {
 	room_map->take_from_map(obj_.resolve(room_map), true, false, nullptr);
 }
 
+DeltaCode PutDelta::code() {
+	return DeltaCode::PutDelta;
+}
+
+std::unique_ptr<Delta> PutDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<PutDelta>(file.read_frozen_obj());
+}
+
 
 TakeDelta::TakeDelta(GameObject* obj) :
+	obj_{ obj } {}
+
+TakeDelta::TakeDelta(FrozenObject obj) :
 	obj_{ obj } {}
 
 TakeDelta::~TakeDelta() {}
@@ -652,8 +671,18 @@ void TakeDelta::revert(RoomMap* room_map) {
 	room_map->put_in_map(obj_.resolve(room_map), true, false, nullptr);
 }
 
+DeltaCode TakeDelta::code() {
+	return DeltaCode::TakeDelta;
+}
+
+std::unique_ptr<Delta> TakeDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<TakeDelta>(file.read_frozen_obj());
+}
+
 
 ObjArrayPushDelta::ObjArrayPushDelta(GameObject* obj) : obj_{ obj } {}
+
+ObjArrayPushDelta::ObjArrayPushDelta(FrozenObject obj) : obj_{ obj } {}
 
 ObjArrayPushDelta::~ObjArrayPushDelta() {}
 
@@ -665,8 +694,18 @@ void ObjArrayPushDelta::revert(RoomMap* room_map) {
 	room_map->remove_from_object_array(obj_.resolve(room_map));
 }
 
+DeltaCode ObjArrayPushDelta::code() {
+	return DeltaCode::ObjArrayPushDelta;
+}
+
+std::unique_ptr<Delta> ObjArrayPushDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<ObjArrayPushDelta>(file.read_frozen_obj());
+}
+
 
 ObjArrayDeletedPushDelta::ObjArrayDeletedPushDelta(GameObject* obj) : obj_{ obj } {}
+
+ObjArrayDeletedPushDelta::ObjArrayDeletedPushDelta(FrozenObject obj) : obj_{ obj } {}
 
 ObjArrayDeletedPushDelta::~ObjArrayDeletedPushDelta() {}
 
@@ -678,19 +717,40 @@ void ObjArrayDeletedPushDelta::revert(RoomMap* room_map) {
 	room_map->remove_from_object_array_deleted(obj_.resolve(room_map));
 }
 
+DeltaCode ObjArrayDeletedPushDelta::code() {
+	return DeltaCode::ObjArrayDeletedPushDelta;
+}
+
+std::unique_ptr<Delta> ObjArrayDeletedPushDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<ObjArrayDeletedPushDelta>(file.read_frozen_obj());
+}
+
 
 MotionDelta::MotionDelta(GameObject* obj, Point3 dpos) :
+	obj_{ obj }, dpos_{ dpos } {}
+
+MotionDelta::MotionDelta(FrozenObject obj, Point3 dpos) :
 	obj_{ obj }, dpos_{ dpos } {}
 
 MotionDelta::~MotionDelta() {}
 
 void MotionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 	obj_.serialize(file, arr);
-	file << dpos_;
+	file.write_spoint3(dpos_);
 }
 
 void MotionDelta::revert(RoomMap* room_map) {
 	room_map->shift(obj_.resolve(room_map), -dpos_, false, nullptr);
+}
+
+DeltaCode MotionDelta::code() {
+	return DeltaCode::MotionDelta;
+}
+
+std::unique_ptr<Delta> MotionDelta::deserialize(MapFileIwithObjs& file) {
+	auto obj = file.read_frozen_obj();
+	auto dpos = file.read_spoint3();
+	return std::make_unique<MotionDelta>(obj, dpos);
 }
 
 
@@ -701,6 +761,9 @@ BatchMotionDelta::BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos) :
 	}
 }
 
+BatchMotionDelta::BatchMotionDelta(std::vector<FrozenObject>&& objs, Point3 dpos) :
+	objs_{ std::move(objs) }, dpos_{ dpos } {}
+
 BatchMotionDelta::~BatchMotionDelta() {}
 
 void BatchMotionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
@@ -708,11 +771,25 @@ void BatchMotionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 	for (auto& obj : objs_) {
 		obj.serialize(file, arr);
 	}
-	file << dpos_;
+	file.write_spoint3(dpos_);
 }
 
 void BatchMotionDelta::revert(RoomMap* room_map) {
 	room_map->batch_shift_frozen(std::move(objs_), -dpos_);
+}
+
+DeltaCode BatchMotionDelta::code() {
+	return DeltaCode::BatchMotionDelta;
+}
+
+std::unique_ptr<Delta> BatchMotionDelta::deserialize(MapFileIwithObjs& file) {
+	std::vector<FrozenObject> objs;
+	auto n_objs = file.read_uint32();
+	for (unsigned int i = 0; i < n_objs; ++i) {
+		objs.push_back(file.read_frozen_obj());
+	}
+	auto dpos = file.read_spoint3();
+	return std::make_unique<BatchMotionDelta>(std::move(objs), dpos);
 }
 
 
@@ -724,6 +801,14 @@ void ClearFlagCollectionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 
 void ClearFlagCollectionDelta::revert(RoomMap* room_map) {
 	room_map->uncollect_flag();
+}
+
+DeltaCode ClearFlagCollectionDelta::code() {
+	return DeltaCode::ClearFlagCollectionDelta;
+}
+
+std::unique_ptr<Delta> ClearFlagCollectionDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<ClearFlagCollectionDelta>();
 }
 
 
@@ -891,8 +976,19 @@ void AddPlayerDelta::revert(RoomMap* room_map) {
 	cycle->index_ = index_;
 }
 
+DeltaCode AddPlayerDelta::code() {
+	return DeltaCode::AddPlayerDelta;
+}
+
+std::unique_ptr<Delta> AddPlayerDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<AddPlayerDelta>(file.read_byte());
+}
+
 
 RemovePlayerDelta::RemovePlayerDelta(Player* player, Player* dead_player, int index, int dead_index, int rem) :
+	player_{ player }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index }, rem_{ rem } {}
+
+RemovePlayerDelta::RemovePlayerDelta(FrozenObject player, FrozenObject dead_player, int index, int dead_index, int rem) :
 	player_{ player }, dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index }, rem_{ rem } {}
 
 RemovePlayerDelta::~RemovePlayerDelta() {}
@@ -911,8 +1007,23 @@ void RemovePlayerDelta::revert(RoomMap* room_map) {
 	cycle->add_player_at_pos(static_cast<Player*>(player_.resolve(room_map)), rem_);
 }
 
+DeltaCode RemovePlayerDelta::code() {
+	return DeltaCode::RemovePlayerDelta;
+}
+
+std::unique_ptr<Delta> RemovePlayerDelta::deserialize(MapFileIwithObjs& file) {
+	auto player = file.read_frozen_obj();
+	auto dead_player = file.read_frozen_obj();
+	unsigned char b[3];
+	file.read(b, 3);
+	return std::make_unique<RemovePlayerDelta>(player, dead_player, b[0], b[1], b[2]);
+}
+
 
 CyclePlayerDelta::CyclePlayerDelta(Player* dead_player, int index, int dead_index) :
+	dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index } {}
+
+CyclePlayerDelta::CyclePlayerDelta(FrozenObject dead_player, int index, int dead_index) :
 	dead_player_{ dead_player }, index_{ index }, dead_index_{ dead_index } {}
 
 CyclePlayerDelta::~CyclePlayerDelta() {}
@@ -930,6 +1041,18 @@ void CyclePlayerDelta::revert(RoomMap* room_map) {
 	cycle->dead_index_ = dead_index_;
 }
 
+DeltaCode CyclePlayerDelta::code() {
+	return DeltaCode::CyclePlayerDelta;
+}
+
+std::unique_ptr<Delta> CyclePlayerDelta::deserialize(MapFileIwithObjs& file) {
+	auto dead_player = file.read_frozen_obj();
+	unsigned char b[2];
+	file.read(b, 2);
+	return std::make_unique<CyclePlayerDelta>(dead_player, b[0], b[1]);
+}
+
+
 WallDestructionDelta::WallDestructionDelta(Point3 pos) : Delta(), pos_{ pos } {}
 
 WallDestructionDelta::~WallDestructionDelta() {}
@@ -941,6 +1064,15 @@ void WallDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
 void WallDestructionDelta::revert(RoomMap* room_map) {
 	room_map->at(pos_) = GENERIC_WALL_ID;
 }
+
+DeltaCode WallDestructionDelta::code() {
+	return DeltaCode::WallDestructionDelta;
+}
+
+std::unique_ptr<Delta> WallDestructionDelta::deserialize(MapFileIwithObjs& file) {
+	return std::make_unique<WallDestructionDelta>(file.read_point3());
+}
+
 
 DeadObjectAdder::DeadObjectAdder(GameObjectArray & obj_array) :
 	RoomMap(obj_array, nullptr, 0, 0, 0) {}
