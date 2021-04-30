@@ -90,7 +90,7 @@ void FrozenObject::serialize(MapFileO& file, GameObjectArray* arr) {
 	}
 	if (ref_ != ObjRefCode::Dead) {
 		file << pos_;
-	} else  {
+	} else {
 		file.write_uint32(arr->dead_obj_map_[obj_]);
 	}
 }
@@ -184,7 +184,6 @@ void DeltaFrame::deserialize(MapFileIwithObjs& file) {
 			CASE_DELTACODE(CyclePlayerDelta);
 			CASE_DELTACODE(GlobalFlagDelta);
 			CASE_DELTACODE(FlagCountDelta);
-			CASE_DELTACODE(AutosaveDelta);
 			CASE_DELTACODE(SignalerCountDelta);
 			CASE_DELTACODE(AddLinkDelta);
 			CASE_DELTACODE(RemoveLinkDelta);
@@ -209,18 +208,28 @@ void DeltaFrame::serialize(MapFileO& file, GameObjectArray* arr) {
 
 
 UndoStack::UndoStack(PlayingState* state, unsigned int max_depth) :
-	state_{ state }, frames_ {}, max_depth_{ max_depth }, size_{ 0 } {}
+	state_{ state }, max_depth_{ max_depth } {}
 
 UndoStack::~UndoStack() {}
 
 void UndoStack::push(std::unique_ptr<DeltaFrame> delta_frame) {
-	if (!delta_frame->trivial()) {
-		if (size_ == max_depth_) {
-			frames_.pop_front();
-		} else {
-			++size_;
+	if (delta_frame->trivial()) {
+		return;
+	}
+	frames_.push_back(std::move(delta_frame));
+	if (size_ == max_depth_) {
+		frames_.pop_front();
+		if (!cache_map_.empty()) {
+			++num_new_frames_;
+			if (++skip_frames_ == cache_map_.front().second) {
+				std::cout << "POP" << std::endl;
+				cache_map_.pop_front();
+				skip_frames_ = 0;
+			}
 		}
-		frames_.push_back(std::move(delta_frame));
+	} else {
+		++num_new_frames_;
+		++size_;
 	}
 }
 
@@ -229,6 +238,11 @@ bool UndoStack::non_empty() {
 }
 
 void UndoStack::pop() {
+	if (num_new_frames_ > 0) {
+		--num_new_frames_;
+	} else if (--cache_map_.back().second == 0) {
+		cache_map_.pop_back();
+	}
 	frames_.back()->revert(state_);
 	frames_.pop_back();
 	--size_;
@@ -237,20 +251,53 @@ void UndoStack::pop() {
 void UndoStack::reset() {
 	frames_.clear();
 	size_ = 0;
+	num_new_frames_ = 0;
+	skip_frames_ = 0;
+	cache_map_.clear();
 }
 
-void UndoStack::deserialize(MapFileIwithObjs& file) {
-	unsigned int n_frames = file.read_uint32();
-	for (unsigned int i = 0; i < n_frames; ++i) {
-		auto frame = std::make_unique<DeltaFrame>();
-		frame->deserialize(file);
-		push(std::move(frame));
+
+void UndoStack::deserialize(std::filesystem::path base_path, unsigned int subsave_index, GameObjectArray* arr) {
+	MapFileI meta_file{ base_path / std::to_string(subsave_index) / "delta_meta.sav" };
+	unsigned int n_cache_map = meta_file.read_uint32();
+	for (unsigned int i_group = 0; i_group < n_cache_map; ++i_group) {
+		unsigned int index = meta_file.read_uint32();
+		unsigned int count = meta_file.read_uint32();
+		cache_map_.push_back(std::make_pair(index, count));
+		MapFileIwithObjs file{ base_path / std::to_string(index) / "deltas.sav", arr };
+		for (unsigned int i_frame = 0; i_frame < count; ++i_frame) {
+			auto frame = std::make_unique<DeltaFrame>();
+			frame->deserialize(file);
+			push(std::move(frame));
+		}
 	}
+	num_new_frames_ = 0;
 }
 
-void UndoStack::serialize(MapFileO& file, GameObjectArray* arr) {
-	file.write_uint32((unsigned int)frames_.size());
-	for (auto& frame : frames_) {
-		frame->serialize(file, arr);
+void UndoStack::serialize(std::filesystem::path subsave_path, unsigned int subsave_index, GameObjectArray* arr) {
+	MapFileO meta_file{ subsave_path / "delta_meta.sav" };
+	if (num_new_frames_ > 0) {
+		cache_map_.push_back(std::make_pair(subsave_index, num_new_frames_));
 	}
+	meta_file.write_uint32((unsigned int)cache_map_.size());
+	unsigned int start_frame = 0;
+	for (auto& p : cache_map_) {
+		meta_file.write_uint32(p.first);
+		meta_file.write_uint32(p.second);
+		start_frame += p.second;
+	}
+	start_frame = start_frame - skip_frames_ - num_new_frames_;
+	MapFileO file{ subsave_path / "deltas.sav" };
+	for (auto it = frames_.begin() + start_frame; it != frames_.end(); ++it) {
+		(*it)->serialize(file, arr);
+	}
+	num_new_frames_ = 0;
+}
+
+std::vector<unsigned int> UndoStack::dependent_subsaves() {
+	std::vector<unsigned int> dep{};
+	for (auto& p : cache_map_) {
+		dep.push_back(p.first);
+	}
+	return dep;
 }

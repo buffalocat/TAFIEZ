@@ -4,12 +4,16 @@
 #include "delta.h"
 
 class PlayingState;
+class RealPlayingState;
 struct PlayingRoom;
 class Room;
+class MapFileI;
+class MapFileO;
 
 enum class SaveType {
-	Current,
+	Emergency,
 	Auto,
+	Manual,
 };
 
 class GlobalData {
@@ -56,37 +60,6 @@ public:
 	int clear_flag_total_ = 0;
 };
 
-class SaveFile {
-public:
-	SaveFile(std::string base);
-	~SaveFile();
-
-	void create_save_dir();
-	void load_meta();
-	std::filesystem::path get_path(std::string, bool* from_main);
-	void make_subsave(PlayingState* state, SaveType type);
-	void load_subsave(PlayingState* state, unsigned int subsave_index);
-	void load_most_recent_subsave(PlayingState* state);
-	void load_last_autosave(PlayingState* state);
-
-	void world_reset();
-
-	std::unique_ptr<PlayingGlobalData> global_{};
-	bool exists_ = false;
-	std::string cur_room_name_{};
-
-	void save_meta();
-	void load_room_data(std::filesystem::path subsave_path);
-	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
-	void save_room(Room* room, std::filesystem::path path);
-
-	const std::filesystem::path base_;
-	std::map<std::string, unsigned int> room_subsave_{};
-	int cur_subsave_ = 0;
-	int next_subsave_ = 1;
-	int auto_subsave_ = -1;
-};
-
 class GlobalFlagDelta : public Delta {
 public:
 	GlobalFlagDelta(unsigned int flag);
@@ -124,4 +97,98 @@ public:
 
 private:
 	int index_;
+};
+
+
+extern const int NUM_SAVE_ROWS;
+extern const int NUM_SAVE_COLUMNS;
+extern const int NUM_AUTO_SAVES;
+extern const int NUM_MANUAL_SAVES;
+
+
+class AutosavePanel;
+
+class SubSave {
+public:
+	SubSave();
+	virtual ~SubSave();
+
+	void save_meta(MapFileO& file);
+	void load_meta(MapFileI& file);
+
+	unsigned int index_;
+	std::set<unsigned int> dependent_{};
+	std::string time_stamp_{};
+	char zone_{};
+};
+
+
+class SubSaveAuto : public SubSave {
+public:
+	SubSaveAuto(AutosavePanel* panel);
+	~SubSaveAuto();
+
+	AutosavePanel* panel_{};
+};
+
+
+
+class SaveDependencyGraph {
+public:
+	SaveDependencyGraph();
+	~SaveDependencyGraph();
+
+	void add_save(SubSave*);
+	void remove_save(SubSave*);
+	std::vector<unsigned int> clear_unused_saves();
+
+private:
+	std::map<unsigned int, unsigned int> dep_count_{};
+};
+
+
+class SaveProfile {
+public:
+	SaveProfile(std::string profile_name);
+	~SaveProfile();
+
+	unsigned int get_save_index();
+	void make_subsave(SubSave*, RealPlayingState*);
+	void load_subsave(SubSave*, RealPlayingState*);
+	void load_global();
+	void remove_save(SubSave*);
+	void delete_unused_saves();
+	void create_save_dir();
+
+	bool overwrite_current_autosave(AutosavePanel*);
+	void make_emergency_save(RealPlayingState*);
+	void make_auto_save(AutosavePanel*, RealPlayingState*);
+	void make_manual_save(unsigned int index, RealPlayingState*);
+	void load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state);
+
+	void load_room_data(std::filesystem::path subsave_path);
+	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
+	std::filesystem::path get_path(std::string name, bool* from_main);
+	void save_room(Room* room, std::filesystem::path path);
+
+	void load_meta();
+	void save_meta();
+	void save_meta_single(MapFileO& file, SubSave* subsave);
+
+	void world_reset();
+
+	std::unique_ptr<PlayingGlobalData> global_;
+	std::string cur_room_name_{};
+	bool exists_ = false;
+
+	std::unique_ptr<SubSave> emergency_save_{};
+	std::deque<std::unique_ptr<SubSaveAuto>> auto_saves_{};
+	std::vector<std::unique_ptr<SubSave>> manual_saves_{};
+	SaveDependencyGraph dep_graph_{};
+
+private:
+	unsigned int next_index_{ 0 };
+	std::vector<unsigned int> unused_subsave_indices_{};
+	std::map<std::string, int> room_subsave_{};
+	std::filesystem::path base_path_;
 };

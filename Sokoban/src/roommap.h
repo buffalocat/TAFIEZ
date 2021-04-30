@@ -50,6 +50,7 @@ public:
 	void put_in_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
     void take_from_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
 	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+	virtual void create_null_object();
 	GameObject* deref_object(ObjRefCode ref_code, Point3 pos);
 
 	void create_wall(Point3);
@@ -151,8 +152,9 @@ public:
 	DeadObjectAdder(GameObjectArray& obj_array);
 	~DeadObjectAdder();
 
-	virtual void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
-	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
+	void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
+	void create_null_object();
 };
 
 // Deltas

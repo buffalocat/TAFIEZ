@@ -16,11 +16,10 @@ private:
 
 	//Menu Callbacks
 	void unpause();
-	void save();
+	void open_load_menu();
+	void open_save_menu();
 	void world_reset();
-	void load_last_autosave();
 	void quit_playing();
-	void quit_without_saving();
 
 	PlayingState* playing_state_;
 	std::unique_ptr<Menu> menu_;

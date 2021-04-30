@@ -13,16 +13,14 @@
 #include "player.h"
 #include "globalflagconstants.h"
 
-RealPlayingState::RealPlayingState(SaveFile* savefile, GameState* parent) :
+RealPlayingState::RealPlayingState(SaveProfile* savefile, GameState* parent) :
 	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {}
 
 RealPlayingState::~RealPlayingState() {
 	if (delta_frame_) {
 		delta_frame_->revert(this);
 	}
-	if (should_save_) {
-		make_subsave(SaveType::Current);
-	}
+	savefile_->make_emergency_save(this);
 }
 
 void RealPlayingState::play_from_map(std::string starting_map) {
@@ -43,11 +41,21 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 	return true;
 }
 
-void RealPlayingState::make_subsave(SaveType type) {
+void RealPlayingState::make_subsave(SaveType type, unsigned int save_index, AutosavePanel* panel) {
 	if (player_doa()->death_ != CauseOfDeath::None) {
 		undo_stack_->pop();
 	}
-	savefile_->make_subsave(this, type);
+	switch (type) {
+	case SaveType::Emergency:
+		savefile_->make_emergency_save(this);
+		break;
+	case SaveType::Auto:
+		savefile_->make_auto_save(panel, this);
+		break;
+	case SaveType::Manual:
+		savefile_->make_manual_save(save_index, this);
+		break;
+	}
 }
 
 void RealPlayingState::play_from_loaded_subsave() {
@@ -58,9 +66,20 @@ void RealPlayingState::play_from_loaded_subsave() {
 	gfx_->set_state(GraphicsState::FadeIn);
 }
 
+void RealPlayingState::reset() {
+	delta_frame_ = {};
+	loaded_rooms_.clear();
+	text_->reset();
+	anims_->reset();
+	room_ = nullptr;
+	undo_stack_->reset();
+	objs_ = std::make_unique<GameObjectArray>();
+}
+
 void RealPlayingState::world_reset() {
 	// Forget all the maps we know
 	global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[int(HubCode::Alpha)]);
+	savefile_->make_emergency_save(this);
 	reset();
 	savefile_->world_reset();
 	// Start anew in the world reset start room (not necessarily the same as the "new file start room"!)

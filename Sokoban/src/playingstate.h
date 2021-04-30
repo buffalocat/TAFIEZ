@@ -16,6 +16,7 @@ class Player;
 class MoveProcessor;
 class PlayingGlobalData;
 class GlobalAnimation;
+class AutosavePanel;
 
 class UndoStack;
 class DeltaFrame;
@@ -70,16 +71,13 @@ public:
 	bool activate_room(std::string);
 	void load_room_from_path(std::filesystem::path path, bool use_default_player);
 	virtual bool load_room(std::string name, bool use_default_player) = 0;
+	virtual void make_subsave(SaveType type, unsigned int save_index = 0, AutosavePanel* panel = nullptr);
 
 	bool can_use_door(Door* ent_door, Room** dest_room_ptr, std::vector<DoorTravellingObj>& objs, std::vector<Door*>& exit_doors);
 
 	void move_camera_to_player(bool snap);
 
 	Player* player_doa();
-
-	virtual void make_subsave(SaveType);
-	virtual void world_reset();
-	void reset();
 
 	bool mandatory_wait_ = false;
 
@@ -91,8 +89,7 @@ public:
 	std::unique_ptr<DeltaFrame> delta_frame_{};
 
 	std::map<std::string, std::unique_ptr<PlayingRoom>> loaded_rooms_{};
-	bool should_save_ = true;
-	bool queued_autosave_ = false;
+	AutosavePanel* queued_autosave_ = nullptr;
 
 	std::unique_ptr<GameObjectArray> objs_ = std::make_unique<GameObjectArray>();
 	std::unique_ptr<UndoStack> undo_stack_{ std::make_unique<UndoStack>(this, MAX_UNDO_DEPTH) };

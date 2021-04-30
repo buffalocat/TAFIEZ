@@ -138,7 +138,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);glfw3.lib;opengl32.lib;assimp-vc140-mt.lib;freetype.lib;OpenAL32.lib;alut.lib;</AdditionalDependencies>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <ShowProgress>NotSet</ShowProgress>
+      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -208,6 +211,7 @@
     <ClInclude Include="src\floorsign.h" />
     <ClInclude Include="src\mapdisplay.h" />
     <ClInclude Include="src\menu.h" />
+    <ClInclude Include="src\savemenustate.h" />
     <ClInclude Include="src\soundmanager.h" />
     <ClInclude Include="src\stringdrawer.h" />
     <ClInclude Include="src\permanentswitch.h" />
@@ -396,6 +400,7 @@
     <ClCompile Include="src\roommap.cpp" />
     <ClCompile Include="src\savefile.cpp" />
     <ClCompile Include="src\saveloadtab.cpp" />
+    <ClCompile Include="src\savemenustate.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\signaler.cpp" />
     <ClCompile Include="src\snakeblock.cpp" />

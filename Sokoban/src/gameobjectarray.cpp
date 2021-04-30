@@ -70,6 +70,10 @@ void GameObjectArray::remove_undeleted_objects() {
 }
 
 unsigned int GameObjectArray::add_dead_obj(GameObject* obj) {
+	if (!obj) {
+		free_dead_ids_.push_back((unsigned int)dead_obj_list_.size());
+		dead_obj_list_.push_back(nullptr);
+	}
 	if (free_dead_ids_.empty()) {
 		auto id = (unsigned int)dead_obj_list_.size();
 		dead_obj_list_.push_back(obj);
@@ -122,7 +126,11 @@ void GameObjectArray::serialize_object_ref(GameObject* obj, MapFileO& file) {
 
 void GameObjectArray::serialize_dead_objs(MapFileO& file) {
 	for (auto* obj : dead_obj_list_) {
-		obj->serialize(file);
+		if (obj) {
+			obj->serialize(file);
+		} else {
+			file << ObjCode::Null;
+		}
 	}
 	file << ObjCode::NONE;
 }

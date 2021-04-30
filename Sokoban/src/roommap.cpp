@@ -629,6 +629,8 @@ std::vector<Player*>& RoomMap::player_list() {
 	return player_cycle_->players_;
 }
 
+void RoomMap::create_null_object() {}
+
 
 PutDelta::PutDelta(GameObject* obj) :
 	obj_{ obj } {}
@@ -1087,4 +1089,8 @@ void DeadObjectAdder::push_to_object_array(std::unique_ptr<GameObject> obj, Delt
 
 void DeadObjectAdder::create_in_map(std::unique_ptr<GameObject> obj_unique, bool, DeltaFrame*) {
 	push_to_object_array(std::move(obj_unique), nullptr);
+}
+
+void DeadObjectAdder::create_null_object() {
+	obj_array_.add_dead_obj(nullptr);
 }

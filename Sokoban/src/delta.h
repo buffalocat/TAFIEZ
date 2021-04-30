@@ -42,13 +42,12 @@ enum class DeltaCode {
 	CyclePlayerDelta = 25,
 	GlobalFlagDelta = 26,
 	FlagCountDelta = 27,
-	AutosaveDelta = 28,
-	SignalerCountDelta = 29,
-	AddLinkDelta = 30,
-	RemoveLinkDelta = 31,
-	RemoveLinkOneWayDelta = 32,
-	SwitchToggleDelta = 33,
-	SwitchableDelta = 34,
+	SignalerCountDelta = 28,
+	AddLinkDelta = 29,
+	RemoveLinkDelta = 30,
+	RemoveLinkOneWayDelta = 31,
+	SwitchToggleDelta = 32,
+	SwitchableDelta = 33,
 };
 
 class FrozenObject {
@@ -108,14 +107,18 @@ public:
 	bool non_empty();
 	void pop();
 	void reset();
-	void deserialize(MapFileIwithObjs& file);
-	void serialize(MapFileO& file, GameObjectArray* arr);
+	void deserialize(std::filesystem::path base_path, unsigned int subsave_index, GameObjectArray* arr);
+	void serialize(std::filesystem::path subsave_path, unsigned int subsave_index, GameObjectArray* arr);
+	std::vector<unsigned int> dependent_subsaves();
 
 private:
 	PlayingState* state_;
-	std::deque<std::unique_ptr<DeltaFrame>> frames_;
+	std::deque<std::pair<unsigned int, unsigned int>> cache_map_{};
+	unsigned int num_new_frames_{ 0 };
+	unsigned int skip_frames_{ 0 };
+	std::deque<std::unique_ptr<DeltaFrame>> frames_{};
 	unsigned int max_depth_;
-	unsigned int size_;
+	unsigned int size_{ 0 };
 };
 
 #endif // DELTA_H

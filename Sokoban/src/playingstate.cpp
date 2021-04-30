@@ -143,8 +143,8 @@ void PlayingState::handle_input() {
 		if (move_processor_->update()) {
 			move_processor_.reset(nullptr);
 			if (queued_autosave_) {
-				make_subsave(SaveType::Auto);
-				queued_autosave_ = false;
+				make_subsave(SaveType::Auto, 0, queued_autosave_);
+				queued_autosave_ = nullptr;
 			}
 			undo_stack_->push(std::move(delta_frame_));
 			delta_frame_ = std::make_unique<DeltaFrame>();
@@ -343,6 +343,8 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 	loaded_rooms_[name] = std::make_unique<PlayingRoom>(std::move(room));
 }
 
+void PlayingState::make_subsave(SaveType type, unsigned int, AutosavePanel*) {}
+
 bool PlayingState::can_use_door(Door* ent_door, Room** dest_room_ptr,
 	std::vector<DoorTravellingObj>& objs,
 	std::vector<Door*>& exit_doors) {
@@ -433,20 +435,6 @@ void PlayingState::set_death_text() {
 	}
 }
 
-void PlayingState::make_subsave(SaveType) {}
-
-void PlayingState::world_reset() {}
-
-void PlayingState::reset() {
-	delta_frame_ = {};
-	loaded_rooms_.clear();
-	text_->reset();
-	anims_->reset();
-	room_ = nullptr;
-	should_save_ = true;
-	undo_stack_->reset();
-	objs_ = std::make_unique<GameObjectArray>();
-}
 
 void PlayingState::move_camera_to_player(bool snap) {
 	Player* player = player_doa();

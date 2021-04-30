@@ -295,7 +295,7 @@
     <ClInclude Include="src\autosavepanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\objectrefarray.h">
+    <ClInclude Include="src\savemenustate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -552,8 +552,8 @@
     <ClCompile Include="src\autosavepanel.cpp">
       <Filter>Source Files\Object Modifiers</Filter>
     </ClCompile>
-    <ClCompile Include="src\objectrefarray.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\savemenustate.cpp">
+      <Filter>Source Files\Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

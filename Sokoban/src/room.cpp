@@ -278,10 +278,8 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 			}
 			break;
 		case MapCode::End:
-			reading_file = false;
-			break;
 		default:
-			std::cout << "unknown state code! " << (int)b[0] << std::endl;
+			reading_file = false;
 			break;
 		}
 	}
@@ -304,6 +302,11 @@ void read_objects_free(MapFileI& file, RoomMap* map) {
 	while (true) {
 		file.read(&b, 1);
 		switch (static_cast<ObjCode>(b)) {
+		case ObjCode::Null:
+		{
+			map->create_null_object();
+			continue;
+		}
 			CASE_OBJCODE(PushBlock);
 			CASE_OBJCODE(SnakeBlock);
 			CASE_OBJCODE(GateBody);
@@ -318,10 +321,8 @@ void read_objects_free(MapFileI& file, RoomMap* map) {
 			break;
 		}
 		case ObjCode::NONE:
-			return;
 		default:
-			throw std::runtime_error("Unknown Object code encountered in .map file (it's probably corrupt/an old version)");
-			break;
+			return;
 		}
 		file.read(&b, 1);
 		switch (static_cast<ModCode>(b)) {
@@ -340,6 +341,7 @@ void read_objects_free(MapFileI& file, RoomMap* map) {
 			CASE_MODCODE(MapDisplay);
 			CASE_MODCODE(AutosavePanel);
 		case ModCode::NONE:
+		default:
 			break;
 		}
 		map->create_in_map(std::move(obj), false, nullptr);

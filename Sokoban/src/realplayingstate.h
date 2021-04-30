@@ -4,22 +4,24 @@
 #include "playingstate.h"
 
 class PlayingGlobalData;
-class SaveFile;
+class SaveProfile;
+class AutosavePanel;
 class FontManager;
 
 class RealPlayingState: public PlayingState {
 public:
-    RealPlayingState(SaveFile*, GameState* parent);
+    RealPlayingState(SaveProfile*, GameState* parent);
     ~RealPlayingState();
 
 	void play_from_map(std::string starting_map);
 	bool load_room(std::string name, bool use_default_player);
-	void make_subsave(SaveType type);
+	void make_subsave(SaveType type, unsigned int save_index = 0, AutosavePanel* panel = nullptr);
 	void play_from_loaded_subsave();
 
+	void reset();
 	void world_reset();
 
-	SaveFile* savefile_;
+	SaveProfile* savefile_;
 };
 
 

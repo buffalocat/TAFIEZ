@@ -62,9 +62,10 @@ void FileSelectState::main_loop() {
 void FileSelectState::load_save_info() {
 	for (int i = 0; i < MAX_SAVE_FILES; ++i) {
 		std::string cur_name = std::to_string(i + 1);
-		auto cur_file = std::make_unique<SaveFile>(cur_name);
+		auto cur_file = std::make_unique<SaveProfile>(cur_name);
 		cur_file->create_save_dir();
 		cur_file->load_meta();
+		cur_file->load_global();
 		save_files_.push_back(std::move(cur_file));
 	}
 }
@@ -100,7 +101,7 @@ void FileSelectState::continue_file() {
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
 	playing_state->reset();
-	cur_file->load_most_recent_subsave(playing_state);
+	cur_file->load_subsave_dispatch(SaveType::Emergency, 0, playing_state);
 	playing_state->play_from_loaded_subsave();
 	queue_quit();
 }

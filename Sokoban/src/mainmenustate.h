@@ -4,7 +4,7 @@
 #include "gamestate.h"
 
 class Menu;
-class SaveFile;
+class SaveProfile;
 
 class MainMenuState: public GameState {
 public:
@@ -38,7 +38,7 @@ public:
 private:
 	int save_index_;
 	std::unique_ptr<Menu> menu_{};
-	std::vector<std::unique_ptr<SaveFile>> save_files_{};
+	std::vector<std::unique_ptr<SaveProfile>> save_files_{};
 };
 
 #endif // MAINMENUSTATE_H
