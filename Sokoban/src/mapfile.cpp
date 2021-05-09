@@ -142,20 +142,17 @@ MapFileIwithObjs::~MapFileIwithObjs() {}
 
 FrozenObject MapFileIwithObjs::read_frozen_obj() {
 	auto ref = static_cast<ObjRefCode>(read_byte());
+	auto inacc_id = read_uint32();
+    Point3 pos;
 	switch (ref) {
-	case ObjRefCode::Null:
-		return FrozenObject({ 0,0,0 }, ref);
-	case ObjRefCode::Dead:
-    {
-        auto dead_id = read_uint32();
-        return FrozenObject::create_dead_obj(arr_->dead_obj_list_[dead_id]);
-    }
+    case ObjRefCode::Null:
+	case ObjRefCode::Inaccessible:
+        break;
 	default:
-    {
-        auto pos = read_point3();
-        return FrozenObject(pos, ref);
-    }
+        pos = read_point3();
+        break;
 	}
+    return FrozenObject(pos, ref, inacc_id);
 }
 
 
@@ -254,7 +251,7 @@ MapFileO& MapFileO::operator<<(FloatRect r) {
 	return *this;
 }
 
-MapFileO& MapFileO::operator<<(const std::string& str) {
+MapFileO& MapFileO::operator<<(std::string str) {
     file_ << (unsigned char) str.size();
     file_.write(str.c_str(), str.size());
     return *this;

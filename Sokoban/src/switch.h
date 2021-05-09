@@ -43,7 +43,7 @@ public:
 	SwitchToggleDelta(Switch* obj);
 	SwitchToggleDelta(FrozenObject obj);
 	~SwitchToggleDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

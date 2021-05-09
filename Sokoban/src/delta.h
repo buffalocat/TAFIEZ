@@ -45,7 +45,7 @@ enum class DeltaCode {
 	SignalerCountDelta = 28,
 	AddLinkDelta = 29,
 	RemoveLinkDelta = 30,
-	RemoveLinkOneWayDelta = 31,
+	GateUnlinkDelta = 31,
 	SwitchToggleDelta = 32,
 	SwitchableDelta = 33,
 };
@@ -55,18 +55,20 @@ public:
 	FrozenObject();
 	FrozenObject(GameObject* obj);
 	FrozenObject(ObjectModifier* mod);
-	FrozenObject(Point3 pos, ObjRefCode ref);
+	FrozenObject(Point3 pos, ObjRefCode ref, unsigned int inacc_id);
 	~FrozenObject();
 
-	static FrozenObject create_dead_obj(GameObject* obj);
 	void init_from_obj();
-	void serialize(MapFileO& file, GameObjectArray* arr);
+	void serialize(MapFileO& file);
 	GameObject* resolve(RoomMap*);
 	ObjectModifier* resolve_mod(RoomMap*);
+
+	void print();
 
 	GameObject* obj_;
 	ObjRefCode ref_;
 	Point3 pos_;
+	unsigned int inacc_id_;
 };
 
 
@@ -74,7 +76,7 @@ class Delta {
 public:
 	virtual ~Delta();
 	virtual void revert(RoomMap* room_map) = 0;
-	virtual void serialize(MapFileO& file, GameObjectArray* arr) = 0;
+	virtual void serialize(MapFileO& file) = 0;
 	virtual DeltaCode code() = 0;
 };
 
@@ -91,10 +93,10 @@ public:
 	bool changed();
 
 	void deserialize(MapFileIwithObjs& file);
-	void serialize(MapFileO& file, GameObjectArray* arr);
+	void serialize(MapFileO& file);
 
-private:
 	std::vector<std::unique_ptr<Delta>> deltas_{};
+private:
 	bool changed_ = false;
 };
 

@@ -20,8 +20,8 @@ menu_{ std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72
 		if (playing_state_->global_->has_flag(get_misc_flag(MiscGlobalFlag::WorldResetLearned))) {
 			menu_->push_entry("World Reset", [this]() { world_reset(); });
 		}
-		menu_->push_entry("  Load...", [this]() { open_load_menu(); });
-		menu_->push_entry("  Save...", [this]() { open_save_menu(); });
+		menu_->push_entry(" Load...", [this]() { open_load_menu(); });
+		menu_->push_entry(" Save...", [this]() { open_save_menu(); });
 		menu_->push_entry("Save and Quit", [this]() { quit_playing(); });
 	} else if (dynamic_cast<TestPlayingState*>(parent)) {
 		menu_->push_entry("Quit Test Session", [this]() { quit_playing(); });
@@ -54,7 +54,7 @@ void PauseState::open_load_menu() {
 }
 
 void PauseState::open_save_menu() {
-
+	create_child(std::make_unique<SaveMenuState>(this));
 }
 
 void PauseState::quit_playing() {

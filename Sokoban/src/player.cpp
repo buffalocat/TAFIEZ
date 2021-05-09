@@ -157,7 +157,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 				if (auto* above = map->view(pos_ + Point3{ 0,0,1 })) {
 					mp->add_to_fall_check(above);
 				}
-				map->take_from_map(this, true, true, delta_frame);
+				map->take_from_map(this, true, false, true, delta_frame);
 				state_ = PlayerState::RidingHidden;
 				set_car(car);
 				break;
@@ -337,9 +337,9 @@ PlayerStateDelta::PlayerStateDelta(FrozenObject player, FrozenObject car, Player
 
 PlayerStateDelta::~PlayerStateDelta() {}
 
-void PlayerStateDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	player_.serialize(file, arr);
-	car_.serialize(file, arr);
+void PlayerStateDelta::serialize(MapFileO& file) {
+	player_.serialize(file);
+	car_.serialize(file);
 	file << state_;
 	file << death_;
 }

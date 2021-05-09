@@ -123,7 +123,7 @@ public:
 	RoomChangeDelta(Room* room);
 	RoomChangeDelta(std::string room_name);
 	~RoomChangeDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -138,7 +138,7 @@ public:
 	ToggleGravitableDelta(GameObject* obj);
 	ToggleGravitableDelta(FrozenObject obj);
 	~ToggleGravitableDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -154,7 +154,7 @@ public:
 	ColorChangeDelta(Car* car, bool undo);
 	ColorChangeDelta(FrozenObject car, bool undo);
 	~ColorChangeDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

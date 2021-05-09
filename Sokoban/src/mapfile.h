@@ -5,6 +5,7 @@
 #include "delta.h"
 
 enum class MapCode {
+	NONE = 0,
 	Dimensions = 1, // The dimensions of the room as 1 byte integers
 	Zone = 2, // Indicates which of the 36 zones the map is in
 	ClearFlagRequirement = 3, // Indicates the number of clear flags to clear this room
@@ -29,16 +30,17 @@ enum class MapCode {
 	PlayerCycle = 22,
 	DeadObjs = 23,
 	Deltas = 24,
+	DoorRelationsFrozen = 25,
 	End = 255,
 };
 
 
 enum class ObjRefCode {
 	Tangible = 1,
-	Dead = 2,
+	Inaccessible = 2,
 	HeldGateBody = 3,
 	HeldPlayer = 4,
-	Null = 5,
+	Null = 7,
 };
 
 
@@ -123,7 +125,7 @@ public:
 	MapFileO& operator<<(IntRect);
 	MapFileO& operator<<(FloatRect);
 
-    MapFileO& operator<<(const std::string&);
+    MapFileO& operator<<(std::string);
     MapFileO& operator<<(const ColorCycle&);
 
     MapFileO& operator<<(MapCode);

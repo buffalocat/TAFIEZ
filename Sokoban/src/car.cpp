@@ -8,6 +8,7 @@
 #include "mapfile.h"
 #include "graphicsmanager.h"
 #include "moveprocessor.h"
+#include "gameobjectarray.h"
 
 
 Car::Car(GameObject* parent, CarType type, ColorCycle color_cycle) : ObjectModifier(parent), type_{ type }, color_cycle_{ color_cycle } {}
@@ -29,7 +30,7 @@ void Car::serialize(MapFileO& file) {
 	}
 }
 
-void Car::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void Car::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
 	CarType type = static_cast<CarType>(file.read_byte());
     ColorCycle color_cycle;
     file >> color_cycle;
@@ -38,7 +39,7 @@ void Car::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 		if (file.read_byte()) {
 			auto riding_player = std::make_unique<Player>(parent->shifted_pos({ 0,0,1 }), PlayerState::RidingHidden);
 			riding_player->set_car(car.get());
-			map->push_to_object_array(std::move(riding_player), nullptr);
+			arr->push_object(std::move(riding_player));
 		}
 	}
 	parent->set_modifier(std::move(car));
@@ -127,8 +128,11 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 			player_->set_free(mp->delta_frame_);
 			break;
 		case CarType::Convertible:
+			player_->set_free(mp->delta_frame_);
 			player_->destroy(mp, death);
 			break;
+		default:
+			player_->set_free(mp->delta_frame_);
 		}
 	}
 }

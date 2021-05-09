@@ -54,7 +54,7 @@ PlayingRoom::PlayingRoom(std::unique_ptr<Room> arg_room) :
 
 PlayingState::PlayingState(GameState* parent, PlayingGlobalData* global) :
 	GameState(parent), global_{ global } {
-	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this, text_->ui_atlas_);
+	anims_ = std::make_unique<AnimationManager>(&gfx_->particle_shader_, this, text_->ui_atlas_, sound_);
 	current_death_ = CauseOfDeath::None;
 	current_death_state_ = DeathState::Alive;
 }
@@ -142,12 +142,12 @@ void PlayingState::handle_input() {
 	if (move_processor_) {
 		if (move_processor_->update()) {
 			move_processor_.reset(nullptr);
+			undo_stack_->push(std::move(delta_frame_));
+			delta_frame_ = std::make_unique<DeltaFrame>();
 			if (queued_autosave_) {
 				make_subsave(SaveType::Auto, 0, queued_autosave_);
 				queued_autosave_ = nullptr;
 			}
-			undo_stack_->push(std::move(delta_frame_));
-			delta_frame_ = std::make_unique<DeltaFrame>();
 		} else {
 			return;
 		}
@@ -331,11 +331,11 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		// Uncreate the default objects we put in the map
 		if (default_player) {
 			room->map()->player_cycle_->remove_player(default_player, nullptr);
-			room->map()->take_from_map(default_player, true, false, nullptr);
+			room->map()->take_from_map(default_player, true, false, false, nullptr);
 			room->map()->remove_from_object_array(default_player);
 		}
 		if (Car* car = init_data.default_car) {
-			room->map()->take_from_map(car->parent_, true, false, nullptr);
+			room->map()->take_from_map(car->parent_, true, false, false, nullptr);
 			room->map()->remove_from_object_array(car->parent_);
 		}
 	}

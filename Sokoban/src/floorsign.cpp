@@ -34,7 +34,7 @@ void FloorSign::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void FloorSign::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void FloorSign::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	std::string content = file.read_long_str();
 	bool showing_text = file.read_byte();
 	auto sign = std::make_unique<FloorSign>(parent, content, showing_text);
@@ -48,6 +48,11 @@ bool FloorSign::relation_check() {
 void FloorSign::relation_serialize(MapFileO& file) {
 	file << MapCode::FloorSignFlag;
 	file << pos();
+	file.write_uint32(learn_flag_);
+}
+
+void FloorSign::relation_serialize_frozen(MapFileO& file) {
+	file << MapCode::FloorSignFlag;
 	file.write_uint32(learn_flag_);
 }
 
@@ -126,8 +131,8 @@ SignToggleDelta::SignToggleDelta(FrozenObject sign) :
 
 SignToggleDelta::~SignToggleDelta() {}
 
-void SignToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	sign_.serialize(file, arr);
+void SignToggleDelta::serialize(MapFileO& file) {
+	sign_.serialize(file);
 }
 
 void SignToggleDelta::revert(RoomMap* room_map) {
@@ -151,8 +156,8 @@ LearnFlagDelta::LearnFlagDelta(FrozenObject sign, unsigned int flag) :
 
 LearnFlagDelta::~LearnFlagDelta() {}
 
-void LearnFlagDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	sign_.serialize(file, arr);
+void LearnFlagDelta::serialize(MapFileO& file) {
+	sign_.serialize(file);
 	file.write_uint32(flag_);
 }
 

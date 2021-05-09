@@ -29,7 +29,7 @@ void Incinerator::serialize(MapFileO& file) {
 	file << count_ << persistent_ << default_ << active_;
 }
 
-void Incinerator::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void Incinerator::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	unsigned char b[4];
 	file.read(b, 4);
 	parent->set_modifier(std::make_unique<Incinerator>(parent, b[0], b[1], b[2], b[3]));

@@ -74,7 +74,7 @@ public:
 	PlayerStateDelta(Player* player);
 	PlayerStateDelta(FrozenObject player, FrozenObject car, PlayerState state, CauseOfDeath death);
 	~PlayerStateDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

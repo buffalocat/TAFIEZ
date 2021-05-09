@@ -54,7 +54,7 @@ public:
 	SwitchableDelta(Switchable* obj, int count, bool active, bool waiting);
 	SwitchableDelta(FrozenObject obj, int count, bool active, bool waiting);
 	~SwitchableDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

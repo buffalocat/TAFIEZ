@@ -64,7 +64,7 @@ class GlobalFlagDelta : public Delta {
 public:
 	GlobalFlagDelta(unsigned int flag);
 	~GlobalFlagDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -77,7 +77,7 @@ class FlagCountDelta : public Delta {
 public:
 	FlagCountDelta(unsigned int count);
 	~FlagCountDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -90,7 +90,7 @@ class AutosaveDelta : public Delta {
 public:
 	AutosaveDelta(int index);
 	~AutosaveDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -164,7 +164,7 @@ public:
 	void make_emergency_save(RealPlayingState*);
 	void make_auto_save(AutosavePanel*, RealPlayingState*);
 	void make_manual_save(unsigned int index, RealPlayingState*);
-	void load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state);
+	bool load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state);
 
 	void load_room_data(std::filesystem::path subsave_path);
 	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
@@ -176,12 +176,14 @@ public:
 	void save_meta_single(MapFileO& file, SubSave* subsave);
 
 	void world_reset();
+	void replace_emergency();
 
 	std::unique_ptr<PlayingGlobalData> global_;
 	std::string cur_room_name_{};
 	bool exists_ = false;
 
 	std::unique_ptr<SubSave> emergency_save_{};
+	std::unique_ptr<SubSave> emergency_save_temp_{};
 	std::deque<std::unique_ptr<SubSaveAuto>> auto_saves_{};
 	std::vector<std::unique_ptr<SubSave>> manual_saves_{};
 	SaveDependencyGraph dep_graph_{};

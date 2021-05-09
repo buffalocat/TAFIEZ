@@ -20,6 +20,7 @@ class MapFileI;
 class MapFileO;
 class RoomMap;
 class PlayingGlobalData;
+class FrozenObject;
 
 class GameObject;
 class Player;
@@ -45,21 +46,16 @@ public:
 
 	virtual void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
-	void push_to_object_array_deleted(GameObject*, DeltaFrame*);
-	void remove_from_object_array_deleted(GameObject*);
 	void put_in_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
-    void take_from_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
+    void take_from_map(GameObject*, bool real, bool inacc, bool activate_listeners, DeltaFrame*);
 	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
-	virtual void create_null_object();
-	GameObject* deref_object(ObjRefCode ref_code, Point3 pos);
+	GameObject* deref_object(FrozenObject* frozen_obj);
 
 	void create_wall(Point3);
 	void clear(Point3);
 
     void shift(GameObject*, Point3, bool activate_listeners, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, bool activate_listeners, DeltaFrame*);
-	void batch_shift_frozen(std::vector<FrozenObject>, Point3);
-
 
     void serialize(MapFileO& file);
 
@@ -121,6 +117,7 @@ public:
 	char zone_ = '!';
 	bool clear_flags_changed_ = false;
 
+	std::string name_;
 	bool inited_ = false;
 
 	std::unique_ptr<PlayerCycle> player_cycle_;
@@ -147,15 +144,6 @@ public:
     friend class SwitchTab;
 };
 
-class DeadObjectAdder : public RoomMap {
-public:
-	DeadObjectAdder(GameObjectArray& obj_array);
-	~DeadObjectAdder();
-
-	void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
-	void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
-	void create_null_object();
-};
 
 // Deltas
 
@@ -164,7 +152,7 @@ public:
 	PutDelta(GameObject* obj);
 	PutDelta(FrozenObject obj);
 	~PutDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -176,16 +164,17 @@ private:
 
 class TakeDelta : public Delta {
 public:
-	TakeDelta(GameObject* obj);
-	TakeDelta(FrozenObject obj);
+	TakeDelta(GameObject* obj, bool new_inacc);
+	TakeDelta(FrozenObject obj, bool new_inacc);
 	~TakeDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 
 private:
 	FrozenObject obj_;
+	bool new_inacc_;
 };
 
 
@@ -194,7 +183,7 @@ public:
 	WallDestructionDelta(Point3 pos);
 	~WallDestructionDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -209,7 +198,7 @@ public:
 	ObjArrayPushDelta(GameObject* obj);
 	ObjArrayPushDelta(FrozenObject obj);
 	~ObjArrayPushDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -217,22 +206,6 @@ public:
 private:
 	FrozenObject obj_;
 };
-
-
-class ObjArrayDeletedPushDelta : public Delta {
-public:
-	ObjArrayDeletedPushDelta(GameObject* obj);
-	ObjArrayDeletedPushDelta(FrozenObject obj);
-	~ObjArrayDeletedPushDelta();
-	void serialize(MapFileO&, GameObjectArray*);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
-
-private:
-	FrozenObject obj_;
-};
-
 
 
 class MotionDelta : public Delta {
@@ -240,7 +213,7 @@ public:
 	MotionDelta(GameObject* obj, Point3 dpos);
 	MotionDelta(FrozenObject obj, Point3 dpos);
 	~MotionDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -256,7 +229,7 @@ public:
 	BatchMotionDelta(std::vector<GameObject*> objs, Point3 dpos);
 	BatchMotionDelta(std::vector<FrozenObject>&& objs, Point3 dpos);
 	~BatchMotionDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -271,7 +244,7 @@ class ClearFlagCollectionDelta : public Delta {
 public:
 	ClearFlagCollectionDelta();
 	~ClearFlagCollectionDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -321,7 +294,7 @@ public:
 	AddPlayerDelta(int index);
 	~AddPlayerDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -337,7 +310,7 @@ public:
 	RemovePlayerDelta(FrozenObject player, FrozenObject dead_player, int index, int dead_index, int rem);
 	~RemovePlayerDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -357,7 +330,7 @@ public:
 	CyclePlayerDelta(FrozenObject dead_player, int index, int dead_index);
 	~CyclePlayerDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

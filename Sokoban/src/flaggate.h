@@ -40,7 +40,7 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI& file, RoomMap* map, GameObject* parent);
+	static void deserialize(MapFileI& file, GameObjectArray* map, GameObject* parent);
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 	bool can_set_state(bool state, RoomMap*);
@@ -86,7 +86,7 @@ public:
 	FlagGateOpenDelta(FrozenObject fg);
 	~FlagGateOpenDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

@@ -279,7 +279,7 @@ struct DoorSquish {
 
 class AnimationManager {
 public:
-	AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas);
+	AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas, SoundManager* sound);
 	~AnimationManager();
 
 	void update();
@@ -301,7 +301,7 @@ public:
 
 	glm::vec3 view_dir_{};
 
-	std::unique_ptr<SoundManager> sounds_{};
+	SoundManager* sounds_;
 
 private:
 	// "Keyed" on Direction (minus 1)
@@ -336,7 +336,7 @@ public:
 	AnimationSignalDelta(AnimationSignal signal, FrozenObject obj);
 	~AnimationSignalDelta();
 
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

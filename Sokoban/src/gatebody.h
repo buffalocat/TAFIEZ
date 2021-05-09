@@ -2,6 +2,7 @@
 #define GATEBODY_H
 
 #include "pushblock.h"
+#include "delta.h"
 
 class Gate;
 class MoveProcessor;
@@ -25,7 +26,6 @@ public:
 	void set_gate(Gate*);
 
 	void destroy(MoveProcessor*, CauseOfDeath);
-	void undestroy();
 
 	void collect_special_links(std::vector<GameObject*>&);
 
@@ -37,5 +37,21 @@ private:
 	bool persistent_;
 	bool corrupt_;
 };
+
+class GateUnlinkDelta : public Delta {
+public:
+	GateUnlinkDelta(GateBody* body, Gate* gate);
+	GateUnlinkDelta(FrozenObject body, FrozenObject gate);
+	~GateUnlinkDelta();
+	void serialize(MapFileO&);
+	void revert(RoomMap*);
+	DeltaCode code();
+	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+
+private:
+	FrozenObject body_;
+	FrozenObject gate_;
+};
+
 
 #endif // GATEBODY_H

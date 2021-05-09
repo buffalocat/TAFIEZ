@@ -14,9 +14,10 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI& file, RoomMap*, GameObject* parent);
+	static void deserialize(MapFileI& file, GameObjectArray*, GameObject* parent);
 	bool relation_check();
 	void relation_serialize(MapFileO& file);
+	void relation_serialize_frozen(MapFileO& file);
 
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
@@ -47,7 +48,7 @@ public:
 	SignToggleDelta(FloorSign* sign);
 	SignToggleDelta(FrozenObject sign);
 	~SignToggleDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -61,7 +62,7 @@ public:
 	LearnFlagDelta(FloorSign* sign, unsigned int flag);
 	LearnFlagDelta(FrozenObject sign, unsigned int flag);
 	~LearnFlagDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

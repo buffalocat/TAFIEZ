@@ -95,7 +95,7 @@ bool FallStepProcessor::run(bool test) {
 			}
 		}
 		for (auto* sb : temp_snakes) {
-			map_->take_from_map(sb, false, false, nullptr);
+			map_->take_from_map(sb, false, false, false, nullptr);
 		}
 		for (auto* sb : caught_snakes) {
 			settle(sb->fall_comp());
@@ -177,8 +177,9 @@ void FallStepProcessor::check_land_sticky(FallComponent* comp) {
 
 void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
     comp->settled_ = true;
-    std::vector<GameObject*> live_blocks {};
-    for (GameObject* block : comp->blocks_) {
+    std::vector<GameObject*> live_blocks{};
+    std::vector<GameObject*> to_destroy{};
+    for (auto* block : comp->blocks_) {
         if (block->pos_.z >= 0) {
             anims_->make_fall_trail(block, layers_fallen_, 0);
             live_blocks.push_back(block);
@@ -188,11 +189,14 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
             // NOTE: magic number for trail size
 			anims_->make_fall_trail(block, layers_fallen_, 10);
             block->pos_ += {0,0,layers_fallen_};
-			// Listeners only have to get activated once
-            map_->put_in_map(block, false, true, nullptr);
-            map_->take_from_map(block, true, false, delta_frame_);
-			block->destroy(move_processor_, CauseOfDeath::Fallen);
+            to_destroy.push_back(block);
+            map_->put_in_map(block, false, false, nullptr);
         }
+    }
+    for (auto* block : to_destroy) {
+		// Listeners only have to get activated once
+		map_->take_from_map(block, true, true, true, delta_frame_);
+		block->destroy(move_processor_, CauseOfDeath::Fallen);
     }
     if (!live_blocks.empty() && delta_frame_) {
 		for (auto* block : live_blocks) {

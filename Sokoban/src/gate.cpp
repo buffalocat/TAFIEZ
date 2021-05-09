@@ -12,6 +12,8 @@
 #include "animationmanager.h"
 #include "graphicsmanager.h"
 #include "texture_constants.h"
+#include "gameobjectarray.h"
+
 
 Gate::Gate(GameObject* parent, GateBody* body, int color, int count, bool persistent, bool def, bool active, bool waiting) :
 	Switchable(parent, count, persistent, def, active, waiting), color_{ color }, body_{ body } {}
@@ -35,7 +37,7 @@ void Gate::serialize(MapFileO& file) {
 	}
 }
 
-void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
+void Gate::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
 	unsigned char b[7];
 	file.read(b, 7);
 	auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -43,7 +45,7 @@ void Gate::deserialize(MapFileI& file, RoomMap* map, GameObject* parent) {
 	if (b[6]) {
 		Point3_S16 body_pos{};
 		file >> body_pos;
-		map->push_to_object_array(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_), nullptr);
+		arr->push_object(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_));
 	}
 	parent->set_modifier(std::move(gate));
 }
@@ -71,7 +73,7 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 		if (cur_state && !body_->tangible_) {
 			mp->push_rising_gate(this);
 		} else if (!cur_state && body_->tangible_) {
-			map->take_from_map(body_, true, true, delta_frame);
+			map->take_from_map(body_, true, false, true, delta_frame);
 			mp->anims_->receive_signal(AnimationSignal::GateDown, parent_, delta_frame);
 			mp->add_to_fall_check(parent_);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });

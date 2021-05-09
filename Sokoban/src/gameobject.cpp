@@ -62,12 +62,6 @@ GameObject* GameObject::realize(PlayingState* state) {
 	return this;
 }
 
-void GameObject::realize_references(RoomMap* room_map) {
-	if (auto* mod = modifier()) {
-		mod->realize_references(room_map);
-	}
-}
-
 Point3 GameObject::shifted_pos(Point3 d) {
 	return pos_ + d;
 }
@@ -85,7 +79,6 @@ void GameObject::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 }
 
 void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death) {
-	mp->map_->push_to_object_array_deleted(this, mp->delta_frame_);
 	if (modifier_) {
 		modifier_->destroy(mp, death);
 	}
@@ -212,14 +205,13 @@ DestructionDelta::DestructionDelta(FrozenObject obj) :
 
 DestructionDelta::~DestructionDelta() {}
 
-void DestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void DestructionDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 }
 
 void DestructionDelta::revert(RoomMap* room_map) {
 	auto* obj = obj_.resolve(room_map);
 	obj->undestroy();
-	room_map->remove_from_object_array_deleted(obj);
 }
 
 DeltaCode DestructionDelta::code() {
@@ -239,8 +231,8 @@ AbstractShiftDelta::AbstractShiftDelta(FrozenObject obj, Point3 dpos) :
 
 AbstractShiftDelta::~AbstractShiftDelta() {}
 
-void AbstractShiftDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void AbstractShiftDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 	file.write_spoint3(dpos_);
 }
 
@@ -268,8 +260,8 @@ AbstractPutDelta::AbstractPutDelta(FrozenObject obj, Point3 pos) :
 
 AbstractPutDelta::~AbstractPutDelta() {}
 
-void AbstractPutDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void AbstractPutDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 	file.write_spoint3(pos_);
 }
 

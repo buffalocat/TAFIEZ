@@ -12,7 +12,7 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI&, RoomMap*, GameObject*);
+	static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
 	bool relation_check();
 	void relation_serialize(MapFileO& file);
 

@@ -17,7 +17,9 @@ bool ObjectModifier::relation_check() {
 
 void ObjectModifier::relation_serialize(MapFileO&) {}
 
-void ObjectModifier::realize_references(RoomMap* map) {}
+void ObjectModifier::relation_serialize_frozen(MapFileO& file) {
+	file << MapCode::NONE;
+}
 
 // The "default" case is "Block"
 bool ObjectModifier::valid_parent(GameObject* obj) {
@@ -87,8 +89,8 @@ ModDestructionDelta::ModDestructionDelta(FrozenObject mod) :
 
 ModDestructionDelta::~ModDestructionDelta() {}
 
-void ModDestructionDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	mod_.serialize(file, arr);
+void ModDestructionDelta::serialize(MapFileO& file) {
+	mod_.serialize(file);
 }
 
 void ModDestructionDelta::revert(RoomMap* room_map) {

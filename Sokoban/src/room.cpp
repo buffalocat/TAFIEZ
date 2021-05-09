@@ -37,7 +37,7 @@
 #include "switchable.h"
 #include "signaler.h"
 #include "mapfile.h"
-
+#include "gameobjectarray.h"
 #include "savefile.h"
 #include "globalflagconstants.h"
 
@@ -51,6 +51,7 @@ std::string const Room::name() {
 
 void Room::initialize(GameObjectArray& objs, int w, int h, int d) {
 	map_ = std::make_unique<RoomMap>(objs, state_, w, h, d);
+	map_->name_ = name_;
 	camera_ = std::make_unique<Camera>(w, h);
 }
 
@@ -179,8 +180,7 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 	auto* p_global = dynamic_cast<PlayingGlobalData*>(global);
 	auto* e_global = dynamic_cast<EditorGlobalData*>(global);
 	while (reading_file) {
-		file.read(b, 1);
-		switch (static_cast<MapCode>(b[0])) {
+		switch (static_cast<MapCode>(file.read_byte())) {
 		case MapCode::Dimensions:
 			file.read(b, 3);
 			initialize(objs, b[0], b[1], b[2]);
@@ -277,6 +277,9 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 				door->map_flag_ = file.read_uint32();
 			}
 			break;
+		case MapCode::PlayerCycle:
+			map_->player_cycle()->deserialize_permutation(file, map_.get());
+			break;
 		case MapCode::End:
 		default:
 			reading_file = false;
@@ -285,6 +288,126 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 	}
 }
 
+
+#define CASE_OBJCODE(CLASS)\
+case ObjCode::CLASS:\
+    obj_unique = CLASS::deserialize(file);\
+    break;
+
+#define CASE_MODCODE(CLASS)\
+case ModCode::CLASS:\
+    CLASS::deserialize(file, arr, obj);\
+    break;
+
+
+void deserialize_inacc_objects(MapFileIwithObjs& file, GameObjectArray* arr) {
+	std::unique_ptr<GameObject> obj_unique{};
+	arr->inacc_obj_list_.resize(file.read_uint32());
+	std::fill(arr->inacc_obj_list_.begin(), arr->inacc_obj_list_.end(), nullptr);
+	unsigned int n_objs = file.read_uint32();
+	GameObject* obj;
+	for (unsigned int i = 0; i < n_objs; ++i) {
+		unsigned int key = file.read_uint32();
+		auto ref = static_cast<ObjRefCode>(file.read_byte());
+		switch (ref) {
+		case ObjRefCode::Null:
+		{
+			std::cout << "A Null FrozenObject was in the inacc_map??" << std::endl;
+			return;
+		}
+		case ObjRefCode::Inaccessible:
+		{
+			switch (static_cast<ObjCode>(file.read_byte())) {
+				CASE_OBJCODE(PushBlock);
+				CASE_OBJCODE(SnakeBlock);
+				CASE_OBJCODE(GateBody);
+				CASE_OBJCODE(Wall);
+				CASE_OBJCODE(ArtWall);
+				CASE_OBJCODE(Player);
+			case ObjCode::NONE:
+			default:
+				std::cout << "BAD OBJECT CODE" << std::endl;
+				return;
+			}
+			obj = obj_unique.get();
+			switch (static_cast<ModCode>(file.read_byte())) {
+				CASE_MODCODE(Car);
+				CASE_MODCODE(Door);
+				CASE_MODCODE(Gate);
+				CASE_MODCODE(PressSwitch);
+				CASE_MODCODE(AutoBlock);
+				CASE_MODCODE(PuppetBlock);
+				CASE_MODCODE(ClearFlag);
+				CASE_MODCODE(PermanentSwitch);
+				CASE_MODCODE(FloorSign);
+				CASE_MODCODE(Incinerator);
+				CASE_MODCODE(FlagGate);
+				CASE_MODCODE(FlagSwitch);
+				CASE_MODCODE(MapDisplay);
+				CASE_MODCODE(AutosavePanel);
+			case ModCode::NONE:
+				break;
+			default:
+				std::cout << "BAD MOD CODE" << std::endl;
+				break;
+			}
+			arr->push_object(std::move(obj_unique));
+			arr->inacc_obj_list_[key] = obj;
+			obj->inacc_id_ = key;
+			arr->inacc_obj_map_[obj] = key;
+			switch (static_cast<MapCode>(file.read_byte())) {
+			case MapCode::NONE:
+				break;
+			case MapCode::DoorRelationsFrozen:
+				read_door_relations_frozen(file, static_cast<Door*>(obj->modifier()));
+				break;
+			case MapCode::FloorSignFlag:
+			{
+				auto* sign = static_cast<FloorSign*>(obj->modifier());
+				sign->learn_flag_ = file.read_uint32();
+				break;
+			}
+			}
+			break;
+		}
+		default:
+		{
+			Point3 pos = file.read_point3();
+			std::string map_name = file.read_str();
+			auto f_obj = std::make_unique<FrozenObject>(pos, ref, key);
+			if (arr->frozen_inaccessible_map_.count(map_name)) {
+				arr->frozen_inaccessible_map_[map_name].push_back(std::move(f_obj));
+			} else {
+				std::vector<std::unique_ptr<FrozenObject>> fio{};
+				fio.push_back(std::move(f_obj));
+				arr->frozen_inaccessible_map_[map_name] = std::move(fio);
+			}
+		}
+		}
+	}
+	for (unsigned int i = 1; i < arr->inacc_obj_list_.size(); i++) {
+		if (!arr->inacc_obj_list_[i]) {
+			arr->free_inacc_ids_.push_back(i);
+		}
+	}
+	auto n_fio_groups = file.read_uint32();
+	for (unsigned int i_group = 0; i_group < n_fio_groups; ++i_group) {
+		std::string name = file.read_str();
+		if (!arr->frozen_inaccessible_map_.count(name)) {
+			arr->frozen_inaccessible_map_[name].clear();
+		}
+		auto& cur = arr->frozen_inaccessible_map_[name];
+		auto n_objs = file.read_uint32();
+		for (unsigned int i = 0; i < n_objs; ++i) {
+			auto frozen = file.read_frozen_obj();
+			cur.push_back(std::make_unique<FrozenObject>(frozen));
+		}
+	}
+}
+
+#undef CASE_OBJCODE
+#undef CASE_MODCODE
+
 #define CASE_OBJCODE(CLASS)\
 case ObjCode::CLASS:\
     obj = CLASS::deserialize(file);\
@@ -292,21 +415,16 @@ case ObjCode::CLASS:\
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize(file, map, obj.get());\
+    CLASS::deserialize(file, &map_->obj_array_, obj.get());\
     break;
 
 
-void read_objects_free(MapFileI& file, RoomMap* map) {
+void Room::read_objects(MapFileI& file) {
 	unsigned char b;
 	std::unique_ptr<GameObject> obj{};
 	while (true) {
 		file.read(&b, 1);
 		switch (static_cast<ObjCode>(b)) {
-		case ObjCode::Null:
-		{
-			map->create_null_object();
-			continue;
-		}
 			CASE_OBJCODE(PushBlock);
 			CASE_OBJCODE(SnakeBlock);
 			CASE_OBJCODE(GateBody);
@@ -317,7 +435,7 @@ void read_objects_free(MapFileI& file, RoomMap* map) {
 			obj = Player::deserialize(file);
 			// Players need special initialization when brought into the map
 			auto* player = static_cast<Player*>(obj.get());
-			map->player_cycle_->add_player(player, nullptr, false);
+			map_->player_cycle_->add_player(player, nullptr, false);
 			break;
 		}
 		case ObjCode::NONE:
@@ -344,13 +462,8 @@ void read_objects_free(MapFileI& file, RoomMap* map) {
 		default:
 			break;
 		}
-		map->create_in_map(std::move(obj), false, nullptr);
+		map_->create_in_map(std::move(obj), false, nullptr);
 	}
-}
-
-
-void Room::read_objects(MapFileI& file) {
-	read_objects_free(file, map_.get());
 }
 
 #undef CASE_OBJCODE
@@ -402,6 +515,20 @@ void Room::read_door_dest(MapFileI& file) {
 		exit_room = name_;
 	}
 	door->set_data(door_id, name_, exit_room);
+}
+
+void read_door_relations_frozen(MapFileI& file, Door* door) {
+	// Is there a DoorDest here?
+	if (file.read_byte()) {
+		unsigned int door_id = file.read_uint32();
+		std::string start_room = file.read_str();
+		std::string exit_room = file.read_str();
+		door->set_data(door_id, start_room, exit_room);
+	}
+	// Is there a map flag here?
+	if (file.read_byte()) {
+		door->map_flag_ = file.read_uint32();
+	}
 }
 
 void Room::read_threshold_signaler(MapFileI& file) {

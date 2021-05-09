@@ -228,7 +228,7 @@ SignalerCountDelta::SignalerCountDelta(unsigned int sig_index, int count) :
 
 SignalerCountDelta::~SignalerCountDelta() {}
 
-void SignalerCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+void SignalerCountDelta::serialize(MapFileO& file) {
 	file.write_uint32(index_);
 	file << count_;
 }

@@ -161,7 +161,7 @@ void ObjectTab::object_tab_options(EditorRoom* eroom) {
 				if (selected_obj->id_ == GENERIC_WALL_ID) {
 					map->clear(selected_pos);
 				} else {
-					map->take_from_map(selected_obj, true, false, nullptr);
+					map->take_from_map(selected_obj, true, false, false, nullptr);
 					map->remove_from_object_array(selected_obj);
 				}
 				selected_obj = new_obj.get();
@@ -171,7 +171,7 @@ void ObjectTab::object_tab_options(EditorRoom* eroom) {
 			else if (transmute_obj_code == ObjCode::Wall) {
 				// If the old object was also a generic Wall, do nothing
 				if (selected_obj->id_ != GENERIC_WALL_ID) {
-					map->take_from_map(selected_obj, true, false, nullptr);
+					map->take_from_map(selected_obj, true, false, false, nullptr);
 					map->remove_from_object_array(selected_obj);
 					map->create_wall(selected_pos);
 					selected_obj = map->view(selected_pos);

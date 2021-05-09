@@ -60,7 +60,7 @@ public:
 	PlayingState(GameState* parent, PlayingGlobalData* global);
 	virtual ~PlayingState();
 
-	void main_loop();
+	virtual void main_loop();
 	void update_key_status();
 	void handle_input();
 	void create_move_processor(Player* player);

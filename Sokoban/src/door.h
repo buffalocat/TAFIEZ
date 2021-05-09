@@ -25,10 +25,11 @@ public:
 	void make_str(std::string&);
     ModCode mod_code();
     void serialize(MapFileO& file);
-    static void deserialize(MapFileI&, RoomMap*, GameObject*);
+    static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
 
     bool relation_check();
     void relation_serialize(MapFileO& file);
+	void relation_serialize_frozen(MapFileO& file);
     bool can_set_state(bool state, RoomMap*);
 
     void set_data(unsigned int door_id, std::string start, std::string dest);

@@ -8,6 +8,7 @@ GameState::GameState() {}
 GameState::GameState(GameState* parent): parent_{} {
 	if (parent) {
 		gfx_ = parent->gfx_;
+		sound_ = parent->sound_;
 		text_ = std::make_unique<TextRenderer>(gfx_->fonts_.get());
 		window_ = parent->window_;
 		current_state_ptr_ = parent->current_state_ptr_;
@@ -58,4 +59,10 @@ void GameState::queue_quit() {
 
 bool GameState::can_quit(bool confirm) {
 	return true;
+}
+
+void GameState::defer_to_sibling(std::unique_ptr<GameState> sibling) {
+	sibling->parent_ = std::move(parent_);
+	parent_ = std::move(sibling);
+	queue_quit();
 }

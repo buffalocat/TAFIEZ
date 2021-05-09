@@ -167,7 +167,7 @@ GlobalFlagDelta::GlobalFlagDelta(unsigned int flag) :
 
 GlobalFlagDelta::~GlobalFlagDelta() {}
 
-void GlobalFlagDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+void GlobalFlagDelta::serialize(MapFileO& file) {
 	file.write_uint32(flag_);
 }
 
@@ -189,7 +189,7 @@ FlagCountDelta::FlagCountDelta(unsigned int count) :
 
 FlagCountDelta::~FlagCountDelta() {}
 
-void FlagCountDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+void FlagCountDelta::serialize(MapFileO& file) {
 	file << count_;
 }
 
@@ -316,7 +316,6 @@ void SaveProfile::make_emergency_save(RealPlayingState* state) {
 	remove_save(emergency_save_.get());
 	emergency_save_ = std::make_unique<SubSave>();
 	make_subsave(emergency_save_.get(), state);
-	delete_unused_saves();
 }
 
 void SaveProfile::make_auto_save(AutosavePanel* panel, RealPlayingState* state) {
@@ -331,7 +330,6 @@ void SaveProfile::make_auto_save(AutosavePanel* panel, RealPlayingState* state) 
 	auto* new_save = new_save_unique.get();
 	auto_saves_.push_front(std::move(new_save_unique));
 	make_subsave(new_save, state);
-	delete_unused_saves();
 }
 
 void SaveProfile::make_manual_save(unsigned int index, RealPlayingState* state) {
@@ -342,7 +340,6 @@ void SaveProfile::make_manual_save(unsigned int index, RealPlayingState* state) 
 	auto* new_save = new_save_unique.get();
 	manual_saves_[index] = std::move(new_save_unique);
 	make_subsave(new_save, state);
-	delete_unused_saves();
 }
 
 unsigned int SaveProfile::get_save_index() {
@@ -382,7 +379,7 @@ void SaveProfile::make_subsave(SubSave* subsave, RealPlayingState* state) {
 	save_room_data(subsave_path, cur_room_name);
 	global_->save_flags(subsave_path);
 	MapFileO dead_objs_file{ subsave_path / "objs.sav" };
-	state->objs_->serialize_dead_objs(dead_objs_file);
+	state->objs_->serialize_inacc_objs(dead_objs_file);
 	state->undo_stack_->serialize(subsave_path, index, state->objs_.get());
 	for (auto i : state->undo_stack_->dependent_subsaves()) {
 		subsave->dependent_.insert(i);
@@ -399,7 +396,7 @@ void SaveProfile::create_save_dir() {
 	}
 }
 
-void SaveProfile::load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state) {
+bool SaveProfile::load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state) {
 	SubSave* subsave{};
 	switch (type) {
 	case SaveType::Emergency:
@@ -412,7 +409,12 @@ void SaveProfile::load_subsave_dispatch(SaveType type, unsigned int index, RealP
 		subsave = manual_saves_[index].get();
 		break;
 	}
-	load_subsave(subsave, state);
+	if (subsave) {
+		load_subsave(subsave, state);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void SaveProfile::load_subsave(SubSave* subsave, RealPlayingState* state) {
@@ -422,7 +424,7 @@ void SaveProfile::load_subsave(SubSave* subsave, RealPlayingState* state) {
 	auto* obj_arr = state->objs_.get();
 	auto dead_objs_path = subsave_path / "objs.sav";
 	MapFileIwithObjs dead_objs_file{ dead_objs_path, obj_arr };
-	obj_arr->deserialize_dead_objs(dead_objs_file);
+	deserialize_inacc_objects(dead_objs_file, obj_arr);
 	state->undo_stack_->deserialize(base_path_, subsave_index, obj_arr);
 	load_room_data(subsave_path);
 }
@@ -557,7 +559,13 @@ void SaveProfile::save_meta_single(MapFileO& file, SubSave* subsave) {
 	}
 }
 
-
 void SaveProfile::world_reset() {
 	room_subsave_.clear();
+}
+
+void SaveProfile::replace_emergency() {
+	if (emergency_save_) {
+		emergency_save_ = std::move(emergency_save_);
+		emergency_save_.reset(nullptr);
+	}
 }

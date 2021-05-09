@@ -79,8 +79,8 @@ SwitchToggleDelta::SwitchToggleDelta(FrozenObject obj) : obj_{ obj } {}
 
 SwitchToggleDelta::~SwitchToggleDelta() {}
 
-void SwitchToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void SwitchToggleDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 }
 
 void SwitchToggleDelta::revert(RoomMap* room_map) {

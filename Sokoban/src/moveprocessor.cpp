@@ -291,7 +291,7 @@ void MoveProcessor::run_incinerators() {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
 						sb->collect_all_viable_neighbors(map_, snake_check);
 					}
-					map_->take_from_map(above, true, true, delta_frame_);
+					map_->take_from_map(above, true, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
@@ -367,7 +367,7 @@ void MoveProcessor::try_door_entry() {
 		}
 		for (auto& obj : door_travelling_objs_) {
 			anims_->receive_signal(AnimationSignal::DoorEnter, obj.raw, delta_frame_);
-			map_->take_from_map(obj.raw, true, true, delta_frame_);
+			map_->take_from_map(obj.raw, true, true, true, delta_frame_);
 			collect_adj_fall_checks(obj.raw);
 		}
 		for (auto& obj : door_travelling_objs_) {
@@ -383,6 +383,7 @@ void MoveProcessor::try_door_entry() {
 		door_state_ = DoorState::None;
 	}
 }
+
 
 void MoveProcessor::place_door_travelling_objects() {
 	int num_exits = (int)exit_doors_.size();
@@ -504,13 +505,13 @@ void MoveProcessor::try_door_unentry() {
 }
 
 void MoveProcessor::ext_door_exit() {
-	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_->active_room()));
 	map_->player_cycle_->remove_player(player_, delta_frame_);
+	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_->active_room()));
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
-	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	entry_door_->acquire_map_flag(playing_state_->global_, delta_frame_);
 	place_door_travelling_objects();
+	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	playing_state_->move_camera_to_player(true);
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::ExtSucceeded;
@@ -536,7 +537,7 @@ RoomChangeDelta::RoomChangeDelta(std::string room_name) :
 
 RoomChangeDelta::~RoomChangeDelta() {}
 
-void RoomChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+void RoomChangeDelta::serialize(MapFileO& file) {
 	file << room_name_;
 }
 
@@ -562,8 +563,8 @@ ToggleGravitableDelta::ToggleGravitableDelta(FrozenObject obj) :
 
 ToggleGravitableDelta::~ToggleGravitableDelta() {}
 
-void ToggleGravitableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void ToggleGravitableDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 }
 
 void ToggleGravitableDelta::revert(RoomMap* room_map) {
@@ -586,8 +587,8 @@ ColorChangeDelta::ColorChangeDelta(FrozenObject car, bool undo) : car_{ car }, u
 
 ColorChangeDelta::~ColorChangeDelta() {}
 
-void ColorChangeDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	car_.serialize(file, arr);
+void ColorChangeDelta::serialize(MapFileO& file) {
+	car_.serialize(file);
 	file << undo_;
 }
 

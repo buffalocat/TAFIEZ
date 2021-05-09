@@ -31,7 +31,7 @@ ModCode MapDisplay::mod_code() {
 	return ModCode::MapDisplay;
 }
 
-void MapDisplay::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void MapDisplay::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	auto fg = std::make_unique<MapDisplay>(parent);
 	parent->set_modifier(std::move(fg));
 }

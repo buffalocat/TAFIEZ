@@ -30,7 +30,7 @@ void FlagSwitch::serialize(MapFileO& file) {
 	file << active_ << orientation_;
 }
 
-void FlagSwitch::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void FlagSwitch::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	unsigned char b[2];
 	file.read(b, 2);
 	parent->set_modifier(std::make_unique<FlagSwitch>(parent, b[0], b[1]));

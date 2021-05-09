@@ -23,17 +23,12 @@
 #include "snakeblock.h"
 #include "signaler.h"
 
-FrozenObject::FrozenObject() {}
+FrozenObject::FrozenObject() :
+	obj_{ nullptr }, ref_{ ObjRefCode::Null }, inacc_id_{ 0 } {}
 
-FrozenObject::FrozenObject(GameObject* obj) : obj_{ obj } {
+FrozenObject::FrozenObject(GameObject* obj) :
+	obj_{ obj } {
 	init_from_obj();
-}
-
-FrozenObject FrozenObject::create_dead_obj(GameObject* obj) {
-	auto f_obj = FrozenObject();
-	f_obj.obj_ = obj;
-	f_obj.ref_ = ObjRefCode::Dead;
-	return f_obj;
 }
 
 FrozenObject::FrozenObject(ObjectModifier* mod) {
@@ -47,7 +42,8 @@ FrozenObject::FrozenObject(ObjectModifier* mod) {
 	init_from_obj();
 }
 
-FrozenObject::FrozenObject(Point3 pos, ObjRefCode ref) : obj_{ nullptr }, pos_{ pos }, ref_{ ref } {}
+FrozenObject::FrozenObject(Point3 pos, ObjRefCode ref, unsigned int inacc_id) :
+	obj_{ nullptr }, pos_{ pos }, ref_{ ref }, inacc_id_{ inacc_id } {}
 
 FrozenObject::~FrozenObject() {}
 
@@ -56,6 +52,7 @@ void FrozenObject::init_from_obj() {
 		ref_ = ObjRefCode::Null;
 		return;
 	}
+	inacc_id_ = obj_->inacc_id_;
 	if (obj_->tangible_) {
 		pos_ = obj_->pos_;
 		ref_ = ObjRefCode::Tangible;
@@ -79,42 +76,49 @@ void FrozenObject::init_from_obj() {
 			}
 		}
 	}
+	std::cout << "Made Inaccessible FrozenObject" << std::endl;
 	pos_ = obj_->pos_;
-	ref_ = ObjRefCode::Dead;
+	ref_ = ObjRefCode::Inaccessible;
 }
 
-void FrozenObject::serialize(MapFileO& file, GameObjectArray* arr) {
+void FrozenObject::serialize(MapFileO& file) {
 	file << ref_;
-	if (ref_ == ObjRefCode::Null) {
-		return;
-	}
-	if (ref_ != ObjRefCode::Dead) {
+	file.write_uint32(inacc_id_);
+	switch (ref_) {
+	case ObjRefCode::Null:
+	case ObjRefCode::Inaccessible:
+		break;
+	default:
 		file << pos_;
-	} else {
-		file.write_uint32(arr->dead_obj_map_[obj_]);
+		break;
 	}
 }
 
 GameObject* FrozenObject::resolve(RoomMap* room_map) {
-	if (ref_ == ObjRefCode::Null) {
-		return nullptr;
-	}
 	if (!obj_) {
-		obj_ = room_map->deref_object(ref_, pos_);
+		obj_ = room_map->deref_object(this);
 	}
 	return obj_;
 }
 
 ObjectModifier* FrozenObject::resolve_mod(RoomMap* room_map) {
-	if (ref_ == ObjRefCode::Null) {
-		return nullptr;
-	}
 	if (!obj_) {
-		obj_ = room_map->deref_object(ref_, pos_);
+		obj_ = room_map->deref_object(this);
+		if (!obj_) {
+			return nullptr;
+		}
 	}
 	return obj_->modifier();
 }
 
+void FrozenObject::print() {
+	if (ref_ == ObjRefCode::Tangible) {
+		Point3 p = pos_;
+		std::cout << "tangible at " << p.x << " " << p.y << " " << p.z;
+	} else {
+		std::cout << "key " << inacc_id_;
+	}
+}
 
 Delta::~Delta() {}
 
@@ -127,6 +131,7 @@ void DeltaFrame::revert(PlayingState* state) {
 	for (auto it = deltas_.rbegin(); it != deltas_.rend(); ++it) {
 		(**it).revert(state->room_->map());
 	}
+	deltas_.clear();
 }
 
 void DeltaFrame::push(std::unique_ptr<Delta> delta) {
@@ -149,12 +154,11 @@ bool DeltaFrame::changed() {
 
 #define CASE_DELTACODE(CLASS)\
 case DeltaCode::CLASS:\
-    delta = CLASS::deserialize(file);\
+    push(std::move(CLASS::deserialize(file)));\
     break;
 
 void DeltaFrame::deserialize(MapFileIwithObjs& file) {
 	unsigned int n_deltas = file.read_uint32();
-	std::unique_ptr<Delta> delta{};
 	for (unsigned int i = 0; i < n_deltas; ++i) {
 		switch (static_cast<DeltaCode>(file.read_byte())) {
 			CASE_DELTACODE(AnimationSignalDelta);
@@ -175,7 +179,6 @@ void DeltaFrame::deserialize(MapFileIwithObjs& file) {
 			CASE_DELTACODE(TakeDelta);
 			CASE_DELTACODE(WallDestructionDelta);
 			CASE_DELTACODE(ObjArrayPushDelta);
-			CASE_DELTACODE(ObjArrayDeletedPushDelta);
 			CASE_DELTACODE(MotionDelta);
 			CASE_DELTACODE(BatchMotionDelta);
 			CASE_DELTACODE(ClearFlagCollectionDelta);
@@ -187,22 +190,21 @@ void DeltaFrame::deserialize(MapFileIwithObjs& file) {
 			CASE_DELTACODE(SignalerCountDelta);
 			CASE_DELTACODE(AddLinkDelta);
 			CASE_DELTACODE(RemoveLinkDelta);
-			CASE_DELTACODE(RemoveLinkOneWayDelta);
+			CASE_DELTACODE(GateUnlinkDelta);
 			CASE_DELTACODE(SwitchToggleDelta);
 			CASE_DELTACODE(SwitchableDelta);
 		}
-		push(std::move(delta));
 	}
 }
 
 #undef CASE_DELTACODE
 
 
-void DeltaFrame::serialize(MapFileO& file, GameObjectArray* arr) {
+void DeltaFrame::serialize(MapFileO& file) {
 	file.write_uint32((unsigned int)deltas_.size());
 	for (auto& delta : deltas_) {
 		file << delta->code();
-		delta->serialize(file, arr);
+		delta->serialize(file);
 	}
 }
 
@@ -289,7 +291,7 @@ void UndoStack::serialize(std::filesystem::path subsave_path, unsigned int subsa
 	start_frame = start_frame - skip_frames_ - num_new_frames_;
 	MapFileO file{ subsave_path / "deltas.sav" };
 	for (auto it = frames_.begin() + start_frame; it != frames_.end(); ++it) {
-		(*it)->serialize(file, arr);
+		(*it)->serialize(file);
 	}
 	num_new_frames_ = 0;
 }

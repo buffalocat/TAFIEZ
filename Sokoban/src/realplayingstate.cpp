@@ -16,18 +16,20 @@
 RealPlayingState::RealPlayingState(SaveProfile* savefile, GameState* parent) :
 	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {}
 
+RealPlayingState::RealPlayingState(RealPlayingState* rps) :
+	PlayingState(rps->parent_.get(), rps->savefile_->global_.get()),
+	savefile_{ rps->savefile_ } {}
+
 RealPlayingState::~RealPlayingState() {
-	if (delta_frame_) {
-		delta_frame_->revert(this);
+	if (room_) {
+		make_subsave(SaveType::Emergency);
 	}
-	savefile_->make_emergency_save(this);
 }
 
 void RealPlayingState::play_from_map(std::string starting_map) {
 	load_room(starting_map, true);
 	activate_room(starting_map);
 	move_camera_to_player(true);
-	room_->map()->set_initial_state(this);
 	gfx_->set_state(GraphicsState::FadeIn);
 }
 
@@ -38,13 +40,17 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 		return false;
 	}
 	load_room_from_path(path, use_default_player);
+	objs_->check_room_inaccessibles(loaded_rooms_[name]->room->map());
 	return true;
 }
 
+void RealPlayingState::main_loop() {
+	PlayingState::main_loop();
+	//savefile_->delete_unused_saves();
+}
+
 void RealPlayingState::make_subsave(SaveType type, unsigned int save_index, AutosavePanel* panel) {
-	if (player_doa()->death_ != CauseOfDeath::None) {
-		undo_stack_->pop();
-	}
+	ensure_safe_delta_state();
 	switch (type) {
 	case SaveType::Emergency:
 		savefile_->make_emergency_save(this);
@@ -58,6 +64,16 @@ void RealPlayingState::make_subsave(SaveType type, unsigned int save_index, Auto
 	}
 }
 
+bool RealPlayingState::load_subsave_dispatch(SaveType type, unsigned int index) {
+	auto new_rps = std::make_unique<RealPlayingState>(this);
+	if (savefile_->load_subsave_dispatch(type, index, new_rps.get())) {		
+		new_rps->play_from_loaded_subsave();
+		defer_to_sibling(std::move(new_rps));
+		return true;
+	}
+	return false;
+}
+
 void RealPlayingState::play_from_loaded_subsave() {
 	std::string cur_room_name = savefile_->cur_room_name_;
 	load_room(cur_room_name, false);
@@ -66,22 +82,20 @@ void RealPlayingState::play_from_loaded_subsave() {
 	gfx_->set_state(GraphicsState::FadeIn);
 }
 
-void RealPlayingState::reset() {
-	delta_frame_ = {};
-	loaded_rooms_.clear();
-	text_->reset();
-	anims_->reset();
-	room_ = nullptr;
-	undo_stack_->reset();
-	objs_ = std::make_unique<GameObjectArray>();
-}
-
 void RealPlayingState::world_reset() {
 	// Forget all the maps we know
 	global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[int(HubCode::Alpha)]);
-	savefile_->make_emergency_save(this);
-	reset();
-	savefile_->world_reset();
+	auto new_rps = std::make_unique<RealPlayingState>(this);
 	// Start anew in the world reset start room (not necessarily the same as the "new file start room"!)
-	play_from_map(WORLD_RESET_START_MAP);
+	new_rps->play_from_map(WORLD_RESET_START_MAP);
+	defer_to_sibling(std::move(new_rps));
+}
+
+void RealPlayingState::ensure_safe_delta_state() {
+	if (delta_frame_) {
+		delta_frame_->revert(this);
+	}
+	if (player_doa()->death_ != CauseOfDeath::None) {
+		undo_stack_->pop();
+	}
 }

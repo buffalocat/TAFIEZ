@@ -67,15 +67,10 @@ void GateBody::set_gate(Gate* gate) {
 
 void GateBody::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	GameObject::destroy(mp, death);	
-	if (gate_) {
-		gate_->body_ = nullptr;
-		mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
-	}
-}
-
-void GateBody::undestroy() {
-	if (gate_) {
-		gate_->body_ = this;
+	if (Gate* gate = gate_) {
+		gate->body_ = nullptr;
+		gate_ = nullptr;
+		mp->delta_frame_->push(std::make_unique<GateUnlinkDelta>(this, gate));
 	}
 }
 
@@ -112,4 +107,33 @@ void GateBody::draw(GraphicsManager* gfx) {
 	if (!gate_) {
 		draw_force_indicators(model, p, 0.75f);
 	}
+}
+
+
+GateUnlinkDelta::GateUnlinkDelta(GateBody* body, Gate* gate) : body_{ body }, gate_{ gate } {}
+
+GateUnlinkDelta::GateUnlinkDelta(FrozenObject body, FrozenObject gate) : body_{ body }, gate_{ gate } {}
+
+GateUnlinkDelta::~GateUnlinkDelta() {}
+
+void GateUnlinkDelta::serialize(MapFileO& file) {
+	body_.serialize(file);
+	gate_.serialize(file);
+}
+
+void GateUnlinkDelta::revert(RoomMap* room_map) {
+	auto* body = static_cast<GateBody*>(body_.resolve(room_map));
+	auto* gate = static_cast<Gate*>(gate_.resolve_mod(room_map));
+	body->gate_ = gate;
+	gate->body_ = body;
+}
+
+DeltaCode GateUnlinkDelta::code() {
+	return DeltaCode::GateUnlinkDelta;
+}
+
+std::unique_ptr<Delta> GateUnlinkDelta::deserialize(MapFileIwithObjs& file) {
+	auto body = file.read_frozen_obj();
+	auto gate = file.read_frozen_obj();
+	return std::make_unique<GateUnlinkDelta>(body, gate);
 }

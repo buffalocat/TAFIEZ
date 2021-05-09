@@ -3,6 +3,7 @@
 
 struct GLFWwindow;
 class GraphicsManager;
+class SoundManager;
 class TextRenderer;
 
 class GameState {
@@ -17,8 +18,10 @@ public:
     bool attempt_queued_quit();
 	void queue_quit();
 	virtual bool can_quit(bool confirm);
+	void defer_to_sibling(std::unique_ptr<GameState> sibling);
 
 	GraphicsManager* gfx_{};
+	SoundManager* sound_{};
 	std::unique_ptr<TextRenderer> text_{};
 	GLFWwindow* window_{};
 	std::unique_ptr<GameState> parent_{};

@@ -10,7 +10,7 @@ public:
 	void make_str(std::string&);
 	ModCode mod_code();
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI&, RoomMap*, GameObject*);
+	static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 
@@ -30,7 +30,7 @@ public:
 	AutosavePanelDelta(AutosavePanel* panel);
 	AutosavePanelDelta(FrozenObject panel);
 	~AutosavePanelDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

@@ -37,7 +37,6 @@ public:
     virtual void relation_serialize(MapFileO& file);
 
 	virtual GameObject* realize(PlayingState* state);
-	virtual void realize_references(RoomMap* room_map);
 
     Point3 shifted_pos(Point3 d);
     void abstract_shift(Point3 dpos);
@@ -76,6 +75,7 @@ public:
     Point3 pos_;
 	FPoint3 dpos_{};
 	unsigned int id_ = 0;
+	unsigned int inacc_id_ = 0;
     bool pushable_;
     bool gravitable_;
 	// Is the object physically in the map?
@@ -117,7 +117,7 @@ public:
 	DestructionDelta(GameObject* obj);
 	DestructionDelta(FrozenObject obj);
 	virtual ~DestructionDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -132,7 +132,7 @@ public:
 	AbstractShiftDelta(GameObject* obj, Point3 dpos);
 	AbstractShiftDelta(FrozenObject obj, Point3 dpos);
 	~AbstractShiftDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -148,7 +148,7 @@ public:
 	AbstractPutDelta(GameObject* obj, Point3 pos);
 	AbstractPutDelta(FrozenObject obj, Point3 pos);
 	~AbstractPutDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

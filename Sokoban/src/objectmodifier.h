@@ -17,6 +17,7 @@ class PlayingState;
 class PlayingGlobalData;
 class EditorGlobalData;
 class Room;
+class GameObjectArray;
 
 enum class BlockTexture;
 
@@ -31,7 +32,7 @@ public:
 	virtual void serialize(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
-	virtual void realize_references(RoomMap* map);
+	virtual void relation_serialize_frozen(MapFileO& file);
 	virtual std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*) = 0;
 
 	virtual bool valid_parent(GameObject*);
@@ -70,7 +71,7 @@ public:
 	ModDestructionDelta(ObjectModifier* obj);
 	ModDestructionDelta(FrozenObject mod);
 	~ModDestructionDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

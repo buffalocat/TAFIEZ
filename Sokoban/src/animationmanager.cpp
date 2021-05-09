@@ -350,8 +350,8 @@ void FlagCutscene::draw() {
 }
 
 
-AnimationManager::AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas) :
-	particle_shader_{ shader }, sounds_{ std::make_unique<SoundManager>() },
+AnimationManager::AnimationManager(Shader* shader, PlayingState* state, GLuint particle_atlas, SoundManager* sound) :
+	particle_shader_{ shader }, sounds_{ sound },
 	state_{ state }, gfx_{ state->gfx_ }, particle_atlas_{ particle_atlas } {
 	initialize_particle_shader();
 }
@@ -717,9 +717,9 @@ void AnimationSignalDelta::revert(RoomMap* room_map) {
 	room_map->playing_state()->anims_->receive_signal(signal_, obj_.resolve(room_map), nullptr);
 }
 
-void AnimationSignalDelta::serialize(MapFileO& file, GameObjectArray* arr) {
+void AnimationSignalDelta::serialize(MapFileO& file) {
 	file << signal_;
-	obj_.serialize(file, arr);
+	obj_.serialize(file);
 }
 
 DeltaCode AnimationSignalDelta::code() {

@@ -11,11 +11,13 @@ class RoomMap;
 class Camera;
 class MapFileI;
 class MapFileO;
+class MapFileIwithObjs;
 class GameObject;
 class Player;
 class Car;
 class GlobalData;
 class RoomLabelDrawer;
+class Door;
 
 struct RoomInitData {
 	Player* default_player{};
@@ -53,10 +55,11 @@ public:
 	std::unique_ptr<RoomLabelDrawer> context_label_{};
 	bool should_update_label_ = false;
 
+	std::string name_;
+
 private:
 	std::unique_ptr<RoomMap> map_{};
 	std::unique_ptr<Camera> camera_{};
-	std::string name_;
 
 	GameState* state_;
 	GraphicsManager* gfx_;
@@ -72,7 +75,8 @@ private:
 };
 
 
-void read_objects_free(MapFileI& file, RoomMap* map);
+void deserialize_inacc_objects(MapFileIwithObjs& file, GameObjectArray* arr);
+void read_door_relations_frozen(MapFileI& file, Door* door);
 
 
 #endif // ROOM_H

@@ -15,6 +15,7 @@ GameObjectArray::GameObjectArray() {
     array_.push_back(nullptr);
     array_.push_back(std::make_unique<Wall>());
     array_[1]->id_ = 1;
+	inacc_obj_list_.push_back(nullptr);
 }
 
 GameObjectArray::~GameObjectArray() {}
@@ -43,60 +44,53 @@ GameObject* GameObjectArray::safe_get(unsigned int id) const {
     }
 }
 
-void GameObjectArray::schedule_uncreation(GameObject* obj) {
-	to_uncreate_.push_back(obj);
+void GameObjectArray::uncreate_object(GameObject* obj) {
+	auto id = obj->id_;
+	free_ids_.push_back(id);
+	array_[id].reset(nullptr);
 }
 
-void GameObjectArray::schedule_undeletion(GameObject* obj) {
-	to_undelete_.push_back(obj);
-}
-
-void GameObjectArray::remove_uncreated_objects() {
-	for (auto* obj : to_uncreate_) {
-		auto id = obj->id_;
-		free_ids_.push_back(id);
-		array_[id].reset(nullptr);
+bool GameObjectArray::add_inacc_obj(GameObject* obj, RoomMap* room_map) {
+	if (inacc_obj_map_.count(obj)) {
+		std::cout << obj << " was already added." << std::endl;
+		return false;
 	}
-	to_uncreate_.clear();
-}
-
-void GameObjectArray::remove_undeleted_objects() {
-	for (auto* obj : to_undelete_) {
-		auto id = dead_obj_map_[obj];
-		free_dead_ids_.push_back(id);
-		dead_obj_list_[id] = nullptr;
-	}
-	to_undelete_.clear();
-}
-
-unsigned int GameObjectArray::add_dead_obj(GameObject* obj) {
-	if (!obj) {
-		free_dead_ids_.push_back((unsigned int)dead_obj_list_.size());
-		dead_obj_list_.push_back(nullptr);
-	}
-	if (free_dead_ids_.empty()) {
-		auto id = (unsigned int)dead_obj_list_.size();
-		dead_obj_list_.push_back(obj);
-		dead_obj_map_[obj] = id;
-		return id;
+	unsigned int id;
+	if (free_inacc_ids_.empty()) {
+		id = (unsigned int)inacc_obj_list_.size();
+		std::cout << obj << " added at " << id << std::endl;
+		inacc_obj_list_.push_back(obj);
 	} else {
-		auto id = free_ids_.back();
-		free_ids_.pop_back();
-		dead_obj_list_[id] = obj;
-		dead_obj_map_[obj] = id;
-		return id;
+		id = free_inacc_ids_.back();
+		free_inacc_ids_.pop_back();
+		std::cout << obj << " inserted at " << id << std::endl;
+		inacc_obj_list_[id] = obj;
+	}
+	obj->inacc_id_ = id;
+	inacc_obj_map_[obj] = id;
+	obj_room_map_[obj] = room_map;
+	return true;
+}
+
+void GameObjectArray::remove_inacc_obj(GameObject* obj) {
+	auto id = inacc_obj_map_[obj];
+	std::cout << obj << " removed from " << id << std::endl;
+	inacc_obj_map_.erase(obj);
+	obj_room_map_.erase(obj);
+	free_inacc_ids_.push_back(id);
+	inacc_obj_list_[id] = nullptr;
+	obj->inacc_id_ = 0;
+}
+
+void GameObjectArray::update_parent_map(GameObject* obj, RoomMap* room_map) {
+	if (obj_room_map_.count(obj)) {
+		obj_room_map_[obj] = room_map;
 	}
 }
 
 void GameObjectArray::serialize_object_ref(GameObject* obj, MapFileO& file) {
 	FrozenObject ref{ obj };
 	file << ref.ref_;
-	switch (ref.ref_) {
-	case ObjRefCode::Tangible:
-	{
-		file << obj->pos_;
-	}
-	}
 	if (obj->tangible_) {
 		file << ObjRefCode::Tangible;
 		file << obj->pos_;
@@ -120,27 +114,66 @@ void GameObjectArray::serialize_object_ref(GameObject* obj, MapFileO& file) {
 			}
 		}
 	}
-	file << ObjRefCode::Dead;
-	file << dead_obj_map_[obj];
+	file << ObjRefCode::Inaccessible;
+	file << inacc_obj_map_[obj];
 }
 
-void GameObjectArray::serialize_dead_objs(MapFileO& file) {
-	for (auto* obj : dead_obj_list_) {
-		if (obj) {
-			obj->serialize(file);
+void GameObjectArray::check_room_inaccessibles(RoomMap* room_map) {
+	auto name = room_map->name_;
+	if (frozen_inaccessible_map_.count(name)) {
+		for (auto& fp : frozen_inaccessible_map_[name]) {
+			auto key = fp->inacc_id_;
+			auto* obj = fp->resolve(room_map);
+			inacc_obj_list_[key] = obj;
+			obj->inacc_id_ = key;
+			inacc_obj_map_[obj] = key;
+			obj_room_map_[obj] = room_map;
+		}
+		frozen_inaccessible_map_.erase(name);
+	}
+}
+
+void GameObjectArray::serialize_inacc_objs(MapFileO& file) {
+	file.write_uint32((unsigned int)inacc_obj_list_.size());
+	file.write_uint32((unsigned int)inacc_obj_map_.size());
+	for (auto& p : inacc_obj_map_) {
+		file.write_uint32(p.second);
+		auto* obj = p.first;
+		FrozenObject f{ obj };
+		file << f.ref_;
+		if (obj_room_map_.count(nullptr)) {
+			std::cout << "wow!" << std::endl;
+		}
+		if (f.ref_ == ObjRefCode::Inaccessible) {
+			std::cout << "Serializing FIO" << std::endl;
+			file << obj->obj_code();
+			file << obj->pos_;
+			p.first->serialize(file);
+			if (ObjectModifier* mod = obj->modifier()) {
+				file << mod->mod_code();
+				mod->serialize(file);
+				if (mod->relation_check()) {
+					mod->relation_serialize_frozen(file);
+				}
+			} else {
+				file << ModCode::NONE;
+				file << MapCode::NONE;
+			}
 		} else {
-			file << ObjCode::Null;
+			std::cout << "Serializing ACCESSIBLE" << std::endl;
+			if (!obj_room_map_.count(obj)) {
+				std::cout << "none!" << std::endl;
+			}
+			file << f.pos_;
+			file << obj_room_map_[p.first]->name_;
 		}
 	}
-	file << ObjCode::NONE;
-}
-
-void GameObjectArray::deserialize_dead_objs(MapFileI& file) {
-	DeadObjectAdder fake_room{ *this };
-	read_objects_free(file, &fake_room);
-	for (auto* obj : dead_obj_list_) {
-		if (obj->tangible_) {
-			obj->tangible_ = false;
+	file.write_uint32((unsigned int)frozen_inaccessible_map_.size());
+	for (auto& p : frozen_inaccessible_map_) {
+		file << p.first;
+		file.write_uint32((unsigned int)p.second.size());
+		for (auto& fio : p.second) {
+			fio->serialize(file);
 		}
 	}
 }

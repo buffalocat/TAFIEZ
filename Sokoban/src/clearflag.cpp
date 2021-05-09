@@ -33,7 +33,7 @@ void ClearFlag::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void ClearFlag::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void ClearFlag::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	bool real, active;
 	file >> real >> active;
 	auto cf = std::make_unique<ClearFlag>(parent, real, active, false);
@@ -128,8 +128,8 @@ ClearFlagToggleDelta::ClearFlagToggleDelta(FrozenObject flag) :
 
 ClearFlagToggleDelta::~ClearFlagToggleDelta() {}
 
-void ClearFlagToggleDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	flag_.serialize(file, arr);
+void ClearFlagToggleDelta::serialize(MapFileO& file) {
+	flag_.serialize(file);
 }
 
 void ClearFlagToggleDelta::revert(RoomMap* room_map) {

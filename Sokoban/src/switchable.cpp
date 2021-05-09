@@ -134,8 +134,8 @@ SwitchableDelta::SwitchableDelta(FrozenObject obj, int count, bool active, bool 
 
 SwitchableDelta::~SwitchableDelta() {}
 
-void SwitchableDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	obj_.serialize(file, arr);
+void SwitchableDelta::serialize(MapFileO& file) {
+	obj_.serialize(file);
 	file << count_ << active_ << waiting_;
 }
 

@@ -38,7 +38,7 @@ void FlagGate::serialize(MapFileO& file) {
 	file << num_flags_ << orientation_ << count_ << active_ << walls_placed_ << down_;
 }
 
-void FlagGate::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void FlagGate::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	unsigned char b[6];
 	file.read(b, 6);
 	auto fg = std::make_unique<FlagGate>(parent, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -99,7 +99,7 @@ void FlagGate::remove_walls(RoomMap* map, DeltaFrame* delta_frame) {
 	for (int x = a.x; x <= b.x; ++x) {
 		for (int y = a.y; y <= b.y; ++y) {
 			for (int z = a.z; z <= b.z; ++z) {
-				map->take_from_map(map->view(Point3{ x, y, z }), true, false, delta_frame);
+				map->take_from_map(map->view(Point3{ x, y, z }), true, true, false, delta_frame);
 			}
 		}
 	}
@@ -404,8 +404,8 @@ FlagGateOpenDelta::FlagGateOpenDelta(FrozenObject fg) : Delta(), fg_{ fg } {}
 
 FlagGateOpenDelta::~FlagGateOpenDelta() {}
 
-void FlagGateOpenDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	fg_.serialize(file, arr);
+void FlagGateOpenDelta::serialize(MapFileO& file) {
+	fg_.serialize(file);
 }
 
 void FlagGateOpenDelta::revert(RoomMap* room_map) {

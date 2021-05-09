@@ -33,7 +33,7 @@ void AutosavePanel::serialize(MapFileO& file) {
 }
 
 
-void AutosavePanel::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
+void AutosavePanel::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
 	auto label = file.read_long_str();
 	bool active = file.read_byte();
 	parent->set_modifier(std::make_unique<AutosavePanel>(parent, label, active));
@@ -85,8 +85,8 @@ AutosavePanelDelta::AutosavePanelDelta(FrozenObject panel) : Delta(), panel_{ pa
 
 AutosavePanelDelta::~AutosavePanelDelta() {}
 
-void AutosavePanelDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	panel_.serialize(file, arr);
+void AutosavePanelDelta::serialize(MapFileO& file) {
+	panel_.serialize(file);
 }
 
 void AutosavePanelDelta::revert(RoomMap* room_map) {

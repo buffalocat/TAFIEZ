@@ -41,7 +41,7 @@ std::unique_ptr<GameObject> SnakeBlock::deserialize(MapFileI& file) {
 }
 
 bool SnakeBlock::relation_check() {
-	return true;
+	return tangible_;
 }
 
 void SnakeBlock::relation_serialize(MapFileO& file) {
@@ -61,6 +61,10 @@ void SnakeBlock::relation_serialize(MapFileO& file) {
 		file << pos_;
 		file << link_encode;
 	}
+}
+
+void SnakeBlock::destroy(MoveProcessor* mp, CauseOfDeath) {
+
 }
 
 bool SnakeBlock::is_snake() {
@@ -201,7 +205,9 @@ bool SnakeBlock::in_links(SnakeBlock* sb) {
 
 void SnakeBlock::add_link(SnakeBlock* sb, DeltaFrame* delta_frame) {
 	add_link_quiet(sb);
-	delta_frame->push(std::make_unique<AddLinkDelta>(this, sb));
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<AddLinkDelta>(this, sb));
+	}
 }
 
 void SnakeBlock::add_link_quiet(SnakeBlock* sb) {
@@ -209,27 +215,16 @@ void SnakeBlock::add_link_quiet(SnakeBlock* sb) {
 	sb->links_.push_back(this);
 }
 
-void SnakeBlock::add_link_one_way(SnakeBlock* sb) {
-	links_.push_back(sb);
-}
-
 void SnakeBlock::remove_link(SnakeBlock* sb, DeltaFrame* delta_frame) {
 	remove_link_quiet(sb);
-	delta_frame->push(std::make_unique<RemoveLinkDelta>(this, sb));
+	if (delta_frame) {
+		delta_frame->push(std::make_unique<RemoveLinkDelta>(this, sb));
+	}
 }
 
 void SnakeBlock::remove_link_quiet(SnakeBlock* sb) { 
 	links_.erase(std::find(links_.begin(), links_.end(), sb));
 	sb->links_.erase(std::find(sb->links_.begin(), sb->links_.end(), this));
-}
-
-void SnakeBlock::remove_link_one_way(SnakeBlock* sb) {
-	links_.erase(std::find(links_.begin(), links_.end(), sb));
-}
-
-void SnakeBlock::remove_link_one_way_undoable(SnakeBlock* sb, DeltaFrame* delta_frame) {
-	links_.erase(std::find(links_.begin(), links_.end(), sb));
-	delta_frame->push(std::make_unique<RemoveLinkOneWayDelta>(this, sb));
 }
 
 bool SnakeBlock::can_link(SnakeBlock* snake) {
@@ -348,7 +343,7 @@ void SnakeBlock::break_tangible_links(DeltaFrame* delta_frame, std::vector<GameO
 	auto links_copy = links_;
 	for (auto link : links_copy) {
 		if (link->tangible_) {
-			remove_link_one_way_undoable(link, delta_frame);
+			remove_link(link, delta_frame);
 			fall_check.push_back(link);
 		}
 	}
@@ -373,7 +368,7 @@ void SnakeBlock::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 	reset_internal_state();
 	if (real) {
 		for (SnakeBlock* link : links_) {
-			link->remove_link_one_way(this);
+			remove_link(link, delta_frame);
 		}
 	}
 	if (modifier_) {
@@ -382,11 +377,6 @@ void SnakeBlock::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 }
 
 void SnakeBlock::setup_on_put(RoomMap* map, DeltaFrame* delta_frame, bool real) {
-	if (real) {
-		for (SnakeBlock* link : links_) {
-			link->add_link_one_way(this);
-		}
-	}
 	if (modifier_) {
 		modifier_->setup_on_put(map, delta_frame, real);
 	}
@@ -453,7 +443,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 					move_processor_->anims_->receive_signal(AnimationSignal::SnakeSplit, cur, nullptr);
 					std::vector<SnakeBlock*> links = cur->links_;
 					// Listeners will get alerted during snake pulling anyway
-					map_->take_from_map(cur, true, false, delta_frame_);
+					map_->take_from_map(cur, true, true, false, delta_frame_);
 					for (SnakeBlock* link : links) {
 						auto split_copy_unique = cur->make_split_copy(map_, delta_frame_);
 						SnakeBlock* split_copy = split_copy_unique.get();
@@ -539,13 +529,20 @@ AddLinkDelta::AddLinkDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ b } {}
 
 AddLinkDelta::~AddLinkDelta() {}
 
-void AddLinkDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	a_.serialize(file, arr);
-	b_.serialize(file, arr);
+void AddLinkDelta::serialize(MapFileO& file) {
+	a_.serialize(file);
+	b_.serialize(file);
 }
 
 void AddLinkDelta::revert(RoomMap* room_map) {
-	static_cast<SnakeBlock*>(a_.resolve(room_map))->remove_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
+	std::cout << "UNADDING LINK: ";
+	a_.print();
+	std::cout << ", ";
+	b_.print();
+	std::cout << std::endl;
+	auto* a = static_cast<SnakeBlock*>(a_.resolve(room_map));
+	auto* b = static_cast<SnakeBlock*>(b_.resolve(room_map));
+	a->remove_link_quiet(b);
 }
 
 DeltaCode AddLinkDelta::code() {
@@ -565,13 +562,20 @@ RemoveLinkDelta::RemoveLinkDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ 
 
 RemoveLinkDelta::~RemoveLinkDelta() {}
 
-void RemoveLinkDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	a_.serialize(file, arr);
-	b_.serialize(file, arr);
+void RemoveLinkDelta::serialize(MapFileO& file) {
+	a_.serialize(file);
+	b_.serialize(file);
 }
 
 void RemoveLinkDelta::revert(RoomMap* room_map) {
-	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_quiet(static_cast<SnakeBlock*>(b_.resolve(room_map)));
+	std::cout << "UNREMOVING LINK: ";
+	a_.print();
+	std::cout << ", ";
+	b_.print();
+	std::cout << std::endl;
+	auto* a = static_cast<SnakeBlock*>(a_.resolve(room_map));
+	auto* b = static_cast<SnakeBlock*>(b_.resolve(room_map));
+	a->add_link_quiet(b);
 }
 
 DeltaCode RemoveLinkDelta::code() {
@@ -583,30 +587,3 @@ std::unique_ptr<Delta> RemoveLinkDelta::deserialize(MapFileIwithObjs& file) {
 	auto b = file.read_frozen_obj();
 	return std::make_unique<RemoveLinkDelta>(a, b);
 }
-
-
-RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b) : a_{ a }, b_{ b } {}
-
-RemoveLinkOneWayDelta::RemoveLinkOneWayDelta(FrozenObject a, FrozenObject b) : a_{ a }, b_{ b } {}
-
-RemoveLinkOneWayDelta::~RemoveLinkOneWayDelta() {}
-
-void RemoveLinkOneWayDelta::serialize(MapFileO& file, GameObjectArray* arr) {
-	a_.serialize(file, arr);
-	b_.serialize(file, arr);
-}
-
-void RemoveLinkOneWayDelta::revert(RoomMap* room_map) {
-	static_cast<SnakeBlock*>(a_.resolve(room_map))->add_link_one_way(static_cast<SnakeBlock*>(b_.resolve(room_map)));
-}
-
-DeltaCode RemoveLinkOneWayDelta::code() {
-	return DeltaCode::RemoveLinkOneWayDelta;
-}
-
-std::unique_ptr<Delta> RemoveLinkOneWayDelta::deserialize(MapFileIwithObjs& file) {
-	auto a = file.read_frozen_obj();
-	auto b = file.read_frozen_obj();
-	return std::make_unique<RemoveLinkOneWayDelta>(a, b);
-}
-

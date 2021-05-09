@@ -18,6 +18,7 @@ public:
     static std::unique_ptr<GameObject> deserialize(MapFileI& file);
     bool relation_check();
     void relation_serialize(MapFileO& file);
+	void destroy(MoveProcessor*, CauseOfDeath);
 
 	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
 
@@ -34,13 +35,8 @@ public:
     bool in_links(SnakeBlock* sb);
     void add_link(SnakeBlock*, DeltaFrame*);
     void add_link_quiet(SnakeBlock*);
-    void add_link_one_way(SnakeBlock*);
     void remove_link(SnakeBlock*, DeltaFrame*);
     void remove_link_quiet(SnakeBlock*);
-    void remove_link_one_way(SnakeBlock*);
-	// This method only exists because sometimes we want to break links
-	// *after* removing something from the map
-	void remove_link_one_way_undoable(SnakeBlock* sb, DeltaFrame* delta_frame);
 
     bool can_link(SnakeBlock*);
 
@@ -102,7 +98,7 @@ public:
 	AddLinkDelta(SnakeBlock* a, SnakeBlock* b);
 	AddLinkDelta(FrozenObject a, FrozenObject b);
 	~AddLinkDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
@@ -118,22 +114,7 @@ public:
 	RemoveLinkDelta(SnakeBlock* a, SnakeBlock* b);
 	RemoveLinkDelta(FrozenObject a, FrozenObject b);
 	~RemoveLinkDelta();
-	void serialize(MapFileO&, GameObjectArray*);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
-
-private:
-	FrozenObject a_;
-	FrozenObject b_;
-};
-
-class RemoveLinkOneWayDelta : public Delta {
-public:
-	RemoveLinkOneWayDelta(SnakeBlock* a, SnakeBlock* b);
-	RemoveLinkOneWayDelta(FrozenObject a, FrozenObject b);
-	~RemoveLinkOneWayDelta();
-	void serialize(MapFileO&, GameObjectArray*);
+	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
 	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);

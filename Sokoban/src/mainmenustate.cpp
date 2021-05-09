@@ -91,7 +91,7 @@ void FileSelectState::new_file() {
 		auto playing_state_unique = std::make_unique<RealPlayingState>(cur_file, this);
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
-	playing_state->play_from_map(NEW_FILE_START_MAP);
+	playing_state->play_from_map("TEST");
 	queue_quit();
 }
 
@@ -100,7 +100,6 @@ void FileSelectState::continue_file() {
 	auto playing_state_unique = std::make_unique<RealPlayingState>(cur_file, this);
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
-	playing_state->reset();
 	cur_file->load_subsave_dispatch(SaveType::Emergency, 0, playing_state);
 	playing_state->play_from_loaded_subsave();
 	queue_quit();
