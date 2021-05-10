@@ -21,7 +21,7 @@ public:
     virtual ~Player();
 
 	void serialize(MapFileO& file);
-	static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+	static std::unique_ptr<GameObject> deserialize(MapFileI& file, Point3 pos);
 
 	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
 
@@ -77,7 +77,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject player_;

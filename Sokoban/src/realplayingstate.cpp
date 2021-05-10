@@ -14,15 +14,20 @@
 #include "globalflagconstants.h"
 
 RealPlayingState::RealPlayingState(SaveProfile* savefile, GameState* parent) :
-	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {}
+	PlayingState(parent, savefile->global_.get()), savefile_{ savefile } {
+	savefile_->init_state(this);
+}
 
 RealPlayingState::RealPlayingState(RealPlayingState* rps) :
 	PlayingState(rps->parent_.get(), rps->savefile_->global_.get()),
-	savefile_{ rps->savefile_ } {}
+	savefile_{ rps->savefile_ } {
+	savefile_->init_state(this);
+}
 
 RealPlayingState::~RealPlayingState() {
 	if (room_) {
 		make_subsave(SaveType::Emergency);
+		savefile_->unload_state(this);
 	}
 }
 
@@ -35,12 +40,11 @@ void RealPlayingState::play_from_map(std::string starting_map) {
 
 bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 	bool from_main;
-	std::filesystem::path path = savefile_->get_path(name, &from_main);
+	std::filesystem::path path = savefile_->get_path(this, name, &from_main);
 	if (!std::filesystem::exists(path)) {
 		return false;
 	}
 	load_room_from_path(path, use_default_player);
-	objs_->check_room_inaccessibles(loaded_rooms_[name]->room->map());
 	return true;
 }
 

@@ -37,8 +37,7 @@ void GateBody::serialize(MapFileO& file) {
 	file << color_ << pushable_ << gravitable_ << snake_ << persistent_ << corrupt_;
 }
 
-std::unique_ptr<GameObject> GateBody::deserialize(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
+std::unique_ptr<GameObject> GateBody::deserialize(MapFileI& file, Point3 pos) {
 	unsigned char b[6];
 	file.read(b, 6);
 	return std::make_unique<GateBody>(pos, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -132,7 +131,7 @@ DeltaCode GateUnlinkDelta::code() {
 	return DeltaCode::GateUnlinkDelta;
 }
 
-std::unique_ptr<Delta> GateUnlinkDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> GateUnlinkDelta::deserialize(MapFileI& file) {
 	auto body = file.read_frozen_obj();
 	auto gate = file.read_frozen_obj();
 	return std::make_unique<GateUnlinkDelta>(body, gate);

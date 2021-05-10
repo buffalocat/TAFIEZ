@@ -95,7 +95,7 @@ bool FallStepProcessor::run(bool test) {
 			}
 		}
 		for (auto* sb : temp_snakes) {
-			map_->take_from_map(sb, false, false, false, nullptr);
+			map_->take_from_map(sb, false, false, nullptr);
 		}
 		for (auto* sb : caught_snakes) {
 			settle(sb->fall_comp());
@@ -195,7 +195,7 @@ void FallStepProcessor::handle_fallen_blocks(FallComponent* comp) {
     }
     for (auto* block : to_destroy) {
 		// Listeners only have to get activated once
-		map_->take_from_map(block, true, true, true, delta_frame_);
+		map_->take_from_map(block, true, true, delta_frame_);
 		block->destroy(move_processor_, CauseOfDeath::Fallen);
     }
     if (!live_blocks.empty() && delta_frame_) {

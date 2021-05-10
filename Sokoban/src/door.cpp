@@ -163,8 +163,8 @@ std::unique_ptr<ObjectModifier> Door::duplicate(GameObject* parent, RoomMap*, De
     return std::move(dup);
 }
 
-void Door::acquire_map_flag(PlayingGlobalData* global, DeltaFrame* delta_frame) {
+void Door::acquire_map_flag(PlayingGlobalData* global) {
 	if (map_flag_) {
-		global->add_flag_delta(map_flag_, nullptr);
+		global->add_flag(map_flag_);
 	}
 }

@@ -36,7 +36,7 @@ std::string EditorRoom::name() {
 }
 
 void EditorRoom::write_to_file(MapFileO& file) {
-	room->write_to_file(file);
+	room->write_to_file(file, false);
 	file << MapCode::DefaultPlayerPos;
 	file << start_pos;
 	if (include_car) {

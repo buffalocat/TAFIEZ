@@ -15,11 +15,9 @@ public:
     virtual std::string name();
     virtual ObjCode obj_code();
     void serialize(MapFileO& file);
-    static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+    static std::unique_ptr<GameObject> deserialize(MapFileI& file, Point3 pos);
     bool relation_check();
     void relation_serialize(MapFileO& file);
-	void destroy(MoveProcessor*, CauseOfDeath);
-
 	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
 
 	bool is_snake();
@@ -101,7 +99,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject a_;
@@ -117,7 +115,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject a_;

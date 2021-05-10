@@ -99,7 +99,7 @@ void FlagGate::remove_walls(RoomMap* map, DeltaFrame* delta_frame) {
 	for (int x = a.x; x <= b.x; ++x) {
 		for (int y = a.y; y <= b.y; ++y) {
 			for (int z = a.z; z <= b.z; ++z) {
-				map->take_from_map(map->view(Point3{ x, y, z }), true, true, false, delta_frame);
+				map->take_from_map(map->view(Point3{ x, y, z }), true, false, delta_frame);
 			}
 		}
 	}
@@ -421,6 +421,6 @@ DeltaCode FlagGateOpenDelta::code() {
 	return DeltaCode::FlagGateOpenDelta;
 }
 
-std::unique_ptr<Delta> FlagGateOpenDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> FlagGateOpenDelta::deserialize(MapFileI& file) {
 	return std::make_unique<FlagGateOpenDelta>(file.read_frozen_obj());
 }

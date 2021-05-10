@@ -30,6 +30,17 @@ void Car::serialize(MapFileO& file) {
 	}
 }
 
+void Car::serialize_with_ids(MapFileO& file) {
+	file << type_ << color_cycle_;
+	if (type_ == CarType::Convertible) {
+		if (player_) {
+			file.write_uint32(player_->id_);
+		} else {
+			file.write_uint32(0);
+		}
+	}
+}
+
 void Car::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
 	CarType type = static_cast<CarType>(file.read_byte());
     ColorCycle color_cycle;
@@ -37,6 +48,22 @@ void Car::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) 
 	auto car = std::make_unique<Car>(parent, type, color_cycle);
 	if (type == CarType::Convertible) {
 		if (file.read_byte()) {
+			auto riding_player = std::make_unique<Player>(parent->shifted_pos({ 0,0,1 }), PlayerState::RidingHidden);
+			riding_player->set_car(car.get());
+			arr->push_object(std::move(riding_player));
+		}
+	}
+	parent->set_modifier(std::move(car));
+}
+
+void Car::deserialize_with_ids(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
+	CarType type = static_cast<CarType>(file.read_byte());
+	ColorCycle color_cycle;
+	file >> color_cycle;
+	auto car = std::make_unique<Car>(parent, type, color_cycle);
+	if (type == CarType::Convertible) {
+		auto id = file.read_uint32();
+		if (id) {
 			auto riding_player = std::make_unique<Player>(parent->shifted_pos({ 0,0,1 }), PlayerState::RidingHidden);
 			riding_player->set_car(car.get());
 			arr->push_object(std::move(riding_player));

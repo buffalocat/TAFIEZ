@@ -65,6 +65,12 @@ std::string MapFileI::read_long_str() {
 	return std::string(b, len);
 }
 
+FrozenObject MapFileI::read_frozen_obj() {
+	auto ref = static_cast<ObjRefCode>(read_byte());
+	auto id = read_uint32();
+	return FrozenObject(id, ref);
+}
+
 MapFileI& operator>>(MapFileI& f, int& v) {
     unsigned char b;
     f.read(&b, 1);
@@ -134,26 +140,6 @@ MapFileI& operator>>(MapFileI& f, ColorCycle& v) {
     return f;
 }
 
-
-MapFileIwithObjs::MapFileIwithObjs(const std::filesystem::path& path, GameObjectArray* arr) :
-	MapFileI(path), arr_{ arr } {}
-
-MapFileIwithObjs::~MapFileIwithObjs() {}
-
-FrozenObject MapFileIwithObjs::read_frozen_obj() {
-	auto ref = static_cast<ObjRefCode>(read_byte());
-	auto inacc_id = read_uint32();
-    Point3 pos;
-	switch (ref) {
-    case ObjRefCode::Null:
-	case ObjRefCode::Inaccessible:
-        break;
-	default:
-        pos = read_point3();
-        break;
-	}
-    return FrozenObject(pos, ref, inacc_id);
-}
 
 
 MapFileO::MapFileO(const std::filesystem::path& path): file_ {} {

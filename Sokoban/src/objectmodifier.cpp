@@ -11,6 +11,10 @@ ObjectModifier::~ObjectModifier() {}
 
 void ObjectModifier::serialize(MapFileO&) {}
 
+void ObjectModifier::serialize_with_ids(MapFileO& file) {
+	serialize(file);
+}
+
 bool ObjectModifier::relation_check() {
     return false;
 }
@@ -101,7 +105,7 @@ DeltaCode ModDestructionDelta::code() {
 	return DeltaCode::ModDestructionDelta;
 }
 
-std::unique_ptr<Delta> ModDestructionDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> ModDestructionDelta::deserialize(MapFileI& file) {
 	auto mod = file.read_frozen_obj();
 	return std::make_unique<ModDestructionDelta>(mod);
 }

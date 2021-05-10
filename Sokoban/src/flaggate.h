@@ -89,7 +89,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject fg_;

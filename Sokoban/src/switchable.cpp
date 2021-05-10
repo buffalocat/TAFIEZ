@@ -151,7 +151,7 @@ DeltaCode SwitchableDelta::code() {
 	return DeltaCode::SwitchableDelta;
 }
 
-std::unique_ptr<Delta> SwitchableDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> SwitchableDelta::deserialize(MapFileI& file) {
 	auto obj = file.read_frozen_obj();
 	unsigned char b[3];
 	file.read(b, 3);

@@ -24,7 +24,7 @@
 #include "signaler.h"
 
 FrozenObject::FrozenObject() :
-	obj_{ nullptr }, ref_{ ObjRefCode::Null }, inacc_id_{ 0 } {}
+	obj_{ nullptr }, ref_{ ObjRefCode::Null }, id_{ 0 } {}
 
 FrozenObject::FrozenObject(GameObject* obj) :
 	obj_{ obj } {
@@ -34,35 +34,33 @@ FrozenObject::FrozenObject(GameObject* obj) :
 FrozenObject::FrozenObject(ObjectModifier* mod) {
 	if (mod) {
 		obj_ = mod->parent_;
-		pos_ = obj_->pos_;
 	} else {
 		obj_ = nullptr;
-		pos_ = { 0,0,0 };
 	}
 	init_from_obj();
 }
 
-FrozenObject::FrozenObject(Point3 pos, ObjRefCode ref, unsigned int inacc_id) :
-	obj_{ nullptr }, pos_{ pos }, ref_{ ref }, inacc_id_{ inacc_id } {}
+FrozenObject::FrozenObject(unsigned int id, ObjRefCode ref) :
+	obj_{ nullptr }, id_{ id }, ref_{ ref } {}
 
 FrozenObject::~FrozenObject() {}
 
 void FrozenObject::init_from_obj() {
 	if (!obj_) {
 		ref_ = ObjRefCode::Null;
+		id_ = 0;
 		return;
 	}
-	inacc_id_ = obj_->inacc_id_;
 	if (obj_->tangible_) {
-		pos_ = obj_->pos_;
 		ref_ = ObjRefCode::Tangible;
+		id_ = obj_->id_;
 		return;
 	}
 	if (auto* gate_body = dynamic_cast<GateBody*>(obj_)) {
 		if (auto* gate = gate_body->gate_) {
 			if (gate->body_ == gate_body) {
-				pos_ = gate->pos();
 				ref_ = ObjRefCode::HeldGateBody;
+				id_ = gate->parent_->id_;
 				return;
 			}
 		}
@@ -70,28 +68,19 @@ void FrozenObject::init_from_obj() {
 	if (auto* player = dynamic_cast<Player*>(obj_)) {
 		if (auto* car = player->car_) {
 			if (car->player_ == player) {
-				pos_ = car->pos();
 				ref_ = ObjRefCode::HeldPlayer;
+				id_ = car->parent_->id_;
 				return;
 			}
 		}
 	}
-	std::cout << "Made Inaccessible FrozenObject" << std::endl;
-	pos_ = obj_->pos_;
+	id_ = obj_->id_;
 	ref_ = ObjRefCode::Inaccessible;
 }
 
 void FrozenObject::serialize(MapFileO& file) {
 	file << ref_;
-	file.write_uint32(inacc_id_);
-	switch (ref_) {
-	case ObjRefCode::Null:
-	case ObjRefCode::Inaccessible:
-		break;
-	default:
-		file << pos_;
-		break;
-	}
+	file.write_uint32(id_);
 }
 
 GameObject* FrozenObject::resolve(RoomMap* room_map) {
@@ -111,17 +100,9 @@ ObjectModifier* FrozenObject::resolve_mod(RoomMap* room_map) {
 	return obj_->modifier();
 }
 
-void FrozenObject::print() {
-	if (ref_ == ObjRefCode::Tangible) {
-		Point3 p = pos_;
-		std::cout << "tangible at " << p.x << " " << p.y << " " << p.z;
-	} else {
-		std::cout << "key " << inacc_id_;
-	}
-}
+
 
 Delta::~Delta() {}
-
 
 DeltaFrame::DeltaFrame() {}
 
@@ -157,7 +138,7 @@ case DeltaCode::CLASS:\
     push(std::move(CLASS::deserialize(file)));\
     break;
 
-void DeltaFrame::deserialize(MapFileIwithObjs& file) {
+void DeltaFrame::deserialize(MapFileI& file) {
 	unsigned int n_deltas = file.read_uint32();
 	for (unsigned int i = 0; i < n_deltas; ++i) {
 		switch (static_cast<DeltaCode>(file.read_byte())) {
@@ -181,12 +162,9 @@ void DeltaFrame::deserialize(MapFileIwithObjs& file) {
 			CASE_DELTACODE(ObjArrayPushDelta);
 			CASE_DELTACODE(MotionDelta);
 			CASE_DELTACODE(BatchMotionDelta);
-			CASE_DELTACODE(ClearFlagCollectionDelta);
 			CASE_DELTACODE(AddPlayerDelta);
 			CASE_DELTACODE(RemovePlayerDelta);
 			CASE_DELTACODE(CyclePlayerDelta);
-			CASE_DELTACODE(GlobalFlagDelta);
-			CASE_DELTACODE(FlagCountDelta);
 			CASE_DELTACODE(SignalerCountDelta);
 			CASE_DELTACODE(AddLinkDelta);
 			CASE_DELTACODE(RemoveLinkDelta);
@@ -224,7 +202,6 @@ void UndoStack::push(std::unique_ptr<DeltaFrame> delta_frame) {
 		if (!cache_map_.empty()) {
 			++num_new_frames_;
 			if (++skip_frames_ == cache_map_.front().second) {
-				std::cout << "POP" << std::endl;
 				cache_map_.pop_front();
 				skip_frames_ = 0;
 			}
@@ -259,14 +236,14 @@ void UndoStack::reset() {
 }
 
 
-void UndoStack::deserialize(std::filesystem::path base_path, unsigned int subsave_index, GameObjectArray* arr) {
+void UndoStack::deserialize(std::filesystem::path base_path, unsigned int subsave_index) {
 	MapFileI meta_file{ base_path / std::to_string(subsave_index) / "delta_meta.sav" };
 	unsigned int n_cache_map = meta_file.read_uint32();
 	for (unsigned int i_group = 0; i_group < n_cache_map; ++i_group) {
 		unsigned int index = meta_file.read_uint32();
 		unsigned int count = meta_file.read_uint32();
 		cache_map_.push_back(std::make_pair(index, count));
-		MapFileIwithObjs file{ base_path / std::to_string(index) / "deltas.sav", arr };
+		MapFileI file{ base_path / std::to_string(index) / "deltas.sav" };
 		for (unsigned int i_frame = 0; i_frame < count; ++i_frame) {
 			auto frame = std::make_unique<DeltaFrame>();
 			frame->deserialize(file);
@@ -276,7 +253,7 @@ void UndoStack::deserialize(std::filesystem::path base_path, unsigned int subsav
 	num_new_frames_ = 0;
 }
 
-void UndoStack::serialize(std::filesystem::path subsave_path, unsigned int subsave_index, GameObjectArray* arr) {
+void UndoStack::serialize(std::filesystem::path subsave_path, unsigned int subsave_index) {
 	MapFileO meta_file{ subsave_path / "delta_meta.sav" };
 	if (num_new_frames_ > 0) {
 		cache_map_.push_back(std::make_pair(subsave_index, num_new_frames_));

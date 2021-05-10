@@ -4,7 +4,7 @@
 #include "point.h"
 
 
-class MapFileIwithObjs;
+class MapFileI;
 class MapFileO;
 class GameObject;
 class ObjectModifier;
@@ -55,7 +55,7 @@ public:
 	FrozenObject();
 	FrozenObject(GameObject* obj);
 	FrozenObject(ObjectModifier* mod);
-	FrozenObject(Point3 pos, ObjRefCode ref, unsigned int inacc_id);
+	FrozenObject(unsigned int id, ObjRefCode ref);
 	~FrozenObject();
 
 	void init_from_obj();
@@ -63,12 +63,9 @@ public:
 	GameObject* resolve(RoomMap*);
 	ObjectModifier* resolve_mod(RoomMap*);
 
-	void print();
-
 	GameObject* obj_;
+	unsigned int id_;
 	ObjRefCode ref_;
-	Point3 pos_;
-	unsigned int inacc_id_;
 };
 
 
@@ -92,7 +89,7 @@ public:
 	void reset_changed();
 	bool changed();
 
-	void deserialize(MapFileIwithObjs& file);
+	void deserialize(MapFileI& file);
 	void serialize(MapFileO& file);
 
 	std::vector<std::unique_ptr<Delta>> deltas_{};
@@ -109,8 +106,8 @@ public:
 	bool non_empty();
 	void pop();
 	void reset();
-	void deserialize(std::filesystem::path base_path, unsigned int subsave_index, GameObjectArray* arr);
-	void serialize(std::filesystem::path subsave_path, unsigned int subsave_index, GameObjectArray* arr);
+	void deserialize(std::filesystem::path base_path, unsigned int subsave_index);
+	void serialize(std::filesystem::path subsave_path, unsigned int subsave_index);
 	std::vector<unsigned int> dependent_subsaves();
 
 private:

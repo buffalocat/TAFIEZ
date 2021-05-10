@@ -726,7 +726,7 @@ DeltaCode AnimationSignalDelta::code() {
 	return DeltaCode::AnimationSignalDelta;
 }
 
-std::unique_ptr<Delta> AnimationSignalDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> AnimationSignalDelta::deserialize(MapFileI& file) {
 	auto signal = static_cast<AnimationSignal>(file.read_byte());
 	auto obj = file.read_frozen_obj();
 	return std::make_unique<AnimationSignalDelta>(signal, obj);

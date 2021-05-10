@@ -52,13 +52,22 @@ bool PermanentSwitch::check_send_signal(RoomMap* map, DeltaFrame* delta_frame) {
 	if (active_) {
 		return false;
 	}
-	if (should_toggle(map) || map->global_->has_flag(global_id_)) {
+	if (should_toggle(map)) {
 		toggle();
 		delta_frame->push(std::make_unique<SwitchToggleDelta>(this));
-		map->global_->add_flag_delta(global_id_, delta_frame);
+		map->global_->add_flag(global_id_);
 		return true;
 	}
 	return false;
+}
+
+void PermanentSwitch::check_send_signal_from_global_flag(RoomMap* map) {
+	if (active_) {
+		return;
+	}
+	if (map->global_->has_flag(global_id_)) {
+		toggle();
+	}
 }
 
 void PermanentSwitch::setup_on_editor_creation(EditorGlobalData* global, Room* room) {

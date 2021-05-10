@@ -12,8 +12,7 @@ Wall::Wall(Point3 pos) : Block(pos, false, false) {}
 
 Wall::~Wall() {}
 
-std::unique_ptr<GameObject> Wall::deserialize(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
+std::unique_ptr<GameObject> Wall::deserialize(MapFileI& file, Point3 pos) {
 	return std::make_unique<Wall>(pos);
 }
 
@@ -51,8 +50,7 @@ void ArtWall::serialize(MapFileO& file) {
 	file << flavor_;
 }
 
-std::unique_ptr<GameObject> ArtWall::deserialize(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
+std::unique_ptr<GameObject> ArtWall::deserialize(MapFileI& file, Point3 pos) {
 	unsigned char flavor = file.read_byte();
 	return std::make_unique<ArtWall>(pos, flavor);
 }

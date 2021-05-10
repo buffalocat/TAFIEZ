@@ -331,11 +331,11 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 		// Uncreate the default objects we put in the map
 		if (default_player) {
 			room->map()->player_cycle_->remove_player(default_player, nullptr);
-			room->map()->take_from_map(default_player, true, false, false, nullptr);
+			room->map()->take_from_map(default_player, true, false, nullptr);
 			room->map()->remove_from_object_array(default_player);
 		}
 		if (Car* car = init_data.default_car) {
-			room->map()->take_from_map(car->parent_, true, false, false, nullptr);
+			room->map()->take_from_map(car->parent_, true, false, nullptr);
 			room->map()->remove_from_object_array(car->parent_);
 		}
 	}

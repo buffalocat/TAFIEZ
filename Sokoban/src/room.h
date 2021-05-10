@@ -11,7 +11,7 @@ class RoomMap;
 class Camera;
 class MapFileI;
 class MapFileO;
-class MapFileIwithObjs;
+class MapFileI;
 class GameObject;
 class Player;
 class Car;
@@ -36,7 +36,7 @@ public:
     RoomMap* map();
 	Camera* camera();
 
-    void write_to_file(MapFileO& file);
+    void write_to_file(MapFileO& file, bool write_obj_ids);
     void load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, RoomInitData* init_data);
 
     void draw_at_pos(Point3 cam_pos, bool display_labels, bool ortho, bool one_layer);
@@ -65,6 +65,7 @@ private:
 	GraphicsManager* gfx_;
 
     void read_objects(MapFileI& file);
+    void read_objects_with_ids(MapFileI& file);
     void read_camera_rects(MapFileI& file);
     void read_snake_link(MapFileI& file);
     void read_door_dest(MapFileI& file);
@@ -75,7 +76,7 @@ private:
 };
 
 
-void deserialize_inacc_objects(MapFileIwithObjs& file, GameObjectArray* arr);
+void deserialize_dead_objects(MapFileI& file, GameObjectArray* arr);
 void read_door_relations_frozen(MapFileI& file, Door* door);
 
 

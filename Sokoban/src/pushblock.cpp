@@ -27,8 +27,7 @@ void PushBlock::serialize(MapFileO& file) {
     file << color_ << pushable_ << gravitable_ << sticky_;
 }
 
-std::unique_ptr<GameObject> PushBlock::deserialize(MapFileI& file) {
-    Point3 pos {file.read_point3()};
+std::unique_ptr<GameObject> PushBlock::deserialize(MapFileI& file, Point3 pos) {
     unsigned char b[4];
     file.read(b, 4);
     return std::make_unique<PushBlock>(pos, b[0], b[1], b[2], static_cast<Sticky>(b[3]));

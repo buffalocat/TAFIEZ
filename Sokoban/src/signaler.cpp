@@ -241,7 +241,7 @@ DeltaCode SignalerCountDelta::code() {
 	return DeltaCode::SignalerCountDelta;
 }
 
-std::unique_ptr<Delta> SignalerCountDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> SignalerCountDelta::deserialize(MapFileI& file) {
 	auto index = file.read_uint32();
 	auto count = file.read_byte();
 	return std::make_unique<SignalerCountDelta>(index, count);

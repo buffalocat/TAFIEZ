@@ -24,7 +24,9 @@ public:
 	void make_str(std::string&);
     ModCode mod_code();
     void serialize(MapFileO& file);
+	void serialize_with_ids(MapFileO& file);
     static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
+	static void deserialize_with_ids(MapFileI&, GameObjectArray*, GameObject*);
 
 	GameObject* get_subordinate_object();
 

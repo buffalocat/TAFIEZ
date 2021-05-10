@@ -33,8 +33,7 @@ void SnakeBlock::serialize(MapFileO& file) {
 	file << color_ << pushable_ << gravitable_ << ends_ << weak_;
 }
 
-std::unique_ptr<GameObject> SnakeBlock::deserialize(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
+std::unique_ptr<GameObject> SnakeBlock::deserialize(MapFileI& file, Point3 pos) {
 	unsigned char b[5];
 	file.read(b, 5);
 	return std::make_unique<SnakeBlock>(pos, b[0], b[1], b[2], b[3], b[4]);
@@ -61,10 +60,6 @@ void SnakeBlock::relation_serialize(MapFileO& file) {
 		file << pos_;
 		file << link_encode;
 	}
-}
-
-void SnakeBlock::destroy(MoveProcessor* mp, CauseOfDeath) {
-
 }
 
 bool SnakeBlock::is_snake() {
@@ -443,7 +438,7 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 					move_processor_->anims_->receive_signal(AnimationSignal::SnakeSplit, cur, nullptr);
 					std::vector<SnakeBlock*> links = cur->links_;
 					// Listeners will get alerted during snake pulling anyway
-					map_->take_from_map(cur, true, true, false, delta_frame_);
+					map_->take_from_map(cur, true, false, delta_frame_);
 					for (SnakeBlock* link : links) {
 						auto split_copy_unique = cur->make_split_copy(map_, delta_frame_);
 						SnakeBlock* split_copy = split_copy_unique.get();
@@ -535,11 +530,6 @@ void AddLinkDelta::serialize(MapFileO& file) {
 }
 
 void AddLinkDelta::revert(RoomMap* room_map) {
-	std::cout << "UNADDING LINK: ";
-	a_.print();
-	std::cout << ", ";
-	b_.print();
-	std::cout << std::endl;
 	auto* a = static_cast<SnakeBlock*>(a_.resolve(room_map));
 	auto* b = static_cast<SnakeBlock*>(b_.resolve(room_map));
 	a->remove_link_quiet(b);
@@ -549,7 +539,7 @@ DeltaCode AddLinkDelta::code() {
 	return DeltaCode::AddLinkDelta;
 }
 
-std::unique_ptr<Delta> AddLinkDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> AddLinkDelta::deserialize(MapFileI& file) {
 	auto a = file.read_frozen_obj();
 	auto b = file.read_frozen_obj();
 	return std::make_unique<AddLinkDelta>(a, b);
@@ -568,11 +558,6 @@ void RemoveLinkDelta::serialize(MapFileO& file) {
 }
 
 void RemoveLinkDelta::revert(RoomMap* room_map) {
-	std::cout << "UNREMOVING LINK: ";
-	a_.print();
-	std::cout << ", ";
-	b_.print();
-	std::cout << std::endl;
 	auto* a = static_cast<SnakeBlock*>(a_.resolve(room_map));
 	auto* b = static_cast<SnakeBlock*>(b_.resolve(room_map));
 	a->add_link_quiet(b);
@@ -582,7 +567,7 @@ DeltaCode RemoveLinkDelta::code() {
 	return DeltaCode::RemoveLinkDelta;
 }
 
-std::unique_ptr<Delta> RemoveLinkDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> RemoveLinkDelta::deserialize(MapFileI& file) {
 	auto a = file.read_frozen_obj();
 	auto b = file.read_frozen_obj();
 	return std::make_unique<RemoveLinkDelta>(a, b);

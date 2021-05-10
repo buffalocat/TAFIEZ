@@ -126,7 +126,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	std::string room_name_;
@@ -141,7 +141,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject obj_;
@@ -157,7 +157,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject car_;

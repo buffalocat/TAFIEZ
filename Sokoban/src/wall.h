@@ -9,7 +9,7 @@ public:
 	Wall(Point3);
 	virtual ~Wall();
 
-	static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+	static std::unique_ptr<GameObject> deserialize(MapFileI& file, Point3 pos);
 	virtual std::string name();
 	virtual ObjCode obj_code();
 
@@ -25,7 +25,7 @@ public:
 	~ArtWall();
 
 	void serialize(MapFileO& file);
-	static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+	static std::unique_ptr<GameObject> deserialize(MapFileI& file, Point3 pos);
 	std::string name();
 	ObjCode obj_code();
 

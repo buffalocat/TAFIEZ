@@ -13,7 +13,7 @@ public:
     virtual std::string name();
     virtual ObjCode obj_code();
     virtual void serialize(MapFileO& file);
-    static std::unique_ptr<GameObject> deserialize(MapFileI& file);
+    static std::unique_ptr<GameObject> deserialize(MapFileI& file, Point3 pos);
 
 	std::unique_ptr<GameObject> duplicate(RoomMap*, DeltaFrame*);
 

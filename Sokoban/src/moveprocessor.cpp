@@ -245,7 +245,7 @@ void MoveProcessor::perform_switch_checks(bool skippable) {
 	activated_switchables_.clear();
 	raise_gates();
 	run_incinerators();
-	map_->check_clear_flag_collected(delta_frame_);
+	map_->check_clear_flag_collected();
 	map_->validate_players(delta_frame_);
 	if (!skippable || delta_frame_->changed()) {
 		state_ = MoveStep::PreFallSwitch;
@@ -291,7 +291,7 @@ void MoveProcessor::run_incinerators() {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
 						sb->collect_all_viable_neighbors(map_, snake_check);
 					}
-					map_->take_from_map(above, true, true, true, delta_frame_);
+					map_->take_from_map(above, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
@@ -367,7 +367,7 @@ void MoveProcessor::try_door_entry() {
 		}
 		for (auto& obj : door_travelling_objs_) {
 			anims_->receive_signal(AnimationSignal::DoorEnter, obj.raw, delta_frame_);
-			map_->take_from_map(obj.raw, true, true, true, delta_frame_);
+			map_->take_from_map(obj.raw, true, true, delta_frame_);
 			collect_adj_fall_checks(obj.raw);
 		}
 		for (auto& obj : door_travelling_objs_) {
@@ -465,7 +465,7 @@ void MoveProcessor::try_int_door_exit() {
 		return;
 	// Normal door motion
 	}
-	entry_door_->acquire_map_flag(playing_state_->global_, delta_frame_);
+	entry_door_->acquire_map_flag(playing_state_->global_);
 	place_door_travelling_objects();
 	frames_ = FALL_MOVEMENT_FRAMES;
 	door_state_ = DoorState::IntSucceeded;
@@ -509,7 +509,7 @@ void MoveProcessor::ext_door_exit() {
 	delta_frame_->push(std::make_unique<RoomChangeDelta>(playing_state_->active_room()));
 	playing_state_->activate_room(dest_room_);
 	map_ = dest_room_->map();
-	entry_door_->acquire_map_flag(playing_state_->global_, delta_frame_);
+	entry_door_->acquire_map_flag(playing_state_->global_);
 	place_door_travelling_objects();
 	map_->player_cycle_->add_player(player_, delta_frame_, true);
 	playing_state_->move_camera_to_player(true);
@@ -549,7 +549,7 @@ DeltaCode RoomChangeDelta::code() {
 	return DeltaCode::RoomChangeDelta;
 }
 
-std::unique_ptr<Delta> RoomChangeDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> RoomChangeDelta::deserialize(MapFileI& file) {
 	return std::make_unique<RoomChangeDelta>(file.read_str());
 }
 
@@ -576,7 +576,7 @@ DeltaCode ToggleGravitableDelta::code() {
 	return DeltaCode::ToggleGravitableDelta;
 }
 
-std::unique_ptr<Delta> ToggleGravitableDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> ToggleGravitableDelta::deserialize(MapFileI& file) {
 	return std::make_unique<ToggleGravitableDelta>(file.read_frozen_obj());
 }
 
@@ -600,7 +600,7 @@ DeltaCode ColorChangeDelta::code() {
 	return DeltaCode::ColorChangeDelta;
 }
 
-std::unique_ptr<Delta> ColorChangeDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> ColorChangeDelta::deserialize(MapFileI& file) {
 	auto car = file.read_frozen_obj();
 	bool undo = file.read_byte();
 	return std::make_unique<ColorChangeDelta>(car, undo);

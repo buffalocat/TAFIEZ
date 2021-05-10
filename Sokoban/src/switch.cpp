@@ -91,6 +91,6 @@ DeltaCode SwitchToggleDelta::code() {
 	return DeltaCode::SwitchToggleDelta;
 }
 
-std::unique_ptr<Delta> SwitchToggleDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> SwitchToggleDelta::deserialize(MapFileI& file) {
 	return std::make_unique<SwitchToggleDelta>(file.read_frozen_obj());
 }

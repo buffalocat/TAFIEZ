@@ -101,7 +101,7 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 
 	if (ImGui::Button("Shift room?##ROOM")) {
 		Point3 dpos = { shift_width, shift_height, shift_depth };
-		map->take_from_map(player, true, false, false, nullptr);
+		map->take_from_map(player, true, false, nullptr);
 		eroom->room->shift_by(dpos);
 		shift_width = 0;
 		shift_height = 0;
@@ -132,7 +132,7 @@ void RoomTab::shift_extend_options(EditorRoom* eroom) {
 
 	if (ImGui::Button("Extend room?##ROOM")) {
 		Point3 dpos = { extend_width, extend_height, extend_depth };
-		map->take_from_map(player, true, false, false, nullptr);
+		map->take_from_map(player, true, false, nullptr);
 		eroom->room->extend_by(dpos);
 		extend_width = 0;
 		extend_height = 0;
@@ -152,7 +152,7 @@ void RoomTab::handle_left_click(EditorRoom* eroom, Point3 pos) {
 	RoomMap* map = eroom->map();
 	if (!map->view(pos)) {
 		auto player = map->view(eroom->start_pos);
-		map->take_from_map(player, false, false, false, nullptr);
+		map->take_from_map(player, false, false, nullptr);
 		player->pos_ = pos;
 		eroom->start_pos = pos;
 		map->put_in_map(player, false, false, nullptr);

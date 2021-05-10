@@ -47,7 +47,7 @@ public:
 	virtual void push_to_object_array(std::unique_ptr<GameObject>, DeltaFrame*);
 	void remove_from_object_array(GameObject*);
 	void put_in_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
-    void take_from_map(GameObject*, bool real, bool inacc, bool activate_listeners, DeltaFrame*);
+    void take_from_map(GameObject*, bool real, bool activate_listeners, DeltaFrame*);
 	virtual void create_in_map(std::unique_ptr<GameObject>, bool activate_listeners, DeltaFrame*);
 	GameObject* deref_object(FrozenObject* frozen_obj);
 
@@ -57,7 +57,7 @@ public:
     void shift(GameObject*, Point3, bool activate_listeners, DeltaFrame*);
     void batch_shift(std::vector<GameObject*>, Point3, bool activate_listeners, DeltaFrame*);
 
-    void serialize(MapFileO& file);
+    void serialize(MapFileO& file, bool write_obj_ids);
 
     void draw(GraphicsManager*, double angle);
     void draw_layer(GraphicsManager*, int z);
@@ -77,9 +77,8 @@ public:
     void check_signalers(DeltaFrame*, MoveProcessor*);
     void remove_signaler(Signaler*);
 
-	void check_clear_flag_collected(DeltaFrame*);
-	void collect_flag(bool real, DeltaFrame*);
-	void uncollect_flag();
+	void check_clear_flag_collected();
+	void collect_flag(bool real);
 
 	void validate_players(DeltaFrame*);
 
@@ -155,7 +154,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject obj_;
@@ -164,17 +163,16 @@ private:
 
 class TakeDelta : public Delta {
 public:
-	TakeDelta(GameObject* obj, bool new_inacc);
-	TakeDelta(FrozenObject obj, bool new_inacc);
+	TakeDelta(GameObject* obj);
+	TakeDelta(FrozenObject obj);
 	~TakeDelta();
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject obj_;
-	bool new_inacc_;
 };
 
 
@@ -186,7 +184,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	Point3 pos_;
@@ -201,7 +199,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject obj_;
@@ -216,7 +214,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject obj_;
@@ -232,22 +230,11 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	std::vector<FrozenObject> objs_;
 	Point3 dpos_;
-};
-
-
-class ClearFlagCollectionDelta : public Delta {
-public:
-	ClearFlagCollectionDelta();
-	~ClearFlagCollectionDelta();
-	void serialize(MapFileO&);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
 };
 
 
@@ -297,7 +284,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	int index_;
@@ -313,7 +300,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject player_;
@@ -333,7 +320,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject dead_player_;

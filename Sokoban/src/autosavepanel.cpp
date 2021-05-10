@@ -97,7 +97,7 @@ DeltaCode AutosavePanelDelta::code() {
 	return DeltaCode::AutosavePanelDelta;
 }
 
-std::unique_ptr<Delta> AutosavePanelDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> AutosavePanelDelta::deserialize(MapFileI& file) {
 	return std::make_unique<AutosavePanelDelta>(file.read_frozen_obj());
 }
 

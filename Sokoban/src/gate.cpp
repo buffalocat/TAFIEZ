@@ -37,6 +37,15 @@ void Gate::serialize(MapFileO& file) {
 	}
 }
 
+void Gate::serialize_with_ids(MapFileO& file) {
+	bool holding_body = body_ && !state();
+	file << color_ << count_ << persistent_ << default_ << active_ << waiting_ << holding_body;
+	if (holding_body) {
+		file << Point3_S16{ body_->pos_ - pos() };
+		file.write_uint32(body_->id_);
+	}
+}
+
 void Gate::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
 	unsigned char b[7];
 	file.read(b, 7);
@@ -46,6 +55,21 @@ void Gate::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent)
 		Point3_S16 body_pos{};
 		file >> body_pos;
 		arr->push_object(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_));
+	}
+	parent->set_modifier(std::move(gate));
+}
+
+void Gate::deserialize_with_ids(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
+	unsigned char b[7];
+	file.read(b, 7);
+	auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
+	// Is the body alive and retracted?
+	if (b[6]) {
+		Point3 body_pos = file.read_spoint3();
+		auto body_unique = std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_);
+		auto id = file.read_uint32();
+		body_unique->id_ = id;
+		arr->push_object(std::move(body_unique));
 	}
 	parent->set_modifier(std::move(gate));
 }
@@ -73,7 +97,7 @@ void Gate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcess
 		if (cur_state && !body_->tangible_) {
 			mp->push_rising_gate(this);
 		} else if (!cur_state && body_->tangible_) {
-			map->take_from_map(body_, true, false, true, delta_frame);
+			map->take_from_map(body_, true, true, delta_frame);
 			mp->anims_->receive_signal(AnimationSignal::GateDown, parent_, delta_frame);
 			mp->add_to_fall_check(parent_);
 			GameObject* above = map->view(body_->pos_ + Point3{ 0,0,1 });

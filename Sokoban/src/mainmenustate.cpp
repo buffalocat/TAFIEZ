@@ -20,7 +20,7 @@ void MainMenuState::init_menu() {
 	if (EDITOR_ENABLED) {
 		menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
 	}
-	menu_->push_entry("Select File", [this]() { open_file_select(); });
+	menu_->push_entry("Select Profile", [this]() { open_file_select(); });
 	quit_entry_index_ = menu_->num_entries_;
 	menu_->push_entry("Quit", [this]() { queue_quit(); });
 }
@@ -91,7 +91,7 @@ void FileSelectState::new_file() {
 		auto playing_state_unique = std::make_unique<RealPlayingState>(cur_file, this);
 	auto playing_state = playing_state_unique.get();
 	create_child(std::move(playing_state_unique));
-	playing_state->play_from_map("TEST");
+	playing_state->play_from_map("T");
 	queue_quit();
 }
 

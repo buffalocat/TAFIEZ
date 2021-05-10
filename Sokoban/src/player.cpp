@@ -23,8 +23,7 @@ void Player::serialize(MapFileO& file) {
 	file << state_;
 }
 
-std::unique_ptr<GameObject> Player::deserialize(MapFileI& file) {
-	Point3 pos{ file.read_point3() };
+std::unique_ptr<GameObject> Player::deserialize(MapFileI& file, Point3 pos) {
 	PlayerState state = static_cast<PlayerState>(file.read_byte());
 	return std::make_unique<Player>(pos, state);
 }
@@ -157,7 +156,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 				if (auto* above = map->view(pos_ + Point3{ 0,0,1 })) {
 					mp->add_to_fall_check(above);
 				}
-				map->take_from_map(this, true, false, true, delta_frame);
+				map->take_from_map(this, true, true, delta_frame);
 				state_ = PlayerState::RidingHidden;
 				set_car(car);
 				break;
@@ -187,7 +186,6 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 
 void Player::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	GameObject::destroy(mp, death);
-	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	mp->map_->player_cycle_->remove_player(this, mp->delta_frame_);
 	death_ = death;
 }
@@ -356,7 +354,7 @@ DeltaCode PlayerStateDelta::code() {
 	return DeltaCode::PlayerStateDelta;
 }
 
-std::unique_ptr<Delta> PlayerStateDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> PlayerStateDelta::deserialize(MapFileI& file) {
 	auto player = file.read_frozen_obj();
 	auto car = file.read_frozen_obj();
 	auto state = static_cast<PlayerState>(file.read_byte());

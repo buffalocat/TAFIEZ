@@ -30,6 +30,7 @@ public:
     virtual void make_str(std::string&) = 0;
     virtual ModCode mod_code() = 0;
 	virtual void serialize(MapFileO& file);
+	virtual void serialize_with_ids(MapFileO& file);
     virtual bool relation_check();
     virtual void relation_serialize(MapFileO& file);
 	virtual void relation_serialize_frozen(MapFileO& file);
@@ -74,7 +75,7 @@ public:
 	void serialize(MapFileO&);
 	void revert(RoomMap*);
 	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	static std::unique_ptr<Delta> deserialize(MapFileI& file);
 
 private:
 	FrozenObject mod_;

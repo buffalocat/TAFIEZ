@@ -39,7 +39,7 @@ bool EditorTab::kill_object(Point3 pos, RoomMap* map, Point3 player_pos) {
 		if (obj->id_ == GENERIC_WALL_ID) {
 			map->at(pos) = 0;
 		} else {
-			map->take_from_map(obj, true, false, false, nullptr);
+			map->take_from_map(obj, true, false, nullptr);
 			map->remove_from_object_array(obj);
 		}
 		return true;

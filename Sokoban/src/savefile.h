@@ -49,54 +49,26 @@ public:
 	void load_flags(std::filesystem::path path);
 	void save_flags(std::filesystem::path path);
 	void add_flag(unsigned int flag);
-	void add_flag_delta(unsigned int flag, DeltaFrame*);
-	void remove_flag(unsigned int flag);
 	bool has_flag(unsigned int flag);
 
-	void collect_clear_flag(char zone, DeltaFrame*);
-	void uncollect_clear_flag(char zone);
+	void collect_clear_flag(char zone);
 
 	std::set<unsigned int> flags_{};
 	int clear_flag_total_ = 0;
 };
 
-class GlobalFlagDelta : public Delta {
+
+class SaveDependencyGraph {
 public:
-	GlobalFlagDelta(unsigned int flag);
-	~GlobalFlagDelta();
-	void serialize(MapFileO&);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
+	SaveDependencyGraph();
+	~SaveDependencyGraph();
+
+	void add_set(std::set<unsigned int>& dep);
+	void remove_set(std::set<unsigned int>& dep);
+	std::vector<unsigned int> clear_unused_saves();
 
 private:
-	unsigned int flag_;
-};
-
-class FlagCountDelta : public Delta {
-public:
-	FlagCountDelta(unsigned int count);
-	~FlagCountDelta();
-	void serialize(MapFileO&);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
-
-private:
-	unsigned int count_;
-};
-
-class AutosaveDelta : public Delta {
-public:
-	AutosaveDelta(int index);
-	~AutosaveDelta();
-	void serialize(MapFileO&);
-	void revert(RoomMap*);
-	DeltaCode code();
-	static std::unique_ptr<Delta> deserialize(MapFileIwithObjs& file);
-
-private:
-	int index_;
+	std::map<unsigned int, unsigned int> dep_count_{};
 };
 
 
@@ -104,7 +76,6 @@ extern const int NUM_SAVE_ROWS;
 extern const int NUM_SAVE_COLUMNS;
 extern const int NUM_AUTO_SAVES;
 extern const int NUM_MANUAL_SAVES;
-
 
 class AutosavePanel;
 
@@ -114,7 +85,7 @@ public:
 	virtual ~SubSave();
 
 	void save_meta(MapFileO& file);
-	void load_meta(MapFileI& file);
+	void load_meta(MapFileI& file, SaveDependencyGraph* dep);
 
 	unsigned int index_;
 	std::set<unsigned int> dependent_{};
@@ -132,18 +103,13 @@ public:
 };
 
 
-
-class SaveDependencyGraph {
+class LoadedSubSave {
 public:
-	SaveDependencyGraph();
-	~SaveDependencyGraph();
+	LoadedSubSave();
+	~LoadedSubSave();
 
-	void add_save(SubSave*);
-	void remove_save(SubSave*);
-	std::vector<unsigned int> clear_unused_saves();
-
-private:
-	std::map<unsigned int, unsigned int> dep_count_{};
+	std::set<unsigned int> dependent_{};
+	std::map<std::string, unsigned int> room_subsave_{};
 };
 
 
@@ -166,24 +132,25 @@ public:
 	void make_manual_save(unsigned int index, RealPlayingState*);
 	bool load_subsave_dispatch(SaveType type, unsigned int index, RealPlayingState* state);
 
-	void load_room_data(std::filesystem::path subsave_path);
-	void save_room_data(std::filesystem::path subsave_path, std::string cur_room_name);
-	std::filesystem::path get_path(std::string name, bool* from_main);
+	void load_room_data(LoadedSubSave* loaded, std::filesystem::path subsave_path);
+	void save_room_data(RealPlayingState* state, std::filesystem::path subsave_path, std::string cur_room_name);
+	std::filesystem::path get_path(RealPlayingState* state, std::string name, bool* from_main);
 	void save_room(Room* room, std::filesystem::path path);
+
+	void init_state(RealPlayingState* state);
+	void unload_state(RealPlayingState* state);
 
 	void load_meta();
 	void save_meta();
 	void save_meta_single(MapFileO& file, SubSave* subsave);
 
-	void world_reset();
-	void replace_emergency();
-
 	std::unique_ptr<PlayingGlobalData> global_;
 	std::string cur_room_name_{};
 	bool exists_ = false;
 
+	std::map<RealPlayingState*, LoadedSubSave> loaded_subsave_map_{};
+
 	std::unique_ptr<SubSave> emergency_save_{};
-	std::unique_ptr<SubSave> emergency_save_temp_{};
 	std::deque<std::unique_ptr<SubSaveAuto>> auto_saves_{};
 	std::vector<std::unique_ptr<SubSave>> manual_saves_{};
 	SaveDependencyGraph dep_graph_{};
@@ -191,6 +158,5 @@ public:
 private:
 	unsigned int next_index_{ 0 };
 	std::vector<unsigned int> unused_subsave_indices_{};
-	std::map<std::string, int> room_subsave_{};
 	std::filesystem::path base_path_;
 };

@@ -12,7 +12,7 @@
 #include "moveprocessor.h"
 #include "playingstate.h"
 #include "room.h"
-#include "roommap.h"
+#include "gameobjectarray.h"
 
 #include "component.h"
 
@@ -79,6 +79,8 @@ void GameObject::cleanup_on_take(RoomMap* map, DeltaFrame* delta_frame, bool rea
 }
 
 void GameObject::destroy(MoveProcessor* mp, CauseOfDeath death) {
+	mp->map_->obj_array_.add_dead_obj(this);
+	mp->delta_frame_->push(std::make_unique<DestructionDelta>(this));
 	if (modifier_) {
 		modifier_->destroy(mp, death);
 	}
@@ -211,6 +213,7 @@ void DestructionDelta::serialize(MapFileO& file) {
 
 void DestructionDelta::revert(RoomMap* room_map) {
 	auto* obj = obj_.resolve(room_map);
+	room_map->obj_array_.remove_dead_obj(obj);
 	obj->undestroy();
 }
 
@@ -218,7 +221,7 @@ DeltaCode DestructionDelta::code() {
 	return DeltaCode::DestructionDelta;
 }
 
-std::unique_ptr<Delta> DestructionDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> DestructionDelta::deserialize(MapFileI& file) {
 	return std::make_unique<DestructionDelta>(file.read_frozen_obj());
 }
 
@@ -245,7 +248,7 @@ DeltaCode AbstractShiftDelta::code() {
 	return DeltaCode::AbstractShiftDelta;
 }
 
-std::unique_ptr<Delta> AbstractShiftDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> AbstractShiftDelta::deserialize(MapFileI& file) {
 	auto obj = file.read_frozen_obj();
 	auto dpos = file.read_spoint3();
 	return std::make_unique<AbstractShiftDelta>(obj, dpos);
@@ -274,7 +277,7 @@ DeltaCode AbstractPutDelta::code() {
 	return DeltaCode::AbstractPutDelta;
 }
 
-std::unique_ptr<Delta> AbstractPutDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> AbstractPutDelta::deserialize(MapFileI& file) {
 	auto obj = file.read_frozen_obj();
 	auto pos = file.read_spoint3();
 	return std::make_unique<AbstractPutDelta>(obj, pos);

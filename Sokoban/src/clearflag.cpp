@@ -141,6 +141,6 @@ DeltaCode ClearFlagToggleDelta::code() {
 	return DeltaCode::ClearFlagToggleDelta;
 }
 
-std::unique_ptr<Delta> ClearFlagToggleDelta::deserialize(MapFileIwithObjs& file) {
+std::unique_ptr<Delta> ClearFlagToggleDelta::deserialize(MapFileI& file) {
 	return std::make_unique<ClearFlagToggleDelta>(file.read_frozen_obj());
 }

@@ -31,6 +31,7 @@ enum class MapCode {
 	DeadObjs = 23,
 	Deltas = 24,
 	DoorRelationsFrozen = 25,
+	ObjectsWithIDs = 26,
 	End = 255,
 };
 
@@ -71,6 +72,7 @@ public:
 	Point3 read_spoint3();
     std::string read_str();
 	std::string read_long_str();
+	FrozenObject read_frozen_obj();
 
 private:
     std::ifstream file_;
@@ -88,18 +90,6 @@ MapFileI& operator>>(MapFileI& f, IntRect& v);
 MapFileI& operator>>(MapFileI& f, FloatRect& v);
 
 MapFileI& operator>>(MapFileI& f, ColorCycle& v);
-
-class MapFileIwithObjs : public MapFileI {
-public:
-	MapFileIwithObjs(const std::filesystem::path& path, GameObjectArray* arr);
-	~MapFileIwithObjs();
-
-	FrozenObject read_frozen_obj();
-
-private:
-	GameObjectArray* arr_;
-};
-
 
 
 class MapFileO {

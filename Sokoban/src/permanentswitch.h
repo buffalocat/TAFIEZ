@@ -17,6 +17,7 @@ public:
 	void relation_serialize(MapFileO& file);
 
 	bool check_send_signal(RoomMap* map, DeltaFrame* delta_frame);
+	void check_send_signal_from_global_flag(RoomMap* map);
 
 	void setup_on_editor_creation(EditorGlobalData* global, Room* room);
 	void cleanup_on_editor_destruction(EditorGlobalData* global);
