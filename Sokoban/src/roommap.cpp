@@ -289,6 +289,10 @@ void RoomMap::remove_clear_flag(ClearFlag* obj) {
 	clear_flags_.erase(std::remove(clear_flags_.begin(), clear_flags_.end(), obj), clear_flags_.end());
 }
 
+void RoomMap::remove_moved_car(Car* obj) {
+	moved_cars_.erase(std::remove(moved_cars_.begin(), moved_cars_.end(), obj), moved_cars_.end());
+}
+
 void RoomMap::add_listener(ObjectModifier* obj, Point3 pos) {
 	listeners_[pos].push_back(obj);
 }

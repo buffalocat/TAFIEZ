@@ -50,7 +50,7 @@ public:
 	void draw(GraphicsManager*, FPoint3);
 
 	void place_walls(RoomMap*);
-	void remove_walls(RoomMap*, DeltaFrame*);
+	void remove_walls(RoomMap*, DeltaFrame*, MoveProcessor*);
 	void spawn_sigils();
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
@@ -94,6 +94,5 @@ public:
 private:
 	FrozenObject fg_;
 };
-
 
 #endif //FLAGGATE_H

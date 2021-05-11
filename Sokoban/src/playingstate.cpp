@@ -335,6 +335,7 @@ void PlayingState::load_room_from_path(std::filesystem::path path, bool use_defa
 			room->map()->remove_from_object_array(default_player);
 		}
 		if (Car* car = init_data.default_car) {
+			room->map()->remove_moved_car(car);
 			room->map()->take_from_map(car->parent_, true, false, nullptr);
 			room->map()->remove_from_object_array(car->parent_);
 		}

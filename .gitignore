@@ -63,3 +63,4 @@ Sokoban/resources/*.py
 
 # ImGui ini
 *.ini
+*.sav

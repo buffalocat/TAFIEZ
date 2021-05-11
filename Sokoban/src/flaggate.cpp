@@ -65,7 +65,7 @@ void FlagGate::map_callback(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor
 void FlagGate::apply_state_change(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	signal_animation(mp->anims_, mp->delta_frame_);
 	if (!down_ && state() && mp->playing_state_->global_->clear_flag_total_ >= num_flags_) {
-		remove_walls(map, delta_frame);
+		remove_walls(map, delta_frame, mp);
 		animation_state_ = FlagGateAnimationState::Charging;
 		stored_delta_frame_ = delta_frame;
 		mp->playing_state_->mandatory_wait_ = true;
@@ -93,13 +93,15 @@ void FlagGate::place_walls(RoomMap* map) {
 	}
 }
 
-void FlagGate::remove_walls(RoomMap* map, DeltaFrame* delta_frame) {
+void FlagGate::remove_walls(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	Point3 a, b;
 	get_gate_extremes(a, b);
 	for (int x = a.x; x <= b.x; ++x) {
 		for (int y = a.y; y <= b.y; ++y) {
 			for (int z = a.z; z <= b.z; ++z) {
-				map->take_from_map(map->view(Point3{ x, y, z }), true, false, delta_frame);
+				auto* wall = map->view(Point3{ x, y, z });
+				map->take_from_map(wall, true, false, delta_frame);
+				wall->destroy(mp, CauseOfDeath::None);
 			}
 		}
 	}

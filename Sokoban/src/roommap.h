@@ -88,8 +88,8 @@ public:
 
 	void remove_auto(AutoBlock* obj);
 	void remove_puppet(PuppetBlock* obj);
-	void remove_clear_flag(ClearFlag* flag);
-
+	void remove_clear_flag(ClearFlag* obj);
+	void remove_moved_car(Car* obj);
 
     void add_listener(ObjectModifier*, Point3);
     void remove_listener(ObjectModifier*, Point3);

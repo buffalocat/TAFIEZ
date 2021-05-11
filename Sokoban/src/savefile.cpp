@@ -452,6 +452,9 @@ void SaveProfile::unload_state(RealPlayingState* state) {
 		std::error_code e{};
 		auto subsave_path = base_path_ / std::to_string(i);
 		std::filesystem::remove_all(subsave_path, e);
+		if (!e) {
+			unused_subsave_indices_.push_back(i);
+		}
 	}
 }
 
