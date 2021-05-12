@@ -409,7 +409,7 @@ void MoveProcessor::place_door_travelling_objects() {
 				GameObject* obj = dto.raw;
 				auto dup_unique = obj->duplicate(map_, delta_frame_);
 				auto* dup = dup_unique.get();
-				dup->abstract_put(exit_pos + dto.rel_pos, delta_frame_);
+				dup->pos_ = exit_pos + dto.rel_pos;
 				fall_check_.push_back(dup);
 				if (auto* snake = dynamic_cast<SnakeBlock*>(dup)) {
 					moved_snakes.push_back(snake);

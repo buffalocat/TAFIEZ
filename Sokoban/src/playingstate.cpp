@@ -62,7 +62,7 @@ PlayingState::PlayingState(GameState* parent, PlayingGlobalData* global) :
 PlayingState::~PlayingState() {}
 
 void PlayingState::main_loop() {
-	if (!move_processor_) {
+	if (not_in_move()) {
 		delta_frame_ = std::make_unique<DeltaFrame>();
 	}
 	update_key_status();
@@ -88,9 +88,13 @@ void PlayingState::main_loop() {
 	anims_->draw_cutscene();
 	// If a move is not currently happening, try to push the current DeltaFrame
 	// If it's trivial, nothing will happen
-	if (!move_processor_) {
+	if (not_in_move()) {
 		undo_stack_->push(std::move(delta_frame_));
 	}
+}
+
+bool PlayingState::not_in_move() {
+	return (!move_processor_) && (player_doa()->death_ == CauseOfDeath::None);
 }
 
 void PlayingState::update_key_status() {
@@ -142,8 +146,10 @@ void PlayingState::handle_input() {
 	if (move_processor_) {
 		if (move_processor_->update()) {
 			move_processor_.reset(nullptr);
-			undo_stack_->push(std::move(delta_frame_));
-			delta_frame_ = std::make_unique<DeltaFrame>();
+			if (not_in_move()) {
+				undo_stack_->push(std::move(delta_frame_));
+				delta_frame_ = std::make_unique<DeltaFrame>();
+			}
 			if (queued_autosave_) {
 				make_subsave(SaveType::Auto, 0, queued_autosave_);
 				queued_autosave_ = nullptr;

@@ -123,7 +123,6 @@ public:
 	void load_subsave(SubSave*, RealPlayingState*);
 	void load_global();
 	void remove_save(SubSave*);
-	void delete_unused_saves();
 	void create_save_dir();
 
 	bool overwrite_current_autosave(AutosavePanel*);

@@ -50,7 +50,6 @@ bool RealPlayingState::load_room(std::string name, bool use_default_player) {
 
 void RealPlayingState::main_loop() {
 	PlayingState::main_loop();
-	//savefile_->delete_unused_saves();
 }
 
 void RealPlayingState::make_subsave(SaveType type, unsigned int save_index, AutosavePanel* panel) {
@@ -99,7 +98,7 @@ void RealPlayingState::ensure_safe_delta_state() {
 	if (delta_frame_) {
 		delta_frame_->revert(this);
 	}
-	if (player_doa()->death_ != CauseOfDeath::None) {
+	while (player_doa()->death_ != CauseOfDeath::None) {
 		undo_stack_->pop();
 	}
 }

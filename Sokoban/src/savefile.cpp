@@ -375,15 +375,6 @@ void SaveProfile::remove_save(SubSave* subsave) {
 	}
 }
 
-void SaveProfile::delete_unused_saves() {
-	return;
-	for (auto index : dep_graph_.clear_unused_saves()) {
-		unused_subsave_indices_.push_back(index);
-		std::filesystem::remove_all(base_path_ / std::to_string(index));
-	}
-}
-
-
 void SaveProfile::load_room_data(LoadedSubSave* loaded, std::filesystem::path subsave_path) {
 	auto room_data_path = subsave_path / "rooms.sav";
 	std::ifstream room_data_file{};
@@ -456,6 +447,7 @@ void SaveProfile::unload_state(RealPlayingState* state) {
 			unused_subsave_indices_.push_back(i);
 		}
 	}
+	save_meta();
 }
 
 
