@@ -261,6 +261,7 @@ public:
 	bool any_player_alive();
 	void serialize_permutation(MapFileO & file);
 	void deserialize_permutation(MapFileI& file, RoomMap* room_map);
+	void deserialize_dead_player(MapFileI& file, RoomMap* room_map);
 
 private:
 	std::vector<Player*> players_{};

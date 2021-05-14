@@ -6,6 +6,7 @@
 #include "mapfile.h"
 #include "room.h"
 #include "roommap.h"
+#include "player.h"
 
 GameObjectArray::GameObjectArray() {
 	array_.push_back(nullptr);
@@ -62,13 +63,22 @@ void GameObjectArray::serialize(MapFileO& file) {
 		file.write_uint32(obj->id_);
 		file.write_spoint3(obj->pos_);
 		obj->serialize(file);
-		if (ObjectModifier* mod = obj->modifier()) {
+		if (auto* mod = obj->modifier()) {
 			file << mod->mod_code();
 			mod->serialize(file);
 			mod->relation_serialize_frozen(file);
 		} else {
 			file << ModCode::NONE;
-			file << MapCode::NONE;
+			if (auto* player = dynamic_cast<Player*>(obj)) {
+				if (player->death_ != CauseOfDeath::None) {
+					file << MapCode::PlayerDeath;
+					file << static_cast<unsigned char>(player->death_);
+				} else {
+					file << MapCode::NONE;
+				}
+			} else {
+				file << MapCode::NONE;
+			}
 		}
 	}
 }

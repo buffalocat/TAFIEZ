@@ -357,6 +357,10 @@ void deserialize_dead_objects(MapFileI& file, GameObjectArray* arr) {
 			sign->learn_flag_ = file.read_uint32();
 			break;
 		}
+		case MapCode::PlayerDeath:
+		{
+			static_cast<Player*>(obj)->death_ = static_cast<CauseOfDeath>(file.read_byte());
+		}
 		default:
 			break;
 		}

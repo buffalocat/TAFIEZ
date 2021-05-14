@@ -51,30 +51,10 @@ void FrozenObject::init_from_obj() {
 		id_ = 0;
 		return;
 	}
+	id_ = obj_->id_;
 	if (obj_->tangible_) {
 		ref_ = ObjRefCode::Tangible;
-		id_ = obj_->id_;
-		return;
 	}
-	if (auto* gate_body = dynamic_cast<GateBody*>(obj_)) {
-		if (auto* gate = gate_body->gate_) {
-			if (gate->body_ == gate_body) {
-				ref_ = ObjRefCode::HeldGateBody;
-				id_ = gate->parent_->id_;
-				return;
-			}
-		}
-	}
-	if (auto* player = dynamic_cast<Player*>(obj_)) {
-		if (auto* car = player->car_) {
-			if (car->player_ == player) {
-				ref_ = ObjRefCode::HeldPlayer;
-				id_ = car->parent_->id_;
-				return;
-			}
-		}
-	}
-	id_ = obj_->id_;
 	ref_ = ObjRefCode::Inaccessible;
 }
 

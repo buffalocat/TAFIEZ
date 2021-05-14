@@ -182,15 +182,10 @@ void RoomMap::create_in_map(std::unique_ptr<GameObject> obj_unique, bool activat
 GameObject* RoomMap::deref_object(FrozenObject* frozen_obj) {
 	auto* obj = obj_array_[frozen_obj->id_];
 	switch (frozen_obj->ref_) {
-	case ObjRefCode::Null:
-		return nullptr;
 	case ObjRefCode::Tangible:
 	case ObjRefCode::Inaccessible:
 		return obj;
-	case ObjRefCode::HeldPlayer:
-		return dynamic_cast<Car*>(obj->modifier())->player_;
-	case ObjRefCode::HeldGateBody:
-		return dynamic_cast<Gate*>(obj->modifier())->body_;
+	case ObjRefCode::Null:
 	default:
 		return nullptr;
 	}
@@ -896,36 +891,24 @@ bool PlayerCycle::any_player_alive() {
 
 void PlayerCycle::serialize_permutation(MapFileO& file) {
 	file << MapCode::PlayerCycle;
+	file.write_uint32((unsigned int)players_.size());
 	for (auto* player : players_) {
-		if (player->tangible_) {
-			file << ObjRefCode::Tangible;
-			file << player->pos_;
-		} else {
-			file << ObjRefCode::HeldPlayer;
-			file << player->car_riding()->pos();
-		}
+		FrozenObject(player).serialize(file);
 	}
+	FrozenObject(dead_player_).serialize(file);
+	file.write_int32(index_);
+	file.write_int32(dead_index_);
 }
 
 void PlayerCycle::deserialize_permutation(MapFileI& file, RoomMap* room_map) {
-	for (int i = 0; i < players_.size(); ++i) {
-		auto ref_code = static_cast<ObjRefCode>(file.read_byte());
-		Player* cur_player = nullptr;
-		auto pos = file.read_point3();
-		switch (ref_code) {
-		case ObjRefCode::Tangible:
-		{
-			cur_player = dynamic_cast<Player*>(room_map->view(pos));
-			break;
-		}
-		case ObjRefCode::HeldPlayer:
-		{
-			cur_player = dynamic_cast<Car*>(room_map->view(pos)->modifier())->player_;
-			break;
-		}
-		}
-		players_[i] = cur_player;
+	players_.clear();
+	auto num_players = file.read_uint32();
+	for (unsigned int i = 0; i < num_players; ++i) {
+		players_.push_back(static_cast<Player*>(file.read_frozen_obj().resolve(room_map)));
 	}
+	dead_player_ = static_cast<Player*>(file.read_frozen_obj().resolve(room_map));
+	index_ = file.read_int32();
+	dead_index_ = file.read_int32();
 }
 
 
@@ -974,6 +957,7 @@ void RemovePlayerDelta::revert(RoomMap* room_map) {
 	auto* cycle = room_map->player_cycle();
 	ActivePlayerGuard guard{ cycle };
 	cycle->dead_player_ = static_cast<Player*>(dead_player_.resolve(room_map));
+	cycle->dead_index_ = dead_index_;
 	cycle->index_ = index_;
 	cycle->add_player_at_pos(static_cast<Player*>(player_.resolve(room_map)), rem_);
 }

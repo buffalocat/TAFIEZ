@@ -98,7 +98,8 @@ void RealPlayingState::ensure_safe_delta_state() {
 	if (delta_frame_) {
 		delta_frame_->revert(this);
 	}
+	/*
 	while (player_doa()->death_ != CauseOfDeath::None) {
 		undo_stack_->pop();
-	}
+	}*/
 }

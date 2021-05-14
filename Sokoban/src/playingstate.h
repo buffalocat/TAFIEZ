@@ -73,7 +73,6 @@ public:
 	virtual bool load_room(std::string name, bool use_default_player) = 0;
 	virtual void make_subsave(SaveType type, unsigned int save_index = 0, AutosavePanel* panel = nullptr);
 
-	bool not_in_move();
 	bool can_use_door(Door* ent_door, Room** dest_room_ptr, std::vector<DoorTravellingObj>& objs, std::vector<Door*>& exit_doors);
 
 	void move_camera_to_player(bool snap);

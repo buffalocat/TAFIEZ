@@ -32,6 +32,7 @@ enum class MapCode {
 	Deltas = 24,
 	DoorRelationsFrozen = 25,
 	ObjectsWithIDs = 26,
+	PlayerDeath = 27,
 	End = 255,
 };
 
@@ -39,8 +40,6 @@ enum class MapCode {
 enum class ObjRefCode {
 	Tangible = 1,
 	Inaccessible = 2,
-	HeldGateBody = 3,
-	HeldPlayer = 4,
 	Null = 7,
 };
 

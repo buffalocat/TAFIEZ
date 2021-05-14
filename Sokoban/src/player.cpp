@@ -185,8 +185,9 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 }
 
 void Player::destroy(MoveProcessor* mp, CauseOfDeath death) {
-	GameObject::destroy(mp, death);
+	set_free(mp->delta_frame_);
 	mp->map_->player_cycle_->remove_player(this, mp->delta_frame_);
+	GameObject::destroy(mp, death);
 	death_ = death;
 }
 
