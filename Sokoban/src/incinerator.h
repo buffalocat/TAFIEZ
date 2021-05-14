@@ -10,7 +10,7 @@ public:
 	void make_str(std::string&);
 	ModCode mod_code();
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
+	static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
 	bool can_set_state(bool state, RoomMap* map);
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);

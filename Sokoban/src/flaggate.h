@@ -40,7 +40,7 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI& file, GameObjectArray* map, GameObject* parent);
+	static void deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent);
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 	bool can_set_state(bool state, RoomMap*);

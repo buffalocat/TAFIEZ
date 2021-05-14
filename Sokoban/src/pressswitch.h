@@ -19,7 +19,7 @@ public:
 	virtual void make_str(std::string&);
     virtual ModCode mod_code();
     virtual void serialize(MapFileO& file);
-    static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
+    static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
     virtual void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);
 

@@ -34,7 +34,7 @@ void FloorSign::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void FloorSign::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void FloorSign::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	std::string content = file.read_long_str();
 	bool showing_text = file.read_byte();
 	auto sign = std::make_unique<FloorSign>(parent, content, showing_text);

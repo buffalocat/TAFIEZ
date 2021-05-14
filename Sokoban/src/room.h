@@ -76,7 +76,7 @@ private:
 };
 
 
-void deserialize_dead_objects(MapFileI& file, GameObjectArray* arr);
+void deserialize_dead_objects(MapFileI& file, RoomMap* room_map);
 void read_door_relations_frozen(MapFileI& file, Door* door);
 
 

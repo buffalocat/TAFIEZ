@@ -58,7 +58,7 @@ void Door::serialize(MapFileO& file) {
 	file.write_uint32(door_id_);
 }
 
-void Door::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void Door::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
     unsigned char b[4];
     file.read(b, 4);
 	unsigned int id = file.read_uint32();

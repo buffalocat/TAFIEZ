@@ -46,7 +46,7 @@ void Gate::serialize_with_ids(MapFileO& file) {
 	}
 }
 
-void Gate::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
+void Gate::deserialize(MapFileI& file, RoomMap* room_map, GameObject* parent) {
 	unsigned char b[7];
 	file.read(b, 7);
 	auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -54,12 +54,12 @@ void Gate::deserialize(MapFileI& file, GameObjectArray* arr, GameObject* parent)
 	if (b[6]) {
 		Point3_S16 body_pos{};
 		file >> body_pos;
-		arr->push_object(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_));
+		room_map->obj_array_.push_object(std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_));
 	}
 	parent->set_modifier(std::move(gate));
 }
 
-void Gate::deserialize_with_ids(MapFileI& file, GameObjectArray* arr, GameObject* parent) {
+void Gate::deserialize_with_ids(MapFileI& file, RoomMap* room_map, GameObject* parent) {
 	unsigned char b[7];
 	file.read(b, 7);
 	auto gate = std::make_unique<Gate>(parent, nullptr, b[0], b[1], b[2], b[3], b[4], b[5]);
@@ -69,7 +69,7 @@ void Gate::deserialize_with_ids(MapFileI& file, GameObjectArray* arr, GameObject
 		auto body_unique = std::make_unique<GateBody>(gate.get(), Point3{ body_pos } + parent->pos_);
 		auto id = file.read_uint32();
 		body_unique->id_ = id;
-		arr->push_object(std::move(body_unique));
+		room_map->obj_array_.push_object(std::move(body_unique));
 	}
 	parent->set_modifier(std::move(gate));
 }

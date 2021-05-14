@@ -38,7 +38,7 @@ void FlagGate::serialize(MapFileO& file) {
 	file << num_flags_ << orientation_ << count_ << active_ << walls_placed_ << down_;
 }
 
-void FlagGate::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void FlagGate::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	unsigned char b[6];
 	file.read(b, 6);
 	auto fg = std::make_unique<FlagGate>(parent, b[0], b[1], b[2], b[3], b[4], b[5]);

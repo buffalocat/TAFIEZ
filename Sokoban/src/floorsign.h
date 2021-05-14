@@ -14,7 +14,7 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI& file, GameObjectArray*, GameObject* parent);
+	static void deserialize(MapFileI& file, RoomMap*, GameObject* parent);
 	bool relation_check();
 	void relation_serialize(MapFileO& file);
 	void relation_serialize_frozen(MapFileO& file);

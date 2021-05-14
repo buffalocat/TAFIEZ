@@ -91,5 +91,6 @@ void GameObjectArray::deserialize(MapFileI& file) {
 	for (unsigned int i = 0; i < num_free; ++i) {
 		free_ids_.push_back(file.read_uint32());
 	}
-	deserialize_dead_objects(file, this);
+	RoomMap fake_map{ *this, nullptr, 0, 0, 0 };
+	deserialize_dead_objects(file, &fake_map);
 }

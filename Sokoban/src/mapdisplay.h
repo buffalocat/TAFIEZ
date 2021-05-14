@@ -26,7 +26,7 @@ public:
 
 	void make_str(std::string&);
 	ModCode mod_code();
-	static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
+	static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 

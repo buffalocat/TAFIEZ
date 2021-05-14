@@ -299,13 +299,14 @@ case ObjCode::CLASS:\
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize(file, arr, obj);\
+    CLASS::deserialize(file, room_map, obj);\
     break;
 
 
-void deserialize_dead_objects(MapFileI& file, GameObjectArray* arr) {
+void deserialize_dead_objects(MapFileI& file, RoomMap* room_map) {
 	std::unique_ptr<GameObject> obj_unique{};
 	GameObject* obj;
+	auto* arr = &room_map->obj_array_;
 	auto n_dead_objs = file.read_uint32();
 	for (unsigned int i = 0; i < n_dead_objs; ++i) {
 		auto obj_code = static_cast<ObjCode>(file.read_byte());
@@ -377,7 +378,7 @@ case ObjCode::CLASS:\
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize(file, &map_->obj_array_, obj.get());\
+    CLASS::deserialize(file, map_.get(), obj.get());\
     break;
 
 
@@ -438,12 +439,12 @@ case ObjCode::CLASS:\
 
 #define CASE_MODCODE(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize(file, &map_->obj_array_, obj.get());\
+    CLASS::deserialize(file, map_.get(), obj.get());\
     break;
 
 #define CASE_MODCODE_IDS(CLASS)\
 case ModCode::CLASS:\
-    CLASS::deserialize_with_ids(file, &map_->obj_array_, obj.get());\
+    CLASS::deserialize_with_ids(file, map_.get(), obj.get());\
     break;
 
 void Room::read_objects_with_ids(MapFileI& file) {

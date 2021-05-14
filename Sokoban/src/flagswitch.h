@@ -11,7 +11,7 @@ public:
 	void make_str(std::string&);
 	ModCode mod_code();
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
+	static void deserialize(MapFileI&, RoomMap*, GameObject*);
 
 	bool should_toggle(RoomMap*);
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);

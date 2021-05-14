@@ -17,7 +17,7 @@ ModCode PuppetBlock::mod_code() {
 	return ModCode::PuppetBlock;
 }
 
-void PuppetBlock::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void PuppetBlock::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	parent->set_modifier(std::make_unique<PuppetBlock>(parent));
 }
 

@@ -31,8 +31,8 @@ public:
     ModCode mod_code();
     void serialize(MapFileO& file);
 	void serialize_with_ids(MapFileO& file);
-    static void deserialize(MapFileI&, GameObjectArray*, GameObject*);
-	static void deserialize_with_ids(MapFileI&, GameObjectArray*, GameObject*);
+    static void deserialize(MapFileI&, RoomMap*, GameObject*);
+	static void deserialize_with_ids(MapFileI&, RoomMap*, GameObject*);
 
 	bool valid_parent(GameObject*);
 

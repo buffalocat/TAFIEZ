@@ -12,7 +12,7 @@ public:
 	ModCode mod_code();
 
 	void serialize(MapFileO& file);
-	static void deserialize(MapFileI& file, GameObjectArray*, GameObject* parent);
+	static void deserialize(MapFileI& file, RoomMap*, GameObject* parent);
 	std::unique_ptr<ObjectModifier> duplicate(GameObject*, RoomMap*, DeltaFrame*);
 
 	void map_callback(RoomMap*, DeltaFrame*, MoveProcessor*);

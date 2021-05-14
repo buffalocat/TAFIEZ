@@ -33,7 +33,7 @@ void AutosavePanel::serialize(MapFileO& file) {
 }
 
 
-void AutosavePanel::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void AutosavePanel::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	auto label = file.read_long_str();
 	bool active = file.read_byte();
 	parent->set_modifier(std::make_unique<AutosavePanel>(parent, label, active));

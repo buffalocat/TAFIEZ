@@ -33,7 +33,7 @@ void ClearFlag::serialize(MapFileO& file) {
 	file << active_;
 }
 
-void ClearFlag::deserialize(MapFileI& file, GameObjectArray*, GameObject* parent) {
+void ClearFlag::deserialize(MapFileI& file, RoomMap*, GameObject* parent) {
 	bool real, active;
 	file >> real >> active;
 	auto cf = std::make_unique<ClearFlag>(parent, real, active, false);
