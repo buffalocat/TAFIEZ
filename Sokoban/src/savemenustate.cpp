@@ -100,28 +100,28 @@ const int MAX_MENU_COOLDOWN = 8;
 
 void LoadMenuState::handle_entry_select_input() {
 	can_select_ = true;
-	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_UP)) {
 		if (input_cooldown_ == 0) {
 			move_y(-1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+	} else if (key_pressed(GLFW_KEY_DOWN)) {
 		if (input_cooldown_ == 0) {
 			move_y(1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else 	if (glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+	} else 	if (key_pressed(GLFW_KEY_RIGHT)) {
 		if (input_cooldown_ == 0) {
 			move_x(1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS) {
+	} else if (key_pressed(GLFW_KEY_LEFT)) {
 		if (input_cooldown_ == 0) {
 			move_x(-1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
@@ -174,7 +174,7 @@ void LoadMenuState::set_cur_save_slot() {
 }
 
 void LoadMenuState::handle_input(GameState* game_state) {
-	if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_ENTER)) {
 		if (can_select_) {
 			can_select_ = false;
 			if (cur_slot_) {
@@ -266,28 +266,28 @@ void SaveMenuState::generate_text() {
 
 void SaveMenuState::handle_entry_select_input() {
 	can_select_ = true;
-	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_UP)) {
 		if (input_cooldown_ == 0) {
 			move_y(-1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+	} else if (key_pressed(GLFW_KEY_DOWN)) {
 		if (input_cooldown_ == 0) {
 			move_y(1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else 	if (glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+	} else 	if (key_pressed(GLFW_KEY_RIGHT)) {
 		if (input_cooldown_ == 0) {
 			move_x(1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
 		} else {
 			--input_cooldown_;
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS) {
+	} else if (key_pressed(GLFW_KEY_LEFT)) {
 		if (input_cooldown_ == 0) {
 			move_x(-1);
 			input_cooldown_ = MAX_MENU_COOLDOWN;
@@ -332,7 +332,7 @@ void SaveMenuState::set_cur_save_slot() {
 
 
 void SaveMenuState::handle_input(GameState* game_state) {
-	if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_ENTER)) {
 		if (can_select_) {
 			can_select_ = false;
 			if (cur_slot_) {

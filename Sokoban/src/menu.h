@@ -15,14 +15,14 @@ struct MenuEntry {
 
 class Menu {
 public:
-	Menu(GLFWwindow* window, Font* font);
+	Menu(GameState* state, Font* font);
 	~Menu();
 
 	void push_entry(std::string label, MenuCallback callback);
 	void set_current_entry();
 
 	int handle_entry_select_input();
-	void handle_input(GameState* game_state);
+	void handle_input();
 	void set_current_entry(int new_current);
 	void update();
 	void draw();
@@ -30,7 +30,7 @@ public:
 	int num_entries_ = 0;
 
 private:
-	GLFWwindow* window_;
+	GameState* state_;
 	Font* font_;
 	std::vector<MenuEntry> entries_{};
 	int current_ = 0;

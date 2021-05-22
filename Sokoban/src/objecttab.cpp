@@ -226,9 +226,9 @@ bool ObjectTab::handle_keyboard_input() {
 	if (EditorTab::handle_keyboard_input()) {
 		return true;
 	}
-	if (glfwGetKey(editor_->window_, GLFW_KEY_LEFT_SHIFT)) {
+	if (key_pressed(GLFW_KEY_LEFT_SHIFT)) {
 		for (int i = 1; i <= 3; ++i) {
-			if (glfwGetKey(editor_->window_, GLFW_KEY_0 + i) == GLFW_PRESS) {
+			if (key_pressed(GLFW_KEY_0 + i)) {
 				obj_code = static_cast<ObjCode>(i);
 			}
 		}

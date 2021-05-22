@@ -18,6 +18,7 @@ public:
     virtual void handle_left_click(EditorRoom*, Point3);
     virtual void handle_right_click(EditorRoom*, Point3);
 	bool kill_object(Point3 pos, RoomMap* map, Point3 player_pos);
+    bool key_pressed(int key);
 
 protected:
     EditorState* editor_;

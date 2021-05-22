@@ -280,6 +280,7 @@
     <ClInclude Include="src\texture_constants.h" />
     <ClInclude Include="src\vertexlayout.h" />
     <ClInclude Include="src\wall.h" />
+    <ClInclude Include="src\window.h" />
     <ClInclude Include="src\worldresetkey.h" />
   </ItemGroup>
   <ItemGroup>
@@ -422,6 +423,7 @@
     <ClCompile Include="src\fontmanager.cpp" />
     <ClCompile Include="src\texture_constants.cpp" />
     <ClCompile Include="src\wall.cpp" />
+    <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\instanced_shader.fs" />

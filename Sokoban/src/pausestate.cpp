@@ -11,10 +11,11 @@
 #include "menu.h"
 #include "globalflagconstants.h"
 #include "savemenustate.h"
+#include "window.h"
 
 PauseState::PauseState(GameState* parent) : GameState(parent),
 playing_state_{ static_cast<PlayingState*>(parent) },
-menu_{ std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72)) } {
+menu_{ std::make_unique<Menu>(this, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72)) } {
 	menu_->push_entry("Unpause", [this]() { unpause(); });
 	if (auto* real_ps = dynamic_cast<RealPlayingState*>(parent)) {
 		if (playing_state_->global_->has_flag(get_misc_flag(MiscGlobalFlag::WorldResetLearned))) {
@@ -33,11 +34,12 @@ PauseState::~PauseState() {}
 
 void PauseState::main_loop() {
 	menu_->update();
-	menu_->handle_input(this);
+	menu_->handle_input();
 	draw();
 }
 
 void PauseState::draw() {
+	gfx_->clear_screen(CLEAR_COLOR);
 	double prev_shadow = gfx_->shadow_;
 	gfx_->shadow_ *= 0.3;
 	gfx_->post_rendering();

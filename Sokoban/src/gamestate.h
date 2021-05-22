@@ -1,7 +1,7 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-struct GLFWwindow;
+class OpenGLWindow;
 class GraphicsManager;
 class SoundManager;
 class TextRenderer;
@@ -19,11 +19,12 @@ public:
 	void queue_quit();
 	virtual bool can_quit(bool confirm);
 	void defer_to_sibling(std::unique_ptr<GameState> sibling);
+	bool key_pressed(int key);
 
 	GraphicsManager* gfx_{};
 	SoundManager* sound_{};
 	std::unique_ptr<TextRenderer> text_{};
-	GLFWwindow* window_{};
+	OpenGLWindow* window_{};
 	std::unique_ptr<GameState> parent_{};
 
 	GameState(GameState* parent);

@@ -7,6 +7,7 @@
 #include "gameobject.h"
 #include "objectmodifier.h"
 #include "roommap.h"
+#include "window.h"
 
 EditorTab::EditorTab(EditorState* editor) : editor_{ editor }, gfx_{ editor->gfx_ } {}
 
@@ -15,7 +16,7 @@ EditorTab::~EditorTab() {}
 void EditorTab::init() {}
 
 bool EditorTab::handle_keyboard_input() {
-	if (glfwGetKey(editor_->window_, GLFW_KEY_R)) {
+	if (key_pressed(GLFW_KEY_R)) {
 		inspect_mode_ = !inspect_mode_;
 		return true;
 	}
@@ -45,6 +46,10 @@ bool EditorTab::kill_object(Point3 pos, RoomMap* map, Point3 player_pos) {
 		return true;
 	}
 	return false;
+}
+
+bool EditorTab::key_pressed(int key) {
+	return editor_->key_pressed(key);
 }
 
 void color_button(int color_id) {

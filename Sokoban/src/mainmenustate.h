@@ -9,11 +9,13 @@ class SaveProfile;
 class MainMenuState: public GameState {
 public:
     MainMenuState(GameState* parent);
+	MainMenuState(GraphicsManager* gfx, SoundManager* sound, OpenGLWindow* window);
     ~MainMenuState();
     void main_loop();
 	void init_menu();
 	void handle_escape();
 
+	void toggle_fullscreen();
 	void open_file_select();
 	void draw();
 

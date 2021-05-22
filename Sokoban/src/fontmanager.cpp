@@ -1,10 +1,12 @@
 #include "stdafx.h"
+
 #include "fontmanager.h"
 #include "common_constants.h"
 #include "color_constants.h"
+#include "window.h"
 
-FontManager::FontManager(Shader* text_shader) :
-	text_shader_{ text_shader } {
+FontManager::FontManager(OpenGLWindow* window, Shader* text_shader) :
+	window_{ window }, text_shader_{ text_shader } {
 	if (FT_Init_FreeType(&ft_)) {
 		std::cout << "Failed to initialize FreeType" << std::endl;
 	}
@@ -23,11 +25,11 @@ Font* FontManager::get_font(std::string path, unsigned int size) {
 }
 
 std::unique_ptr<Font> FontManager::make_font(std::string path, unsigned int font_size) {
-	return std::make_unique<Font>(ft_, text_shader_, path, font_size);
+	return std::make_unique<Font>(this, ft_, window_, text_shader_, path, font_size);
 }
 
-Font::Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size) :
-	shader_{ text_shader },
+Font::Font(FontManager* fm, FT_Library ft, OpenGLWindow* window, Shader* text_shader, std::string path, unsigned int font_size) :
+	fm_{ fm }, window_{ window }, shader_{ text_shader },
 	tex_width_{ 1 << 9 }, tex_height_{ 1 << 9 }, font_size_{ font_size } {
 	FT_Face face;
 	if (FT_New_Face(ft, path.c_str(), 0, &face)) {
@@ -97,8 +99,10 @@ void Font::init_glyphs(int font_size, FT_Face face) {
 
 void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy,
 	std::vector<TextVertex>& text_verts, float* width, float* height) {
-	sx *= 2.0f / SCREEN_WIDTH;
-	sy *= 2.0f / SCREEN_HEIGHT;
+	sx /= 512.0f;
+	sy /= 384.0f;
+	std::cout << x << " " << y << std::endl;
+	std::cout << window_->viewport_size_[0] << " " << window_->viewport_size_[1] << std::endl;
 	float su = 1.0f / tex_width_;
 	float sv = 1.0f / tex_height_;
 

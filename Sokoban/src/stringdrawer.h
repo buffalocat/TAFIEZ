@@ -33,12 +33,15 @@ public:
 	virtual void update();
 	virtual void kill_instance();
 	virtual void cleanup();
+	void refresh_buffers();
 
 	void set_alive_ptr(bool*);
 
 	bool active_ = true;
 
 protected:
+	Font* font_;
+	std::string label_;
 	std::vector<TextVertex> vertices_{};
 	std::vector<TextVertex> bg_vertices_{};
 	glm::vec4 color_;
@@ -46,6 +49,7 @@ protected:
 	Shader* shader_;
 	GLuint VAO_, VBO_, tex_;
 	GLuint bg_VAO_, bg_VBO_;
+	float x_, y_, sx_, sy_;
 	float width_, height_;
 	float opacity_, bg_;
 	bool* alive_ptr_{};

@@ -2,6 +2,7 @@
 #include "gamestate.h"
 
 #include "graphicsmanager.h"
+#include "window.h"
 
 GameState::GameState() {}
 
@@ -30,10 +31,14 @@ void GameState::set_csp(std::unique_ptr<GameState>* csp) {
     current_state_ptr_ = csp;
 }
 
+bool GameState::key_pressed(int key) {
+	return glfwGetKey(window_->window_, key) == GLFW_PRESS;
+}
+
 void GameState::check_for_escape() {
-    if (can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    if (can_escape_quit_ && key_pressed(GLFW_KEY_ESCAPE)) {
 		handle_escape();
-    } else if (!can_escape_quit_ && glfwGetKey(window_, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+    } else if (!can_escape_quit_ && !key_pressed(GLFW_KEY_ESCAPE)) {
         can_escape_quit_ = true;
     }
 }

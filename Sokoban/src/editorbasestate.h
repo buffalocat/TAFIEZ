@@ -15,8 +15,6 @@ public:
     void display_hover_pos_object(Point3 cam_pos, RoomMap* map);
 
 protected:
-	static const glm::vec4 CLEAR_COLOR;
-
     bool ortho_cam_;
     bool one_layer_;
     int keyboard_cooldown_;

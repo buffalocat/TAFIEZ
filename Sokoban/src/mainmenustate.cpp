@@ -8,27 +8,45 @@
 #include "menu.h"
 #include "graphicsmanager.h"
 #include "fontmanager.h"
+#include "window.h"
+#include "stringdrawer.h"
 
-constexpr bool EDITOR_ENABLED = false;
 
-MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {}
+MainMenuState::MainMenuState(GameState* parent) : GameState(parent) {
+	init_menu();
+}
+
+MainMenuState::MainMenuState(GraphicsManager* gfx, SoundManager* sound, OpenGLWindow* window) :
+	GameState() {
+	gfx_ = gfx;
+	sound_ = sound;
+	window_ = window;
+	text_ = std::make_unique<TextRenderer>(gfx->fonts_.get());
+	init_menu();
+}
 
 MainMenuState::~MainMenuState() {}
 
 void MainMenuState::init_menu() {
-	menu_ = std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
-	if (EDITOR_ENABLED) {
-		menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
-	}
+	menu_ = std::make_unique<Menu>(this, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
+#ifdef SOKOBAN_EDITOR
+	menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
+#endif
 	menu_->push_entry("Select Profile", [this]() { open_file_select(); });
+	menu_->push_entry("Toggle Fullscreen", [this]() { toggle_fullscreen(); });
 	quit_entry_index_ = menu_->num_entries_;
 	menu_->push_entry("Quit", [this]() { queue_quit(); });
 }
 
 void MainMenuState::main_loop() {
 	menu_->update();
-	menu_->handle_input(this);
+	menu_->handle_input();
 	draw();
+}
+
+void MainMenuState::toggle_fullscreen() {
+	window_->toggle_fullscreen(gfx_);
+	defer_to_sibling(std::make_unique<MainMenuState>(this));
 }
 
 void MainMenuState::open_file_select() {
@@ -36,6 +54,7 @@ void MainMenuState::open_file_select() {
 }
 
 void MainMenuState::draw() {
+	gfx_->clear_screen(CLEAR_COLOR);
 	menu_->draw();
 }
 
@@ -55,7 +74,7 @@ FileSelectState::~FileSelectState() {}
 
 void FileSelectState::main_loop() {
 	menu_->update();
-	menu_->handle_input(this);
+	menu_->handle_input();
 	draw();
 }
 
@@ -71,7 +90,7 @@ void FileSelectState::load_save_info() {
 }
 
 void FileSelectState::create_menu() {
-	menu_ = std::make_unique<Menu>(window_, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
+	menu_ = std::make_unique<Menu>(this, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
 	if (save_files_[save_index_]->exists_) {
 		menu_->push_entry("Continue", [this]() { continue_file(); });
 //		menu_->push_entry("Load Save", [this]() {});
@@ -83,6 +102,7 @@ void FileSelectState::create_menu() {
 }
 
 void FileSelectState::draw() {
+	gfx_->clear_screen(CLEAR_COLOR);
 	menu_->draw();
 }
 

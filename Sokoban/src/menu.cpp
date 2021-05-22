@@ -9,7 +9,7 @@
 #include "common_constants.h"
 
 
-Menu::Menu(GLFWwindow* window, Font* font) : window_{ window }, font_{ font } {
+Menu::Menu(GameState* state, Font* font) : state_{ state }, font_ { font } {
 	active_color_ = COLOR_VECTORS[GOLD];
 	inactive_color_ = COLOR_VECTORS[BLUE];
 }
@@ -38,7 +38,7 @@ const int MENU_CYCLE_TIME = 120;
 int Menu::handle_entry_select_input() {
 	can_select_ = true;
 	int new_current = current_;
-	if (glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS) {
+	if (state_->key_pressed(GLFW_KEY_UP)) {
 		if (input_cooldown_ == 0) {
 			--new_current;
 			if (new_current < 0) {
@@ -48,7 +48,7 @@ int Menu::handle_entry_select_input() {
 		} else {
 			--input_cooldown_;
 		}
-	} else if (glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS) {
+	} else if (state_->key_pressed(GLFW_KEY_DOWN)) {
 		if (input_cooldown_ == 0) {
 			++new_current;
 			if (new_current >= num_entries_) {
@@ -64,12 +64,12 @@ int Menu::handle_entry_select_input() {
 	return new_current;
 }
 
-void Menu::handle_input(GameState* game_state) {
+void Menu::handle_input() {
 	if (num_entries_ == 0) {
 		return;
 	}
 	int new_current = current_;
-	if (glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS) {
+	if (state_->key_pressed(GLFW_KEY_ENTER)) {
 		if (can_select_) {
 			can_select_ = false;
 			(entries_[current_].callback)();

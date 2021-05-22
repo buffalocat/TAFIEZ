@@ -44,7 +44,7 @@ struct PlayingRoom {
 class KeyStatus {
 public:
 	KeyStatus(int code);
-	void update(GLFWwindow* window);
+	void update(GameState* state);
 	void consume();
 
 	int status_;

@@ -1,16 +1,16 @@
 #include "stdafx.h"
 #include "common_constants.h"
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 900;
+const int SCREEN_WIDTH = 1024;
+const int SCREEN_HEIGHT = 768;
 
 const int MESH_SIZE = 50;
 
-const double ORTHO_WIDTH = (double)SCREEN_WIDTH / (double)MESH_SIZE;
-const double ORTHO_HEIGHT = (double)SCREEN_HEIGHT / (double)MESH_SIZE;
+const double ORTHO_WIDTH = 24;
+const double ORTHO_HEIGHT = 18;
 
 const double FOV_VERTICAL = glm::radians(60.0);
-const double ASPECT_RATIO = (double)SCREEN_WIDTH / (double)SCREEN_HEIGHT;
+const double ASPECT_RATIO = 4.0/3.0;
 
 const double TWO_PI = 6.28318530718;
 

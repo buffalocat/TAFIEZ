@@ -31,8 +31,8 @@
 
 KeyStatus::KeyStatus(int code) : code_{ code }, press_{ false }, held_{ false }, status_{ false } {}
 
-void KeyStatus::update(GLFWwindow* window) {
-	bool cur = (glfwGetKey(window, code_) == GLFW_PRESS);
+void KeyStatus::update(GameState* state) {
+	bool cur = (state->key_pressed(code_));
 	if (held_) {
 		held_ = cur;
 	} else if (cur) {
@@ -74,12 +74,13 @@ void PlayingState::main_loop() {
 	anims_->update();
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
-	gfx_->pre_object_rendering(glm::vec4{ 0.33f, 0.67f, 0.89f, 1.0f });
+	gfx_->pre_object_rendering();
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	anims_->view_dir_ = gfx_->view_dir();
 	anims_->draw_fall_trails();
 	anims_->draw_special();
+
 	gfx_->pre_particle_rendering();
 	anims_->render_particles();
 	text_->draw();
@@ -94,9 +95,9 @@ void PlayingState::main_loop() {
 }
 
 void PlayingState::update_key_status() {
-	car_ride_key_.update(window_);
-	color_change_key_.update(window_);
-	player_switch_key_.update(window_);
+	car_ride_key_.update(this);
+	color_change_key_.update(this);
+	player_switch_key_.update(this);
 }
 
 void PlayingState::handle_input() {
@@ -104,7 +105,7 @@ void PlayingState::handle_input() {
 		--input_cooldown;
 	}
 
-	if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_Z)) {
 		if (input_cooldown == 0) {
 			++undo_combo;
 			if (undo_combo < UNDO_COMBO_FIRST) {
@@ -136,7 +137,7 @@ void PlayingState::handle_input() {
 	}
 
 	// Manual camera movement
-	room_->camera()->handle_free_cam_input(window_);
+	room_->camera()->handle_free_cam_input(this);
 
 	// Ignore all other input if an animation is occurring
 	if (move_processor_) {
@@ -158,7 +159,7 @@ void PlayingState::handle_input() {
 	player_switch_key_.consume();
 
 	// You can pause with any cooldown, but not in a move
-	if (glfwGetKey(window_, GLFW_KEY_P) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_P)) {
 		create_child(std::make_unique<PauseState>(this));
 		return;
 	}
@@ -203,7 +204,7 @@ void PlayingState::handle_input() {
 			move_processor_.reset(nullptr);
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_SPACE)) {
 		create_move_processor(player);
 		if (move_processor_->try_jump()) {
 			input_cooldown = MAX_COOLDOWN;
@@ -213,7 +214,7 @@ void PlayingState::handle_input() {
 		}
 	}
 	for (int i = 0; i < 4; ++i) {
-		if (glfwGetKey(window_, MOVEMENT_KEYS[i]) == GLFW_PRESS) {
+		if (key_pressed(MOVEMENT_KEYS[i])) {
 			const double HALF_PI = 1.57079632679;
 			double angle = room_->camera()->get_rotation();
 			i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
@@ -228,7 +229,7 @@ void PlayingState::handle_input() {
 	}
 	/*
 	auto zone_order = "HVCKFG7T2N0DO5AES4UQ69WZJ3LPYBMRI81X!";
-	if (glfwGetKey(window_, GLFW_KEY_G) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_G)) {
 		static int hub_i = 0;
 		if (hub_i < 5) {
 			global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[hub_i]);
@@ -237,7 +238,7 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_H) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_H)) {
 		static int visit_i = 0;
 		if (visit_i < 37) {
 			global_->add_flag(FLAG_COLLECT_FLAGS[get_clear_flag_index(zone_order[visit_i])]);
@@ -246,7 +247,7 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_J) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_J)) {
 		static int flag_i = 0;
 		if (flag_i < 37) {
 			global_->add_flag(ZONE_ACCESSED_GLOBAL_FLAGS[get_clear_flag_index(zone_order[flag_i])]);
@@ -255,7 +256,7 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_K) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_K)) {
 		static int x_alt_i = 0;
 		if (x_alt_i < 4) {
 			global_->add_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[x_alt_i]);
@@ -264,7 +265,7 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_L) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_L)) {
 		static int hub_alt_i = 0;
 		if (hub_alt_i < 5) {
 			global_->add_flag(HUB_ALT_ACCESSED_GLOBAL_FLAGS[hub_alt_i]);

@@ -5,6 +5,7 @@
 #include "room.h"
 #include "roommap.h"
 #include "gameobject.h"
+#include "window.h"
 
 
 const std::unordered_map<int, Point3> EDITOR_MOVEMENT_KEYS {
@@ -22,8 +23,6 @@ ortho_cam_ {true}, one_layer_ {false}, keyboard_cooldown_ {0} {}
 
 EditorBaseState::~EditorBaseState() {}
 
-const glm::vec4 EditorBaseState::CLEAR_COLOR = glm::vec4(0.3f, 0.6f, 0.9f, 1.0f);
-
 bool EditorBaseState::want_capture_keyboard() {
     return ImGui::GetIO().WantCaptureKeyboard;
 }
@@ -34,7 +33,7 @@ bool EditorBaseState::want_capture_mouse() {
 
 Point3 EditorBaseState::get_pos_from_mouse(Point3 cam_pos) {
     double xpos, ypos;
-    glfwGetCursorPos(window_, &xpos, &ypos);
+    glfwGetCursorPos(window_->window_, &xpos, &ypos);
     if (xpos >= 0 && xpos < SCREEN_WIDTH && ypos >= 0 && ypos < SCREEN_HEIGHT) {
         int x_raw = (int)xpos + MESH_SIZE * cam_pos.x - (SCREEN_WIDTH - MESH_SIZE) / 2;
 		int y_raw = (int)ypos + MESH_SIZE * cam_pos.y - (SCREEN_HEIGHT - MESH_SIZE) / 2;
@@ -78,17 +77,17 @@ void EditorBaseState::handle_mouse_input(Point3 cam_pos, Room* room) {
     if (!room->valid(mouse_pos)) {
         return;
     }
-    if (glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (glfwGetMouseButton(window_->window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         handle_left_click(mouse_pos);
-    } else if (glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    } else if (glfwGetMouseButton(window_->window_, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         handle_right_click(mouse_pos);
     }
 }
 
 bool EditorBaseState::handle_keyboard_input(Point3& cam_pos, Room* room) {
     for (auto p : EDITOR_MOVEMENT_KEYS) {
-        if (glfwGetKey(window_, p.first) == GLFW_PRESS) {
-            if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        if (key_pressed(p.first)) {
+            if (key_pressed(GLFW_KEY_LEFT_SHIFT)) {
                 cam_pos += FAST_MAP_MOVE * p.second;
             } else {
                 cam_pos += p.second;
@@ -97,10 +96,10 @@ bool EditorBaseState::handle_keyboard_input(Point3& cam_pos, Room* room) {
             return true;
         }
     }
-    if (glfwGetKey(window_, GLFW_KEY_C)) {
+    if (key_pressed(GLFW_KEY_C)) {
         ortho_cam_ = !ortho_cam_;
         return true;
-    } else if (glfwGetKey(window_, GLFW_KEY_F)) {
+    } else if (key_pressed(GLFW_KEY_F)) {
         one_layer_ = !one_layer_;
         return true;
 	}

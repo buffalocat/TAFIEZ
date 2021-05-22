@@ -7,6 +7,7 @@ class DeltaFrame;
 class RoomMap;
 class MapFileI;
 class MapFileO;
+class GameState;
 
 namespace CAM_FLAGS {
 	enum {
@@ -155,7 +156,7 @@ public:
 	void shift_by(Point3 d);
 	void extend_by(Point3 d);
 
-	void handle_free_cam_input(GLFWwindow* window);
+	void handle_free_cam_input(GameState* state);
 
 	std::string active_label_;
 

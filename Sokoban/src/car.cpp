@@ -147,22 +147,22 @@ void Car::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 void Car::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {}
 
 void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
-	if (player_) {
+	if (auto* player = player_) {
 		switch (type_) {
 		case CarType::Normal:
 		case CarType::Hover:
-			if (!player_->gravitable_) {
-				player_->gravitable_ = true;
+			if (!player->gravitable_) {
+				player->gravitable_ = true;
 				mp->delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
 			}
-			player_->set_free(mp->delta_frame_);
+			player->set_free(mp->delta_frame_);
 			break;
 		case CarType::Convertible:
-			player_->set_free(mp->delta_frame_);
-			player_->destroy(mp, death);
+			player->set_free(mp->delta_frame_);
+			player->destroy(mp, death);
 			break;
 		default:
-			player_->set_free(mp->delta_frame_);
+			player->set_free(mp->delta_frame_);
 		}
 	}
 }

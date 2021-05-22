@@ -8,6 +8,7 @@
 #include "roommap.h"
 #include "mapfile.h"
 #include "fontmanager.h"
+#include "gamestate.h"
 
 
 CameraContext::CameraContext(IntRect rect, int priority, std::string label) :
@@ -440,7 +441,7 @@ void Camera::extend_by(Point3 d) {
 	}
 }
 
-void Camera::handle_free_cam_input(GLFWwindow* window) {
+void Camera::handle_free_cam_input(GameState* state) {
 	double* tilt_ptr = nullptr;
 	double* rot_ptr = nullptr;
 	if (context_->is_free()) {
@@ -452,23 +453,23 @@ void Camera::handle_free_cam_input(GLFWwindow* window) {
 	} else {
 		return;
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+	if (state->key_pressed(GLFW_KEY_S)) {
 		*tilt_ptr = std::min(*tilt_ptr + FREE_CAM_TILT_SPEED, MAX_CAM_TILT);
-	} else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+	} else if (state->key_pressed(GLFW_KEY_W)) {
 		*tilt_ptr = std::max(*tilt_ptr - FREE_CAM_TILT_SPEED, MIN_CAM_TILT);
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+	if (state->key_pressed(GLFW_KEY_A)) {
 		*rot_ptr += FREE_CAM_ROT_SPEED;
 		if (*rot_ptr >= TWO_PI) {
 			*rot_ptr -= TWO_PI;
 		}
-	} else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+	} else if (state->key_pressed(GLFW_KEY_D)) {
 		*rot_ptr -= FREE_CAM_ROT_SPEED;
 		if (*rot_ptr <= -TWO_PI) {
 			*rot_ptr += TWO_PI;
 		}
 	}
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+	if (state->key_pressed(GLFW_KEY_E)) {
 		*tilt_ptr = DEFAULT_CAM_TILT;
 		*rot_ptr = DEFAULT_CAM_ROTATION;
 	}

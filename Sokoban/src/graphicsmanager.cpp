@@ -6,6 +6,7 @@
 #include "animationmanager.h"
 #include "stringdrawer.h"
 #include "model.h"
+#include "window.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -28,36 +29,13 @@ ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer
 	}
 }
 
-GraphicsManager::GraphicsManager(GLFWwindow* window) :
+GraphicsManager::GraphicsManager(OpenGLWindow* window) :
 	window_{ window } {
-	fonts_ = std::make_unique<FontManager>(&text_shader_);
+	fonts_ = std::make_unique<FontManager>(window_, &text_shader_);
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// Initialize frame buffer to hold all renders
-	glGenFramebuffers(1, &fbo_);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-	// Make a color texture
-	glGenTextures(1, &color_tex_);
-	glBindTexture(GL_TEXTURE_2D, color_tex_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1200, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// Make a depth/stencil buffer
-	glGenRenderbuffers(1, &rbo_);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1200, 900);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	// Attach color and depth/stencil
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_tex_, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer is not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Make the VAO for post processing
 	glGenVertexArrays(1, &screen_vao_);
 	glBindVertexArray(screen_vao_);
@@ -83,6 +61,56 @@ GraphicsManager::~GraphicsManager() {
 	glDeleteRenderbuffers(1, &rbo_);
 	glDeleteVertexArrays(1, &screen_vao_);
 	glDeleteBuffers(1, &screen_vbo_);
+}
+
+void GraphicsManager::generate_framebuffer() {
+	std::cout << "Making the FBO again!" << std::endl;
+	if (fbo_) {
+		glDeleteFramebuffers(1, &fbo_);
+	}
+	if (color_tex_) {
+		glDeleteTextures(1, &color_tex_);
+	}
+	if (rbo_) {
+		glDeleteRenderbuffers(1, &rbo_);
+	}
+	// Initialize frame buffer to hold all renders
+	glGenFramebuffers(1, &fbo_);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+	// Make a color texture
+	glGenTextures(1, &color_tex_);
+	glBindTexture(GL_TEXTURE_2D, color_tex_);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_->viewport_size_[0], window_->viewport_size_[1],
+		0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// Make a depth/stencil buffer
+	glGenRenderbuffers(1, &rbo_);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_->viewport_size_[0], window_->viewport_size_[1]);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	// Attach color and depth/stencil
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_tex_, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
+	/*
+	if (auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "Framebuffer is not complete! " << status << std::endl;
+		std::cout <<
+			GL_FRAMEBUFFER_UNDEFINED << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER << " " <<
+			GL_FRAMEBUFFER_UNSUPPORTED << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE << " " <<
+			GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS << " " <<
+			std::endl;
+	}
+	*/
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 const int FADE_IN_FRAMES = 20;
@@ -148,10 +176,6 @@ bool GraphicsManager::in_animation() {
 	}
 }
 
-GLFWwindow* GraphicsManager::window() {
-	return window_;
-}
-
 void GraphicsManager::load_texture_atlas() {
 	glGenTextures(1, &atlas_);
 	glBindTexture(GL_TEXTURE_2D, atlas_);
@@ -174,10 +198,15 @@ void GraphicsManager::set_light_source(glm::vec3 light_source) {
 	light_source_ = light_source;
 }
 
-void GraphicsManager::pre_object_rendering(glm::vec4 clear_color) {
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+void GraphicsManager::clear_screen(glm::vec4 clear_color) {
 	glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void GraphicsManager::pre_object_rendering() {
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+	glDisable(GL_SCISSOR_TEST);
+	glViewport(0, 0, window_->viewport_size_[0], window_->viewport_size_[1]);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
@@ -199,6 +228,7 @@ void GraphicsManager::prepare_draw_objects() {
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	clear_screen(CLEAR_COLOR);
 	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
 	instanced_shader_.setMat4("PV", PV_);
 	instanced_shader_.setVec3("lightSource", light_source_);
@@ -239,8 +269,8 @@ void GraphicsManager::draw_objects() {
 
 void GraphicsManager::post_rendering() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glEnable(GL_SCISSOR_TEST);
+	glViewport(window_->viewport_pos_[0], window_->viewport_pos_[1], window_->viewport_size_[0], window_->viewport_size_[1]);
 	post_shader_.use();
 	post_shader_.setFloat("shadow", shadow_);
 	glBindVertexArray(screen_vao_);
@@ -252,6 +282,7 @@ void GraphicsManager::post_rendering() {
 
 TextRenderer::TextRenderer(FontManager* fonts) :
 	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {
+	std::cout << "Constructing TR" << std::endl;
 	ui_shader_.use();
 	ui_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
 	glGenTextures(1, &ui_atlas_);

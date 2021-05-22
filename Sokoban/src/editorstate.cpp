@@ -76,20 +76,20 @@ EditorState::~EditorState() {
 // which inherit from EditorBaseState
 bool EditorState::handle_keyboard_input_main_state() {
 	for (int i = 0; i < tabs_.size(); ++i) {
-		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) != GLFW_PRESS) {
-			if (glfwGetKey(window_, GLFW_KEY_1 + i) == GLFW_PRESS) {
+		if (!key_pressed(GLFW_KEY_LEFT_SHIFT)) {
+			if (key_pressed(GLFW_KEY_1 + i)) {
 				set_active_tab_by_index(i);
 				return false;
 			}
 		}
 	}
-	if (glfwGetKey(window_, GLFW_KEY_T)) {
+	if (key_pressed(GLFW_KEY_T)) {
 		begin_test();
 		return true;
 	}
-	if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS &&
-		glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+	if (key_pressed(GLFW_KEY_LEFT_CONTROL) &&
+		key_pressed(GLFW_KEY_S)) {
+		if (key_pressed(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 			commit_all();
 		} else {
 			commit_current_room();
@@ -161,7 +161,7 @@ void EditorState::main_loop() {
 	}
 
 	gfx_->set_state(GraphicsState::None);
-	gfx_->pre_object_rendering(CLEAR_COLOR);
+	gfx_->pre_object_rendering();
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	gfx_->post_rendering();

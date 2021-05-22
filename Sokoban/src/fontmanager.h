@@ -1,5 +1,9 @@
 #pragma once
 
+class OpenGLWindow;
+class StringDrawer;
+class FontManager;
+
 struct TextVertex {
 	glm::vec2 Position;
 	glm::vec2 TexCoords;
@@ -19,7 +23,8 @@ struct GlyphPos {
 
 class Font {
 public:
-	Font(FT_Library ft, Shader* text_shader, std::string path, unsigned int font_size);
+	Font(FontManager* fm, FT_Library ft, OpenGLWindow* window,
+		Shader* text_shader, std::string path, unsigned int font_size);
 	~Font();
 
 	void init_glyphs(int font_size, FT_Face face);
@@ -28,7 +33,9 @@ public:
 	void generate_spacial_char_verts(char c, glm::vec3 center, glm::vec3 vx, glm::vec3 vy, float scale,
 		std::vector<TextVertex3>& text_verts);
 
+	FontManager* fm_;
 	GLuint tex_;
+	OpenGLWindow* window_;
 	Shader* shader_;
 	unsigned int font_size_;
 
@@ -39,17 +46,18 @@ private:
 
 class FontManager {
 public:
-	FontManager(Shader* text_shader);
+	FontManager(OpenGLWindow* window, Shader* text_shader);
 	~FontManager();
 
 	Font* get_font(std::string path, unsigned int size);
 
+	OpenGLWindow* window_;
 	Shader* text_shader_;
+
+	std::set<StringDrawer*> string_drawers_{};
 
 private:
 	std::unique_ptr<Font> make_font(std::string path, unsigned int font_size);
-
 	std::map<std::pair<std::string, unsigned int>, std::unique_ptr<Font>> fonts_{};
-
 	FT_Library ft_;
 };

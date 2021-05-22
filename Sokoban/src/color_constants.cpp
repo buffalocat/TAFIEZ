@@ -71,3 +71,5 @@ const glm::vec4 ZONE_CLEAR_COLORS[] = {
 glm::vec4 get_zone_clear_color(char zone) {
 	return ZONE_CLEAR_COLORS[get_clear_flag_index(zone)];
 }
+
+const glm::vec4 CLEAR_COLOR = glm::vec4{ 0.33f, 0.67f, 0.89f, 1.0f };

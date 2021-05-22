@@ -5,6 +5,7 @@
 #include "color_constants.h"
 #include "common_constants.h"
 #include "texture_constants.h"
+#include "fontmanager.h"
 
 const float ZONE_STRING_HEIGHT = 0.98f;
 const float LEVEL_STRING_HEIGHT = 0.65f;
@@ -21,38 +22,53 @@ const int DEATH_STRING_FADE_FRAMES = 4;
 
 StringDrawer::StringDrawer(Font* font, glm::vec4 color,
 	std::string label, float x, float y, float sx, float sy, float bg) :
-	color_{ color }, bg_color_{ glm::vec4(0.6f,0.6f,0.6f,1.0f) }, opacity_{ 1.0f },
+	font_{ font }, label_{ label }, color_{ color }, bg_color_{ glm::vec4(0.6f,0.6f,0.6f,1.0f) }, opacity_{ 1.0f },
+	x_{ x }, y_{ y }, sx_{ sx }, sy_{ sy },
 	shader_{ font->shader_ }, tex_{ font->tex_ }, bg_{ bg } {
-	font->generate_string_verts(label.c_str(), x, y, sx, sy, vertices_, &width_, &height_);
+	font_->fm_->string_drawers_.insert(this);
 	glGenVertexArrays(1, &VAO_);
 	glBindVertexArray(VAO_);
 	glGenBuffers(1, &VBO_);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(TextVertex), vertices_.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, Position));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, TexCoords));
-	if (bg > 0 && !label.empty()) {
-		generate_bg_verts(x, y, font->font_size_ * 2.0f / SCREEN_HEIGHT);
+	if (bg_ > 0 && !label.empty()) {
 		glGenVertexArrays(1, &bg_VAO_);
 		glBindVertexArray(bg_VAO_);
 		glGenBuffers(1, &bg_VBO_);
-		bind_bg_vbo();
+		glBindBuffer(GL_ARRAY_BUFFER, bg_VBO_);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, Position));
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void*)offsetof(TextVertex, TexCoords));
 	}
+	refresh_buffers();
 }
 
 StringDrawer::~StringDrawer() {
+	font_->fm_->string_drawers_.erase(this);
 	glDeleteVertexArrays(1, &VAO_);
 	glDeleteBuffers(1, &VBO_);
 	if (alive_ptr_) {
 		*alive_ptr_ = false;
 	}
 }
+
+
+void StringDrawer::refresh_buffers() {
+	vertices_.clear();
+	font_->generate_string_verts(label_.c_str(), x_, y_, sx_, sy_, vertices_, &width_, &height_);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(TextVertex), vertices_.data(), GL_STATIC_DRAW);
+	if (bg_ > 0 && !label_.empty()) {
+		bg_vertices_.clear();
+		generate_bg_verts(x_, y_, font_->font_size_ * 2.0f / SCREEN_HEIGHT);
+		bind_bg_vbo();
+	}
+}
+
 
 void StringDrawer::bind_bg_vbo() {
 	glBindBuffer(GL_ARRAY_BUFFER, bg_VBO_);
@@ -91,9 +107,9 @@ void StringDrawer::generate_bg_verts(float x, float y, float font_height) {
 			float v = tex.y;
 			TextVertex box[4] = {
 				TextVertex{{key_x[i], key_y[j]}, {u, v}},
-				TextVertex{{key_x[i+1], key_y[j]}, {u + 1, v}},
-				TextVertex{{key_x[i], key_y[j+1]}, {u, v + 1}},
-				TextVertex{{key_x[i+1], key_y[j+1]}, {u + 1, v + 1}},
+				TextVertex{{key_x[i + 1], key_y[j]}, {u + 1, v}},
+				TextVertex{{key_x[i], key_y[j + 1]}, {u, v + 1}},
+				TextVertex{{key_x[i + 1], key_y[j + 1]}, {u + 1, v + 1}},
 			};
 			for (int i : {0, 1, 2, 2, 1, 3}) {
 				bg_vertices_.push_back(box[i]);

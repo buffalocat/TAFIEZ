@@ -4,7 +4,7 @@
 #include "color_constants.h"
 #include "modelinstancer.h"
 
-struct GLFWwindow;
+class OpenGLWindow;
 class FontManager;
 class AnimationManager;
 class Animation;
@@ -35,11 +35,10 @@ enum class GraphicsState {
 
 class GraphicsManager {
 public:
-	GraphicsManager(GLFWwindow*);
+	GraphicsManager(OpenGLWindow*);
 	~GraphicsManager();
 
-	GLFWwindow* window();
-
+	void generate_framebuffer();
 	void update();
 	void set_state(GraphicsState state);
 	bool in_animation();
@@ -47,7 +46,8 @@ public:
 	void set_PV(glm::mat4, glm::mat4);
 	void set_light_source(glm::vec3);
 
-	void pre_object_rendering(glm::vec4 clear_color);
+	void clear_screen(glm::vec4 clear_color);
+	void pre_object_rendering();
 	void prepare_draw_objects();
 	void prepare_draw_objects_particle_atlas(GLuint atlas);
 	void draw_objects();
@@ -89,7 +89,7 @@ public:
 	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
 
 private:
-	GLFWwindow* window_;
+	OpenGLWindow* window_;
 
 	GLuint atlas_;
 
