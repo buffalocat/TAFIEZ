@@ -64,7 +64,6 @@ GraphicsManager::~GraphicsManager() {
 }
 
 void GraphicsManager::generate_framebuffer() {
-	std::cout << "Making the FBO again!" << std::endl;
 	if (fbo_) {
 		glDeleteFramebuffers(1, &fbo_);
 	}
@@ -282,7 +281,6 @@ void GraphicsManager::post_rendering() {
 
 TextRenderer::TextRenderer(FontManager* fonts) :
 	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {
-	std::cout << "Constructing TR" << std::endl;
 	ui_shader_.use();
 	ui_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
 	glGenTextures(1, &ui_atlas_);

@@ -139,6 +139,8 @@ void PlayingState::handle_input() {
 	// Manual camera movement
 	room_->camera()->handle_free_cam_input(this);
 
+	handle_fullscreen_toggle();
+
 	// Ignore all other input if an animation is occurring
 	if (move_processor_) {
 		if (move_processor_->update()) {

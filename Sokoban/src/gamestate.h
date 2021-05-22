@@ -20,6 +20,8 @@ public:
 	virtual bool can_quit(bool confirm);
 	void defer_to_sibling(std::unique_ptr<GameState> sibling);
 	bool key_pressed(int key);
+	void toggle_fullscreen();
+	void handle_fullscreen_toggle();
 
 	GraphicsManager* gfx_{};
 	SoundManager* sound_{};
@@ -30,6 +32,7 @@ public:
 	GameState(GameState* parent);
 	std::unique_ptr<GameState>* current_state_ptr_{};
 	bool can_escape_quit_ = true;
+	bool can_toggle_fullscreen_ = true;
 
 private:
 	void defer_to_parent();

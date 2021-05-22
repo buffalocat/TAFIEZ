@@ -66,6 +66,22 @@ bool GameState::can_quit(bool confirm) {
 	return true;
 }
 
+void GameState::handle_fullscreen_toggle() {
+	if (key_pressed(GLFW_KEY_F11) || (key_pressed(GLFW_KEY_ENTER) &&
+		(key_pressed(GLFW_KEY_RIGHT_ALT) || key_pressed(GLFW_KEY_LEFT_ALT)))) {
+		if (can_toggle_fullscreen_) {
+			window_->toggle_fullscreen(gfx_);
+			can_toggle_fullscreen_ = false;
+		}
+	} else {
+		can_toggle_fullscreen_ = true;
+	}
+}
+
+void GameState::toggle_fullscreen() {
+	window_->toggle_fullscreen(gfx_);
+}
+
 void GameState::defer_to_sibling(std::unique_ptr<GameState> sibling) {
 	sibling->parent_ = std::move(parent_);
 	parent_ = std::move(sibling);

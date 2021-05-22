@@ -44,11 +44,6 @@ void MainMenuState::main_loop() {
 	draw();
 }
 
-void MainMenuState::toggle_fullscreen() {
-	window_->toggle_fullscreen(gfx_);
-	defer_to_sibling(std::make_unique<MainMenuState>(this));
-}
-
 void MainMenuState::open_file_select() {
 	create_child(std::make_unique<FileSelectState>(this));
 }

@@ -101,8 +101,6 @@ void Font::generate_string_verts(const char* text, float x, float y, float sx, f
 	std::vector<TextVertex>& text_verts, float* width, float* height) {
 	sx /= 512.0f;
 	sy /= 384.0f;
-	std::cout << x << " " << y << std::endl;
-	std::cout << window_->viewport_size_[0] << " " << window_->viewport_size_[1] << std::endl;
 	float su = 1.0f / tex_width_;
 	float sv = 1.0f / tex_height_;
 

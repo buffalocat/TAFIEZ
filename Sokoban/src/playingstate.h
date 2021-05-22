@@ -109,6 +109,7 @@ private:
 	KeyStatus player_switch_key_{ GLFW_KEY_V };
 	CauseOfDeath current_death_;
 	DeathState current_death_state_;
+	bool can_toggle_fullscreen_ = false;
 };
 
 #endif // PLAYINGSTATE_H

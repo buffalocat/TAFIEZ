@@ -15,7 +15,6 @@ public:
 	void init_menu();
 	void handle_escape();
 
-	void toggle_fullscreen();
 	void open_file_select();
 	void draw();
 
