@@ -427,9 +427,6 @@ void SnakePuller::prepare_pull(SnakeBlock* cur) {
 		if (cur->distance_ > 0) {
 			// The chain was odd length; split the middle block!
 			if (cur->distance_ == prev->distance_ + 1) {
-				// TODO: Make sure this is *really* the condition we want
-				// For now, a snake which is linked to anything else
-				//(at level Sticky::AllStick) will not be split.
 				std::vector<GameObject*> sticky_comp{};
 				cur->collect_special_links(sticky_comp);
 				cur->reset_internal_state();

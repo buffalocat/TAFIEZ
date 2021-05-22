@@ -94,21 +94,6 @@ void GraphicsManager::generate_framebuffer() {
 	// Attach color and depth/stencil
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_tex_, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
-	/*
-	if (auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cout << "Framebuffer is not complete! " << status << std::endl;
-		std::cout <<
-			GL_FRAMEBUFFER_UNDEFINED << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER << " " <<
-			GL_FRAMEBUFFER_UNSUPPORTED << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE << " " <<
-			GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS << " " <<
-			std::endl;
-	}
-	*/
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

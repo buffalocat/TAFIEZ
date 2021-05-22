@@ -98,11 +98,24 @@ void PlayingState::update_key_status() {
 	car_ride_key_.update(this);
 	color_change_key_.update(this);
 	player_switch_key_.update(this);
+	restart_key_.update(this);
 }
 
 void PlayingState::handle_input() {
 	if (input_cooldown > 0) {
 		--input_cooldown;
+	}
+
+	restart_key_.consume();
+
+	if (restart_cooldown_ > 0) {
+		--restart_cooldown_;
+	} else {
+		if (restart_key_.status_) {
+			if (auto* rps = dynamic_cast<RealPlayingState*>(this)) {
+				rps->load_subsave_dispatch(SaveType::Auto, 0);
+			}
+		}
 	}
 
 	if (key_pressed(GLFW_KEY_Z)) {

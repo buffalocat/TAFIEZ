@@ -107,6 +107,8 @@ private:
 	KeyStatus car_ride_key_{ GLFW_KEY_X };
 	KeyStatus color_change_key_{ GLFW_KEY_C };
 	KeyStatus player_switch_key_{ GLFW_KEY_V };
+	KeyStatus restart_key_{ GLFW_KEY_R };
+	int restart_cooldown_ = 60;
 	CauseOfDeath current_death_;
 	DeathState current_death_state_;
 	bool can_toggle_fullscreen_ = false;
