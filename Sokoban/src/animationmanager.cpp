@@ -183,7 +183,7 @@ bool FlagSparkleSource::update(RandDouble& rand, ParticleVector& particles) {
 			glm::vec3(0.01f) * d,
 			glm::vec3(0.8f) * color));
 	}
-	return false;
+	return !active_;
 }
 
 

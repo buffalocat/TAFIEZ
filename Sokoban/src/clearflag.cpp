@@ -11,6 +11,9 @@
 #include "player.h"
 #include "delta.h"
 #include "car.h"
+#include "roommap.h"
+#include "savefile.h"
+#include "globalflagconstants.h"
 
 ClearFlag::ClearFlag(GameObject* parent, bool real, bool active, bool collected) :
 	ObjectModifier(parent),
@@ -80,6 +83,9 @@ void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->clear_flags_.push_back(this);
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
+	if (real && map->global_->has_flag(get_clear_flag_code(map->zone_))) {
+		collected_ = true;
+	}
 }
 
 void ClearFlag::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {

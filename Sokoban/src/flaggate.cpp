@@ -191,33 +191,33 @@ void FlagGate::spawn_sigils() {
 	}
 	switch (num_flags_) {
 	case 1:
-		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0, 1 });
+		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0 });
 		break;
 	case 2:
 		for (int i = 0; i < 2; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.5, 80 * i, 80 * 2, i, 2 });
+			sigils_.push_back(FlagSigil{ center_, 0.5, 80 * i, 80 * 2, i });
 		}
 		break;
 	case 4:
 		for (int i = 0; i < 4; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.75, 60 * i, 60 * 4, i, 4 });
+			sigils_.push_back(FlagSigil{ center_, 0.75, 60 * i, 60 * 4, i });
 		}
 		break;
 	case 8:
-		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0, 8 });
+		sigils_.push_back(FlagSigil{ center_, 0.0, 0, 1, 0 });
 		for (int i = 0; i < 7; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1, 8 });
+			sigils_.push_back(FlagSigil{ center_, 1.0, 40 * i, 40 * 7, i+1 });
 		}
 		break;
 	case 24:
 		for (int i = 0; i < 3; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.7, 80 * i, 80 * 3, i, 24 });
+			sigils_.push_back(FlagSigil{ center_, 0.7, 80 * i, 80 * 3, i });
 		}
 		for (int i = 0; i < 8; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.6, -80 * i, -80 * 8, i + 3, 24 });
+			sigils_.push_back(FlagSigil{ center_, 1.6, -80 * i, -80 * 8, i + 3 });
 		}
 		for (int i = 0; i < 13; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 13, i + 11, 24 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, 80 * i, 80 * 13, i + 11 });
 		}
 		for (auto& sigil : sigils_) {
 			sigil.lum = 1.0f;
@@ -225,17 +225,17 @@ void FlagGate::spawn_sigils() {
 		break;
 	case 36:
 		for (int i = 0; i < 4; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 0.7, -80 * i, -80 * 4, i, 36 });
+			sigils_.push_back(FlagSigil{ center_, 0.7, -80 * i, -80 * 4, i });
 		}
 		for (int i = 0; i < 10; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 1.6, 80 * i, 80 * 10, i + 4, 36 });
+			sigils_.push_back(FlagSigil{ center_, 1.6, 80 * i, 80 * 10, i + 4 });
 		}
 		for (int i = 0; i < 18; ++i) {
-			sigils_.push_back(FlagSigil{ center_, 2.5, -80 * i, -80 * 18, i + 14, 36 });
+			sigils_.push_back(FlagSigil{ center_, 2.5, -80 * i, -80 * 18, i + 14 });
 		}
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 2; j++) {
-				sigils_.push_back(FlagSigil{ center_ + glm::vec3(5 * (i - 0.5), 0, 5 * (j - 0.5)), 0, 1, ((i == 0) ? j : 3 - j) + 32, 36 });
+				sigils_.push_back(FlagSigil{ center_ + glm::vec3(5 * (i - 0.5), 0, 5 * (j - 0.5)), 0, 0, 1, (2*i + j) + 32 });
 			}
 		}
 		break;

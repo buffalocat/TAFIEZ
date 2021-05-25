@@ -75,7 +75,7 @@ void StringDrawer::bind_bg_vbo() {
 	glBufferData(GL_ARRAY_BUFFER, bg_vertices_.size() * sizeof(TextVertex), bg_vertices_.data(), GL_STATIC_DRAW);
 }
 
-const float FONT_TOP_FACTOR = -0.3f;
+const float FONT_TOP_FACTOR = -0.2f;
 const float FONT_BOTTOM_FACTOR = 0.08f;
 const float TB_PAD_TOP = 0.04f;
 const float TB_PAD_BOTTOM = 0.04f;

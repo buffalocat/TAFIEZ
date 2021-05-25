@@ -99,8 +99,8 @@ void Font::init_glyphs(int font_size, FT_Face face) {
 
 void Font::generate_string_verts(const char* text, float x, float y, float sx, float sy,
 	std::vector<TextVertex>& text_verts, float* width, float* height) {
-	sx /= 512.0f;
-	sy /= 384.0f;
+	sx /= 600.0f;
+	sy /= 450.0f;
 	float su = 1.0f / tex_width_;
 	float sv = 1.0f / tex_height_;
 
