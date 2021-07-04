@@ -78,7 +78,25 @@ void Incinerator::signal_animation(AnimationManager* anims, DeltaFrame* delta_fr
 void Incinerator::draw(GraphicsManager* gfx, FPoint3 p) {
 	int color = state() ? ORANGE : GREY;
 	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
-	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), BlockTexture::Incinerator, color);
+	BlockTexture tex;
+	if (persistent_) {
+		if (active_) {
+			if (default_) {
+				tex = BlockTexture::IncineratorPersistentInactiveOff;
+			} else {
+				tex = BlockTexture::IncineratorPersistentActiveOn;
+			}
+		} else {
+			if (default_) {
+				tex = BlockTexture::IncineratorPersistentInactiveOn;
+			} else {
+				tex = BlockTexture::IncineratorPersistentActiveOff;
+			}
+		}
+	} else {
+		tex = BlockTexture::Incinerator;
+	}
+	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.9f, 0.9f, 0.1f), tex, color);
 }
 
 std::unique_ptr<ObjectModifier> Incinerator::duplicate(GameObject* parent, RoomMap*, DeltaFrame*) {

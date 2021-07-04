@@ -169,7 +169,20 @@ void Gate::undestroy() {
 
 // Consider making the Gate(base) visually different when the gate is active (only visible if the GateBody has been separated)
 void Gate::draw(GraphicsManager* gfx, FPoint3 p) {
-	BlockTexture tex = persistent_ ? BlockTexture::GateBasePersistent : BlockTexture::GateBase;
+	BlockTexture tex;
+	if (state()) {
+		tex = BlockTexture::GateBaseExtended;
+	} else {
+		if (persistent_) {
+			if (default_) {
+				tex = BlockTexture::GateBasePersistentOn;
+			} else {
+				tex = BlockTexture::GateBasePersistentOff;
+			}
+		} else {
+			tex = BlockTexture::GateBase;
+		}
+	}
 	ModelInstancer& model = parent_->is_snake() ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z + 0.5f), glm::vec3(0.7f, 0.7f, 0.1f), tex, color_);
 	if (animation_state_ == GateAnimationState::Lower) {

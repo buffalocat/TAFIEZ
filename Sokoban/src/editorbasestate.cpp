@@ -34,12 +34,14 @@ bool EditorBaseState::want_capture_mouse() {
 Point3 EditorBaseState::get_pos_from_mouse(Point3 cam_pos) {
     double xpos, ypos;
     glfwGetCursorPos(window_->window_, &xpos, &ypos);
+    double mesh_size_x = SCREEN_WIDTH / ORTHO_WIDTH;
+    double mesh_size_y = SCREEN_HEIGHT / ORTHO_HEIGHT;
     if (xpos >= 0 && xpos < SCREEN_WIDTH && ypos >= 0 && ypos < SCREEN_HEIGHT) {
-        int x_raw = (int)xpos + MESH_SIZE * cam_pos.x - (SCREEN_WIDTH - MESH_SIZE) / 2;
-		int y_raw = (int)ypos + MESH_SIZE * cam_pos.y - (SCREEN_HEIGHT - MESH_SIZE) / 2;
+        int x_raw = (int)xpos + mesh_size_x * cam_pos.x - (SCREEN_WIDTH - mesh_size_x) / 2;
+		int y_raw = (int)ypos + mesh_size_y * cam_pos.y - (SCREEN_HEIGHT - mesh_size_y) / 2;
 		// Adjust for truncate-toward-zero division
-		int x = (x_raw / MESH_SIZE) - (x_raw < 0);
-		int y = (y_raw / MESH_SIZE) - (y_raw < 0);
+		int x = (x_raw / mesh_size_x) - (x_raw < 0);
+		int y = (y_raw / mesh_size_y) - (y_raw < 0);
         return {x, y, cam_pos.z};
     }
     return {};

@@ -17,8 +17,6 @@ extern const int MAX_ROOM_DIMS;
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
-extern const int MESH_SIZE;
-
 extern const double FOV_VERTICAL;
 extern const double ASPECT_RATIO;
 

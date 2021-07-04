@@ -38,12 +38,14 @@ glm::vec4 get_zone_clear_color(char zone);
 
 const int NUM_GREYS = 8;
 
-const double GREY_INTENSITIES[NUM_GREYS] = { 0.1f, 0.17f, 0.25f, 0.37f, 0.5f, 0.64f, 0.79f, 0.95f};
+//const double GREY_INTENSITIES[NUM_GREYS] = { 0.1f, 0.17f, 0.25f, 0.37f, 0.5f, 0.64f, 0.79f, 0.95f};
+const double GREY_INTENSITIES[NUM_GREYS] = { 0.15f, 0.3f, 0.47f, 0.67f, 0.9f, 0.67f, 0.47f, 0.3f};
 
 extern const glm::vec4 CLEAR_COLOR;
 
 #define MAKE_GREY(i) glm::vec4{i, i, i, 1.0f},
 
+/*
 const glm::vec4 GREY_VECTORS[NUM_GREYS] {
 	MAKE_GREY(0.1f)
 	MAKE_GREY(0.17f)
@@ -53,6 +55,18 @@ const glm::vec4 GREY_VECTORS[NUM_GREYS] {
 	MAKE_GREY(0.64f)
 	MAKE_GREY(0.79f)
 	MAKE_GREY(0.95f)
+};
+*/
+
+const glm::vec4 GREY_VECTORS[NUM_GREYS]{
+	MAKE_GREY(0.15f)
+	MAKE_GREY(0.3f)
+	MAKE_GREY(0.47f)
+	MAKE_GREY(0.67f)
+	MAKE_GREY(0.9f)
+	MAKE_GREY(0.67f)
+	MAKE_GREY(0.47f)
+	MAKE_GREY(0.3f)
 };
 
 #undef MAKE_GREY

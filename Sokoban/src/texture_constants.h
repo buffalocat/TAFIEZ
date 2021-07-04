@@ -22,7 +22,7 @@ enum class BlockTexture {
 	BindingCar = 28,
 
 	// Double-size
-	Sign = 48,
+	Sign = 64,
 	Door,
 	Cross,
 	SwitchUp,
@@ -31,12 +31,21 @@ enum class BlockTexture {
 	PermSwitchDown,
 	GateBase,
 	GateBody,
-	GateBasePersistent,
-	GateBodyPersistent,
+	GateBasePersistentOff,
+	GateBodyPersistentOn,
+	GateBasePersistentOn,
+	GateBodyPersistentOff,
+	GateBodyPersistentDisconnected,
 	GateBodyCorrupt,
-	Incinerator,
+	GateBaseExtended,
 
-	FlagSwitch0 = 80,
+	// Double-size Row 2
+	Incinerator = 96,
+	IncineratorPersistentActiveOff,
+	IncineratorPersistentActiveOn,
+	IncineratorPersistentInactiveOn,
+	IncineratorPersistentInactiveOff,
+	FlagSwitch0,
 	FlagSwitch1,
 	FlagSwitch2,
 	FlagSwitch3,
@@ -44,10 +53,10 @@ enum class BlockTexture {
 	AutosaveUsed,
 
 	// Padded Single-Size
-	FlagSigil = 129,
-	Darker = 131,
-	Wall = 133,
-	Blank = 135,
+	FlagSigil = 145,
+	Darker = 147,
+	Wall = 149,
+	Blank = 151,
 };
 
 BlockTexture operator |(BlockTexture a, BlockTexture b);

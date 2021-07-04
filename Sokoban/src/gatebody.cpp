@@ -12,7 +12,7 @@
 #include "delta.h"
 
 GateBody::GateBody(Gate* gate, Point3 pos) :
-	PushBlock(pos, gate->color_, gate->pushable(), gate->gravitable(), Sticky::None),
+	PushBlock(pos, gate->color_, true, true, Sticky::None),
 	snake_{ gate->parent_->obj_code() == ObjCode::SnakeBlock },
 	persistent_{ gate->persistent_ }, corrupt_{ false } {
 	set_gate(gate);
@@ -97,8 +97,24 @@ void GateBody::draw(GraphicsManager* gfx) {
 			break;
 		}
 	}
-	BlockTexture tex = corrupt_ ? BlockTexture::GateBodyCorrupt :
-		(persistent_ ? BlockTexture::GateBodyPersistent : BlockTexture::GateBody);
+	BlockTexture tex;
+	if (corrupt_) {
+		tex = BlockTexture::GateBodyCorrupt;
+	} else {
+		if (persistent_) {
+			if (gate_) {
+				if (gate_->default_) {
+					tex = BlockTexture::GateBodyPersistentOff;
+				} else {
+					tex = BlockTexture::GateBodyPersistentOn;
+				}
+			} else {
+				tex = BlockTexture::GateBodyPersistentDisconnected;
+			}
+		} else {
+			tex = BlockTexture::GateBody;
+		}
+	}
 	ModelInstancer& model = snake_ ? gfx->top_diamond : gfx->top_cube;
 	model.push_instance(glm::vec3(p.x, p.y, p.z - (1.0f - height) / 2),
 		glm::vec3(0.6f, 0.6f, height), tex, color_);

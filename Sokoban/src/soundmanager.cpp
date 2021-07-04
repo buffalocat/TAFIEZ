@@ -15,7 +15,12 @@ QueuedSound::QueuedSound(const char* file_name) : power{ 0 } {
 
 
 SoundManager::SoundManager() {
-	alutInit(nullptr, nullptr);
+	std::cout << "Trying to start ALUT..." << std::endl;
+	if (!alutInit(nullptr, nullptr)) {
+		std::cout << "ALUT error: " << alutGetErrorString (alutGetError ()) << std::endl;
+	} else {
+		std::cout << "ALUT init'd normally." << std::endl;
+	}
 	queued_sounds_.push_back({ "undo_click.wav" });
 	queued_sounds_.push_back({ "door_enter.wav" });
 	queued_sounds_.push_back({ "switch_on.wav" });
@@ -30,6 +35,8 @@ SoundManager::SoundManager() {
 	queued_sounds_.push_back({ "fall_thud.wav" });
 	queued_sounds_.push_back({ "fall.wav" });
 	queued_sounds_.push_back({ "jump.wav" });
+	std::cout << "Trying to load sounds..." << std::endl;
+	std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
 }
 
 SoundManager::~SoundManager() {
@@ -63,10 +70,23 @@ void SoundManager::play_sounds() {
 		if (q.power) {
 			ALuint source;
 			alGenSources(1, &source);
+			if (!has_played_sound_) {
+				std::cout << "Trying to generate a source..." << std::endl;
+				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+			}
 			alSourcei(source, AL_BUFFER, q.buffer);
+			if (!has_played_sound_) {
+				std::cout << "Trying to put sound in the buffer..." << std::endl;
+				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+			}
 			q.power = 0;
 			active_sources_.push_back(source);
 			alSourcePlay(source);
+			if (!has_played_sound_) {
+				std::cout << "Trying to play the sound..." << std::endl;
+				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+				has_played_sound_ = true;
+			}
 		}
 	}
 }

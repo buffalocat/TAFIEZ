@@ -43,6 +43,8 @@ private:
 	std::vector<ALuint> active_sources_{};
 	ALCdevice* device_;
 	ALCcontext* context_;
+	
+	bool has_played_sound_ = false;
 };
 
 #endif SOUNDMANAGER_H

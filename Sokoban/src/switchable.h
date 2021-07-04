@@ -34,7 +34,6 @@ public:
 
 	bool persistent_;
 
-protected:
 	int count_;
 	int prev_count_;
 	bool default_;

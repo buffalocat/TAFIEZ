@@ -27,6 +27,7 @@ MainMenuState::MainMenuState(GraphicsManager* gfx, SoundManager* sound, OpenGLWi
 
 MainMenuState::~MainMenuState() {}
 
+
 void MainMenuState::init_menu() {
 	menu_ = std::make_unique<Menu>(this, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72));
 #ifdef SOKOBAN_EDITOR
