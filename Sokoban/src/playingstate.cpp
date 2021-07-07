@@ -7,6 +7,7 @@
 #include "stringdrawer.h"
 #include "soundmanager.h"
 #include "globalanimation.h"
+#include "background.h"
 
 #include "gameobject.h"
 #include "savefile.h"
@@ -74,7 +75,9 @@ void PlayingState::main_loop() {
 	anims_->update();
 	// Draw stuff
 	room_->draw_at_player(player_doa(), true, false, false);
-	gfx_->pre_object_rendering();
+	gfx_->background_->update();
+	gfx_->pre_rendering();
+	gfx_->background_->draw();
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	anims_->view_dir_ = gfx_->view_dir();
@@ -133,13 +136,13 @@ void PlayingState::handle_input() {
 				delta_frame_->revert(this);
 				anims_->reset_temp();
 				delta_frame_ = std::make_unique<DeltaFrame>();
-				move_camera_to_player(true);
-				anims_->sounds_->queue_sound(SoundName::UndoClick);
 			} else if (undo_stack_->non_empty()) {
 				undo_stack_->pop();
-				move_camera_to_player(true);
-				anims_->sounds_->queue_sound(SoundName::UndoClick);
 			}
+			move_camera_to_player(true);
+			anims_->sounds_->queue_sound(SoundName::UndoClick);
+			gfx_->background_->cur_pos_ = player_doa()->real_pos();
+			gfx_->background_->snap_colors();
 			gfx_->set_state(GraphicsState::None);
 			room_->map()->reset_local_state();
 			set_death_text();
@@ -327,7 +330,9 @@ bool PlayingState::activate_room(std::string name) {
 		}
 		room_ = new_room;
 		room_->map()->set_initial_state(this);
+		gfx_->set_wall_colors(*room_->wall_color_spec_);
 	}
+	gfx_->set_background(*room_->background_spec_);
 	return true;
 }
 

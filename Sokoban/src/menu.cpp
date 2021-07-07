@@ -103,7 +103,6 @@ void Menu::update() {
 void Menu::draw() {
 	font_->shader_->use();
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	for (auto& entry : entries_) {
 		entry.text->render();
 	}

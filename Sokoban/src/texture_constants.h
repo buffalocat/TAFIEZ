@@ -6,23 +6,28 @@ const int BLOCK_TEXTURE_ATLAS_SIZE = 16;
 // Reading off the texture atlas starting from top, left to right
 enum class BlockTexture {
 	// ColoredBlocks
-	LightEdges = 0,
-	Corners = 1,
-	BrokenEdges = 2,
-	Edges = 3,
+	SolidEdgesLight = 0,
+	SemiweakSticky = 1,
+	WeakSticky = 2,
+	SolidEdgesDark = 3,
+	StrongSnakeTwo = 4,
+	StrongSnakeOne = 5,
+	WeakSnakeOne = 6,
+	WeakSnakeTwo = 7,
+
 
 	// "Additive" textures
 	Default = 0,
-	LockedCar = 4,
-	NormalCar = 8,
-	ConvertibleCar = 12,
-	AutoBlock = 16,
-	PuppetBlock = 20,
-	HoverCar = 24,
-	BindingCar = 28,
+	LockedCar = 8,
+	NormalCar = 16,
+	ConvertibleCar = 24,
+	AutoBlock = 32,
+	PuppetBlock = 40,
+	HoverCar = 48,
+	BindingCar = 56,
 
 	// Double-size
-	Sign = 64,
+	Sign = 144,
 	Door,
 	Cross,
 	SwitchUp,
@@ -40,7 +45,7 @@ enum class BlockTexture {
 	GateBaseExtended,
 
 	// Double-size Row 2
-	Incinerator = 96,
+	Incinerator = 176,
 	IncineratorPersistentActiveOff,
 	IncineratorPersistentActiveOn,
 	IncineratorPersistentInactiveOn,
@@ -53,10 +58,10 @@ enum class BlockTexture {
 	AutosaveUsed,
 
 	// Padded Single-Size
-	FlagSigil = 145,
-	Darker = 147,
-	Wall = 149,
-	Blank = 151,
+	FlagSigil = 225,
+	Darker = 227,
+	Wall = 229,
+	Blank = 231,
 };
 
 BlockTexture operator |(BlockTexture a, BlockTexture b);
@@ -96,6 +101,8 @@ enum class ParticleTexture {
 
 	SolidBox = 51,
 	DashedBox = 52,
+	SolidBoxInverted = 53,
+	DashedBoxInverted = 54,
 
 	Alpha = 59,
 	Beta = 60,

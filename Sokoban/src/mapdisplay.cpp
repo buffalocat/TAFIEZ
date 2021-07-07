@@ -67,12 +67,13 @@ void MapDisplay::init_sprites(PlayingState* state) {
 
 
 void MapDisplay::draw_special(GraphicsManager* gfx, GLuint atlas) {
+	glEnable(GL_BLEND);
 	init_sprites(state_);
 	for (auto& sprite : sprites_) {
 		gfx->square_0.push_instance(sprite.pos, glm::vec3(0.6f), sprite.tex, sprite.color);
 	}
 	gfx->prepare_draw_objects_particle_atlas(atlas);
-	gfx->draw_objects();
+	gfx->square_0.draw();
 	gfx->text_shader_spacial_.use();
 	gfx->text_shader_spacial_.setMat4("PV", gfx->PV_);
 	gfx->text_shader_spacial_.setVec4("color", COLOR_VECTORS[BLACK]);
@@ -396,7 +397,12 @@ bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
 		break;
 	}
 	}
-	box_tex = exits_done ? ParticleTexture::SolidBox : ParticleTexture::DashedBox;
+	if (hub == HubCode::Omega) {
+		box_tex = exits_done ? ParticleTexture::SolidBoxInverted : ParticleTexture::DashedBoxInverted;
+	} else {
+		box_tex = exits_done ? ParticleTexture::SolidBox : ParticleTexture::DashedBox;
+	}
+	
 	draw_tex(box_tex, 0, 0, 0, color);
 	draw_tex(letter_tex, 0, 0, 0.02f, WHITE);
 	pos_.x -= dx;

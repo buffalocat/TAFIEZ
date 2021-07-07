@@ -72,16 +72,16 @@ BlockTexture PushBlock::get_block_texture() {
 	BlockTexture tex{ BlockTexture::Blank };
 	switch (sticky_) {
 	case Sticky::None:
-		tex = BlockTexture::Edges;
+		tex = BlockTexture::SolidEdgesDark;
 		break;
 	case Sticky::WeakBlock:
-		tex = BlockTexture::BrokenEdges;
+		tex = BlockTexture::WeakSticky;
 		break;
 	case Sticky::StrongBlock:
-		tex = BlockTexture::LightEdges;
+		tex = BlockTexture::SolidEdgesLight;
 		break;
 	case Sticky::SemiBlock:
-		tex = BlockTexture::Corners;
+		tex = BlockTexture::SemiweakSticky;
 		break;
 	}
 	if (modifier_) {

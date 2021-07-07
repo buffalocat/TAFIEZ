@@ -18,7 +18,7 @@ const double DEFAULT_CAM_RADIUS = 10.0;
 const double DEFAULT_CAM_TILT = 0.3;
 const double DEFAULT_CAM_ROTATION = 0.0;
 
-const double MAX_CAM_TILT = 1.5;
+const double MAX_CAM_TILT = 2.5;
 const double MIN_CAM_TILT = 0.0;
 
 const double FREE_CAM_TILT_SPEED = 0.01;

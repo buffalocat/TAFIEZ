@@ -271,7 +271,7 @@ void Player::draw(GraphicsManager* gfx) {
 		}
 		scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
 	}
-	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(scale), BlockTexture::Edges, color());
+	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(scale), BlockTexture::SolidEdgesDark, color());
 }
 
 void Player::draw_squished(GraphicsManager* gfx, FPoint3 p, float squish_scale) {
@@ -307,7 +307,7 @@ void Player::draw_squished(GraphicsManager* gfx, FPoint3 p, float squish_scale) 
 		}
 		scale = PLAYER_RIDING_SCALE * t + PLAYER_DEFAULT_SCALE * (1 - t);
 	}
-	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(squish_scale * scale, squish_scale * scale, scale), BlockTexture::Edges, color());
+	player_model->push_instance(glm::vec3(p.x, p.y, p.z + z_offset), glm::vec3(squish_scale * scale, squish_scale * scale, scale), BlockTexture::SolidEdgesDark, color());
 }
 
 FPoint3 Player::cam_pos() {

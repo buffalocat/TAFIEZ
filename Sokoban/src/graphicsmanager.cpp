@@ -7,6 +7,7 @@
 #include "stringdrawer.h"
 #include "model.h"
 #include "window.h"
+#include "background.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -32,6 +33,7 @@ ProtectedStringDrawer::ProtectedStringDrawer(ProtectedStringDrawer&& p) : drawer
 GraphicsManager::GraphicsManager(OpenGLWindow* window) :
 	window_{ window } {
 	fonts_ = std::make_unique<FontManager>(window_, &text_shader_);
+	background_ = std::make_unique<BackgroundAnimation>();
 	instanced_shader_.use();
 	instanced_shader_.setFloat("lightMixFactor", 0.7);
 	load_texture_atlas();
@@ -83,18 +85,38 @@ void GraphicsManager::generate_framebuffer() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_->viewport_size_[0], window_->viewport_size_[1],
-		0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	int texture_error = 0;
+	set_ideal_render_upscale();
+	do {
+		if (texture_error) {
+			render_upscale_ >>= 1;
+		}
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, render_upscale_ * window_->viewport_size_[0], render_upscale_ * window_->viewport_size_[1],
+			0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	} while (texture_error = glGetError());
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// Make a depth/stencil buffer
 	glGenRenderbuffers(1, &rbo_);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_->viewport_size_[0], window_->viewport_size_[1]);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, render_upscale_ * window_->viewport_size_[0], render_upscale_ * window_->viewport_size_[1]);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	// Attach color and depth/stencil
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_tex_, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GraphicsManager::set_ideal_render_upscale() {
+	const int ideal_upscale = 2;
+	render_upscale_ = ideal_upscale;
+	GLint max_size;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
+	for (auto n : window_->viewport_size_) {
+		while (render_upscale_ * n > max_size) {
+			render_upscale_ >>= 1;
+		}
+	}
+	//TODO: check if render_upscale_ == 0. If so, we must make the window smaller!
 }
 
 const int FADE_IN_FRAMES = 20;
@@ -178,27 +200,103 @@ void GraphicsManager::set_PV(glm::mat4 proj, glm::mat4 view) {
 	PV_ = proj * view;
 }
 
-void GraphicsManager::set_light_source(glm::vec3 light_source) {
-	light_source_ = light_source;
+void GraphicsManager::set_cam_pos(glm::vec3 cam_pos) {
+	light_source_ = glm::vec3(-cam_pos.x, cam_pos.y, cam_pos.z);
 }
+
+glm::vec4 GraphicsManager::wall_color(int height) {
+	return wall_colors_[height % wall_colors_.size()];
+}
+
+void GraphicsManager::set_wall_colors(WallColorSpec spec) {
+	if (spec.type == WallColorType::Default) {
+		spec = { WallColorType::Wave, 2, 0, 0.15, 0.9 };
+	}
+	wall_colors_.clear();
+	std::vector<float> lum_list{};
+	float dlum = 0;
+	float lum;
+	switch (spec.type) {
+	case WallColorType::Ascend:
+	{
+		lum = spec.min;
+		if (spec.count > 1) {
+			dlum = (spec.max - spec.min) / (spec.count - 1);
+		}
+		for (int i = 0; i < spec.count; ++i) {
+			lum_list.push_back(lum);
+			lum += dlum;
+		}
+		break;
+	}
+	case WallColorType::Descend:
+	{
+		lum = spec.max;
+		if (spec.count > 1) {
+			dlum = (spec.max - spec.min) / (spec.count - 1);
+		}
+		for (int i = 0; i < spec.count; ++i) {
+			lum_list.push_back(lum);
+			lum -= dlum;
+		}
+		break;
+	}
+	case WallColorType::Wave:
+	{
+		lum = spec.min;
+		if (spec.count > 0) {
+			dlum = (spec.max - spec.min) / spec.count;
+		}
+		for (int i = 0; i < spec.count; ++i) {
+			lum_list.push_back(lum);
+			lum += dlum;
+		}
+		for (int i = 0; i < spec.count; ++i) {
+			lum_list.push_back(lum);
+			lum -= dlum;
+		}
+		break;
+	}
+	}
+	for (int i = 0; i < lum_list.size(); ++i) {
+		lum = lum_list[(i + spec.offset) % lum_list.size()];
+		wall_colors_.push_back(glm::vec4(lum, lum, lum, 1.0f));
+	}
+}
+
+void GraphicsManager::set_background(BackgroundSpec spec) {
+	if (spec.type == BackgroundSpecType::Default) {
+		spec = {
+			BackgroundSpecType::Default,
+			glm::vec4(0,0,0,1),
+			glm::vec4(4,4,4,1),
+			BackgroundParticleType::None };
+	}
+	background_->type_ = spec.type;
+	spec.color_1.a = 1.0f;
+	spec.color_2.a = 1.0f;
+	background_->color_down_ = spec.color_1;
+	background_->color_up_ = spec.color_2;
+	background_->particle_type_ = spec.particle_type;
+	background_->snap_colors();
+}
+
 
 void GraphicsManager::clear_screen(glm::vec4 clear_color) {
 	glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void GraphicsManager::pre_object_rendering() {
+void GraphicsManager::pre_rendering() {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	glDisable(GL_SCISSOR_TEST);
-	glViewport(0, 0, window_->viewport_size_[0], window_->viewport_size_[1]);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
+	glViewport(0, 0, render_upscale_ * window_->viewport_size_[0], render_upscale_ * window_->viewport_size_[1]);
+	clear_screen(CLEAR_COLOR);
 }
 
 void GraphicsManager::pre_particle_rendering() {
 	particle_shader_.use();
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	particle_shader_.setMat4("Proj", proj_);
 	particle_shader_.setMat4("View", view_);
 }
@@ -211,8 +309,6 @@ void GraphicsManager::prepare_draw_objects() {
 	instanced_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, atlas_);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	clear_screen(CLEAR_COLOR);
 	instanced_shader_.setFloat("texScale", 1.0f / BLOCK_TEXTURE_ATLAS_SIZE);
 	instanced_shader_.setMat4("PV", PV_);
 	instanced_shader_.setVec3("lightSource", light_source_);
@@ -222,7 +318,6 @@ void GraphicsManager::prepare_draw_objects_particle_atlas(GLuint atlas) {
 	instanced_shader_.use();
 	glBindTexture(GL_TEXTURE_2D, atlas);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	instanced_shader_.setFloat("texScale", 1.0f / PARTICLE_TEXTURE_ATLAS_SIZE);
 	instanced_shader_.setMat4("PV", PV_);
 	instanced_shader_.setVec3("lightSource", light_source_);
@@ -262,8 +357,8 @@ void GraphicsManager::post_rendering() {
 	glDisable(GL_BLEND);
 	glBindTexture(GL_TEXTURE_2D, color_tex_);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glEnable(GL_BLEND);
 }
-
 TextRenderer::TextRenderer(FontManager* fonts) :
 	fonts_{ fonts }, text_shader_{ fonts->text_shader_ } {
 	ui_shader_.use();
@@ -290,7 +385,6 @@ TextRenderer::~TextRenderer() {
 void TextRenderer::draw() {
 	update_drawers();
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	draw_ui();
 	draw_text();
 }

@@ -83,7 +83,7 @@ void ClearFlag::setup_on_put(RoomMap* map, DeltaFrame*, bool real) {
 	map->clear_flags_.push_back(this);
 	map->add_listener(this, pos_above());
 	map->activate_listener_of(this);
-	if (real && map->global_->has_flag(get_clear_flag_code(map->zone_))) {
+	if (real && map->global_ && map->global_->has_flag(get_clear_flag_code(map->zone_))) {
 		collected_ = true;
 	}
 }

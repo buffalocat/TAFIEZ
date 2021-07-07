@@ -40,8 +40,10 @@
 #include "gameobjectarray.h"
 #include "savefile.h"
 #include "globalflagconstants.h"
+#include "background.h"
 
-Room::Room(GameState* state, std::string name) : state_{ state }, gfx_{ state->gfx_ }, name_{ name } {}
+Room::Room(GameState* state, std::string name) : state_{ state }, gfx_{ state->gfx_ }, name_{ name },
+	wall_color_spec_{ std::make_unique<WallColorSpec>() }, background_spec_{ std::make_unique<BackgroundSpec>() } {}
 
 Room::~Room() {}
 
@@ -117,7 +119,7 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 	glm::mat4 model, view, projection;
 	if (ortho) {
 		set_cam_pos(vpos, vpos, display_labels, true);
-		gfx_->set_light_source(glm::vec3(rpos.x, rpos.y, rpos.z + 100));
+		gfx_->set_cam_pos(glm::vec3(rpos.x, rpos.y, rpos.z + 100));
 		view = glm::lookAt(glm::vec3(-rpos.x, rpos.y, rpos.z),
 			glm::vec3(-rpos.x, rpos.y, rpos.z - 1.0),
 			glm::vec3(0.0, -1.0, 0.0));
@@ -126,7 +128,8 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 		set_cam_pos(vpos, rpos, display_labels, false);
 
 		double cam_radius = camera_->get_radius();
-		FPoint3 target_pos = camera_->get_pos() + FPoint3{ 0, 0, 0.5 };
+		glm::vec3 target_pos = glm::vec3(camera_->get_pos()) + glm::vec3(0, 0, 0.5);
+		target_pos.x *= -1;
 
 		double cam_tilt = camera_->get_tilt();
 		double cam_rotation = camera_->get_rotation();
@@ -134,19 +137,22 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 		double c_tilt = cos(cam_tilt);
 		double s_rot = sin(cam_rotation);
 		double c_rot = cos(cam_rotation);
-		double cam_x = s_tilt * s_rot * cam_radius;
-		double cam_y = s_tilt * c_rot * cam_radius;
-		double cam_z = c_tilt * cam_radius;
+		glm::vec3 cam(s_tilt * s_rot * cam_radius,
+			s_tilt * c_rot * cam_radius,
+			c_tilt * cam_radius);
 
+		auto cam_pos = cam + target_pos;
+		auto cam_up = glm::vec3(-s_rot, -c_rot, 5.0f);
+		gfx_->set_cam_pos(cam_pos);
+		gfx_->background_->set_positions(cam, cam_up, rpos);
 
-		gfx_->set_light_source(glm::vec3(-cam_x + target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z));
-
-		view = glm::lookAt(glm::vec3(cam_x - target_pos.x, cam_y + target_pos.y, cam_z + target_pos.z),
-			glm::vec3(-target_pos.x, target_pos.y, target_pos.z),
-			glm::vec3(-s_rot, -c_rot, 1.0));
+		view = glm::lookAt(cam_pos, target_pos, cam_up);
 		projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
 	}
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
+	if (auto error = glGetError()) {
+		std::cout << "OpenGL Error before PV" << error << std::endl;
+	}
 	gfx_->set_PV(projection, view);
 }
 
@@ -172,6 +178,9 @@ void Room::write_to_file(MapFileO& file, bool write_obj_ids) {
 	map_->serialize(file, write_obj_ids);
 
 	camera_->serialize(file);
+
+	serialize_wall_color_spec(file);
+	serialize_background_spec(file);
 }
 
 void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, RoomInitData* init_data) {
@@ -283,12 +292,50 @@ void Room::load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* glo
 		case MapCode::PlayerCycle:
 			map_->player_cycle()->deserialize_permutation(file, map_.get());
 			break;
+		case MapCode::WallColorSpec:
+			deserialize_wall_color_spec(file);
+			break;
+		case MapCode::BackgroundSpec:
+			deserialize_background_spec(file);
+			break;
 		case MapCode::End:
 		default:
 			reading_file = false;
 			break;
 		}
 	}
+}
+
+void Room::serialize_wall_color_spec(MapFileO& file) {
+	file << MapCode::WallColorSpec;
+	file << wall_color_spec_->type;
+	file << wall_color_spec_->count;
+	file << wall_color_spec_->offset;
+	file << wall_color_spec_->min;
+	file << wall_color_spec_->max;
+}
+
+void Room::deserialize_wall_color_spec(MapFileI& file) {
+	wall_color_spec_->type = static_cast<WallColorType>(file.read_byte());
+	file >> wall_color_spec_->count;
+	file >> wall_color_spec_->offset;
+	file >> wall_color_spec_->min;
+	file >> wall_color_spec_->max;
+}
+
+void Room::serialize_background_spec(MapFileO& file) {
+	file << MapCode::BackgroundSpec;
+	file << background_spec_->type;
+	file << background_spec_->color_1;
+	file << background_spec_->color_2;
+	file << background_spec_->particle_type;
+}
+
+void Room::deserialize_background_spec(MapFileI& file) {
+	background_spec_->type = static_cast<BackgroundSpecType>(file.read_byte());
+	file >> background_spec_->color_1;
+	file >> background_spec_->color_2;
+	background_spec_->particle_type = static_cast<BackgroundParticleType>(file.read_byte());
 }
 
 

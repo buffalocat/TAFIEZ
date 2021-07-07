@@ -7,6 +7,7 @@
 #include "gameobject.h"
 #include "savefile.h"
 #include "player.h"
+#include "background.h"
 
 RoomTab::RoomTab(EditorState* editor) : EditorTab(editor) {}
 
@@ -26,7 +27,7 @@ void RoomTab::main_loop(EditorRoom* eroom) {
 	ImGui::Checkbox("Include Car as starting object?", &eroom->include_car);
 	ImGui::Separator();
 
-	zone_options(eroom->map());
+	zone_options(eroom->room.get());
 	
 	int* req = &eroom->map()->clear_flag_req_;
 	unsigned int* id = &eroom->map()->clear_id_;
@@ -72,13 +73,68 @@ int zone_input_callback(ImGuiInputTextCallbackData* data) {
 	return 0;
 }
 
-void RoomTab::zone_options(RoomMap* room) {
+void RoomTab::zone_options(Room* room) {
+	auto* room_map = room->map();
+
 	static char zone[2];
-	zone[0] = room->zone_;
+	zone[0] = room_map->zone_;
 	ImGui::InputText("Zone##ROOM", zone, 2,
 		ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_HideCursor,
 		&zone_input_callback);
-	room->zone_ = zone[0];
+	room_map->zone_ = zone[0];
+
+	ImGui::Separator();
+
+	WallColorSpec& wc_spec = *room->wall_color_spec_;
+	int wc_type = static_cast<int>(wc_spec.type);
+	ImGui::InputInt("Wall Color Type##ROOM", &wc_type);
+	if (wc_type >= static_cast<int>(WallColorType::COUNT)) {
+		wc_type = static_cast<int>(WallColorType::COUNT) - 1;
+	}
+	wc_spec.type = static_cast<WallColorType>(wc_type);
+	ImGui::InputInt("Wall Color Count##ROOM", &wc_spec.count);
+	ImGui::InputInt("Wall Color Offset##ROOM", &wc_spec.offset);
+
+	ImGui::InputDouble("Wall Color Min##ROOM", &wc_spec.min);
+	ImGui::InputDouble("Wall Color Max##ROOM", &wc_spec.max);
+
+	ImGui::Separator();
+
+	BackgroundSpec& bg_spec = *room->background_spec_;
+	int bg_type = static_cast<int>(bg_spec.type);
+	int bg_part_type = static_cast<int>(bg_spec.particle_type);
+	ImGui::InputInt("BG Type##ROOM", &bg_type);
+	ImGui::InputInt("Particle Type##ROOM", &bg_part_type);
+	if (bg_type >= static_cast<int>(BackgroundSpecType::COUNT)) {
+		bg_type = static_cast<int>(BackgroundSpecType::COUNT) - 1;
+	}
+	if (bg_part_type >= static_cast<int>(BackgroundParticleType::COUNT)) {
+		bg_part_type = static_cast<int>(BackgroundParticleType::COUNT) - 1;
+	}
+	bg_spec.type = static_cast<BackgroundSpecType>(bg_type);
+	bg_spec.particle_type = static_cast<BackgroundParticleType>(bg_part_type);
+
+	float color_down[3];
+	color_down[0] = bg_spec.color_1.r;
+	color_down[1] = bg_spec.color_1.g;
+	color_down[2] = bg_spec.color_1.b;
+	ImGui::ColorEdit3("Bottom Color##ROOM", color_down);
+	bg_spec.color_1.r = color_down[0];
+	bg_spec.color_1.g = color_down[1];
+	bg_spec.color_1.b = color_down[2];
+	bg_spec.color_1.a = 1.0f;
+
+	float color_up[3];
+	color_up[0] = bg_spec.color_2.r;
+	color_up[1] = bg_spec.color_2.g;
+	color_up[2] = bg_spec.color_2.b;
+	ImGui::ColorEdit3("Top Color##ROOM", color_up);
+	bg_spec.color_2.r = color_up[0];
+	bg_spec.color_2.g = color_up[1];
+	bg_spec.color_2.b = color_up[2];
+	bg_spec.color_2.a = 1.0f;
+
+	ImGui::Separator();
 }
 
 void RoomTab::shift_extend_options(EditorRoom* eroom) {

@@ -214,7 +214,6 @@ void LoadMenuState::draw() {
 	// Draw text
 	font_->shader_->use();
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	for (auto& text : string_drawers_) {
 		text->render();
 	}
@@ -371,12 +370,8 @@ void SaveMenuState::draw() {
 	// Draw text
 	font_->shader_->use();
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	for (auto& text : string_drawers_) {
 		text->render();
 	}
 }
-
-
-
 

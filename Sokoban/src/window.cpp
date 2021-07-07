@@ -38,6 +38,7 @@ bool OpenGLWindow::init(int width, int height, const char* title) {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_BLEND);
 	return true;
 }
 

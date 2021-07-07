@@ -338,7 +338,6 @@ void FlagCutscene::draw() {
 		return;
 	}
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	gfx_->text_shader_.use();
 	if (time_ < TOTAL_TIME - FADE_TIME) {
 		lines_[0]->render();

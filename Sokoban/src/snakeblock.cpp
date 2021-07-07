@@ -146,15 +146,15 @@ BlockTexture SnakeBlock::get_block_texture() {
 	BlockTexture tex;
 	if (weak_) {
 		if (ends_ == 1) {
-			tex = BlockTexture::BrokenEdges;
+			tex = BlockTexture::WeakSnakeOne;
 		} else {
-			tex = BlockTexture::Edges;
+			tex = BlockTexture::WeakSnakeTwo;
 		}
 	} else {
 		if (ends_ == 1) {
-			tex = BlockTexture::Corners;
+			tex = BlockTexture::StrongSnakeOne;
 		} else {
-			tex = BlockTexture::LightEdges;
+			tex = BlockTexture::StrongSnakeTwo;
 		}
 	}
 	if (modifier_) {

@@ -177,7 +177,11 @@ private:
     double cur_tilt_;
     double target_rot_;
     double cur_rot_;
+#ifdef _DEBUG
+	bool free_override_ = true;
+#else
 	bool free_override_ = false;
+#endif
 
 	friend class LabelChangeDelta;
 };

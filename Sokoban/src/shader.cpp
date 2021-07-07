@@ -75,6 +75,7 @@ GLuint Shader::compile_shader(const GLchar* path, GLenum shader_type) {
 		std::cout << "Shader compilation failed.\n" << info_log << std::endl;
 	}
 	return shader;
+
 }
 
 void Shader::use() {

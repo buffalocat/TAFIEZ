@@ -330,7 +330,7 @@ void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 	if (down_) {
 		glm::vec3 center = glm::vec3(center_.x, center_.y, 0.5f * (1.0f + 0.05f));
 		glm::vec3 scale = glm::vec3(scale_.x, scale_.y, 0.05f);
-		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::Edges, parent_->color());
+		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::SolidEdgesDark, parent_->color());
 		return;
 	}
 	switch (animation_state_) {
@@ -338,7 +338,7 @@ void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 	case FlagGateAnimationState::Charging:
 	case FlagGateAnimationState::Fade:
 	{
-		gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::Edges, parent_->color());
+		gfx->cube.push_instance(glm::vec3(p) + center_, scale_, BlockTexture::SolidEdgesDark, parent_->color());
 		ModelInstancer* sigil_model;
 		switch (orientation_) {
 		case 0:
@@ -363,7 +363,7 @@ void FlagGate::draw(GraphicsManager* gfx, FPoint3 p) {
 		float shrink_factor = (float)animation_timer_ / (float)FLAG_GATE_SHRINK_TIME;
 		glm::vec3 center = glm::vec3(center_.x, center_.y, 0.5f * (1.0f + shrink_factor));
 		glm::vec3 scale = glm::vec3(scale_.x, scale_.y, shrink_factor);
-		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::Edges, parent_->color());
+		gfx->cube.push_instance(glm::vec3(p) + center, scale, BlockTexture::SolidEdgesDark, parent_->color());
 	}
 }
 

@@ -18,6 +18,8 @@ class Car;
 class GlobalData;
 class RoomLabelDrawer;
 class Door;
+class WallColorSpec;
+class BackgroundSpec;
 
 struct RoomInitData {
 	Player* default_player{};
@@ -39,6 +41,11 @@ public:
     void write_to_file(MapFileO& file, bool write_obj_ids);
     void load_from_file(GameObjectArray& objs, MapFileI& file, GlobalData* global, RoomInitData* init_data);
 
+    void serialize_wall_color_spec(MapFileO& file);
+    void deserialize_wall_color_spec(MapFileI& file);
+    void serialize_background_spec(MapFileO& file);
+	void deserialize_background_spec(MapFileI& file);
+
     void draw_at_pos(Point3 cam_pos, bool display_labels, bool ortho, bool one_layer);
     void draw_at_player(Player* target, bool display_labels, bool ortho, bool one_layer);
 	void draw(Point3 vpos, FPoint3 rpos, bool display_labels, bool ortho, bool one_layer);
@@ -56,6 +63,8 @@ public:
 	bool should_update_label_ = false;
 
 	std::string name_;
+    std::unique_ptr<WallColorSpec> wall_color_spec_;
+    std::unique_ptr<BackgroundSpec> background_spec_;
 
 private:
 	std::unique_ptr<RoomMap> map_{};

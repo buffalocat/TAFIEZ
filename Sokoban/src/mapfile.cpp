@@ -94,6 +94,15 @@ MapFileI& operator>>(MapFileI& f, double& v) {
 	return f;
 }
 
+MapFileI& operator>>(MapFileI& f, float& v) {
+	unsigned char b[3];
+	f.read(b, 3);
+	v = (b[0] * (1 << 4) - (1 << 11)) +
+		(b[1] / (float)(1 << 4)) +
+		(b[2] / (float)(1 << 12));
+	return f;
+}
+
 MapFileI& operator>>(MapFileI& f, Point2& v) {
     unsigned char b[2];
     f.read(b, 2);
@@ -130,6 +139,11 @@ MapFileI& operator>>(MapFileI& f, IntRect& r) {
 MapFileI& operator>>(MapFileI& f, FloatRect& r) {
 	f >> r.xa >> r.ya >> r.xb >> r.yb;
 	return f;
+}
+
+MapFileI& operator>>(MapFileI& f, glm::vec4& v) {
+    f >> v.r >> v.g >> v.b >> v.a;
+    return f;
 }
 
 MapFileI& operator>>(MapFileI& f, ColorCycle& v) {
@@ -237,6 +251,11 @@ MapFileO& MapFileO::operator<<(FloatRect r) {
 	return *this;
 }
 
+MapFileO& MapFileO::operator<<(glm::vec4 v) {
+    *this << v.r << v.g << v.b << v.a;
+    return *this;
+}
+
 MapFileO& MapFileO::operator<<(std::string str) {
     file_ << (unsigned char) str.size();
     file_.write(str.c_str(), str.size());
@@ -299,6 +318,22 @@ MapFileO& MapFileO::operator<<(CauseOfDeath value) {
 	file_ << (unsigned char)value;
 	return *this;
 }
+
+MapFileO& MapFileO::operator<<(WallColorType value) {
+	file_ << (unsigned char)value;
+	return *this;
+}
+
+MapFileO& MapFileO::operator<<(BackgroundParticleType value) {
+	file_ << (unsigned char)value;
+	return *this;
+}
+
+MapFileO& MapFileO::operator<<(BackgroundSpecType value) {
+	file_ << (unsigned char)value;
+	return *this;
+}
+
 
 MapFileO& MapFileO::operator<<(const ColorCycle& color) {
     file_ << (unsigned char) color.size_;

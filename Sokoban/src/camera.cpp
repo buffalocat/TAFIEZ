@@ -309,7 +309,7 @@ Camera::Camera(int w, int h) :
 	target_tilt_{ DEFAULT_CAM_TILT }, cur_tilt_{ DEFAULT_CAM_TILT },
 	target_rot_{ DEFAULT_CAM_ROTATION }, cur_rot_{ DEFAULT_CAM_ROTATION }
 {
-	context_ = &default_context_;
+	context_ = free_override_ ? &free_context_ : &default_context_;
 	context_map_ = std::vector<std::vector<CameraContext*>>(w, std::vector<CameraContext*>(h, context_));
 }
 
@@ -374,6 +374,10 @@ bool Camera::is_free() {
 }
 
 bool Camera::update_context(Point3 vpos) {
+	if (free_override_) {
+		context_ = &free_context_;
+		return false;
+	}
 	auto* new_context = context_map_[vpos.x][vpos.y];
 	if (!new_context->is_null()) {
 		auto* old_context = context_;

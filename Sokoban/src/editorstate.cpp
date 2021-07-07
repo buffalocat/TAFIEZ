@@ -13,6 +13,7 @@
 #include "room.h"
 #include "roommap.h"
 #include "camera.h"
+#include "background.h"
 
 #include "saveloadtab.h"
 #include "roomtab.h"
@@ -161,7 +162,7 @@ void EditorState::main_loop() {
 	}
 
 	gfx_->set_state(GraphicsState::None);
-	gfx_->pre_object_rendering();
+	gfx_->pre_rendering();
 	gfx_->prepare_draw_objects();
 	gfx_->draw_objects();
 	gfx_->post_rendering();
@@ -174,6 +175,7 @@ void EditorState::set_active_tab_by_index(int i) {
 
 void EditorState::set_active_room(std::string name) {
     active_room_ = rooms_[name].get();
+	gfx_->set_wall_colors(*active_room_->room->wall_color_spec_);
 }
 
 int EditorState::get_room_names(const char* room_names[]) {

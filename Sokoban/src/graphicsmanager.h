@@ -11,6 +11,9 @@ class Animation;
 class StringDrawer;
 class PlayingState;
 
+class WallColorSpec;
+class BackgroundSpec;
+
 class ProtectedStringDrawer {
 public:
 	ProtectedStringDrawer(StringDrawer* drawer);
@@ -33,6 +36,8 @@ enum class GraphicsState {
 };
 
 
+class BackgroundAnimation;
+
 class GraphicsManager {
 public:
 	GraphicsManager(OpenGLWindow*);
@@ -44,16 +49,23 @@ public:
 	bool in_animation();
 
 	void set_PV(glm::mat4, glm::mat4);
-	void set_light_source(glm::vec3);
+	void set_cam_pos(glm::vec3 cam_pos);
+
+	glm::vec4 wall_color(int height);
+	void set_wall_colors(WallColorSpec spec);
+	void set_background(BackgroundSpec spec);
 
 	void clear_screen(glm::vec4 clear_color);
-	void pre_object_rendering();
+	void draw_background();
+	void pre_rendering();
 	void prepare_draw_objects();
 	void prepare_draw_objects_particle_atlas(GLuint atlas);
 	void draw_objects();
 	void pre_particle_rendering();
 	void post_rendering();
 	glm::vec3 view_dir();
+
+	void set_ideal_render_upscale();
 
 	ModelInstancer cube{ "resources/uniform_cube.obj" };
 	ModelInstancer top_cube{ "resources/top_cube.obj" };
@@ -88,6 +100,8 @@ public:
 	Shader post_shader_{ Shader("shaders/post_shader.vs", "shaders/post_shader.fs") };
 	Shader particle_shader_{ Shader("shaders/particle_shader.vs", "shaders/particle_shader.gs", "shaders/particle_shader.fs") };
 
+	std::vector<glm::vec4> wall_colors_{};
+	std::unique_ptr<BackgroundAnimation> background_;
 private:
 	OpenGLWindow* window_;
 
@@ -101,6 +115,7 @@ private:
 
 	GraphicsState state_ = GraphicsState::None;
 	int state_counter_ = 0;
+	int render_upscale_ = 1;
 
 	void load_texture_atlas();
 };
