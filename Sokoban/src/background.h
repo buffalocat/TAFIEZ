@@ -30,6 +30,7 @@ enum class BackgroundSpecType {
 	One = 9,
 	Mountain = 10,
 	HFlag = 11,
+	AlphaSimple = 12,
 	COUNT,
 };
 

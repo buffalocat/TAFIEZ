@@ -64,7 +64,6 @@ void BackgroundAnimation::compute_cur_color() {
 		if (cur_pos_.y > 43) {
 			target_color_up_ = POST_GATE_UP;
 			target_color_down_ = POST_GATE_DOWN;
-
 		} else {
 			target_color_up_ = HUB_ALPHA_UP;
 			target_color_down_ = HUB_ALPHA_DOWN;
@@ -98,34 +97,82 @@ void BackgroundAnimation::compute_cur_color() {
 	{
 		float dx = cur_pos_.x - 20;
 		float dy = cur_pos_.y - 20;
-		glm::vec4 up = NEUTRAL_UP;
-		glm::vec4 down = NEUTRAL_DOWN;
-		float weight = 1;
+		float weight = 3;
+		glm::vec4 up = weight * NEUTRAL_UP;
+		glm::vec4 down = weight * NEUTRAL_DOWN;
 		float dw;
-		if (dy < -3) {
-			dw = -3 - dy;
+		const float null_range = 1;
+		if (dy < -null_range) {
+			dw = -null_range - dy;
 			weight += dw;
 			up += dw * HUB_ALPHA_UP;
 			down += dw * HUB_ALPHA_DOWN;
-		} else if (dy > 3) {
-			dw = dy - 3;
+		} else if (dy > null_range) {
+			dw = dy - null_range;
 			weight += dw;
 			up += dw * HUB_GAMMA_UP;
 			down += dw * HUB_GAMMA_DOWN;
 		}
-		if (dx < -3) {
-			dw = -3 - dx;
+		if (dx < -null_range) {
+			dw = -null_range - dx;
 			weight += dw;
 			up += dw * HUB_DELTA_UP;
 			down += dw * HUB_DELTA_DOWN;
-		} else if (dx > 3) {
-			dw = dx - 3;
+		} else if (dx > null_range) {
+			dw = dx - null_range;
 			weight += dw;
 			up += dw * HUB_BETA_UP;
-			down += dw * HUB_BETA_DOWN;
+			down += dw * HUB_BETA_DOWN; 
 		}
 		target_color_up_ = up / weight;
 		target_color_down_ = down / weight;
+		break;
+	}
+	case BackgroundSpecType::HFlag:
+	{
+		target_color_up_ = NEUTRAL_UP;
+		target_color_down_ = NEUTRAL_DOWN;
+		break;
+	}
+	case BackgroundSpecType::XNexus:
+	{
+		float dx = cur_pos_.x - 28;
+		float dy = cur_pos_.y - 22;
+		float weight = 3;
+		glm::vec4 up = weight * NEUTRAL_UP;
+		glm::vec4 down = weight * NEUTRAL_DOWN;
+		float dw;
+		const float null_range = 1;
+		if (dy < -null_range) {
+			dw = -null_range - dy;
+			weight += dw;
+			up += dw * HUB_BETA_UP;
+			down += dw * HUB_BETA_DOWN;
+		} else if (dy > null_range) {
+			dw = dy - null_range;
+			weight += dw;
+			up += dw * HUB_DELTA_UP;
+			down += dw * HUB_DELTA_DOWN;
+		}
+		if (dx < -null_range) {
+			dw = -null_range - dx;
+			weight += dw;
+			up += dw * HUB_ALPHA_UP;
+			down += dw * HUB_ALPHA_DOWN;
+		} else if (dx > null_range) {
+			dw = dx - null_range;
+			weight += dw;
+			up += dw * HUB_GAMMA_UP;
+			down += dw * HUB_GAMMA_DOWN;
+		}
+		target_color_up_ = up / weight;
+		target_color_down_ = down / weight;
+		break;
+	}
+	case BackgroundSpecType::AlphaSimple:
+	{
+		target_color_up_ = HUB_ALPHA_UP;
+		target_color_down_ = HUB_ALPHA_DOWN;
 		break;
 	}
 	}

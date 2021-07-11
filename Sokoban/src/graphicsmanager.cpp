@@ -210,7 +210,7 @@ glm::vec4 GraphicsManager::wall_color(int height) {
 
 void GraphicsManager::set_wall_colors(WallColorSpec spec) {
 	if (spec.type == WallColorType::Default) {
-		spec = { WallColorType::Wave, 2, 0, 0.15, 0.9 };
+		spec = { WallColorType::Ascend, 8, 0, 0.15, 0.9 };
 	}
 	wall_colors_.clear();
 	std::vector<float> lum_list{};
@@ -268,8 +268,8 @@ void GraphicsManager::set_background(BackgroundSpec spec) {
 	if (spec.type == BackgroundSpecType::Default) {
 		spec = {
 			BackgroundSpecType::Default,
-			glm::vec4(0,0,0,1),
-			glm::vec4(4,4,4,1),
+			CLEAR_COLOR,
+			CLEAR_COLOR,
 			BackgroundParticleType::None };
 	}
 	background_->type_ = spec.type;
