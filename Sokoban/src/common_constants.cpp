@@ -1,8 +1,13 @@
 #include "stdafx.h"
 #include "common_constants.h"
 
+#ifdef SOKOBAN_EDITOR
+const int SCREEN_WIDTH = 1280;
+const int SCREEN_HEIGHT = 960;
+#else
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 768;
+#endif
 
 const int MESH_SIZE = 50;
 

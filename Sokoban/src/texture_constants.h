@@ -25,6 +25,8 @@ enum class BlockTexture {
 	PuppetBlock = 40,
 	HoverCar = 48,
 	BindingCar = 56,
+	GrappleCarWeak = 64,
+	GrappleCarStrong = 72,
 
 	// Double-size
 	Sign = 144,

@@ -98,6 +98,10 @@ BlockTexture Car::texture() {
 		return BlockTexture::HoverCar;
 	case CarType::Binding:
 		return BlockTexture::BindingCar;
+	case CarType::GrappleWeak:
+		return BlockTexture::GrappleCarWeak;
+	case CarType::GrappleStrong:
+		return BlockTexture::GrappleCarStrong;
 	default:
 		return BlockTexture::Default;
 	}
@@ -126,6 +130,8 @@ int Car::next_color() {
 void Car::handle_movement(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* mp) {
 	if (player_) {
 		switch (type_) {
+		case CarType::GrappleStrong:
+		case CarType::GrappleWeak:
 		case CarType::Normal:
 		case CarType::Hover:
 			if (!(player_->pos_ == pos_above())) {
@@ -149,6 +155,8 @@ void Car::cleanup_on_take(RoomMap* map, DeltaFrame*, bool real) {}
 void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 	if (auto* player = player_) {
 		switch (type_) {
+		case CarType::GrappleStrong:
+		case CarType::GrappleWeak:
 		case CarType::Normal:
 		case CarType::Hover:
 			if (!player->gravitable_) {
@@ -194,6 +202,8 @@ void Car::draw(GraphicsManager* gfx, FPoint3 p) {
 		squares_model.push_instance(glm::vec3(p), glm::vec3(1.01f), BlockTexture::Blank, color);
 	}
 	switch (type_) {
+	case CarType::GrappleStrong:
+	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
 	{
@@ -234,6 +244,8 @@ void Car::draw_squished(GraphicsManager* gfx, FPoint3 p, float scale) {
 		squares_model.push_instance(glm::vec3(p), glm::vec3(scale, scale, 1.01f), BlockTexture::Blank, color);
 	}
 	switch (type_) {
+	case CarType::GrappleStrong:
+	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
 	{
@@ -272,6 +284,8 @@ std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map,
     auto dup = std::make_unique<Car>(*this);
     dup->parent_ = parent;
 	switch (type_) {
+	case CarType::GrappleStrong:
+	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
 		dup->player_ = nullptr;

@@ -181,11 +181,18 @@ bool MoveProcessor::try_toggle_riding() {
 	return true;
 }
 
-bool MoveProcessor::try_jump() {
-	Car* car = player_->car_riding();
-	if (!car || (car->type_ != CarType::Hover)) {
-		return false;
+bool MoveProcessor::try_special_action() {
+	if (Car* car = player_->car_riding()) {
+		if (car->type_ == CarType::Hover) {
+			return try_jump();
+		} else if (car->type_ == CarType::GrappleStrong || car->type_ == CarType::GrappleWeak) {
+			return try_toggle_grapple();
+		}
 	}
+	return false;
+}
+
+bool MoveProcessor::try_jump() {
 	// We can't jump if we just jumped!
 	if (!player_->gravitable_) {
 		return false;
@@ -201,6 +208,10 @@ bool MoveProcessor::try_jump() {
 	reset_player_jump();
 	player_->gravitable_ = false;
 	delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
+	return true;
+}
+
+bool MoveProcessor::try_toggle_grapple() {
 	return true;
 }
 
@@ -312,15 +323,17 @@ void MoveProcessor::raise_gates() {
 		if (vec.size() > 1) {
 			bool pushable = true;
 			bool gravitable = true;
+			bool notsnake = true;
 			for (auto* gate : vec) {
 				GateBody* body = gate->body_;
 				pushable &= body->pushable_;
 				gravitable &= body->gravitable_;
+				notsnake &= !body->is_snake();
 				body->destroy(this, CauseOfDeath::Collided);
 			}
 			// Corrupt GateBodies are snake-shaped, because one ingredient must ALWAYS be a snake
 			// Whether they're persistent doesn't matter, because they don't function
-			auto corrupt = std::make_unique<GateBody>(p.first, WHITE, pushable, gravitable, true, false, true);
+			auto corrupt = std::make_unique<GateBody>(p.first, WHITE, pushable, gravitable, !notsnake, false, true);
 			fall_check_.push_back(corrupt.get());
 			map_->create_in_map(std::move(corrupt), true, delta_frame_);
 		} else {

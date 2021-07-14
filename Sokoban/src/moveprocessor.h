@@ -67,8 +67,10 @@ public:
     bool try_move_horizontal(Point3);
     bool try_color_change();
 	bool try_toggle_riding();
+	bool try_special_action();
 	bool try_jump();
 	void try_jump_refresh();
+	bool try_toggle_grapple();
 
     void try_fall_step();
     void perform_switch_checks(bool skippable);

@@ -304,7 +304,7 @@ Camera::Camera(int w, int h) :
 	free_context_{ GeneralCameraContext(IntRect{0,0,w - 1,h - 1}, 0, "FREE", CAM_FLAGS::FREE_CAM) },
 	context_{}, loaded_contexts_{},
 	context_map_{},
-	target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
+	vpos_{ Point3{0,0,0} }, target_pos_{ FPoint3{0,0,0} }, cur_pos_{ FPoint3{0,0,0} },
 	target_rad_{ DEFAULT_CAM_RADIUS }, cur_rad_{ DEFAULT_CAM_RADIUS },
 	target_tilt_{ DEFAULT_CAM_TILT }, cur_tilt_{ DEFAULT_CAM_TILT },
 	target_rot_{ DEFAULT_CAM_ROTATION }, cur_rot_{ DEFAULT_CAM_ROTATION }
@@ -337,6 +337,64 @@ void Camera::push_context(std::unique_ptr<CameraContext> context) {
 		push_context(std::make_unique<DependentNullCameraContext>(border_rect, priority - 1, context->label_ + " (NULL)"));
 	}
 	loaded_contexts_.push_back(std::move(context));
+}
+
+std::pair<int, bool> Camera::compute_direction_index(int i) {
+	if (auto* gcc = dynamic_cast<GeneralCameraContext*>(context_)) {
+		if (gcc->flags_ & CAM_FLAGS::CIRC_CAMERA) {
+			int dx = vpos_.x - 20;
+			int dy = vpos_.y - 20;
+			int di = 0;
+			bool is_left_right = (i % 2 == 0);
+			bool is_not_corner = true;
+			if (dx > -dy) {
+				if (dx > dy) {
+					di = 1;
+				} else if (dx < dy) {
+					di = 2;
+				} else {
+					is_not_corner = false;
+					if (i == 0) {
+						di = 2;
+					} else {
+						di = 1;
+					}
+				}
+			} else if (dx < -dy) {
+				if (dx > dy) {
+					di = 0;
+				} else if (dx < dy) {
+					di = 3;
+				} else {
+					is_not_corner = false;
+					if (i == 0) {
+						di = 0;
+					} else {
+						di = 3;
+					}
+				}
+			} else {
+				is_not_corner = false;
+				if (dx > dy) {
+					if (i == 0) {
+						di = 1;
+					} else {
+						di = 0;
+					}
+				} else if (dx < dy) {
+					if (i == 0) {
+						di = 3;
+					} else {
+						di = 2;
+					}
+				}
+			}
+			return std::make_pair((i + di) % 4, is_left_right || is_not_corner);
+		}
+	}
+	const double HALF_PI = 1.57079632679;
+	double angle = get_rotation();
+	return std::make_pair((i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4, true);
 }
 
 // Note: it just gets replaced with the default context (until the map is reloaded)
@@ -374,6 +432,7 @@ bool Camera::is_free() {
 }
 
 bool Camera::update_context(Point3 vpos) {
+	vpos_ = vpos;
 	if (free_override_) {
 		context_ = &free_context_;
 		return false;

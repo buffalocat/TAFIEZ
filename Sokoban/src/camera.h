@@ -112,8 +112,9 @@ public:
 	double* get_tilt_ptr();
 	double* get_rot_ptr();
 
-private:
 	unsigned int flags_;
+
+private:
 	double rad_;
 	double tilt_;
 	double rot_;
@@ -144,6 +145,7 @@ public:
     FPoint3 get_pos();
     double get_tilt();
     double get_rotation();
+	std::pair<int, bool> compute_direction_index(int i);
 
 	bool is_free();
 
@@ -169,6 +171,7 @@ private:
     CameraContext* context_;
     std::vector<std::unique_ptr<CameraContext>> loaded_contexts_;
     std::vector<std::vector<CameraContext*>> context_map_;
+	Point3 vpos_;
     FPoint3 target_pos_;
     FPoint3 cur_pos_;
     double target_rad_;

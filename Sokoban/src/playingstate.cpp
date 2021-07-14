@@ -224,7 +224,7 @@ void PlayingState::handle_input() {
 	}
 	if (key_pressed(GLFW_KEY_SPACE)) {
 		create_move_processor(player);
-		if (move_processor_->try_jump()) {
+		if (move_processor_->try_special_action()) {
 			input_cooldown = MAX_COOLDOWN;
 			return;
 		} else {
@@ -233,11 +233,12 @@ void PlayingState::handle_input() {
 	}
 	for (int i = 0; i < 4; ++i) {
 		if (key_pressed(MOVEMENT_KEYS[i])) {
-			const double HALF_PI = 1.57079632679;
-			double angle = room_->camera()->get_rotation();
-			i = (i + (int)((angle + 4.5 * HALF_PI) / HALF_PI)) % 4;
+			auto move_pair = room_->camera()->compute_direction_index(i);
+			if (!move_pair.second) {
+				continue;
+			}
 			create_move_processor(player);
-			if (!move_processor_->try_move_horizontal(MOVEMENT_DIRS[i])) {
+			if (!move_processor_->try_move_horizontal(MOVEMENT_DIRS[move_pair.first])) {
 				move_processor_.reset(nullptr);
 				return;
 			}
@@ -245,54 +246,6 @@ void PlayingState::handle_input() {
 			return;
 		}
 	}
-	/*
-	auto zone_order = "HVCKFG7T2N0DO5AES4UQ69WZJ3LPYBMRI81X!";
-	if (key_pressed(GLFW_KEY_G)) {
-		static int hub_i = 0;
-		if (hub_i < 5) {
-			global_->add_flag(HUB_ACCESSED_GLOBAL_FLAGS[hub_i]);
-			++hub_i;
-			input_cooldown = MAX_COOLDOWN;
-			return;
-		}
-	}
-	if (key_pressed(GLFW_KEY_H)) {
-		static int visit_i = 0;
-		if (visit_i < 37) {
-			global_->add_flag(FLAG_COLLECT_FLAGS[get_clear_flag_index(zone_order[visit_i])]);
-			++visit_i;
-			input_cooldown = MAX_COOLDOWN;
-			return;
-		}
-	}
-	if (key_pressed(GLFW_KEY_J)) {
-		static int flag_i = 0;
-		if (flag_i < 37) {
-			global_->add_flag(ZONE_ACCESSED_GLOBAL_FLAGS[get_clear_flag_index(zone_order[flag_i])]);
-			++flag_i;
-			input_cooldown = MAX_COOLDOWN;
-			return;
-		}
-	}
-	if (key_pressed(GLFW_KEY_K)) {
-		static int x_alt_i = 0;
-		if (x_alt_i < 4) {
-			global_->add_flag(X_ALT_ACCESSED_GLOBAL_FLAGS[x_alt_i]);
-			++x_alt_i;
-			input_cooldown = MAX_COOLDOWN;
-			return;
-		}
-	}
-	if (key_pressed(GLFW_KEY_L)) {
-		static int hub_alt_i = 0;
-		if (hub_alt_i < 5) {
-			global_->add_flag(HUB_ALT_ACCESSED_GLOBAL_FLAGS[hub_alt_i]);
-			++hub_alt_i;
-			input_cooldown = MAX_COOLDOWN;
-			return;
-		}
-	}
-	*/
 }
 
 void PlayingState::create_move_processor(Player* player) {
