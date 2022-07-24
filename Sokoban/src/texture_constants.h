@@ -27,6 +27,7 @@ enum class BlockTexture {
 	BindingCar = 56,
 	GrappleCarWeak = 64,
 	GrappleCarStrong = 72,
+	FlyingCar = 80,
 
 	// Double-size
 	Sign = 144,

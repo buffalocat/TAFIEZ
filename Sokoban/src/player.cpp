@@ -80,6 +80,7 @@ void Player::set_strictest(RoomMap* map, DeltaFrame* delta_frame) {
 			switch (car->type_) {
 			case CarType::Normal:
 			case CarType::Hover:
+			case CarType::Flying:
 			case CarType::GrappleWeak:
 			case CarType::GrappleStrong:
 				state_ = PlayerState::RidingNormal;
@@ -153,6 +154,7 @@ bool Player::toggle_riding(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor*
 			case CarType::GrappleStrong:
 			case CarType::Normal:
 			case CarType::Hover:
+			case CarType::Flying:
 				state_ = PlayerState::RidingNormal;
 				set_car(car);
 				break;
@@ -269,6 +271,7 @@ void Player::draw(GraphicsManager* gfx) {
 		case CarType::GrappleStrong:
 		case CarType::Normal:
 		case CarType::Hover:
+		case CarType::Flying:
 			z_offset = -0.2f * t;
 			break;
 		}
@@ -307,6 +310,7 @@ void Player::draw_squished(GraphicsManager* gfx, FPoint3 p, float squish_scale) 
 		case CarType::GrappleStrong:
 		case CarType::Normal:
 		case CarType::Hover:
+		case CarType::Flying:
 			z_offset = -0.2f * t;
 			break;
 		}

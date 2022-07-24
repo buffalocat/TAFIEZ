@@ -309,7 +309,7 @@ Camera::Camera(int w, int h) :
 	target_tilt_{ DEFAULT_CAM_TILT }, cur_tilt_{ DEFAULT_CAM_TILT },
 	target_rot_{ DEFAULT_CAM_ROTATION }, cur_rot_{ DEFAULT_CAM_ROTATION }
 {
-	context_ = free_override_ ? &free_context_ : &default_context_;
+	context_ = &default_context_;
 	context_map_ = std::vector<std::vector<CameraContext*>>(w, std::vector<CameraContext*>(h, context_));
 }
 
@@ -340,7 +340,8 @@ void Camera::push_context(std::unique_ptr<CameraContext> context) {
 }
 
 std::pair<int, bool> Camera::compute_direction_index(int i) {
-	if (auto* gcc = dynamic_cast<GeneralCameraContext*>(context_)) {
+	CameraContext* context = free_override_ ? &free_context_ : context_;
+	if (auto* gcc = dynamic_cast<GeneralCameraContext*>(context)) {
 		if (gcc->flags_ & CAM_FLAGS::CIRC_CAMERA) {
 			int dx = vpos_.x - 20;
 			int dy = vpos_.y - 20;
@@ -433,10 +434,6 @@ bool Camera::is_free() {
 
 bool Camera::update_context(Point3 vpos) {
 	vpos_ = vpos;
-	if (free_override_) {
-		context_ = &free_context_;
-		return false;
-	}
 	auto* new_context = context_map_[vpos.x][vpos.y];
 	if (!new_context->is_null()) {
 		auto* old_context = context_;
@@ -505,14 +502,14 @@ void Camera::extend_by(Point3 d) {
 }
 
 void Camera::handle_free_cam_input(GameState* state) {
-	double* tilt_ptr = nullptr;
-	double* rot_ptr = nullptr;
-	if (context_->is_free()) {
-		tilt_ptr = context_->get_tilt_ptr();
-		rot_ptr = context_->get_rot_ptr();
-	} else if (free_override_) {
+	double* tilt_ptr;
+	double* rot_ptr;
+	if (free_override_) {
 		tilt_ptr = free_context_.get_tilt_ptr();
 		rot_ptr = free_context_.get_rot_ptr();
+	} else if (context_->is_free()) {
+		tilt_ptr = context_->get_tilt_ptr();
+		rot_ptr = context_->get_rot_ptr();
 	} else {
 		return;
 	}

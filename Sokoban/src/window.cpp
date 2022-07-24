@@ -6,22 +6,25 @@
 
 
 bool OpenGLWindow::init(int width, int height, const char* title) {
+	LOG("Trying to init GLFW...");
 	glfwInit();
+	LOG("GLFW init'd");
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, false);
 
+	LOG("Trying to create GLFW window...");
 	window_ = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	if (window_ == nullptr) {
-		std::cout << "Failed to get a window" << std::endl;
+		LOG("Failed to get a window");
 		glfwTerminate();
 		return false;
 	}
 	glfwMakeContextCurrent(window_);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		LOG("Failed to initialize GLAD");
 		glfwTerminate();
 		return false;
 	}
@@ -33,12 +36,13 @@ bool OpenGLWindow::init(int width, int height, const char* title) {
 	glfwGetWindowSize(window_, &window_size_[0], &window_size_[1]);
 	glfwGetWindowPos(window_, &window_pos_[0], &window_pos_[1]);
 	update_viewport(nullptr);
-	
+	LOG("Setting some OpenGL things...");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glEnable(GL_SCISSOR_TEST);
 	glEnable(GL_BLEND);
+	LOG("Made it to the end of window init!");
 	return true;
 }
 

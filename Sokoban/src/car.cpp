@@ -96,6 +96,8 @@ BlockTexture Car::texture() {
 		return BlockTexture::ConvertibleCar;
 	case CarType::Hover:
 		return BlockTexture::HoverCar;
+	case CarType::Flying:
+		return BlockTexture::FlyingCar;
 	case CarType::Binding:
 		return BlockTexture::BindingCar;
 	case CarType::GrappleWeak:
@@ -134,6 +136,7 @@ void Car::handle_movement(RoomMap* map, DeltaFrame* delta_frame, MoveProcessor* 
 		case CarType::GrappleWeak:
 		case CarType::Normal:
 		case CarType::Hover:
+		case CarType::Flying:
 			if (!(player_->pos_ == pos_above())) {
 				mp->add_to_fall_check(player_);
 				player_->set_strictest(map, delta_frame);
@@ -159,6 +162,7 @@ void Car::destroy(MoveProcessor* mp, CauseOfDeath death) {
 		case CarType::GrappleWeak:
 		case CarType::Normal:
 		case CarType::Hover:
+		case CarType::Flying:
 			if (!player->gravitable_) {
 				player->gravitable_ = true;
 				mp->delta_frame_->push(std::make_unique<ToggleGravitableDelta>(player_));
@@ -206,6 +210,7 @@ void Car::draw(GraphicsManager* gfx, FPoint3 p) {
 	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
+	case CarType::Flying:
 	{
 		ModelInstancer& windshield_model = parent_->is_snake() ? gfx->windshield_diamond : gfx->windshield;
 		float windshield_height;
@@ -248,6 +253,7 @@ void Car::draw_squished(GraphicsManager* gfx, FPoint3 p, float scale) {
 	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
+	case CarType::Flying:
 	{
 		ModelInstancer& windshield_model = parent_->is_snake() ? gfx->windshield_diamond : gfx->windshield;
 		float windshield_height;
@@ -288,6 +294,7 @@ std::unique_ptr<ObjectModifier> Car::duplicate(GameObject* parent, RoomMap* map,
 	case CarType::GrappleWeak:
 	case CarType::Normal:
 	case CarType::Hover:
+	case CarType::Flying:
 		dup->player_ = nullptr;
 		break;
 	case CarType::Convertible:

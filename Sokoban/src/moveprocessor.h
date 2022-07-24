@@ -68,7 +68,7 @@ public:
     bool try_color_change();
 	bool try_toggle_riding();
 	bool try_special_action();
-	bool try_jump();
+	bool try_jump(bool can_rejump);
 	void try_jump_refresh();
 	bool try_toggle_grapple();
 

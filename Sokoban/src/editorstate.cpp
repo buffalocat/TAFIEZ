@@ -196,11 +196,12 @@ EditorRoom* EditorState::get_room(std::string name) {
 
 void EditorState::new_room(std::string name, int width, int height, int depth) {
     if (!name.size()) {
-        std::cout << "Room name must be non-empty!" << std::endl;
+		//TODO: replace this with a better error system that shows up in the editor itself
+        LOG("Room name must be non-empty!");
         return;
     }
     if (rooms_.count(name)) {
-        std::cout << "A room with that name is already loaded!" << std::endl;
+        LOG("A room with that name is already loaded!");
         return;
     }
     auto room = std::make_unique<Room>(this, name);

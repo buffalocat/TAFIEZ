@@ -116,6 +116,7 @@ void ModifierTab::mod_tab_options(RoomMap* room_map) {
 		ImGui::RadioButton("Binding##MOD_CAR_type", &car->type_, CarType::Binding);
 		ImGui::RadioButton("Grapple Weak##MOD_CAR_type", &car->type_, CarType::GrappleWeak);
 		ImGui::RadioButton("Grapple Strong##MOD_CAR_type", &car->type_, CarType::GrappleStrong);
+		ImGui::RadioButton("Flying##MOD_CAR_type", &car->type_, CarType::Flying);
 		select_color_cycle(color_cycle);
 		break;
 	}

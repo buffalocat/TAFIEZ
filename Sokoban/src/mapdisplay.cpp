@@ -121,12 +121,12 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	}
 	
 	// Draw connecting lines
-	if (zone == 'D' && visited('O')) {
+	if (zone == 'D' && visited('0')) {
 		draw_tex(ParticleTexture::TeeLine, 0, 1, -0.02f, WHITE);
 		draw_tex(ParticleTexture::VertLine, 0, 0.5, -0.02f, WHITE);
 		draw_tex(ParticleTexture::HorLine, -0.5, 1, -0.02f, WHITE);
 		dx = -1;
-	} else if (zone == 'O' && visited('D')) {
+	} else if (zone == '0' && visited('D')) {
 		draw_tex(ParticleTexture::HorLine, 0.5, 1, -0.02f, WHITE);
 		dx = 1;
 	} else if (dx != 0) {
@@ -153,9 +153,9 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	case 'C':
 	{
 		exits_done = draw_zone('D', 0, 1) &
-			draw_zone('O', 0, 1) &
+			draw_zone('O', 1, 0) &
 			draw_zone('N', -1, 0) &
-			draw_zone('0', 1, 0);
+			draw_zone('0', 0, 1);
 		break;
 	}
 	case 'D':
@@ -229,7 +229,7 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	}
 	case 'Q':
 	{
-		exits_done = draw_warp(HubCode::Beta, 'H', 0, 1);
+		exits_done = draw_warp(HubCode::Beta, 'H', 1, 0);
 		break;
 	}
 	case 'R':
@@ -249,7 +249,7 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	}
 	case 'U':
 	{
-		exits_done = draw_zone('8', 0, 1);
+		exits_done = draw_zone('8', 1, 0);
 		break;
 	}
 	case 'V':
@@ -290,7 +290,7 @@ bool MapDisplay::draw_zone(char zone, float dx, float dy) {
 	}
 	case '3':
 	{
-		exits_done = draw_warp(HubCode::Omega, 'H', 0, -1);
+		exits_done = draw_warp(HubCode::Omega, 'H', 1, 0);
 		break;
 	}
 	case '4':
@@ -374,8 +374,8 @@ bool MapDisplay::draw_hub(HubCode hub, float dx, float dy) {
 	{
 		letter_tex = ParticleTexture::Gamma;
 		color = BLUE;
-		exits_done = draw_zone('W', 1, 0) &
-			draw_zone('Z', 0, -1) &
+		exits_done = draw_zone('W', 0, -1) &
+			draw_zone('Z', 1, 0) &
 			draw_zone('L', -1, 0);
 		break;
 	}

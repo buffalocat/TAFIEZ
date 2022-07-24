@@ -8,7 +8,7 @@
 FontManager::FontManager(OpenGLWindow* window, Shader* text_shader) :
 	window_{ window }, text_shader_{ text_shader } {
 	if (FT_Init_FreeType(&ft_)) {
-		std::cout << "Failed to initialize FreeType" << std::endl;
+		LOG("Failed to initialize FreeType");
 	}
 }
 
@@ -33,7 +33,7 @@ Font::Font(FontManager* fm, FT_Library ft, OpenGLWindow* window, Shader* text_sh
 	tex_width_{ 1 << 9 }, tex_height_{ 1 << 9 }, font_size_{ font_size } {
 	FT_Face face;
 	if (FT_New_Face(ft, path.c_str(), 0, &face)) {
-		std::cout << "Failed to load the font" << std::endl;
+		LOG("Failed to load the font");
 	}
 	FT_Set_Pixel_Sizes(face, 0, font_size);
 	init_glyphs(font_size, face);

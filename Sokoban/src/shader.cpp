@@ -15,7 +15,7 @@ Shader::Shader(const GLchar* vertex_path, const GLchar* fragment_path): id_ {0} 
     glGetProgramiv(id_, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(id_, 512, nullptr, info_log);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
+		LOG("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log);
     }
     // Clean up the shaders
     glDeleteShader(vertex);
@@ -38,7 +38,7 @@ Shader::Shader(const GLchar* vertex_path, const GLchar* geometry_path, const GLc
 	glGetProgramiv(id_, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(id_, 512, nullptr, info_log);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
+		LOG("ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log);
 	}
 	// Clean up the shaders
 	glDeleteShader(vertex);
@@ -59,7 +59,7 @@ GLuint Shader::compile_shader(const GLchar* path, GLenum shader_type) {
 		shader_file.close();
 		code = shader_stream.str();
 	} catch (std::ifstream::failure e) {
-		std::cout << "Failed to read shader file." << std::endl;
+		LOG("Failed to read shader file.");
 	}
 	const char* code_raw = code.c_str();
 	// Compile shaders
@@ -72,7 +72,7 @@ GLuint Shader::compile_shader(const GLchar* path, GLenum shader_type) {
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(shader, 512, nullptr, info_log);
-		std::cout << "Shader compilation failed.\n" << info_log << std::endl;
+		LOG("Shader compilation failed.\n" << info_log);
 	}
 	return shader;
 

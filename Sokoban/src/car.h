@@ -14,6 +14,7 @@ enum class CarType {
 	Binding = 4,
 	GrappleWeak = 5,
 	GrappleStrong = 6,
+	Flying = 7,
 };
 
 enum class CarAnimationState {

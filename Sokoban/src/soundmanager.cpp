@@ -15,11 +15,11 @@ QueuedSound::QueuedSound(const char* file_name) : power{ 0 } {
 
 
 SoundManager::SoundManager() {
-	std::cout << "Trying to start ALUT..." << std::endl;
+	LOG("Trying to start ALUT...");
 	if (!alutInit(nullptr, nullptr)) {
-		std::cout << "ALUT error: " << alutGetErrorString (alutGetError ()) << std::endl;
+		LOG("ALUT error: " << alutGetErrorString(alutGetError()));
 	} else {
-		std::cout << "ALUT init'd normally." << std::endl;
+		LOG("ALUT init'd normally.");
 	}
 	queued_sounds_.push_back({ "undo_click.wav" });
 	queued_sounds_.push_back({ "door_enter.wav" });
@@ -35,8 +35,8 @@ SoundManager::SoundManager() {
 	queued_sounds_.push_back({ "fall_thud.wav" });
 	queued_sounds_.push_back({ "fall.wav" });
 	queued_sounds_.push_back({ "jump.wav" });
-	std::cout << "Trying to load sounds..." << std::endl;
-	std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+	LOG("Trying to load sounds...");
+	LOG("ALUT error? " << alutGetErrorString (alutGetError ()));
 }
 
 SoundManager::~SoundManager() {
@@ -71,20 +71,20 @@ void SoundManager::play_sounds() {
 			ALuint source;
 			alGenSources(1, &source);
 			if (!has_played_sound_) {
-				std::cout << "Trying to generate a source..." << std::endl;
-				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+				LOG("Trying to generate a source...");
+				LOG("ALUT error? " << alutGetErrorString (alutGetError ()));
 			}
 			alSourcei(source, AL_BUFFER, q.buffer);
 			if (!has_played_sound_) {
-				std::cout << "Trying to put sound in the buffer..." << std::endl;
-				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+				LOG("Trying to put sound in the buffer...");
+				LOG("ALUT error? " << alutGetErrorString (alutGetError ()));
 			}
 			q.power = 0;
 			active_sources_.push_back(source);
 			alSourcePlay(source);
 			if (!has_played_sound_) {
-				std::cout << "Trying to play the sound..." << std::endl;
-				std::cout << "ALUT error? " << alutGetErrorString (alutGetError ()) << std::endl;
+				LOG("Trying to play the sound...");
+				LOG("ALUT error? " << alutGetErrorString (alutGetError ()));
 				has_played_sound_ = true;
 			}
 		}

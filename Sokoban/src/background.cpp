@@ -12,13 +12,6 @@ BackgroundAnimation::BackgroundAnimation() {
 	glGenBuffers(1, &vbo_);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 	vert_data_ = generate_sphere_verts(20, 20);
-	/*vert_data_ = {
-	glm::vec3(-1.0f, -1.0f, 0.0f),
-	glm::vec3(-1.0f,  1.0f, 0.0f),
-	glm::vec3(1.0f,  1.0f, 0.0f),
-	glm::vec3(1.0f, -1.0f, 0.0f),
-	};
-	std::cout << vert_data_.size() * sizeof(glm::vec3) << std::endl;*/
 	glBufferData(GL_ARRAY_BUFFER, vert_data_.size() * sizeof(glm::vec3), vert_data_.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
@@ -189,7 +182,7 @@ void BackgroundAnimation::set_positions(glm::vec3 camera_sight, glm::vec3 camera
 	compute_cur_color();
 }
 
-const float COLOR_DAMP = 0.1;
+const float COLOR_DAMP = 0.1f;
 
 void BackgroundAnimation::update() {
 	cur_color_down_ += COLOR_DAMP * (target_color_down_ - cur_color_down_ );

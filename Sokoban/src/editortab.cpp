@@ -63,7 +63,7 @@ void file_choice(std::filesystem::path path, char* output, int max_size) {
 			std::string file_name = entry.path().stem().string();
 			if (ImGui::Selectable(file_name.c_str())) {
 				if (snprintf(output, max_size, file_name.c_str()) >= max_size) {
-					std::cout << "The file name '" << output << "' is too large" << std::endl;
+					LOG("The file name '" << output << "' is too large");
 				}
 				break;
 			}

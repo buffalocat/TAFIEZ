@@ -55,17 +55,17 @@ enum class CameraCode {
 enum class Sticky {
     None = 0,
 	// Stickiness checks
-	WeakStick = 3,
+	WeakStick = 1 | 2,
 	StrongStick = 4,
-	Weak = 11,
-	Strong = 20,
+	Weak = 1 | 2 | 8,
+	Strong = 4 | 16,
 	// Block levels
     WeakBlock = 1,
-	SemiBlock = 3,
-    StrongBlock = 6,
+	SemiBlock = 1 | 2,
+    StrongBlock = 2 | 4,
 	// Snakes
 	WeakSnake = 8,
-	StrongSnake = 24,
+	StrongSnake = 8 | 16,
 };
 
 enum class CauseOfDeath {

@@ -183,18 +183,22 @@ bool MoveProcessor::try_toggle_riding() {
 
 bool MoveProcessor::try_special_action() {
 	if (Car* car = player_->car_riding()) {
-		if (car->type_ == CarType::Hover) {
-			return try_jump();
-		} else if (car->type_ == CarType::GrappleStrong || car->type_ == CarType::GrappleWeak) {
+		switch (car->type_) {
+		case CarType::Hover:
+			return try_jump(false);
+		case CarType::Flying:
+			return try_jump(true);
+		case CarType::GrappleStrong:
+		case CarType::GrappleWeak:
 			return try_toggle_grapple();
 		}
 	}
 	return false;
 }
 
-bool MoveProcessor::try_jump() {
+bool MoveProcessor::try_jump(bool can_rejump) {
 	// We can't jump if we just jumped!
-	if (!player_->gravitable_) {
+	if (!(player_->gravitable_ || can_rejump)) {
 		return false;
 	}
 	JumpStepProcessor(map_, delta_frame_, player_, anims_, fall_check_, moving_blocks_).run();
@@ -302,8 +306,8 @@ void MoveProcessor::run_incinerators() {
 					if (auto* sb = dynamic_cast<SnakeBlock*>(above)) {
 						sb->collect_all_viable_neighbors(map_, snake_check);
 					}
-					map_->take_from_map(above, true, true, delta_frame_);
 					collect_adj_fall_checks(above);
+					map_->take_from_map(above, true, true, delta_frame_);
 					above->destroy(this, CauseOfDeath::Incinerated);
 				}
 			}

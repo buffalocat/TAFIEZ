@@ -16,7 +16,7 @@ void Model::load_model(std::string const& path) {
 	const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		LOG("ERROR::ASSIMP::" << importer.GetErrorString());
 		return;
 	}
 

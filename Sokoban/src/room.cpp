@@ -150,9 +150,6 @@ void Room::update_view(Point3 vpos, FPoint3 rpos, bool display_labels, bool orth
 		projection = glm::perspective(FOV_VERTICAL, ASPECT_RATIO, 0.1, 100.0);
 	}
 	view = glm::scale(view, glm::vec3(-1.0, 1.0, 1.0));
-	if (auto error = glGetError()) {
-		std::cout << "OpenGL Error before PV" << error << std::endl;
-	}
 	gfx_->set_PV(projection, view);
 }
 

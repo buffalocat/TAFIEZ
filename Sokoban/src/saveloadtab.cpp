@@ -62,7 +62,7 @@ void SaveLoadTab::map_load_and_create() {
 			editor_->set_active_room(map_name_input);
 			return;
 		} else {
-			std::cout << "Failed to load room." << std::endl;
+			LOG("Failed to load room.");
 		}
 	}
 
