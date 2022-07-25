@@ -384,8 +384,8 @@ void MoveProcessor::try_door_entry() {
 		}
 		for (auto& obj : door_travelling_objs_) {
 			anims_->receive_signal(AnimationSignal::DoorEnter, obj.raw, delta_frame_);
-			map_->take_from_map(obj.raw, true, true, delta_frame_);
 			collect_adj_fall_checks(obj.raw);
+			map_->take_from_map(obj.raw, true, true, delta_frame_);
 		}
 		for (auto& obj : door_travelling_objs_) {
 			if (auto* snake = dynamic_cast<SnakeBlock*>(obj.raw)) {
