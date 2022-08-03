@@ -18,10 +18,10 @@ private:
 	void unpause();
 	void open_load_menu();
 	void open_save_menu();
-	void open_options_menu();
 	void world_reset();
 	void quit_playing();
 
 	PlayingState* playing_state_;
 	std::unique_ptr<Menu> menu_;
 };
+
