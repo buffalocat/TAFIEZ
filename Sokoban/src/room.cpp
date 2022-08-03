@@ -405,6 +405,7 @@ void deserialize_dead_objects(MapFileI& file, RoomMap* room_map) {
 		case MapCode::PlayerDeath:
 		{
 			static_cast<Player*>(obj)->death_ = static_cast<CauseOfDeath>(file.read_byte());
+			break;
 		}
 		default:
 			break;

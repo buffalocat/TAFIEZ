@@ -297,6 +297,9 @@ void MoveProcessor::run_incinerators() {
 	for (auto* inc : alerted_incinerators_) {
 		if (inc->state()) {
 			Point3 pos_above = inc->pos_above();
+			if (pos_above.z == map_->depth_) {
+				continue;
+			}
 			if (GameObject* above = map_->view(pos_above)) {
 				anims_->receive_signal(AnimationSignal::IncineratorBurn, inc->parent_, nullptr);
 				if (above->id_ == GENERIC_WALL_ID) {
