@@ -304,6 +304,12 @@
     <ClInclude Include="src\background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="metaeditorstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\optionmenustate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\delta.cpp">
@@ -566,6 +572,12 @@
     </ClCompile>
     <ClCompile Include="src\background.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="metaeditorstate.cpp">
+      <Filter>Source Files\Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\optionmenustate.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

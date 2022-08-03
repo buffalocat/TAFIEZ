@@ -34,7 +34,6 @@ void MainMenuState::init_menu() {
 	menu_->push_entry("Open Editor", [this]() { create_child(std::make_unique<EditorState>(this)); });
 #endif
 	menu_->push_entry("Select Profile", [this]() { open_file_select(); });
-	menu_->push_entry("Toggle Fullscreen", [this]() { toggle_fullscreen(); });
 	quit_entry_index_ = menu_->num_entries_;
 	menu_->push_entry("Quit", [this]() { queue_quit(); });
 }

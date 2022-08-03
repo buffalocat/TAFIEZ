@@ -11,21 +11,23 @@
 #include "menu.h"
 #include "globalflagconstants.h"
 #include "savemenustate.h"
+#include "optionmenustate.h"
 #include "window.h"
 
 PauseState::PauseState(GameState* parent) : GameState(parent),
 playing_state_{ static_cast<PlayingState*>(parent) },
 menu_{ std::make_unique<Menu>(this, gfx_->fonts_->get_font(Fonts::ABEEZEE, 72)) } {
-	menu_->push_entry("Unpause", [this]() { unpause(); });
+	menu_->push_entry("Continue", [this]() { unpause(); });
 	if (auto* real_ps = dynamic_cast<RealPlayingState*>(parent)) {
+		menu_->push_entry(" Load...", [this]() { open_load_menu(); });
+		menu_->push_entry(" Save...", [this]() { open_save_menu(); });
+		menu_->push_entry("Options", [this]() { open_options_menu(); });
 		if (playing_state_->global_->has_flag(get_misc_flag(MiscGlobalFlag::WorldResetLearned))) {
 			menu_->push_entry("World Reset", [this]() { world_reset(); });
 		}
-		menu_->push_entry(" Load...", [this]() { open_load_menu(); });
-		menu_->push_entry(" Save...", [this]() { open_save_menu(); });
-		menu_->push_entry("Save and Quit", [this]() { quit_playing(); });
+		menu_->push_entry("Return to Profile", [this]() { quit_playing(); });
 	} else if (dynamic_cast<TestPlayingState*>(parent)) {
-		menu_->push_entry("Quit Test Session", [this]() { quit_playing(); });
+		menu_->push_entry("Return to Editor", [this]() { quit_playing(); });
 	}
 }
 
@@ -57,6 +59,10 @@ void PauseState::open_load_menu() {
 
 void PauseState::open_save_menu() {
 	create_child(std::make_unique<SaveMenuState>(this));
+}
+
+void PauseState::open_options_menu() {
+	create_child(std::make_unique<OptionMenuState>(this));
 }
 
 void PauseState::quit_playing() {

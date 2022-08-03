@@ -380,6 +380,7 @@
     <Image Include="Sokoban.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="metaeditorstate.h" />
     <ClInclude Include="src\animationmanager.h" />
     <ClInclude Include="src\autosavepanel.h" />
     <ClInclude Include="src\background.h" />
@@ -392,6 +393,7 @@
     <ClInclude Include="src\floorsign.h" />
     <ClInclude Include="src\mapdisplay.h" />
     <ClInclude Include="src\menu.h" />
+    <ClInclude Include="src\optionmenustate.h" />
     <ClInclude Include="src\savemenustate.h" />
     <ClInclude Include="src\soundmanager.h" />
     <ClInclude Include="src\stringdrawer.h" />
@@ -563,6 +565,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release Editor|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="metaeditorstate.cpp" />
     <ClCompile Include="src\animationmanager.cpp" />
     <ClCompile Include="src\autosavepanel.cpp" />
     <ClCompile Include="src\background.cpp" />
@@ -577,6 +580,7 @@
     <ClCompile Include="src\floorsign.cpp" />
     <ClCompile Include="src\mapdisplay.cpp" />
     <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\optionmenustate.cpp" />
     <ClCompile Include="src\permanentswitch.cpp" />
     <ClCompile Include="src\pausestate.cpp" />
     <ClCompile Include="src\roomtab.cpp" />
